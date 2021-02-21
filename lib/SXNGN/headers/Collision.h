@@ -3,7 +3,7 @@
 #include <SDL.h>
 #include <vector>
 
-namespace SXNGN {
+namespace SXNGN {  
 	class Tile;
 
 	class Collision

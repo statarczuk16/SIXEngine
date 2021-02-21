@@ -58,7 +58,7 @@ bool SXNGN::Collision::checkCollision(SDL_Rect a, SDL_Rect b)
 		if ((tiles.at(i).getType() == TileType::WALL))
 		{
 			//If the collision box touches the wall tile
-			if (Collision::checkCollision(box, tiles.at(i).getBox()))
+			if (Collision::checkCollision(box, *tiles.at(i).getCollisionBox()))
 			{
 				return true;
 			}

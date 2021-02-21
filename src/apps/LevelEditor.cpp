@@ -10,17 +10,19 @@ and may not be redistributed without written permission.*/
 #include <gameutils.h>
 #include <Tile.h>
 #include <Collision.h>
-#include <Dot.h>
 #include <Texture.h>
 #include <Constants.h>
+#include <Object/Entity.h>
+#include <Object/MouseObj.h>
+#include "boost/numeric/ublas/matrix.hpp"
 
 	//Screen dimension constants
-	const int SCREEN_WIDTH = 640;
-	const int SCREEN_HEIGHT = 480;
+	const int SCREEN_WIDTH = 640*2;
+	const int SCREEN_HEIGHT = 480*2;
 
 	//The dimensions of the level
-	const int LEVEL_WIDTH = 14 * SXNGN::DEFAULT_TILE_WIDTH;
-	const int LEVEL_HEIGHT = 5 * SXNGN::DEFAULT_TILE_HEIGHT;
+	const int LEVEL_WIDTH = 16 *80;
+	const int LEVEL_HEIGHT =16 *60;
 
 	SDL_Rect g_level_bounds;
 
@@ -48,12 +50,10 @@ and may not be redistributed without written permission.*/
 	//The window renderer
 	SDL_Renderer* gRenderer = NULL;
 
-	//Scene textures
-	std::shared_ptr<SXNGN::Texture> g_dot_texture_;
+	std::shared_ptr<SXNGN::TileHandler> g_tile_handler_apocalpyse_map_;
 
-	std::shared_ptr<SXNGN::TileHandler> g_tile_handler_desert_map_;
+	std::vector< std::vector<SXNGN::Tile> > g_map_tiles_; 
 
-	std::vector<SXNGN::Tile> g_overworld_map_tiles_;
 	
 
 	bool init()
@@ -76,7 +76,7 @@ and may not be redistributed without written permission.*/
 			}
 
 			//Create window
-			gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+			gWindow = SDL_CreateWindow("Level Editor", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
 			if (gWindow == NULL)
 			{
 				printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
@@ -131,26 +131,11 @@ and may not be redistributed without written permission.*/
 			success = false;
 		}
 
-		g_dot_texture_ = std::make_shared<SXNGN::Texture>(gRenderer);
-		//Load dot texture
-		if (!g_dot_texture_->loadFromFile(g_media_folder + "/entities/dot.bmp"))
-		{
-			printf("Failed to load dot texture!\n");
-			success = false;
-		}
-
 		try
 		{
-			//fixme could get all this by reading a config file in the tile map folder
-			std::string desert_tile_sheet_path = g_media_folder + "/desert_tile/tiles.png";
-			std::string desert_tile_map_path = g_media_folder + "/desert_tile/map.map";
-			std::string desert_tile_name_list_path = g_media_folder + "/desert_tile/tile_names.txt";
+			std::string apoc_tile_map_folder_path_ = g_media_folder + "/wasteland_tile/";
+			g_tile_handler_apocalpyse_map_ = std::make_shared<SXNGN::TileHandler>(gRenderer, apoc_tile_map_folder_path_);
 
-			//set up a handler associates a list of "tile names" (list_path) with a sprite sheet (sheet_path)
-			g_tile_handler_desert_map_ = std::make_shared<SXNGN::TileHandler>(gRenderer, desert_tile_sheet_path, desert_tile_map_path, desert_tile_name_list_path, 12, 192, SXNGN::DEFAULT_TILE_WIDTH, SXNGN::DEFAULT_TILE_HEIGHT);
-			//load more 
-			g_tile_handler_desert_map_->setTileNameTileType("BLACK", SXNGN::TileType::WALL); //all desert tile with name "BLACK" will be of TileType "WALL"
-			success = success && g_tile_handler_desert_map_->loadTileMap(g_overworld_map_tiles_, g_level_bounds);//vector is pass by reference
 		}
 		catch (std::exception e)
 		{
@@ -199,8 +184,8 @@ and may not be redistributed without written permission.*/
 				//Event handler
 				SDL_Event e;
 
-				//The dot that will be moving around on the screen
-				SXNGN::Dot dot;
+				std::shared_ptr<SXNGN::MouseObject> mouse = std::make_shared < SXNGN::MouseObject>();
+				
 
 				//Level camera
 				SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
@@ -218,26 +203,24 @@ and may not be redistributed without written permission.*/
 						}
 
 						//Handle input for the dot
-						dot.handleEvent(e);
+						
 					}
 
-					//Move the dot
-					dot.move(g_overworld_map_tiles_,g_level_bounds);
-					dot.setCamera(camera,g_level_bounds);
 
 					//Clear screen
 					SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 					SDL_RenderClear(gRenderer);
 
 					//Render level
-					for(auto tile : g_overworld_map_tiles_)
+					for(auto tile_map : g_map_tiles_)
 					{
-						g_tile_handler_desert_map_->render(camera, tile);
+						for (auto tile : tile_map)
+						{
+							tile.render(camera);
+						}
 					}
 
 					//Render dot
-					dot.render(camera, g_dot_texture_);
-
 					//Update screen
 					SDL_RenderPresent(gRenderer);
 				}

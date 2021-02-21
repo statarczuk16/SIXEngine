@@ -1,4 +1,4 @@
-#include <Dot.h>
+#include <Object/Dot.h>
 #include <Texture.h>
 
 
@@ -15,34 +15,6 @@ SXNGN::Dot::Dot()
 	mVelY = 0;
 }
 
-void SXNGN::Dot::handleEvent(SDL_Event& e)
-{
-	//If a key was pressed
-	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
-	{
-		//Adjust the velocity
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_UP: mVelY -= DOT_VEL; break;
-		case SDLK_DOWN: mVelY += DOT_VEL; break;
-		case SDLK_LEFT: mVelX -= DOT_VEL; break;
-		case SDLK_RIGHT: mVelX += DOT_VEL; break;
-		}
-	}
-	//If a key was released
-	else if (e.type == SDL_KEYUP && e.key.repeat == 0)
-	{
-		//Adjust the velocity
-		switch (e.key.keysym.sym)
-		{
-		case SDLK_UP: mVelY += DOT_VEL; break;
-		case SDLK_DOWN: mVelY -= DOT_VEL; break;
-		case SDLK_LEFT: mVelX += DOT_VEL; break;
-		case SDLK_RIGHT: mVelX -= DOT_VEL; break;
-		}
-	}
-}
-
 void SXNGN::Dot::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, float time_step)
 {
 
@@ -52,7 +24,7 @@ void SXNGN::Dot::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, flo
 		int y_bound_max = level_bounds.y + level_bounds.h;
 		int y_bound_min = level_bounds.y;
 		//Move the dot left or right
-		m_box_.x += mVelX * time_step;
+		m_box_.x += int( mVelX * time_step);
 
 		//If the dot went too far to the left or right or touched a wall
 		if ((m_box_.x < x_bound_min) || (m_box_.x + DOT_WIDTH > x_bound_max) || SXNGN::Collision::touchesWall(m_box_, tiles))

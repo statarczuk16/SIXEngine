@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.7)
 
-project(SDL2Test)
+project(RiskTheSix)
 
 list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/../vclib/")
 
@@ -23,17 +23,23 @@ include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS})
 
 #link_directories(${SDL2_LIBRARIES})
 
-file(GLOB_RECURSE SOURCES
-	${CMAKE_SOURCE_DIR}/src/*.h
-	${CMAKE_SOURCE_DIR}/src/*.cpp
+file(GLOB_RECURSE SXNGN_SOURCES
+	${CMAKE_SOURCE_DIR}/lib/SXNGN/headers/*.h
+	${CMAKE_SOURCE_DIR}/lib/SXNGN/cpp/*.cpp
 	)
 	
-message("Sources: "  ${SOURCES})
+message("Sources: "  ${SXNGN_SOURCES})
 
-include_directories(${CMAKE_SOURCE_DIR}/src/headers)
+include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)
 
-add_executable(SDL2Test ${SOURCES} "src/cpp/Dot.cpp" "src/headers/Dot.h" "src/cpp/Tile.cpp" "src/headers/Tile.h" "src/cpp/Collision.cpp" "src/headers/Collision.h" "src/headers/Texture.h")
-target_link_libraries(SDL2Test ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} Boost::filesystem)
+#include_directories(${CMAKE_SOURCE_DIR}/src/headers)
+add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES})
+target_link_libraries(LevelEditor ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}  Boost::filesystem)
+
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES})
+target_link_libraries(HoplonSimulator ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} Boost::filesystem)
+
+
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
