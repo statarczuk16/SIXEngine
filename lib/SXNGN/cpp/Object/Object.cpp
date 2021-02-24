@@ -75,32 +75,12 @@ void SXNGN::Object::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 }
 
 
-void SXNGN::Object::setCamera(SDL_Rect& camera, SDL_Rect screen_bounds)
+std::shared_ptr<SXNGN::Tile> SXNGN::Object::get_sprite_ref()
 {
-	//Center the camera over the dot
-	camera.x = (collision_box_.x + collision_box_.w / 2) - screen_bounds.w / 2;
-	camera.y = (collision_box_.y + collision_box_.h / 2) - screen_bounds.h / 2;
-
-	//Keep the camera in bounds
-	if (camera.x < 0)
-	{
-		camera.x = 0;
-	}
-	if (camera.y < 0)
-	{
-		camera.y = 0;
-	}
-	if (camera.x > screen_bounds.w - camera.w)
-	{
-		camera.x = screen_bounds.w - camera.w;
-	}
-	if (camera.y > screen_bounds.h - camera.h)
-	{
-		camera.y = screen_bounds.h - camera.h;
-	}
+	return entity_tile_;
 }
 
-void SXNGN::Object::render(SDL_Rect& camera, std::shared_ptr<SXNGN::Texture> dot_texture)
+void SXNGN::Object::render(std::shared_ptr<SXNGN::Camera> camera)
 {
 	//Show the dot
 	entity_tile_->getCollisionBox()->x = collision_box_.x;

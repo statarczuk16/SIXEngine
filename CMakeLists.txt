@@ -33,10 +33,10 @@ message("Sources: "  ${SXNGN_SOURCES})
 include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)
 
 #include_directories(${CMAKE_SOURCE_DIR}/src/headers)
-add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES})
+add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} "lib/SXNGN/cpp/World/Room.cpp" "lib/SXNGN/headers/State/BaseGameState.h" "lib/SXNGN/cpp/State/BaseGameState.cpp" "lib/SXNGN/headers/Camera.h" "lib/SXNGN/cpp/Camera.cpp" "lib/SXNGN/headers/Database.h" "lib/SXNGN/cpp/Database.cpp" "lib/SXNGN/cpp/Timer.cpp")
 target_link_libraries(LevelEditor ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES}  Boost::filesystem)
 
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES})
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} "lib/SXNGN/cpp/World/Room.cpp" "lib/SXNGN/headers/State/BaseGameState.h" "lib/SXNGN/cpp/State/BaseGameState.cpp" "lib/SXNGN/headers/Camera.h" "lib/SXNGN/cpp/Camera.cpp" "lib/SXNGN/headers/Database.h" "lib/SXNGN/cpp/Database.cpp" "lib/SXNGN/cpp/Timer.cpp")
 target_link_libraries(HoplonSimulator ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} Boost::filesystem)
 
 

@@ -23,8 +23,8 @@ SXNGN::MouseObject::MouseObject(std::shared_ptr< SXNGN::Tile> tile)
 	else
 	{
 		name_ = "Mouse";
-		collision_box_.w = SXNGN::DEFAULT_TILE_WIDTH;
-		collision_box_.h = SXNGN::DEFAULT_TILE_HEIGHT;
+		collision_box_.w = SXNGN::BASE_TILE_WIDTH;
+		collision_box_.h = SXNGN::BASE_TILE_HEIGHT;
 
 	}
 	
@@ -73,7 +73,7 @@ void SXNGN::MouseObject::setCamera(SDL_Rect& camera, SDL_Rect screen_bounds)
 	}
 }
 
-void SXNGN::MouseObject::render(SDL_Rect& camera, std::shared_ptr<SXNGN::Texture> dot_texture)
+void SXNGN::MouseObject::render(std::shared_ptr<SXNGN::Camera> camera)
 {
 	//Show the dot
 	if (sprite_ != nullptr)

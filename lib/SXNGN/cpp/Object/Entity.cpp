@@ -60,6 +60,7 @@ void SXNGN::Entity::Entity::handleEvent(SDL_Event& e)
 void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, float time_step)
 {
 
+		
 		SDL_Rect prev_box = collision_box_;
 		int x_bound_max = level_bounds.x + level_bounds.w;
 		int x_bound_min = level_bounds.x;
@@ -75,6 +76,8 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 		double vel_cached = phys_m_vel_x_m_s_ + phys_m_vel_y_m_s_;
 		double force_cached = f_app_n_x_ + f_app_n_y_;
 		double acc_cached = m_acc_x_m_s_s_ + m_acc_y_m_s_s_;
+
+
 
 
 		

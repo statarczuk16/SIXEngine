@@ -25,7 +25,9 @@ namespace SXNGN {
 		 void setCamera(SDL_Rect& camera, SDL_Rect screen_bounds);
 
 		//Shows the dot on the screen
-		 void render(SDL_Rect& camera, std::shared_ptr<SXNGN::Texture> entity_texture);
+		 void render(std::shared_ptr<SXNGN::Camera> camera);
+
+		 std::shared_ptr<SXNGN::Tile> get_sprite_ref();
 
 	protected:
 		//Collision box of the dot

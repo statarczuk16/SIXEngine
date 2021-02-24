@@ -13,266 +13,405 @@ and may not be redistributed without written permission.*/
 #include "../../lib/SXNGN/headers/Texture.h"
 #include "../../lib/SXNGN/headers/Constants.h"
 #include "../../lib/SXNGN/headers/Object/Entity.h"
+#include <World/Room.h>
+#include <State/BaseGameState.h>
+#include <Database.h>
+#include <Timer.h>
 
-	//Screen dimension constants
-	const int SCREEN_WIDTH = 640*2;
-	const int SCREEN_HEIGHT = 480*2;
+		//Screen dimension constants
+const int SCREEN_WIDTH = 800;
+const int SCREEN_HEIGHT = 400;
 
-	//The dimensions of the level
-	const int LEVEL_WIDTH = 14 * SXNGN::DEFAULT_TILE_WIDTH;
-	const int LEVEL_HEIGHT = 5 * SXNGN::DEFAULT_TILE_HEIGHT;
+const int LEVEL_WIDTH_PIXELS = 800;
+const int LEVEL_HEIGHT_PIXELS = 600;
 
-	SDL_Rect g_level_bounds;
-
-	SDL_Rect g_screen_bounds;
-
-
-	std::string g_media_folder = SXNGN::BAD_STRING_RETURN;
-
-	
-
-	//Starts up SDL and creates window
-	bool init();
-
-	//Loads media
-	bool loadMedia();
-
-	//Frees media and shuts down SDL
-	void close();
+//The dimensions of the level
+const int LEVEL_WIDTH_TILES = LEVEL_WIDTH_PIXELS / SXNGN::BASE_TILE_WIDTH;
+const int LEVEL_HEIGHT_TILES = LEVEL_HEIGHT_PIXELS / SXNGN::BASE_TILE_HEIGHT;
 
 
+SXNGN::Database g_database; //static can be accessed anywhere, but must intialize
 
-	//The window we'll be rendering to
-	SDL_Window* gWindow = NULL;
 
-	//The window renderer
-	SDL_Renderer* gRenderer = NULL;
+SDL_Rect g_level_bounds;
 
-	//Scene textures
-	std::shared_ptr<SXNGN::Texture> g_dot_texture_;
+SDL_Rect g_screen_bounds;
 
-	std::shared_ptr<SXNGN::TileHandler> g_tile_handler_desert_map_;
 
-	std::shared_ptr<SXNGN::TileHandler> g_tile_handler_apocalpyse_map_;
+std::string g_media_folder = SXNGN::BAD_STRING_RETURN;
 
-	std::vector<SXNGN::Tile> g_overworld_map_tiles_;
-	
 
-	bool init()
+
+//Starts up SDL and creates window
+bool init();
+
+//Loads media
+bool loadMedia();
+
+//Frees media and shuts down SDL
+void close();
+
+
+
+//The window we'll be rendering to
+SDL_Window* gWindow = NULL;
+
+//The window renderer
+SDL_Renderer* gRenderer = NULL;
+
+//Scene textures
+std::shared_ptr<SXNGN::Texture> g_dot_texture_;
+
+std::shared_ptr<SXNGN::TileHandler> g_tile_handler_desert_map_;
+
+std::shared_ptr<SXNGN::TileHandler> g_tile_handler_apocalpyse_map_;
+
+//std::vector<SXNGN::Tile> g_overworld_map_tiles_;
+
+std::map<std::string, std::shared_ptr<SXNGN::BaseGameState>>  g_game_states_;
+
+SXNGN::BaseGameState* g_current_state = nullptr;
+
+std::string g_current_state_str = "uninit";
+
+
+bool init()
+{
+	//Initialization flag
+	bool success = true;
+
+	//Initialize SDL
+	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
-		//Initialization flag
-		bool success = true;
-
-		//Initialize SDL
-		if (SDL_Init(SDL_INIT_VIDEO) < 0)
+		printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+		success = false;
+	}
+	else
+	{
+		//Set texture filtering to linear
+		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
 		{
-			printf("SDL could not initialize! SDL Error: %s\n", SDL_GetError());
+			printf("Warning: Linear texture filtering not enabled!");
+		}
+
+		//Create window
+		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		if (gWindow == NULL)
+		{
+			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
 			success = false;
 		}
 		else
 		{
-			//Set texture filtering to linear
-			if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+			//Create renderer for window
+			gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+			if (gRenderer == NULL)
 			{
-				printf("Warning: Linear texture filtering not enabled!");
-			}
-
-			//Create window
-			gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-			if (gWindow == NULL)
-			{
-				printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
+				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
 				success = false;
 			}
 			else
 			{
-				//Create renderer for window
-				gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-				if (gRenderer == NULL)
-				{
-					printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
-					success = false;
-				}
-				else
-				{
-					//Initialize renderer color
-					SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+				//Initialize renderer color
+				SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 
-					//Initialize PNG loading
-					int imgFlags = IMG_INIT_PNG;
-					if (!(IMG_Init(imgFlags) & imgFlags))
-					{
-						printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
-						success = false;
-					}
+				//Initialize PNG loading
+				int imgFlags = IMG_INIT_PNG;
+				if (!(IMG_Init(imgFlags) & imgFlags))
+				{
+					printf("SDL_image could not initialize! SDL_image Error: %s\n", IMG_GetError());
+					success = false;
 				}
 			}
 		}
-
-		g_level_bounds.x = 0;
-		g_level_bounds.y = 0;
-		g_level_bounds.w = LEVEL_WIDTH;
-		g_level_bounds.h = LEVEL_HEIGHT;
-
-		g_screen_bounds.y = 0;
-		g_screen_bounds.x = 0;
-		g_screen_bounds.w = SCREEN_WIDTH;
-		g_screen_bounds.h = SCREEN_HEIGHT;
-		return success;
 	}
 
-	bool loadMedia()
+	g_level_bounds.x = 0;
+	g_level_bounds.y = 0;
+	g_level_bounds.w = LEVEL_WIDTH_PIXELS;
+	g_level_bounds.h = LEVEL_HEIGHT_PIXELS;
+
+	g_screen_bounds.x = 0;
+	g_screen_bounds.y = 0;
+	g_screen_bounds.w = SCREEN_WIDTH;
+	g_screen_bounds.h = SCREEN_HEIGHT;
+
+	SXNGN::Database::set_scale(SXNGN::TILE_WIDTH_SCALE);
+
+	return success;
+}
+
+bool loadMedia()
+{
+	//Loading success flag
+	bool success = true;
+	g_media_folder = "uninit";
+	g_media_folder = Gameutils::find_folder_in_project_string("media");
+	if (g_media_folder == SXNGN::BAD_STRING_RETURN)
 	{
-		//Loading success flag
-		bool success = true;
-		g_media_folder = "uninit";
-		g_media_folder = Gameutils::find_folder_in_project_string("media");
-		if (g_media_folder == SXNGN::BAD_STRING_RETURN)
-		{
-			std::cout << "Warning: " << " Could not find media folder" << std::endl;
-			success = false;
-		}
-
-		g_dot_texture_ = std::make_shared<SXNGN::Texture>(gRenderer);
-		//Load dot texture
-		if (!g_dot_texture_->loadFromFile(g_media_folder + "/entities/dot.bmp"))
-		{
-			printf("Failed to load dot texture!\n");
-			success = false;
-		}
-
-		try
-		{
-			//fixme could get all this by reading a config file in the tile map folder
-			std::string desert_tile_sheet_path = g_media_folder + "/desert_tile/tiles.png";
-			std::string desert_tile_map_path = g_media_folder + "/desert_tile/map.map";
-			std::string desert_tile_name_list_path = g_media_folder + "/desert_tile/tile_names.txt";
-			std::string apoc_tile_map_folder_path_ = g_media_folder + "/wasteland_tile/";
-
-			//set up a handler associates a list of "tile names" (list_path) with a sprite sheet (sheet_path)
-			g_tile_handler_desert_map_ = std::make_shared<SXNGN::TileHandler>(gRenderer, desert_tile_sheet_path, desert_tile_map_path, desert_tile_name_list_path, 12, 192, SXNGN::DEFAULT_TILE_WIDTH, SXNGN::DEFAULT_TILE_HEIGHT);
-			//load more 
-			g_tile_handler_desert_map_->setTileNameTileType("BLACK", SXNGN::TileType::WALL); //all desert tile with name "BLACK" will be of TileType "WALL"
-			success = success && g_tile_handler_desert_map_->loadTileMap(g_overworld_map_tiles_, g_level_bounds);//vector is pass by reference
-
-			g_tile_handler_apocalpyse_map_ = std::make_shared<SXNGN::TileHandler>(gRenderer, apoc_tile_map_folder_path_);
-
-		}
-		catch (std::exception e)
-		{
-			printf("Failed to load tile map!\n");
-			success = false;
-		}
-
-
-		return success;
+		std::cout << "Warning: " << " Could not find media folder" << std::endl;
+		success = false;
 	}
 
-	void close()
+	g_dot_texture_ = std::make_shared<SXNGN::Texture>(gRenderer);
+	//Load dot texture
+	if (!g_dot_texture_->loadFromFile(g_media_folder + "/entities/dot.bmp"))
 	{
-		//Destroy window	
-		SDL_DestroyRenderer(gRenderer);//probably dont need to do this for shared ptr
-		SDL_DestroyWindow(gWindow);
-		gWindow = NULL;
-		gRenderer = NULL;
-
-		//Quit SDL subsystems
-		IMG_Quit();
-		SDL_Quit();
+		printf("Failed to load dot texture!\n");
+		success = false;
 	}
 
-
-
-	int main(int argc, char* args[])
+	try
 	{
-		//Start up SDL and create window
-		if (!init())
+
+		std::string apoc_tile_map_folder_path_ = g_media_folder + "/wasteland_tile/";
+		std::string desert_tile_map_path = g_media_folder + "/desert_tile/";
+		std::string world_map_path = g_media_folder + "/maps/world_map.map";
+
+		//set up a handler associates a list of "tile names" (list_path) with a sprite sheet (sheet_path)
+		g_tile_handler_desert_map_ = std::make_shared<SXNGN::TileHandler>(gRenderer, desert_tile_map_path);
+		//load more 
+		g_tile_handler_desert_map_->setTileNameTileType("BLACK", SXNGN::TileType::WALL); //all desert tile with name "BLACK" will be of TileType "WALL"
+		//success = success && g_tile_handler_desert_map_->loadTileMap(g_overworld_map_tiles_,world_map_path);//vector is pass by reference
+
+		//Use a map file to generate a graphical map using the associations in the tile handler
+		auto world_map = g_tile_handler_desert_map_->loadTileMap2D(world_map_path, success);
+		if (!success)
+		{
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading 2D Tile Map from: ", world_map_path);
+			return false;
+		}
+		//create a "room" (wrapper for the graphical map)
+		std::shared_ptr<SXNGN::Room> world_map_2D = std::make_shared<SXNGN::Room>(world_map);
+		//create a game state out of the room TODO nullptr should be list of entities existing in the room
+		std::shared_ptr<SXNGN::BaseGameState> game_state_hoplon_outside = std::make_shared<SXNGN::BaseGameState>(std::move(world_map_2D), nullptr);
+		//move this game state to the global game states map
+		g_game_states_["HOPLON_OUTSIDE"] = std::move(game_state_hoplon_outside);
+
+		g_tile_handler_apocalpyse_map_ = std::make_shared<SXNGN::TileHandler>(gRenderer, apoc_tile_map_folder_path_);
+
+	}
+	catch (std::exception e)
+	{
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to load tile map with error: %s", e.what());
+		success = false;
+	}
+	return success;
+}
+
+void close()
+{
+	//Destroy window	
+	SDL_DestroyRenderer(gRenderer);//probably dont need to do this for shared ptr
+	SDL_DestroyWindow(gWindow);
+	gWindow = NULL;
+	gRenderer = NULL;
+
+	//Quit SDL subsystems
+	IMG_Quit();
+	SDL_Quit();
+}
+
+bool switch_state(std::string new_state)
+{
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "switching state: from: %s to: %s",
+		g_current_state_str.c_str(), new_state.c_str());
+
+
+	if (g_game_states_.count(new_state) != 1)
+	{
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "switching state: no such state in map: %s",
+			new_state.c_str());
+		return false;
+	}
+	g_current_state = g_game_states_.at(new_state).get();
+
+	if (g_current_state == nullptr)
+	{
+		SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "switching state: state was null: %s",
+			new_state.c_str());
+		return false;
+	}
+	return true;
+}
+
+
+int main(int argc, char* args[])
+{
+	//Start up SDL and create window
+	if (!init())
+	{
+		printf("Failed to initialize!\n");
+	}
+	else
+	{
+
+		if (!loadMedia())
 		{
 			printf("Failed to initialize!\n");
+			return 0;
+		}
+		//Fixme initialize a STATE
+		//Main loop flag
+		bool quit = false;
+
+		//Event handler
+		SDL_Event e;
+		bool change_state = true;
+
+		g_current_state_str = "HOPLON_OUTSIDE";
+
+
+		//some entities
+		//Entity moves with acceleration
+		std::shared_ptr< SXNGN::Entity> gunman_entity;
+		//Object moves with constant velocity
+		std::shared_ptr< SXNGN::Object> barrel_object;
+
+		std::shared_ptr<SXNGN::Tile>gunman_tile =
+			g_tile_handler_apocalpyse_map_->generateTileRef("GUNMAN_1");
+		if (gunman_tile)
+		{
+			gunman_entity = std::make_shared< SXNGN::Entity>(gunman_tile, 690);
 		}
 		else
 		{
-
-			if (!loadMedia())
-			{
-				printf("Failed to initialize!\n");
-				return 0;
-			}
-				//Fixme initialize a STATE
-				//Main loop flag
-				bool quit = false;
-
-				//Event handler
-				SDL_Event e;
-
-				//The dot that will be moving around on the screen
-				//SXNGN::Dot dot;
-				std::shared_ptr< SXNGN::Entity> gunman_entity;
-				std::shared_ptr< SXNGN::Object> barrel_object;
-				try
-				{
-					std::shared_ptr<SXNGN::Tile>gunman_tile =
-						std::make_shared<SXNGN::Tile>(g_tile_handler_apocalpyse_map_->generateTile("GUNMAN_1"));
-					gunman_entity = std::make_shared< SXNGN::Entity>(gunman_tile, 690);
-					std::shared_ptr<SXNGN::Tile>barrel_tile =
-						std::make_shared<SXNGN::Tile>(g_tile_handler_apocalpyse_map_->generateTile("BARREL"));
-					barrel_object = std::make_shared< SXNGN::Object>(barrel_tile, 5);
-				}
-				catch (std::exception e)
-				{
-					printf("Failed to load tile map!\n");
-					return 0;
-				}
-				
-
-				//Level camera
-				SDL_Rect camera = { 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT };
-
-				//While application is running
-				while (!quit)
-				{
-					//Handle events on queue
-					while (SDL_PollEvent(&e) != 0)
-					{
-						//User requests quit
-						if (e.type == SDL_QUIT)
-						{
-							quit = true;
-						}
-
-						//Handle input for the dot
-						gunman_entity->handleEvent(e);
-						barrel_object->handleEvent(e);
-					}
-
-					//Move the dot
-					gunman_entity->move(g_overworld_map_tiles_,g_level_bounds);
-					barrel_object->setCamera(camera,g_level_bounds);
-
-					gunman_entity->move(g_overworld_map_tiles_, g_level_bounds);
-
-					barrel_object->move(g_overworld_map_tiles_, g_level_bounds);
-
-					//Clear screen
-					SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-					SDL_RenderClear(gRenderer);
-
-					//Render level
-					for(auto tile : g_overworld_map_tiles_)
-					{
-						tile.render(camera);
-					}
-
-					//Render dot
-					gunman_entity->render(camera, g_dot_texture_);
-					barrel_object->render(camera, g_dot_texture_);
-					//Update screen
-					SDL_RenderPresent(gRenderer);
-				}
-			}
-
-			//Free resources and close SDL
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create from sprite name GUNMAN_1");
+			return 0;
+		}
+		std::shared_ptr<SXNGN::Tile>barrel_tile =
+			g_tile_handler_apocalpyse_map_->generateTileRef("BARREL");
+		if (barrel_tile)
+		{
+			barrel_object = std::make_shared< SXNGN::Object>(barrel_tile, 5);
+		}
+		else
+		{
+			SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Failed to create from sprite name BARREL");
 			return 0;
 		}
 
-		
+
+
+
+		//Create a camera 
+		SDL_Rect camera_lens;
+		camera_lens.h = SCREEN_HEIGHT;
+		camera_lens.w = SCREEN_WIDTH;
+		camera_lens.x = 0;
+		camera_lens.y = 0;
+
+		SDL_Rect camera_position;
+		camera_position.x = 0;
+		camera_position.y = 0;
+
+		std::shared_ptr<SXNGN::Camera> main_cam_ = std::make_shared<SXNGN::Camera>(camera_lens, camera_position, g_screen_bounds);
+
+		//Assign the camera to track this sprite
+		main_cam_->lock_on(gunman_entity->get_sprite_ref());
+
+		SXNGN::Timer move_timer;
+		SXNGN::Timer frame_timer;
+		SXNGN::Timer frame_cap_timer;
+		frame_timer.start();
+
+		int frame_count = 0;
+
+		//While application is running
+		while (!quit)
+		{
+
+			frame_cap_timer.start();//this timer must reached ticks per frame before the next frame can start
+			if (change_state)
+			{
+				switch_state(g_current_state_str);
+				if (g_current_state == nullptr)
+				{
+					printf("Failed start state\n");
+					return 0;
+				}
+				change_state = false;
+			}
+			///////////Event Handling
+			while (SDL_PollEvent(&e) != 0)
+			{
+				//User requests quit
+				if (e.type == SDL_QUIT)
+				{
+					quit = true;
+				}
+				//On mouse wheel scroll
+				if (e.type == SDL_EventType::SDL_MOUSEWHEEL)
+				{
+				
+					if(e.wheel.y < 0)
+					{
+						SXNGN::Database::reduce_scale();
+					}
+					else
+					{
+						SXNGN::Database::increase_scale();
+					}
+					
+				}
+
+				//Handle input for the dot
+				gunman_entity->handleEvent(e);
+				barrel_object->handleEvent(e);
+			}
+
+			////////////Physics
+			float fps_avg = frame_count / (frame_timer.getTicks() / 1000.f);
+			if (fps_avg > 2000000)
+			{
+				fps_avg = 0;
+			}
+			//printf("%g\n", fps_avg);
+			
+
+			float time_step = move_timer.getTicks() / 1000.f;
+
+			//Dont bother with physics unless positive frame rate to avoid divide by zero erros
+			if(fps_avg>0 && time_step > 0)
+			{
+				//for movement sake, what percentage of the frame rate has passed
+				//If we move 100% of the speed per frame, then we move 50% if only half of the average has passed
+				float percentage_of_frame = time_step / fps_avg;
+				gunman_entity->move(g_current_state->get_room()->get_tiles_1D(), g_current_state->get_room()->get_room_bounds());
+				main_cam_->move(time_step);
+			}
+			
+			//barrel_object->setCamera(camera,g_level_bounds);
+
+			//barrel_object->move(g_overworld_map_tiles_, g_level_bounds);
+
+			move_timer.start();
+			///////////////Rendering
+			//Clear screen
+			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_RenderClear(gRenderer);
+
+			//Render level
+			for (auto tile : g_current_state->get_room()->get_tiles_1D())
+			{
+				tile.render(main_cam_);
+			}
+
+			//Render dot
+			gunman_entity->render(main_cam_);
+			//barrel_object->render(main_cam_);
+			//Update screen
+			SDL_RenderPresent(gRenderer);
+			//delay if frame finished early (so maintain capped frames per second)
+			if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())
+			{
+				SDL_Delay(SXNGN::Database::get_screen_ticks_per_frame() - frame_cap_timer.getTicks());
+			}
+			++frame_count;
+		}
+	}
+
+	//Free resources and close SDL
+	return 0;
+}
+

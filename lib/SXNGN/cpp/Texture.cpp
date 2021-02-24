@@ -1,4 +1,6 @@
 #include <Texture.h>
+#include <Constants.h>
+#include <Database.h>
 
 
 SXNGN::Texture::Texture(SDL_Renderer* renderer)
@@ -34,7 +36,7 @@ bool SXNGN::Texture::loadFromFile(std::string path)
 	else
 	{
 		//Color key image
-		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0, 0xFF, 0xFF));
+		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0xFF, 0xFF, 0xFF));
 
 		//Create texture from surface pixels
 		newTexture = SDL_CreateTextureFromSurface(renderer_, loadedSurface);
@@ -135,10 +137,26 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 	{
 		renderQuad.w = clip->w;
 		renderQuad.h = clip->h;
+
+		//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
+		renderQuad.x *= SXNGN::Database::get_scale();
+		renderQuad.y *= SXNGN::Database::get_scale();
+		renderQuad.w *= SXNGN::Database::get_scale();
+		renderQuad.h *= SXNGN::Database::get_scale();
 	}
 
 	//Render to screen
-	SDL_RenderCopyEx(renderer_, mTexture_, clip, &renderQuad, angle, center, flip);
+	if (mTexture_)
+	{
+		SDL_RenderCopyEx(renderer_, mTexture_, clip, &renderQuad, angle, center, flip);
+	}
+	else
+	{
+		//Render red filled quad
+		SDL_SetRenderDrawColor(renderer_, 0xFF, 0xCC, 0xCC, 0xFF);
+		SDL_RenderFillRect(renderer_, &renderQuad);
+	}
+	
 }
 
 int SXNGN::Texture::getWidth()

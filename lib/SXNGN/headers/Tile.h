@@ -6,6 +6,7 @@
 #include <vector>
 #include <map>
 #include <Constants.h>
+#include "Camera.h"
 
 //The tile
 namespace SXNGN {
@@ -31,11 +32,11 @@ namespace SXNGN {
 	public:
 		//Initializes position and type
 		Tile(
-			std::shared_ptr<SXNGN::Texture> tileTexture,
-			int x, int y,
-			int tile_clip_x, int tile_clip_y,
-			std::string tile_name,
-			int tile_width = SXNGN::DEFAULT_TILE_WIDTH, int tile_height = SXNGN::DEFAULT_TILE_HEIGHT,
+			std::shared_ptr<SXNGN::Texture> tileTexture = nullptr,
+			int x = 0, int y = 0,
+			int tile_clip_x = 0, int tile_clip_y = 0,
+			std::string tile_name = "Uninit Tile",
+			int tile_width = SXNGN::BASE_TILE_WIDTH, int tile_height = SXNGN::BASE_TILE_HEIGHT,
 			TileType tile_type = NORMAL);
 
 		Tile(
@@ -47,7 +48,7 @@ namespace SXNGN {
 
 
 		//Shows the tile
-		void render(SDL_Rect& camera);
+		void render(std::shared_ptr<SXNGN::Camera> camera);
 
 		//Get the tile type
 		TileType getType();
@@ -62,6 +63,11 @@ namespace SXNGN {
 
 		//Get the tile clip box (shows where in the srpite sheet to get this tile's graphic)
 		std::shared_ptr<SDL_Rect> getTileClipBox();
+
+
+		std::shared_ptr<SXNGN::Texture> get_tile_texture();
+
+		void set_tile_texture(std::shared_ptr<SXNGN::Texture> texture_in);
 
 
 
@@ -82,7 +88,7 @@ namespace SXNGN {
 	class TileHandler
 	{
 	public:
-		TileHandler(SDL_Renderer* renderer, std::string tileSheetPath, std::string tileMapPath, std::string tileNameListPath, unsigned int tileMapSize, unsigned int totalTiles, unsigned int tile_width, unsigned int tile_height);
+		//TileHandler(SDL_Renderer* renderer, std::string tileSheetPath, std::string tileMapPath, std::string tileNameListPath, unsigned int tileMapSize, unsigned int totalTiles, unsigned int tile_width, unsigned int tile_height);
 
 		TileHandler(SDL_Renderer* renderer, std::string sourcePath);
 
@@ -90,11 +96,14 @@ namespace SXNGN {
 		TileType TileTypeIntToEnum(int tile_type_int);
 		bool initTileNames();
 		bool initTilesNamesFromManifest();
-		bool loadTileMap(std::vector<SXNGN::Tile>& tiles, SDL_Rect level_bounds);
+		bool loadTileMap(std::vector<SXNGN::Tile>& tiles, std::string map_path);
+		std::vector< std::vector<std::shared_ptr<SXNGN::Tile>>> loadTileMap2D(std::string map_path, bool& success);
 		//void render(SDL_Rect& camera, Tile tile);
 		bool setTileNameTileType(std::string tileName, SXNGN::TileType tileType);
 
 		Tile generateTile(std::string);
+
+		std::shared_ptr<SXNGN::Tile> generateTileRef(std::string tile_name);
 
 	private:
 		std::shared_ptr<SXNGN::Texture> tileTexture_;
@@ -104,7 +113,7 @@ namespace SXNGN {
 		//each tileset directory should have the following files inside:
 
 		//"map.map" the tile map - a bunch of tile types as integers that will make a map once parsed (water,water,land,land,land,wall,etc)
-		std::string tile_map_path_;
+		//std::string tile_map_path_;
 		//"tiles.png" the tile sheet - png with graphics for the tile types
 		std::string tile_sheet_path_;
 		//"tile_names.txt" the tile list - contains the tile_names to be mapped to a section of the tile map. Eg, put in "SAND" to the tile_type_map and get back an index to a chunk of the tilemap that looks like sand
@@ -125,6 +134,8 @@ namespace SXNGN {
 		unsigned int total_tiles_, tile_width_, tile_height_, tile_map_size_;
 
 		std::vector<SDL_Rect> tile_clips;
+
+		std::vector< std::vector<std::shared_ptr<SXNGN::Tile>>> tile_1D_to_2D(std::vector<SXNGN::Tile> tiles, size_t width);
 
 	};
 
