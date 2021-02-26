@@ -9,7 +9,6 @@
 #include "../../headers/gameutils.h"
 
 namespace SXNGN {
-	//The dot that will move around on the screen
 	class Entity : public Object
 	{
 	public:
@@ -24,7 +23,6 @@ namespace SXNGN {
 
 	protected:
 
-		
 		//double position. With high enough frame rate, movement per frame may not be greater
 		//than one (one pixel), so will need to accumulate over time before rounding to int.
 		double phys_x, phys_y = 0.0; 
