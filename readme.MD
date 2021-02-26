@@ -21,7 +21,7 @@ There must be a config.cmake for each library, which are not usually distributed
 
 Example showing how vclib should be set up. This is where cmakelists.txt will look for the libraries.
 
-
+<pre>
 └── SXNGN
 │   │   README.md (you are here)
 │      
@@ -33,6 +33,7 @@ Example showing how vclib should be set up. This is where cmakelists.txt will lo
 			sdl2_ttf-config.cmake
 	 └──	SDL2_2.0.14
 			sdl2-config.cmake
+</pre>
 
 			
 To use in an IDE, open this directory in a C++ IDE that supports CMake such as Visual Studio or CLion and build as normal. 
