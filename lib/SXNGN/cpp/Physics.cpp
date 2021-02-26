@@ -3,18 +3,38 @@
 #include "gameutils.h"
 
 
+SXNGN::Physics::FrictionType SXNGN::Physics::move_type_to_friction_type(MoveType move_type)
+{
+	switch (move_type)
+	{
+		case MoveType::ROLL:
+		{
+			return FrictionType::STATIC_YES_KINETIC_YES;
+			break;
+		}
+		case MoveType::WALK:
+		{
+			return FrictionType::STATIC_NO_KINETIC_YES;
+			break;
+		}
+		case MoveType::SLIDE:
+		{
+			return FrictionType::STATIC_YES_KINETIC_YES;
+			break;
+		}
+	}
+}
 
-
-double SXNGN::Physics::get_friction_acc(double weight_kg, double cof, double cur_vel_m_s, double cur_force_n)
+double SXNGN::Physics::get_friction_acc(double weight_kg, double cof, double cur_vel_m_s, double cur_force_n, MoveType move_type)
 {
 	double kinetic_friction_acc_m_s_s = 0.0;
 	double static_friction_acc_m_s_s = 0.0;
 	double static_cof = cof * 1.33; //simplification: static is a bit more than kinetic
-	
+	FrictionType friction_type = Physics::move_type_to_friction_type(move_type);
+	int f;
 	
 	//determine kinetic friction - applies only to moving objects
-
-	if (cur_vel_m_s == 0)
+	if (cur_vel_m_s == 0 || friction_type == FrictionType::STATIC_NO_KINETIC_NO || friction_type == FrictionType::STATIC_YES_KINETIC_NO)
 	{
 		kinetic_friction_acc_m_s_s = 0.0;
 	}
@@ -29,7 +49,7 @@ double SXNGN::Physics::get_friction_acc(double weight_kg, double cof, double cur
 	}
 	
 	//determine static friction - applies only to objects on which force is imparted
-	if (cur_force_n == 0.0)
+	if (cur_force_n == 0.0 || abs(cur_vel_m_s) > 0 || friction_type == FrictionType::STATIC_YES_KINETIC_NO || friction_type == FrictionType::STATIC_YES_KINETIC_YES)
 	{
 		static_friction_acc_m_s_s = 0.0;
 	}
@@ -43,15 +63,23 @@ double SXNGN::Physics::get_friction_acc(double weight_kg, double cof, double cur
 		}
 	}
 
-	if (abs(static_friction_acc_m_s_s) > abs(kinetic_friction_acc_m_s_s))
+	switch (friction_type)
 	{
-		return static_friction_acc_m_s_s;
+		case FrictionType::STATIC_NO_KINETIC_NO: return 0.0;
+		case FrictionType::STATIC_NO_KINETIC_YES: return kinetic_friction_acc_m_s_s;
+		case FrictionType::STATIC_YES_KINETIC_NO: return static_friction_acc_m_s_s;
+		default: 
+		{
+			if (abs(static_friction_acc_m_s_s) > abs(kinetic_friction_acc_m_s_s))
+			{
+				return static_friction_acc_m_s_s;
+			}
+			else
+			{
+				return kinetic_friction_acc_m_s_s;
+			}
+		}
 	}
-	else
-	{
-		return kinetic_friction_acc_m_s_s;
-	}
-
 }
 
 double SXNGN::Physics::get_friction_force(double weight_kg, double cof)

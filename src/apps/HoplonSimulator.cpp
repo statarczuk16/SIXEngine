@@ -272,7 +272,7 @@ int main(int argc, char* args[])
 			g_tile_handler_apocalpyse_map_->generateTileRef("GUNMAN_1");
 		if (gunman_tile)
 		{
-			gunman_entity = std::make_shared< SXNGN::Entity>(gunman_tile, 690);
+			gunman_entity = std::make_shared< SXNGN::Entity>(gunman_tile, 3000);
 		}
 		else
 		{
@@ -369,16 +369,15 @@ int main(int argc, char* args[])
 			//printf("%g\n", fps_avg);
 			
 
-			float time_step = move_timer.getTicks() / 1000.f;
+			float time_step_seconds = move_timer.getTicks() / 1000.f;
 
 			//Dont bother with physics unless positive frame rate to avoid divide by zero erros
-			if(fps_avg>0 && time_step > 0)
+			if(fps_avg>0 && time_step_seconds > 0)
 			{
-				//for movement sake, what percentage of the frame rate has passed
-				//If we move 100% of the speed per frame, then we move 50% if only half of the average has passed
-				float percentage_of_frame = time_step / fps_avg;
-				gunman_entity->move(g_current_state->get_room()->get_tiles_1D(), g_current_state->get_room()->get_room_bounds());
-				main_cam_->move(time_step);
+			
+				
+				gunman_entity->move(g_current_state->get_room()->get_tiles_1D(), g_current_state->get_room()->get_room_bounds(), time_step_seconds);
+				main_cam_->move(time_step_seconds);
 			}
 			
 			//barrel_object->setCamera(camera,g_level_bounds);

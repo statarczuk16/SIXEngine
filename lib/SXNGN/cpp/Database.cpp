@@ -9,7 +9,7 @@ int SXNGN::Database::max_fps_;
 SXNGN::Database::Database()
 {
 	scale_ = 1;
-	max_fps_ = 60;
+	max_fps_ = 30;
 }
 
 int SXNGN::Database::get_scale()

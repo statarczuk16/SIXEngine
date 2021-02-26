@@ -13,13 +13,15 @@ SXNGN::Entity::Entity(std::shared_ptr< SXNGN::Tile> tile, int speed) : Object(ti
 	collision_box_.h = tile->getTileClipBox()->h;
 
 	//Initialize the velocity
+	phys_x = 0.0;
+	phys_y = 0.0;
 	phys_m_vel_x_m_s_ = 0;
 	phys_m_vel_y_m_s_ = 0;
 	m_acc_x_m_s_s_ = 0;
 	m_acc_y_m_s_s_ = 0;
-	m_max_vel_m_s_ = 3;
+	m_max_vel_m_s_ = 6;
 	speed_x_n_ = speed;
-	weight_kg_ = 75;
+	weight_kg_ = 90;
 
 	f_app_n_x_ = 0;
 	f_app_n_y_ = 0;
@@ -81,8 +83,8 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 
 
 		
-		x_friction_acc_m_s_s = SXNGN::Physics::get_friction_acc(weight_kg_, 0.7, phys_m_vel_x_m_s_, f_app_n_x_);
-		y_friction_acc_m_s_s = SXNGN::Physics::get_friction_acc(weight_kg_, 0.7, phys_m_vel_y_m_s_, f_app_n_y_);
+		x_friction_acc_m_s_s = SXNGN::Physics::get_friction_acc(weight_kg_, 2.0, phys_m_vel_x_m_s_, f_app_n_x_, Physics::MoveType::WALK);
+		y_friction_acc_m_s_s = SXNGN::Physics::get_friction_acc(weight_kg_, 2.0, phys_m_vel_y_m_s_, f_app_n_y_, Physics::MoveType::WALK);
 
 
 
@@ -115,36 +117,39 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 		//move according to current acceleration
 		phys_m_vel_x_m_s_ = Physics::adjust_velocity_by_acc(m_acc_x_m_s_s_, phys_m_vel_x_m_s_, time_step, m_max_vel_m_s_);
 		phys_m_vel_y_m_s_ = Physics::adjust_velocity_by_acc(m_acc_y_m_s_s_, phys_m_vel_y_m_s_, time_step, m_max_vel_m_s_);
-
+		
+		phys_x += SXNGN::PIXELS_TO_METERS * ( phys_m_vel_x_m_s_ * time_step);
+		collision_box_.x = int(round(phys_x));
 
 		if ((phys_m_vel_x_m_s_ + phys_m_vel_y_m_s_) != vel_cached || (f_app_n_x_ + f_app_n_y_) != force_cached || (m_acc_x_m_s_s_ + m_acc_y_m_s_s_) != acc_cached)
 		{
-			std::cout << "Entity: " << name_ << " movement: " << " force: " << f_app_n_x_ << " vel: " << phys_m_vel_x_m_s_ << " acc " << m_acc_x_m_s_s_ 
-				<< "( " << x_app_acc_m_s_s << " + " << x_friction_acc_m_s_s << ") " << std::endl;
+			std::cout << "Entity: " << name_ << " timestep: " << time_step << " movement: " << " force: " << f_app_n_x_ << " vel: " << phys_m_vel_x_m_s_ << " acc " << m_acc_x_m_s_s_
+				<< "( " << x_app_acc_m_s_s << " + " << x_friction_acc_m_s_s << ") "
+				<< " position (dlb): " << phys_m_vel_x_m_s_ << " position (int): " << collision_box_.x
+				<< std::endl;
 		}
-		
-
-
-		collision_box_.x += int(round((phys_m_vel_x_m_s_ * time_step)));
 
 		//If the dot went too far to the left or right or touched a wall
 		if ((collision_box_.x < x_bound_min) || (collision_box_.x + collision_box_.w > x_bound_max) || SXNGN::Collision::touchesWall(collision_box_, tiles))
 		{
 			//move back
 			collision_box_.x = prev_box.x;
+			phys_x = double(collision_box_.x);
 			phys_m_vel_x_m_s_ = 0.0;
 			m_acc_x_m_s_s_ = 0.0;
 
 		}
 
 		//Move the dot up or down
-		collision_box_.y += int(round((phys_m_vel_y_m_s_ * time_step)));
+		phys_y += SXNGN::PIXELS_TO_METERS * (phys_m_vel_y_m_s_ * time_step);
+		collision_box_.y = int(round(phys_y));
 
 		//If the dot went too far up or down or touched a wall
 		if ((collision_box_.y < y_bound_min) || (collision_box_.y + collision_box_.h > y_bound_max) || SXNGN::Collision::touchesWall(collision_box_, tiles))
 		{
 			//move back
 			collision_box_.y = prev_box.y;
+			phys_y = double(collision_box_.y);
 			phys_m_vel_y_m_s_ = 0.0;
 			m_acc_y_m_s_s_ = 0.0;
 		}

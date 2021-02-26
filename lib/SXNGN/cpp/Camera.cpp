@@ -37,6 +37,7 @@ bool SXNGN::Camera::object_in_view(SDL_Rect obj_bounds)
 	//Have to scale up object to compare to the camera
 	obj_bounds.x *= SXNGN::Database::get_scale();
 	obj_bounds.y *= SXNGN::Database::get_scale();
+	obj_bounds.w *= SXNGN::Database::get_scale();
 
 	if (SXNGN::Collision::checkCollisionBuffer(get_lens_rect_scaled(), obj_bounds, obj_bounds.w*2))
 	{
@@ -67,24 +68,31 @@ SDL_Rect SXNGN::Camera::get_lens_rect_scaled()
 	return_view.w = lens_.w;
 	return_view.h = lens_.h;
 
+	SDL_Rect screen_bounds_scaled = screen_bounds_;
+
+	screen_bounds_scaled.x *=  SXNGN::Database::get_scale();
+	screen_bounds_scaled.y *= SXNGN::Database::get_scale();
+	screen_bounds_scaled.w *= SXNGN::Database::get_scale();
+	screen_bounds_scaled.h *= SXNGN::Database::get_scale();
+
 
 	//don't allow camera top-right view square point to leave screen
-	if (return_view.x < screen_bounds_.x)
+	if (return_view.x < screen_bounds_scaled.x)
 	{
-		return_view.x = screen_bounds_.x;
+		return_view.x = screen_bounds_scaled.x;
 	}
-	if (return_view.x > (screen_bounds_.x + screen_bounds_.w))
+	if (return_view.x > (screen_bounds_scaled.x + screen_bounds_scaled.w))
 	{
-		return_view.x = screen_bounds_.x + screen_bounds_.w;
+		return_view.x = screen_bounds_scaled.x + screen_bounds_scaled.w;
 	}
 
-	if (return_view.y < screen_bounds_.y)
+	if (return_view.y < screen_bounds_scaled.y)
 	{
-		return_view.y = screen_bounds_.y;
+		return_view.y = screen_bounds_scaled.y;
 	}
-	if (return_view.y > (screen_bounds_.y + screen_bounds_.h))
+	if (return_view.y > (screen_bounds_scaled.y + screen_bounds_scaled.h))
 	{
-		return_view.y = screen_bounds_.y + screen_bounds_.h;
+		return_view.y = screen_bounds_scaled.y + screen_bounds_scaled.h;
 	}
 
 	return return_view;

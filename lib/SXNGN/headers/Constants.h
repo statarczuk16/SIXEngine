@@ -8,6 +8,8 @@ namespace SXNGN {
 	const int BASE_TILE_WIDTH = 16;
 	const int BASE_TILE_HEIGHT = 16;
 
+	const int PIXELS_TO_METERS = 16;
+
 
 	const int TILE_WIDTH_SCALE = 3;
 	const int TILE_HEIGHT_SCALE = 3;  

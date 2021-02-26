@@ -23,7 +23,11 @@ namespace SXNGN {
 
 
 	protected:
-		//The velocity of the dot
+
+		
+		//double position. With high enough frame rate, movement per frame may not be greater
+		//than one (one pixel), so will need to accumulate over time before rounding to int.
+		double phys_x, phys_y = 0.0; 
 		double phys_m_vel_x_m_s_, phys_m_vel_y_m_s_ = 0.0;//velocity in meters / second in directions
 		double m_acc_x_m_s_s_, m_acc_y_m_s_s_ = 0.0;//current acceleration m /s second squared
 		double m_max_vel_m_s_ = 0.0;//maximum speed in any direction
