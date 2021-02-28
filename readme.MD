@@ -18,7 +18,7 @@ Boost
 kiss_sdl (https://github.com/actsl/kiss_sdl)
 
 Cmake will look for these libraries in the vc_lib directory if not elsewhere wherever you put libraries.
-There must be a config.cmake for each library, which are not usually distributed with the cmake library downloads. Therefor, take the ones from SXNGN/sdl_cmake-config-templates and place into the library downloads like so:
+There must be a config.cmake for each library, which are not usually distributed with the cmake library downloads. Therefore, take the ones from SXNGN/docs and place into the library downloads like so:
 
 Example showing how vclib should be set up. This is where cmakelists.txt will look for the libraries.
 
@@ -39,7 +39,7 @@ Example showing how vclib should be set up. This is where cmakelists.txt will lo
 			
 To use in an IDE, open this directory in a C++ IDE that supports CMake such as Visual Studio or CLion and build as normal. 
 
-To build normally, create a "build" directory at the same level as this readme.
+To build in terminal, create a "build" directory at the same level as this readme.
 "cd build"
 "cmake .."
 "make" (or whatever you are using to build - the point of cmake is that you should be able to use make or visual studio or whatever to compile)

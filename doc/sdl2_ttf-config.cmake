@@ -1,4 +1,4 @@
-set(SDL2_TTF_INCLUDE_DIRS "${CMAKE_CURRENT_LIST_DIR}/include")
+set(SDL2_TTF_INCLUDE_DIR "${CMAKE_CURRENT_LIST_DIR}/include")
 
 # Support both 32 and 64 bit builds
 if (${CMAKE_SIZEOF_VOID_P} MATCHES 8)
@@ -10,4 +10,4 @@ else ()
 endif ()
 message(${SDL2_TTF_LIBRARIES})
 
-string(STRIP "${SDL2_LIBRARIES}" SDL2_LIBRARIES)
+string(STRIP "${SDL2_TTF_LIBRARIES}" SDL2_TTF_LIBRARIES)
