@@ -31,7 +31,7 @@ Example showing how vclib should be set up. This is where cmakelists.txt will lo
 			sdl2_image-config.cmake
     └──	SDL2_ttf-2.0.15
 			sdl2_ttf-config.cmake
-	 └──	SDL2_2.0.14
+	└──	SDL2_2.0.14
 			sdl2-config.cmake
 </pre>
 

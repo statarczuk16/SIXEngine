@@ -1,8 +1,8 @@
 #include <Collision.h>
-#include <Tile.h>
+#include <Sprite/Tile.h>
 
 
-bool SXNGN::Collision::checkCollision(SDL_Rect a, SDL_Rect b)
+bool SXNGN::CollisionChecks::checkCollision(SDL_Rect a, SDL_Rect b)
 {
 	//The sides of the rectangles
 	int leftA, leftB;
@@ -47,7 +47,7 @@ bool SXNGN::Collision::checkCollision(SDL_Rect a, SDL_Rect b)
 	return true;
 }
 
-bool SXNGN::Collision::checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer)
+bool SXNGN::CollisionChecks::checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer)
 {
 	//The sides of the rectangles
 	int leftA, leftB;
@@ -94,7 +94,7 @@ bool SXNGN::Collision::checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer)
 
 
 //fixme should this be here?
- bool SXNGN::Collision::touchesWall(SDL_Rect box, std::vector<SXNGN::Tile> tiles)
+ bool SXNGN::CollisionChecks::touchesWall(SDL_Rect box, std::vector<SXNGN::Tile> tiles)
 {
 	//Go through the tiles
 	for (int i = 0; i < tiles.size(); ++i)
@@ -103,7 +103,7 @@ bool SXNGN::Collision::checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer)
 		if ((tiles.at(i).getType() == TileType::WALL))
 		{
 			//If the collision box touches the wall tile
-			if (Collision::checkCollision(box, *tiles.at(i).getCollisionBox()))
+			if (CollisionChecks::checkCollision(box, *tiles.at(i).getCollisionBox()))
 			{
 				return true;
 			}

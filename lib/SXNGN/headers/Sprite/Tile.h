@@ -8,7 +8,9 @@
 #include <Constants.h>
 #include "Camera.h"
 
-//The tile
+
+//TODO this class should just handle graphics.
+//New Terrain class should handle collision etc.
 namespace SXNGN {
 
 	class Texture;
@@ -25,8 +27,31 @@ namespace SXNGN {
 	};
 
 
+	//Class for objects represented by multiple tiles
+	//Must be rectangular
+	class MultiSprite
+	{
+	public:
+		MultiSprite(std::vector<std::vector<std::shared_ptr<SXNGN::Tile>>> tile_matrix);
 
+		std::vector<std::vector<std::shared_ptr<SXNGN::Tile>>> get_tiles();
 
+		//Get the collision box
+		std::shared_ptr<SDL_Rect> get_bounding_box();
+
+		//Update the tiles. Recalculate the collision box.
+		void update_tiles(std::vector<std::vector<std::shared_ptr<SXNGN::Tile>>>);
+
+		//Render all the tiles
+		void render(std::shared_ptr<SXNGN::Camera> camera, int x = -1, int y = -1);
+
+	protected:
+		std::shared_ptr<SDL_Rect> bounding_box_;
+		std::vector<std::vector<std::shared_ptr<SXNGN::Tile>>> tile_matrix_;
+	};
+
+	//Tiles are the base graphical objects of the engine
+	//Objects (characters, projectiles, etc) and terrain contain tiles that inform what the graphics look like
 	class Tile
 	{
 	public:

@@ -1,6 +1,6 @@
 #include <Camera.h>
 #include <Collision.h>
-#include <Tile.h>
+#include <Sprite/Tile.h>
 #include <Database.h>
 
 
@@ -39,7 +39,7 @@ bool SXNGN::Camera::object_in_view(SDL_Rect obj_bounds)
 	obj_bounds.y *= SXNGN::Database::get_scale();
 	obj_bounds.w *= SXNGN::Database::get_scale();
 
-	if (SXNGN::Collision::checkCollisionBuffer(get_lens_rect_scaled(), obj_bounds, obj_bounds.w*2))
+	if (SXNGN::CollisionChecks::checkCollisionBuffer(get_lens_rect_scaled(), obj_bounds, obj_bounds.w*2))
 	{
 		return true;
 	}

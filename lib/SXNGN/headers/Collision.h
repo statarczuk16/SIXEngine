@@ -6,7 +6,7 @@
 namespace SXNGN {  
 	class Tile;
 
-	class Collision
+	class CollisionChecks
 	{
 	public:
 		//Box collision detector

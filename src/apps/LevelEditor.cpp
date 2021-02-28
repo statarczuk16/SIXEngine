@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 #include <gameutils.h>
-#include <Tile.h>
+#include <Sprite/Tile.h>
 #include <Collision.h>
 #include <Texture.h>
 #include <Constants.h>

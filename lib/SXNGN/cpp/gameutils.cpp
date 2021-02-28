@@ -8,10 +8,10 @@ boost::filesystem::path Gameutils::get_working_dir()
 
 std::string Gameutils::find_folder_in_project_string(std::string folder_name)
 {
-	//FIXME make this a constant for all "bad string" returns
+
 	std::string ret = SXNGN::BAD_STRING_RETURN;
 
-	auto ptr = find_folder_in_project("media");
+	auto ptr = find_folder_in_project(folder_name);
 
 	if (ptr != nullptr)
 	{
@@ -179,7 +179,7 @@ std::shared_ptr<boost::filesystem::path> Gameutils::find_folder_in_project(std::
 	}
 	if (!found)
 	{
-		std::cout << "Debug: " << " Could not find media folder" <<  folder_name <<std::endl;
+		std::cout << "Debug: " << " Could not find folder: " <<  folder_name <<std::endl;
 	}
 	return media_folder;
 }

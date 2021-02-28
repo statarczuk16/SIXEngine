@@ -5,7 +5,7 @@
 #include <string>
 #include <fstream>
 #include "../../lib/SXNGN/headers/gameutils.h"
-#include "../../lib/SXNGN/headers/Tile.h"
+#include <Sprite/Tile.h>
 #include "../../lib/SXNGN/headers/Collision.h"
 #include "../../lib/SXNGN/headers/Texture.h"
 #include "../../lib/SXNGN/headers/Constants.h"
@@ -14,6 +14,7 @@
 #include <State/BaseGameState.h>
 #include <Database.h>
 #include <Timer.h>
+#include<kiss_sdl.h>
 
 		//Screen dimension constants
 const int SCREEN_WIDTH = 800;
@@ -37,7 +38,11 @@ SDL_Rect g_screen_bounds;
 
 std::string g_media_folder = SXNGN::BAD_STRING_RETURN;
 
-
+//some entities
+		//Entity moves with acceleration
+std::shared_ptr< SXNGN::Entity> gunman_entity;
+//Object moves with constant velocity
+std::shared_ptr< SXNGN::Object> barrel_object;
 
 //Starts up SDL and creates window
 bool init();
@@ -51,7 +56,7 @@ void close();
 
 
 //The window we'll be rendering to
-SDL_Window* gWindow = NULL;
+//SDL_Window* gWindow = NULL;
 
 //The window renderer
 SDL_Renderer* gRenderer = NULL;
@@ -85,6 +90,16 @@ bool init()
 	}
 	else
 	{
+		g_level_bounds.x = 0;
+		g_level_bounds.y = 0;
+		g_level_bounds.w = LEVEL_WIDTH_PIXELS;
+		g_level_bounds.h = LEVEL_HEIGHT_PIXELS;
+
+		g_screen_bounds.x = 0;
+		g_screen_bounds.y = 0;
+		g_screen_bounds.w = SCREEN_WIDTH;
+		g_screen_bounds.h = SCREEN_HEIGHT;
+
 		//Set texture filtering to linear
 		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
 		{
@@ -92,16 +107,35 @@ bool init()
 		}
 
 		//Create window
-		gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		if (gWindow == NULL)
-		{
-			printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
-			success = false;
-		}
-		else
-		{
+		//gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
+		//if (gWindow == NULL)
+		//{
+		//	printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
+		//	success = false;
+		//}
+		//else
+		//{
+			g_media_folder = "uninit";
+			g_media_folder = Gameutils::find_folder_in_project_string("media");
+			if (g_media_folder == SXNGN::BAD_STRING_RETURN)
+			{
+				std::cout << "Fatal: " << " Could not find media folder" << std::endl;
+				return 0;
+			}
+			std::string kiss_resource_folder = g_media_folder + "/kiss_resources/";
+			if (Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
+			{
+				printf("Found KISS media folder %s", kiss_resource_folder.c_str());
+			}
+			else
+			{
+				printf("Fatal: Could not load kiss media folder");
+				return 0;
+			}
+			kiss_array kiss_objects;
+			gRenderer = kiss_init("HOPLON", &kiss_objects, g_screen_bounds.w, g_screen_bounds.h, kiss_resource_folder.c_str());
 			//Create renderer for window
-			gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+			//gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if (gRenderer == NULL)
 			{
 				printf("Renderer could not be created! SDL Error: %s\n", SDL_GetError());
@@ -120,18 +154,10 @@ bool init()
 					success = false;
 				}
 			}
-		}
+		//}
 	}
 
-	g_level_bounds.x = 0;
-	g_level_bounds.y = 0;
-	g_level_bounds.w = LEVEL_WIDTH_PIXELS;
-	g_level_bounds.h = LEVEL_HEIGHT_PIXELS;
 
-	g_screen_bounds.x = 0;
-	g_screen_bounds.y = 0;
-	g_screen_bounds.w = SCREEN_WIDTH;
-	g_screen_bounds.h = SCREEN_HEIGHT;
 
 	SXNGN::Database::set_scale(SXNGN::TILE_WIDTH_SCALE);
 
@@ -142,13 +168,7 @@ bool loadMedia()
 {
 	//Loading success flag
 	bool success = true;
-	g_media_folder = "uninit";
-	g_media_folder = Gameutils::find_folder_in_project_string("media");
-	if (g_media_folder == SXNGN::BAD_STRING_RETURN)
-	{
-		std::cout << "Warning: " << " Could not find media folder" << std::endl;
-		success = false;
-	}
+	
 
 	g_dot_texture_ = std::make_shared<SXNGN::Texture>(gRenderer);
 	//Load dot texture
@@ -199,9 +219,9 @@ bool loadMedia()
 void close()
 {
 	//Destroy window	
-	SDL_DestroyRenderer(gRenderer);//probably dont need to do this for shared ptr
-	SDL_DestroyWindow(gWindow);
-	gWindow = NULL;
+	SDL_DestroyRenderer(gRenderer);
+	//SDL_DestroyWindow(gWindow);
+	//gWindow = NULL;
 	gRenderer = NULL;
 
 	//Quit SDL subsystems
@@ -232,6 +252,16 @@ bool switch_state(std::string new_state)
 	return true;
 }
 
+static void button_sw_event(kiss_button* button, SDL_Event* e, int* draw)
+{
+	std::shared_ptr<SXNGN::Tile>mailman_tile =
+		g_tile_handler_apocalpyse_map_->generateTileRef("MAILMAN");
+	if (kiss_button_event(button, e, draw))
+	{
+		gunman_entity->get_sprite_ref()->getTileClipBox()->x = mailman_tile->getTileClipBox()->x;
+		gunman_entity->get_sprite_ref()->getTileClipBox()->y = mailman_tile->getTileClipBox()->y;
+	}
+}
 
 int main(int argc, char* args[])
 {
@@ -259,11 +289,7 @@ int main(int argc, char* args[])
 		g_current_state_str = "HOPLON_OUTSIDE";
 
 
-		//some entities
-		//Entity moves with acceleration
-		std::shared_ptr< SXNGN::Entity> gunman_entity;
-		//Object moves with constant velocity
-		std::shared_ptr< SXNGN::Object> barrel_object;
+		
 
 		std::shared_ptr<SXNGN::Tile>gunman_tile =
 			g_tile_handler_apocalpyse_map_->generateTileRef("GUNMAN_1");
@@ -314,6 +340,15 @@ int main(int argc, char* args[])
 
 		int frame_count = 0;
 
+		kiss_window window_low;
+		kiss_button button_switch = { 0 };
+
+		kiss_window_new(&window_low, NULL, 1, 0, g_screen_bounds.h-60, g_screen_bounds.w,60);
+		kiss_button_new_uc(&button_switch, &window_low, "Switch", 20, g_screen_bounds.h - 50, 0);
+
+
+		window_low.visible = 1;
+		int draw_ui = 1;
 		//While application is running
 		while (!quit)
 		{
@@ -355,6 +390,8 @@ int main(int argc, char* args[])
 				//Handle input for the dot
 				gunman_entity->handleEvent(e);
 				barrel_object->handleEvent(e);
+
+				button_sw_event(&button_switch, &e, &draw_ui);
 			}
 
 			////////////Physics
@@ -382,7 +419,7 @@ int main(int argc, char* args[])
 			//barrel_object->move(g_overworld_map_tiles_, g_level_bounds);
 
 			move_timer.start();
-			///////////////Rendering
+			///////////////Rendering Game
 			//Clear screen
 			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
 			SDL_RenderClear(gRenderer);
@@ -397,6 +434,12 @@ int main(int argc, char* args[])
 			gunman_entity->render(main_cam_);
 			//barrel_object->render(main_cam_);
 			//Update screen
+
+			///////////////Rendering UI
+			kiss_window_draw(&window_low, gRenderer);
+			kiss_button_draw(&button_switch, gRenderer);
+
+
 			SDL_RenderPresent(gRenderer);
 			//delay if frame finished early (so maintain capped frames per second)
 			if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())

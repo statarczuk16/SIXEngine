@@ -2,7 +2,7 @@
 
 #include "../../headers/Object/Object.h"
 #include "../../headers/Object/Entity.h"
-#include "../../headers/Tile.h"
+#include <Sprite/Tile.h>
 
 
 namespace SXNGN {

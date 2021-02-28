@@ -1,6 +1,6 @@
 #include <Object/Entity.h>
 #include <Texture.h>
-#include <Tile.h>
+#include <Sprite/Tile.h>
 #include <Physics.h>
 
 
@@ -130,14 +130,13 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 		}
 
 		//If the dot went too far to the left or right or touched a wall
-		if ((collision_box_.x < x_bound_min) || (collision_box_.x + collision_box_.w > x_bound_max) || SXNGN::Collision::touchesWall(collision_box_, tiles))
+		if ((collision_box_.x < x_bound_min) || (collision_box_.x + collision_box_.w > x_bound_max) || SXNGN::CollisionChecks::touchesWall(collision_box_, tiles))
 		{
 			//move back
 			collision_box_.x = prev_box.x;
 			phys_x = double(collision_box_.x);
 			phys_m_vel_x_m_s_ = 0.0;
 			m_acc_x_m_s_s_ = 0.0;
-
 		}
 
 		//Move the dot up or down
@@ -145,7 +144,7 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 		collision_box_.y = int(round(phys_y));
 
 		//If the dot went too far up or down or touched a wall
-		if ((collision_box_.y < y_bound_min) || (collision_box_.y + collision_box_.h > y_bound_max) || SXNGN::Collision::touchesWall(collision_box_, tiles))
+		if ((collision_box_.y < y_bound_min) || (collision_box_.y + collision_box_.h > y_bound_max) || SXNGN::CollisionChecks::touchesWall(collision_box_, tiles))
 		{
 			//move back
 			collision_box_.y = prev_box.y;

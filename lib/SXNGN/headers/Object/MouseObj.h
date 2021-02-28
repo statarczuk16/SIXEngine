@@ -1,6 +1,6 @@
 #pragma once
 
-#include <Tile.h>
+#include <Sprite/Tile.h>
 #include <Collision.h>
 #include <vector>
 #include <SDL.h>

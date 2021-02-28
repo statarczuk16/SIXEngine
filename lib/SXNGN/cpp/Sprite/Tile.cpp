@@ -1,7 +1,60 @@
-#include <Tile.h>
+#include <Sprite/Tile.h>
 #include <Texture.h>
 #include <gameutils.h>
 
+
+
+
+SXNGN::MultiSprite::MultiSprite(std::vector<std::vector<std::shared_ptr<SXNGN::Tile>>> tile_matrix)
+{
+	tile_matrix_ = tile_matrix;
+
+	update_tiles(tile_matrix);
+	SDL_Rect bounding_box;
+	bounding_box.x = 0;
+	bounding_box.y = 0;
+	//tile_matrix must be rectangular 
+	bounding_box.w = tile_matrix.at(0).size() * SXNGN::BASE_TILE_WIDTH;
+	bounding_box.h = tile_matrix.size() * SXNGN::BASE_TILE_HEIGHT;
+}
+
+void SXNGN::MultiSprite::update_tiles(std::vector<std::vector<std::shared_ptr<SXNGN::Tile>>> tile_matrix)
+{
+	tile_matrix_ = tile_matrix;
+	SDL_Rect bounding_box;
+	bounding_box.x = 0;
+	bounding_box.y = 0;
+	//tile_matrix must be rectangular 
+	bounding_box.w = tile_matrix.at(0).size() * SXNGN::BASE_TILE_WIDTH;
+	bounding_box.h = tile_matrix.size() * SXNGN::BASE_TILE_HEIGHT;
+	bounding_box_ = std::make_shared<SDL_Rect>(bounding_box);
+}
+
+void SXNGN::MultiSprite::render(std::shared_ptr<SXNGN::Camera> camera, int x, int y)
+{
+	//Location information should note be stored in the sprite, but just in case...
+	if (x == -1)
+	{
+		x = bounding_box_->x;
+	}
+	if (y == -1)
+	{
+		y = bounding_box_->y;
+	}
+
+	for (auto sprite_vector : tile_matrix_)
+	{
+		for (auto sprite : sprite_vector)
+		{
+			sprite->getCollisionBox()->x = x;
+			sprite->getCollisionBox()->y = y;
+			sprite->render(camera);
+			x += sprite->getCollisionBox()->w;
+		}
+		y += sprite_vector.at(0)->getCollisionBox()->h;
+	}
+
+}
 
 SXNGN::Tile::Tile(
 	std::shared_ptr<SXNGN::Texture> tileTexture,
@@ -110,59 +163,6 @@ void SXNGN::Tile::render(std::shared_ptr<SXNGN::Camera> camera)
 		tile_texture_.get()->render(texture_pos_wrt_cam_x, texture_pos_wrt_cam_y, tile_map_snip_.get());
 	}
 }
-	//if (SXNGN::Collision::checkCollision(camera, *collision_box_))
-	//{
-		//Show the tile
-		//tile_texture_.get()->render(collision_box_->x - camera.x, collision_box_->y - camera.y, tile_map_snip_.get());
-
-	//}
-
-
-
-/**
-
-SXNGN::TileHandler::TileHandler(SDL_Renderer* renderer, std::string tileSheetPath, std::string tileNameListPath, unsigned int tileMapSize, unsigned int totalTiles, unsigned int tile_width, unsigned int tile_height)
-{
-	if (renderer == nullptr)
-	{
-		throw std::exception("Warn TileHandler:: pointer to renderer was null");
-	}
-	tileTexture_ = std::make_shared<SXNGN::Texture>(renderer);
-
-	//Load tile texture
-	if (!tileTexture_->loadFromFile(tileSheetPath))
-	{
-		throw std::exception("Warn TileHandler:: Failed to load tile set texture");
-	}
-
-	if (!(Gameutils::file_exists(tileMapPath)))
-	{
-		printf("Warn TileHandler::Init Failed to find tile map");
-		throw std::exception("Warn TileHandler:: Failed to find tile map");
-	}
-
-	if (!(Gameutils::file_exists(tileNameListPath)))
-	{
-		printf("Warn TileHandler::Init Failed to find tile map");
-		throw std::exception("Warn TileHandler:: Failed to find tile list");
-	}
-
-	tile_name_list_path_ = tileNameListPath;
-	tile_sheet_path_ = tileSheetPath;
-	tile_map_size_ = tileMapSize;
-	total_tiles_ = totalTiles;
-	tile_width_ = tile_width;
-	tile_height_ = tile_height;
-
-	bool tileNamesLoaded = initTileNames();
-
-	if (!tileNamesLoaded)
-	{
-		printf("Warn TileHandler:: failed to load tile names");
-		throw std::exception("Warn TileHandler:: Failed to load tile names");
-	}
-}
-**/
 
 SXNGN::TileHandler::TileHandler(SDL_Renderer* renderer, std::string sourcePath)
 {

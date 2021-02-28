@@ -1,6 +1,6 @@
 #include <Object/MouseObj.h>
 #include <Texture.h>
-#include <Tile.h>
+#include <Sprite/Tile.h>
 #include <Physics.h>
 #include <Constants.h>
 

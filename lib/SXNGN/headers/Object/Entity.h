@@ -2,7 +2,7 @@
 
 #include "../../headers/Object/Object.h"
 #include "../../headers/Object/Entity.h"
-#include "../../headers/Tile.h"
+#include <Sprite/Tile.h>
 #include "../../headers/Collision.h"
 #include <vector>
 #include <SDL.h>
