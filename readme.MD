@@ -15,6 +15,7 @@ SDL2
 SDL2_TTF
 SDL2_Image
 Boost
+kiss_sdl (https://github.com/actsl/kiss_sdl)
 
 Cmake will look for these libraries in the vc_lib directory if not elsewhere wherever you put libraries.
 There must be a config.cmake for each library, which are not usually distributed with the cmake library downloads. Therefor, take the ones from SXNGN/sdl_cmake-config-templates and place into the library downloads like so:
