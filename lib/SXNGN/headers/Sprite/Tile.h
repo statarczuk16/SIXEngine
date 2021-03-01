@@ -156,9 +156,7 @@ namespace SXNGN {
 
 		const std::map<std::string, SXNGN::TileType> manifest_string_to_type_map_ = { {"TILE_HEIGHT",TileType::META_HEIGHT},{"TILE_WIDTH",TileType::META_WIDTH},{"TILE_UNIT",TileType::UNIT},{"TILE_TERRAIN",TileType::TERRAIN} };
 
-		unsigned int total_tiles_, tile_width_, tile_height_, tile_map_size_;
-
-		std::vector<SDL_Rect> tile_clips;
+		unsigned int  tile_width_, tile_height_;
 
 		std::vector< std::vector<std::shared_ptr<SXNGN::Tile>>> tile_1D_to_2D(std::vector<SXNGN::Tile> tiles, size_t width);
 

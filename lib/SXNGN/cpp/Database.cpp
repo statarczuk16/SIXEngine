@@ -1,15 +1,16 @@
-#pragma once
-
 #include "..\headers\Database.h"
 #include <stdio.h>
 
 int SXNGN::Database::scale_;
 int SXNGN::Database::max_fps_;
+std::shared_ptr<Coordinator> SXNGN::Database::ecs_coordinator_;
 
 SXNGN::Database::Database()
 {
 	scale_ = 1;
 	max_fps_ = 30;
+	ecs_coordinator_ = nullptr;
+
 }
 
 int SXNGN::Database::get_scale()
@@ -60,5 +61,15 @@ int  SXNGN::Database::get_screen_ticks_per_frame()
 	}
 	return 1000 / max_fps_;
  }
+
+std::shared_ptr<Coordinator> SXNGN::Database::get_coordinator()
+{
+	return ecs_coordinator_;
+}
+
+ void SXNGN::Database::set_coordinator(std::shared_ptr<Coordinator> ecs_coordinator)
+{
+	ecs_coordinator_ = ecs_coordinator;
+}
 
 

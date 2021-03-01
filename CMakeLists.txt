@@ -1,5 +1,7 @@
 cmake_minimum_required(VERSION 3.7)
-
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
 project(RiskTheSix)
 
 list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/../vclib/")
@@ -14,6 +16,8 @@ find_package(Boost REQUIRED COMPONENTS filesystem)
 
 find_package(OpenGL REQUIRED)
 
+
+
 message("SDL2_LIBRARIES: "  ${SDL2_LIBRARIES}) 
 message("SDL2_INCLUDE: "  ${SDL2_INCLUDE_DIR})
 message("SDL2_IMAGE_LIBRARIES: "  ${SDL2_IMAGE_LIBRARIES})
@@ -21,11 +25,11 @@ message("SDL2_IMAGE_INCLUDE: "  ${SDL2_IMAGE_INCLUDE_DIR})
 message("SDL2_TTF_LIBRARIES: "  ${SDL2_TTF_LIBRARIES})
 message("SDL2_TTF_INCLUDE: "  ${SDL2_TTF_INCLUDE_DIR})
 
-message("Boost Found: " ${Boost_FOUND})
+message("Boost Found: " ${Boost_FOUND}) 
 message("Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIRS})
 message("Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS})
 message("Boost_LIBRARIES: " ${Boost_LIBRARIES})
-
+ 
 #message("OpenGL Found" ${OPENGL_FOUND})
 #message("OpenGL Libraries: " ${OPENGL_LIBRARIES})
 
@@ -36,6 +40,7 @@ include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INC
 #include the SXNGN Sources (game engine)
 file(GLOB_RECURSE SXNGN_SOURCES
 	${CMAKE_SOURCE_DIR}/lib/SXNGN/headers/*.h
+	${CMAKE_SOURCE_DIR}/lib/SXNGN/cpp/*.hpp
 	${CMAKE_SOURCE_DIR}/lib/SXNGN/cpp/*.cpp
 	)
 	
@@ -79,15 +84,17 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
 ######### End Nanogui
 
 #include_directories(${CMAKE_SOURCE_DIR}/src/headers)
-add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
+add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}   )
 target_link_libraries(LevelEditor ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} Boost::filesystem)   
 
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  )
 target_link_libraries(HoplonSimulator ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} Boost::filesystem) 
 
-add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
+add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}        )
 target_link_libraries(KissExample ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} Boost::filesystem)
 
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} )
+target_link_libraries(ECS_Demo ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} Boost::filesystem)
 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
