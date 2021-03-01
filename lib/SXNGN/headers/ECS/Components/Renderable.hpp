@@ -41,7 +41,7 @@ namespace SXNGN::ECS::Components {
 		//go from a map file to a string
 		std::map<int, std::string> tile_name_int_to_string_map_;
 		//where that string can go to a rect that is a tilesheet clip coordinate -- also used by Renderable_Creator_System to create a sprite from a name
-		std::map< std::string, std::shared_ptr<SDL_Rect>> tile_name_string_to_rect_map;
+		std::map< std::string, std::shared_ptr<SDL_Rect>> tile_name_string_to_rect_map_;
 		//go from a tilename "SAND, WATER" etc to a TileType that contains collision or other data "WALL" etc
 		std::map<std::string, SXNGN::TileType> tile_name_string_to_tile_type_map_;
 

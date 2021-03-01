@@ -27,15 +27,11 @@ void Sprite_Factory_Creator_System::Update(float dt)
 	{
 
 		//go from a map file to a string
-		std::map<int, std::string> tile_name_int_to_string_map_;
+		std::map<int, std::string> tile_name_int_to_string_map;
 		//where that string can go to a rect that is a tilesheet clip coordinate
 		std::map< std::string, std::shared_ptr<SDL_Rect>> tile_name_string_to_rect_map;
-		//go from a tilename "SAND, WATER" etc to a TileType that contains collision or other data "WALL" etc
-		std::map<std::string, SXNGN::TileType> tile_name_string_to_tile_type_map_;
 
-		
-
-		size_t  tile_width_, tile_height_;
+		size_t  tile_width, tile_height;
 
 		const std::map<std::string, SXNGN::TileType> manifest_string_to_type_map_ = { {"TILE_HEIGHT",TileType::META_HEIGHT},{"TILE_WIDTH",TileType::META_WIDTH},{"TILE_UNIT",TileType::UNIT},{"TILE_TERRAIN",TileType::TERRAIN} };
 
@@ -117,7 +113,7 @@ void Sprite_Factory_Creator_System::Update(float dt)
 			{
 				if (manifest_entry.size() == 2)
 				{
-					tile_height_ = std::stoi(manifest_entry.at(1));
+					tile_height = std::stoi(manifest_entry.at(1));
 				}
 				else
 				{
@@ -129,7 +125,7 @@ void Sprite_Factory_Creator_System::Update(float dt)
 			{
 				if (manifest_entry.size() == 2)
 				{
-					tile_width_ = std::stoi(manifest_entry.at(1));
+					tile_width = std::stoi(manifest_entry.at(1));
 				}
 				else
 				{
@@ -146,12 +142,12 @@ void Sprite_Factory_Creator_System::Update(float dt)
 					int y_grid = std::stoi(manifest_entry.at(2));
 					std::string tile_name = manifest_entry.at(3);
 					int int_to_name = std::stoi(manifest_entry.at(4));
-					entry->x = x_grid * tile_width_;
-					entry->y = y_grid * tile_height_;
-					entry->w = tile_width_;
-					entry->h = tile_height_;
+					entry->x = x_grid * tile_width;
+					entry->y = y_grid * tile_height;
+					entry->w = tile_width;
+					entry->h = tile_height;
 					tile_name_string_to_rect_map[tile_name] = entry;
-					tile_name_int_to_string_map_[int_to_name] = tile_name;
+					tile_name_int_to_string_map[int_to_name] = tile_name;
 				}
 				else
 				{
@@ -167,10 +163,10 @@ void Sprite_Factory_Creator_System::Update(float dt)
 					int x_grid = std::stoi(manifest_entry.at(1));
 					int y_grid = std::stoi(manifest_entry.at(2));
 					std::string tile_name = manifest_entry.at(3);
-					entry->x = x_grid * tile_width_;
-					entry->y = y_grid * tile_height_;
-					entry->w = tile_width_;
-					entry->h = tile_height_;
+					entry->x = x_grid * tile_width;
+					entry->y = y_grid * tile_height;
+					entry->w = tile_width;
+					entry->h = tile_height;
 					tile_name_string_to_rect_map[tile_name] = entry;
 				}
 				else
@@ -191,10 +187,10 @@ void Sprite_Factory_Creator_System::Update(float dt)
 		auto sprite_factory_entity = Database::get_coordinator()->CreateEntity();
 		SXNGN::ECS::Components::Sprite_Factory sprite_factory_component;
 		sprite_factory_component.sprite_factory_name = pre_factory.name_,
-			sprite_factory_component.tile_height_ = tile_height_;
-		sprite_factory_component.tile_width_ = tile_width_;
-		sprite_factory_component.tile_name_int_to_string_map_ = tile_name_int_to_string_map_;
-		sprite_factory_component.tile_name_string_to_rect_map_ = tile_name_string_to_rect_map_;
+			sprite_factory_component.tile_height_ = tile_height;
+		sprite_factory_component.tile_width_ = tile_width;
+		sprite_factory_component.tile_name_int_to_string_map_ = tile_name_int_to_string_map;
+		sprite_factory_component.tile_name_string_to_rect_map_ = tile_name_string_to_rect_map;
 
 		Database::get_coordinator()->AddComponent(sprite_factory, SXNGN::ECS::Components::Sprite_Factory(
 			pre_factory.name_,
