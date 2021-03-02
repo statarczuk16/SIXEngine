@@ -9,46 +9,55 @@
 
 class ComponentManager
 {
+
 public:
-	template<typename T>
-	void RegisterComponent()
+	
+	void RegisterComponent(ComponentTypeEnum component_type)
 	{
-		const char* typeName = typeid(T).name();
 
-		assert(mComponentTypes.find(typeName) == mComponentTypes.end() && "Registering component type more than once.");
+		assert(mComponentTypes.find(component_type) == mComponentTypes.end() && "Registering component type more than once.");
 
-		mComponentTypes.insert({typeName, mNextComponentType});
-		mComponentArrays.insert({typeName, std::make_shared<ComponentArray<T>>()});
+		mComponentTypes.insert({ component_type, mNextComponentType});
+		mComponentArrays.insert({ component_type, std::make_shared<ComponentArray>() });
 
 		++mNextComponentType;
 	}
 
-	template<typename T>
-	ComponentType GetComponentType()
+	ComponentTypeHash GetComponentType(ComponentTypeEnum component_type)
 	{
-		const char* typeName = typeid(T).name();
+		
+		if (mComponentTypes.find(component_type) == mComponentTypes.end())
+		{
+			const char* component_type_str = typeid(component_type).name();
+			printf("Component not registered before use: %s\n", component_type_str);
+		}
 
-		assert(mComponentTypes.find(typeName) != mComponentTypes.end() && "Component not registered before use.");
+		assert(mComponentTypes.find(component_type) != mComponentTypes.end());
 
-		return mComponentTypes[typeName];
+		return mComponentTypes[component_type];
 	}
 
-	template<typename T>
-	void AddComponent(Entity entity, T component)
+	
+	void AddComponent(Entity entity, ECS_Component *component)
 	{
-		GetComponentArray<T>()->InsertData(entity, component);
+		ComponentTypeEnum component_type = component->get_component_type();
+		GetComponentArray(component_type)->InsertData(entity, component);
 	}
 
-	template<typename T>
-	void RemoveComponent(Entity entity)
+	void RemoveComponent(Entity entity, ComponentTypeEnum component_type)
 	{
-		GetComponentArray<T>()->RemoveData(entity);
+		GetComponentArray(component_type)->RemoveData(entity);
 	}
 
-	template<typename T>
-	T& GetComponent(Entity entity)
+
+	ECS_Component* GetComponent(Entity entity, ComponentTypeEnum component_type)
 	{
-		return GetComponentArray<T>()->GetData(entity);
+		return GetComponentArray(component_type)->GetData(entity);
+	}
+
+	ECS_Component* TryGetComponent(Entity entity, ComponentTypeEnum component_type)
+	{
+		return GetComponentArray(component_type)->TryGetData(entity);
 	}
 
 	void EntityDestroyed(Entity entity)
@@ -61,19 +70,34 @@ public:
 		}
 	}
 
-private:
-	std::unordered_map<const char*, ComponentType> mComponentTypes{};
-	std::unordered_map<const char*, std::shared_ptr<IComponentArray>> mComponentArrays{};
-	ComponentType mNextComponentType{};
-
-
-	template<typename T>
-	std::shared_ptr<ComponentArray<T>> GetComponentArray()
+	std::vector<SXNGN::ECS::Components::ECS_Component*> get_all_entity_data(Entity entity)
 	{
-		const char* typeName = typeid(T).name();
+		std::vector<SXNGN::ECS::Components::ECS_Component*> return_components;
+		for (auto component_type : mComponentTypes)
+		{
+			ComponentTypeEnum component_type_enum = component_type.first;
+			auto comp_arr = (mComponentArrays[component_type_enum]);
+			auto component = comp_arr->TryGetData(entity);
+			if (component)
+			{
+				return_components.push_back(component);
+			}
+		}
+		return return_components;
+	}
+	
 
-		assert(mComponentTypes.find(typeName) != mComponentTypes.end() && "Component not registered before use.");
+private:
 
-		return std::static_pointer_cast<ComponentArray<T>>(mComponentArrays[typeName]);
+	std::unordered_map<ComponentTypeEnum, ComponentTypeHash> mComponentTypes{};
+	std::unordered_map<ComponentTypeEnum, std::shared_ptr<ComponentArray>> mComponentArrays{};
+	ComponentTypeHash mNextComponentType{};
+
+	std::shared_ptr<ComponentArray> GetComponentArray(ComponentTypeEnum component_type)
+	{
+
+		assert(mComponentTypes.find(component_type) != mComponentTypes.end() && "Component not registered before use.");
+
+		return (mComponentArrays[component_type]);
 	}
 };

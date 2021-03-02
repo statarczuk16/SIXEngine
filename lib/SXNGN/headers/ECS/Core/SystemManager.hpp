@@ -5,6 +5,7 @@
 #include <cassert>
 #include <memory>
 #include <unordered_map>
+#include <SDL.h>
 
 
 class SystemManager
@@ -23,13 +24,23 @@ public:
 	}
 
 	template<typename T>
-	void SetSignature(Signature signature)
+	void SetSignatureActable(Signature signature)
 	{
 		const char* typeName = typeid(T).name();
 
 		assert(mSystems.find(typeName) != mSystems.end() && "System used before registered.");
 
-		mSignatures.insert({typeName, signature});
+		mSignaturesActable.insert({typeName, signature});
+	}
+
+	template<typename T>
+	void SetSignatureOfInterest(Signature signature)
+	{
+		const char* typeName = typeid(T).name();
+
+		assert(mSystems.find(typeName) != mSystems.end() && "System used before registered.");
+
+		mSignaturesOfInterest.insert({ typeName, signature });
 	}
 
 	void EntityDestroyed(Entity entity)
@@ -39,30 +50,57 @@ public:
 			auto const& system = pair.second;
 
 
-			system->mEntities.erase(entity);
+			system->m_actable_entities.erase(entity);
+			system->m_entities_of_interest.erase(entity);
 		}
 	}
 
 	void EntitySignatureChanged(Entity entity, Signature entitySignature)
 	{
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID: %2d : New Signature: %d",entity,entitySignature);
+
 		for (auto const& pair : mSystems)
 		{
 			auto const& type = pair.first;
 			auto const& system = pair.second;
-			auto const& systemSignature = mSignatures[type];
-			//Logical AND to see if components of entity has all the components of this system
-			if ((entitySignature & systemSignature) == systemSignature)
+			auto const& systemSignatureAct = mSignaturesActable[type];
+			auto const& systemSignatureInterest = mSignaturesOfInterest[type];
+			//Logical AND to see if entity has all the components of this system
+			if ((entitySignature & systemSignatureAct) == systemSignatureAct)
 			{
-				system->mEntities.insert(entity);
+				SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID: Added to System Actables: System: %s", type);
+				system->m_actable_entities.insert(entity);
 			}
 			else
 			{
-				system->mEntities.erase(entity);
+				system->m_actable_entities.erase(entity);
+				//Logical OR to see if entity has ANY of the components of interest to this system
+				// (System may need data from other entities even if it does not operate on them in its main loop)
+				Signature or_result;
+				or_result = entitySignature & systemSignatureInterest;
+				if (or_result.any())
+				{
+					system->m_entities_of_interest.insert(entity);
+					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID: Added to System Interests: System: %s", type);
+				}
+				else
+				{
+					system->m_entities_of_interest.erase(entity);
+				}
 			}
+
+
+
+			
+
+			
 		}
 	}
 
 private:
-	std::unordered_map<const char*, Signature> mSignatures{};
+	//Entities must have ALL components in signature to be added to entities_actable list of system
+	std::unordered_map<const char*, Signature> mSignaturesActable{};
+	//Entities must have ANY component in signature to be added to entities_of_interest of system
+	std::unordered_map<const char*, Signature> mSignaturesOfInterest{};
 	std::unordered_map<const char*, std::shared_ptr<System>> mSystems{};
 };

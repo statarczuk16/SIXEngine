@@ -6,6 +6,11 @@
 #include "ECS/Core/SystemManager.hpp"
 #include "ECS/Core/Types.hpp"
 #include <memory>
+#include <ECS/Core/Component.hpp>
+#include <ECS/Core/TextureManager.hpp>
+
+
+using ECS_Component = SXNGN::ECS::Components::ECS_Component;
 
 
 class Coordinator
@@ -13,10 +18,11 @@ class Coordinator
 public:
 	void Init()
 	{
-		mComponentManager = std::make_unique<ComponentManager>();
-		mEntityManager = std::make_unique<EntityManager>();
-		mEventManager = std::make_unique<EventManager>();
-		mSystemManager = std::make_unique<SystemManager>();
+		mComponentManager = std::make_shared<ComponentManager>();
+		mEntityManager = std::make_shared<EntityManager>();
+		mEventManager = std::make_shared<EventManager>();
+		mSystemManager = std::make_shared<SystemManager>();
+		mTextureManager = std::shared_ptr<TextureManager>();
 	}
 
 
@@ -35,62 +41,70 @@ public:
 		mSystemManager->EntityDestroyed(entity);
 	}
 
+	std::vector<SXNGN::ECS::Components::ECS_Component> get_all_entity_data(Entity entity)
+	{
+		
+	}
 
 	// Component methods
-	template<typename T>
-	void RegisterComponent()
+	
+	void RegisterComponent(ComponentTypeEnum component_type)
 	{
-		mComponentManager->RegisterComponent<T>();
+		mComponentManager->RegisterComponent(component_type);
 	}
 
-	template<typename T>
-	void AddComponent(Entity entity, T component)
+	void AddComponent(Entity entity, ECS_Component *component)
 	{
-		mComponentManager->AddComponent<T>(entity, component);
+		mComponentManager->AddComponent(entity, component);
 
 		auto signature = mEntityManager->GetSignature(entity);
-		signature.set(mComponentManager->GetComponentType<T>(), true);
+		signature.set(mComponentManager->GetComponentType(component->get_component_type()), true);
 		mEntityManager->SetSignature(entity, signature);
 
 		mSystemManager->EntitySignatureChanged(entity, signature);
 	}
 
-	template<typename T>
-	void RemoveComponent(Entity entity)
+	void RemoveComponent(Entity entity, ComponentTypeEnum component_type)
 	{
-		mComponentManager->RemoveComponent<T>(entity);
+		mComponentManager->RemoveComponent(entity, component_type);
 
 		auto signature = mEntityManager->GetSignature(entity);
-		signature.set(mComponentManager->GetComponentType<T>(), false);
+		signature.set(mComponentManager->GetComponentType(component_type), false);
 		mEntityManager->SetSignature(entity, signature);
 
 		mSystemManager->EntitySignatureChanged(entity, signature);
 	}
 
-	template<typename T>
-	T& GetComponent(Entity entity)
+	ECS_Component* GetComponent(Entity entity, ComponentTypeEnum component_type)
 	{
-		return mComponentManager->GetComponent<T>(entity);
+		return mComponentManager->GetComponent(entity, component_type);
+	}
+
+	ECS_Component* TryGetComponent(Entity entity, ComponentTypeEnum component_type)
+	{
+		return mComponentManager->TryGetComponent(entity, component_type);
+	}
+
+	ComponentTypeHash GetComponentType(ComponentTypeEnum component_type)
+	{
+		return mComponentManager->GetComponentType(component_type);
 	}
 
 	template<typename T>
-	ComponentType GetComponentType()
-	{
-		return mComponentManager->GetComponentType<T>();
-	}
-
-
 	// System methods
-	template<typename T>
 	std::shared_ptr<T> RegisterSystem()
 	{
 		return mSystemManager->RegisterSystem<T>();
 	}
-
 	template<typename T>
-	void SetSystemSignature(Signature signature)
+	void SetSystemSignatureActable(Signature signature)
 	{
-		mSystemManager->SetSignature<T>(signature);
+		mSystemManager->SetSignatureActable<T>(signature);
+	}
+	template<typename T>
+	void SetSystemSignatureOfInterest(Signature signature)
+	{
+		mSystemManager->SetSignatureOfInterest<T>(signature);
 	}
 
 
@@ -110,9 +124,15 @@ public:
 		mEventManager->SendEvent(eventId);
 	}
 
+	std::shared_ptr<TextureManager> get_texture_manager()
+	{
+		return mTextureManager;
+	}
+
 private:
-	std::unique_ptr<ComponentManager> mComponentManager;
-	std::unique_ptr<EntityManager> mEntityManager;
-	std::unique_ptr<EventManager> mEventManager;
-	std::unique_ptr<SystemManager> mSystemManager;
+	std::shared_ptr<ComponentManager> mComponentManager;
+	std::shared_ptr<EntityManager> mEntityManager;
+	std::shared_ptr<EventManager> mEventManager;
+	std::shared_ptr<SystemManager> mSystemManager;
+	std::shared_ptr<TextureManager> mTextureManager;
 };

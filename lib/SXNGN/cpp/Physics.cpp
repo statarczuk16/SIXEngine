@@ -22,6 +22,7 @@ SXNGN::Physics::FrictionType SXNGN::Physics::move_type_to_friction_type(MoveType
 			return FrictionType::STATIC_YES_KINETIC_YES;
 			break;
 		}
+		default: return  FrictionType::STATIC_YES_KINETIC_YES;
 	}
 }
 
@@ -31,7 +32,6 @@ double SXNGN::Physics::get_friction_acc(double weight_kg, double cof, double cur
 	double static_friction_acc_m_s_s = 0.0;
 	double static_cof = cof * 1.33; //simplification: static is a bit more than kinetic
 	FrictionType friction_type = Physics::move_type_to_friction_type(move_type);
-	int f;
 	
 	//determine kinetic friction - applies only to moving objects
 	if (cur_vel_m_s == 0 || friction_type == FrictionType::STATIC_NO_KINETIC_NO || friction_type == FrictionType::STATIC_YES_KINETIC_NO)

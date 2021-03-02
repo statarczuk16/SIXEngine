@@ -11,7 +11,6 @@
 #include <Constants.h>
 #include <Object/Entity.h>
 #include <Object/MouseObj.h>
-#include "boost/numeric/ublas/matrix.hpp"
 #include <Camera.h>
 
 	//Screen dimension constants

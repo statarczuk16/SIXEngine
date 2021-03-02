@@ -19,8 +19,8 @@ constexpr std::uint32_t operator "" _hash(char const* s, std::size_t count)
 // ECS
 using Entity = std::uint32_t;
 const Entity MAX_ENTITIES = 5000;
-using ComponentType = std::uint8_t;
-const ComponentType MAX_COMPONENTS = 32;
+using ComponentTypeHash = std::uint8_t;
+const ComponentTypeHash MAX_COMPONENTS = 32;
 using Signature = std::bitset<MAX_COMPONENTS>;
 
 

@@ -1,6 +1,7 @@
 #include <Sprite/Tile.h>
 #include <Texture.h>
 #include <gameutils.h>
+#include <fstream>
 
 
 
@@ -273,7 +274,7 @@ std::shared_ptr<SXNGN::Tile> SXNGN::TileHandler::generateTileRef(std::string til
 		collision_box->w = tile_snip_box->w;
 		collision_box->h = tile_snip_box->h;
 		Tile ret = Tile(tileTexture_, collision_box, tile_name, tile_snip_box, TileType::NORMAL);
-		std::shared_ptr<SXNGN::Tile> ret_ptr = std::make_unique<SXNGN::Tile>(ret);
+		std::shared_ptr<SXNGN::Tile> ret_ptr = std::make_shared<SXNGN::Tile>(ret);
 		return ret_ptr;
 	}
 	else
@@ -288,7 +289,7 @@ bool SXNGN::TileHandler::initTileNames()
 
 	bool tilesNamesLoaded = true;
 
-	ifstream in(tile_name_list_path_);
+	std::ifstream in(tile_name_list_path_);
 
 	if (!in)
 	{
@@ -353,7 +354,7 @@ bool SXNGN::TileHandler::initTilesNamesFromManifest()
 {
 	bool tilesNamesLoaded = true;
 
-	ifstream in(tile_manifest_path_);
+	std::ifstream in(tile_manifest_path_);
 
 	if (!in)
 	{
@@ -545,7 +546,7 @@ bool SXNGN::TileHandler::loadTileMap(std::vector<SXNGN::Tile>& tiles, std::strin
 	int x = 0, y = 0;
 
 
-	ifstream map_stream(map_path);
+	std::ifstream map_stream(map_path);
 
 	if (!map_stream)
 	{

@@ -4,21 +4,24 @@
 #include <array>
 #include <cassert>
 #include <unordered_map>
+#include <ECS/Core/Component.hpp>
 
-
+/**
 class IComponentArray
 {
 public:
 	virtual ~IComponentArray() = default;
 	virtual void EntityDestroyed(Entity entity) = 0;
 };
+**/
 
+using ECS_Component = SXNGN::ECS::Components::ECS_Component;
+using ComponentTypeEnum = SXNGN::ECS::Components::ComponentTypeEnum;
 
-template<typename T>
-class ComponentArray : public IComponentArray
+class ComponentArray// : public IComponentArray
 {
 public:
-	void InsertData(Entity entity, T component)
+	void InsertData(Entity entity, ECS_Component *component)
 	{
 		assert(mEntityToIndexMap.find(entity) == mEntityToIndexMap.end() && "Component added to same entity more than once.");
 
@@ -37,6 +40,11 @@ public:
 		// Copy element at end into deleted element's place to maintain density
 		size_t indexOfRemovedEntity = mEntityToIndexMap[entity];
 		size_t indexOfLastElement = mSize - 1;
+		if (mComponentArray[indexOfRemovedEntity])
+		{
+			delete mComponentArray[indexOfRemovedEntity];
+			mComponentArray[indexOfRemovedEntity] = nullptr;
+		}
 		mComponentArray[indexOfRemovedEntity] = mComponentArray[indexOfLastElement];
 
 		// Update map to point to moved spot
@@ -50,14 +58,25 @@ public:
 		--mSize;
 	}
 
-	T& GetData(Entity entity)
+	//If you are for some reason extremely confident the data exists
+	ECS_Component* GetData(Entity entity)
 	{
 		assert(mEntityToIndexMap.find(entity) != mEntityToIndexMap.end() && "Retrieving non-existent component.");
 
 		return mComponentArray[mEntityToIndexMap[entity]];
 	}
 
-	void EntityDestroyed(Entity entity) override
+	ECS_Component* TryGetData(Entity entity)
+	{
+		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		{
+			return nullptr;
+		}
+
+		return mComponentArray[mEntityToIndexMap[entity]];
+	}
+
+	void EntityDestroyed(Entity entity)
 	{
 		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
 		{
@@ -66,7 +85,7 @@ public:
 	}
 
 private:
-	std::array<T, MAX_ENTITIES> mComponentArray{};
+	std::array<ECS_Component*, MAX_ENTITIES> mComponentArray{};
 	std::unordered_map<Entity, size_t> mEntityToIndexMap{};
 	std::unordered_map<size_t, Entity> mIndexToEntityMap{};
 	size_t mSize{};

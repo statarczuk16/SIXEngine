@@ -1,9 +1,23 @@
 #include "gameutils.h"
 
 
-boost::filesystem::path Gameutils::get_working_dir()
+std::filesystem::path Gameutils::get_working_dir()
 {
-	return boost::filesystem::current_path();
+	return std::filesystem::current_path();
+}
+
+std::string Gameutils::get_file_in_folder(std::string file_in_folder)
+{
+	std::filesystem::path p(file_in_folder);
+	if (std::filesystem::exists(p))
+	{
+		p.replace_filename(file_in_folder);
+		if (std::filesystem::exists(p))
+		{
+			return p.string();
+		}
+	}
+	return SXNGN::BAD_STRING_RETURN;
 }
 
 std::string Gameutils::find_folder_in_project_string(std::string folder_name)
@@ -23,8 +37,8 @@ std::string Gameutils::find_folder_in_project_string(std::string folder_name)
 
 bool Gameutils::file_exists(std::string file_path)
 {
-	boost::filesystem::path p(file_path);
-	if (boost::filesystem::is_regular_file(file_path))
+	std::filesystem::path p(file_path);
+	if (std::filesystem::is_regular_file(file_path))
 	{
 		return true;
 	}
@@ -143,17 +157,17 @@ double Gameutils::adjust_dbl_abs_value_within_range(double value_in, double adju
 	}
 }
 
-std::shared_ptr<boost::filesystem::path> Gameutils::find_folder_in_project(std::string folder_name)
+std::shared_ptr<std::filesystem::path> Gameutils::find_folder_in_project(std::string folder_name)
 {
 	bool found = false;
-	boost::filesystem::path current = current_path();
-	std::shared_ptr<boost::filesystem::path> media_folder = nullptr;
-	directory_iterator end_itr;
+	std::filesystem::path current = std::filesystem::current_path();
+	std::shared_ptr<std::filesystem::path> media_folder = nullptr;
+	std::filesystem::directory_iterator end_itr;
 	int max_iter = 7;
 	int iter = 0;
 	while (!found)
 	{
-		for (directory_iterator itr(current); itr != end_itr; ++itr)
+		for (std::filesystem::directory_iterator itr(current); itr != end_itr; ++itr)
 		{
 			// If it's not a directory, list it. If you want to list directories too, just remove this check.
 			if (is_regular_file(itr->path()) || !(itr->path().has_stem())) {
@@ -165,12 +179,13 @@ std::shared_ptr<boost::filesystem::path> Gameutils::find_folder_in_project(std::
 			
 			if (current_file == folder_name)
 			{
-				media_folder = std::make_shared<boost::filesystem::path>(itr->path());
+				media_folder = std::make_shared<std::filesystem::path>(itr->path());
 				found = true;
 			}
 			
 		}
-		current = current.branch_path();
+		//step up one directory
+		current = current.parent_path();
 		iter++;
 		if (iter > max_iter)
 		{

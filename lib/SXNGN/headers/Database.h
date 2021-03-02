@@ -18,10 +18,11 @@ namespace SXNGN {
 
         static int get_screen_ticks_per_frame();
 
+        
         static std::shared_ptr<Coordinator> ecs_coordinator_;
         static std::shared_ptr<Coordinator> get_coordinator();
         static void set_coordinator(std::shared_ptr<Coordinator> ecs_coordinator);
-
+        
 
         
     };

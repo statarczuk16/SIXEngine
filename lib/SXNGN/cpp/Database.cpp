@@ -62,6 +62,7 @@ int  SXNGN::Database::get_screen_ticks_per_frame()
 	return 1000 / max_fps_;
  }
 
+
 std::shared_ptr<Coordinator> SXNGN::Database::get_coordinator()
 {
 	return ecs_coordinator_;
