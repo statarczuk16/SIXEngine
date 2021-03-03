@@ -13,7 +13,7 @@
 		static std::shared_ptr<std::filesystem::path> find_folder_in_project(std::string folder_name);
 		static std::string find_folder_in_project_string(std::string folder_name);
 		static bool file_exists(std::string file_path);
-		static std::string get_file_in_folder(std::string file_in_folder);
+		static std::string get_file_in_folder(std::string folder, std::string file_in_folder);
 
 		/**
 		* Adjust the absolute value of parameter

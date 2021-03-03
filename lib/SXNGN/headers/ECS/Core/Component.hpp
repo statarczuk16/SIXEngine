@@ -8,7 +8,8 @@ enum class ComponentTypeEnum : std::uint8_t
 	RENDERABLE,
 	PRE_RENDERABLE,
 	SPRITE_FACTORY,
-	PRE_SPRITE_FACTORY
+	PRE_SPRITE_FACTORY,
+	CAMERA
 };
 
 

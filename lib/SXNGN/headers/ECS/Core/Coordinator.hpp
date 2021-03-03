@@ -16,13 +16,13 @@ using ECS_Component = SXNGN::ECS::Components::ECS_Component;
 class Coordinator
 {
 public:
-	void Init()
+	void Init(SDL_Renderer* renderer)
 	{
 		mComponentManager = std::make_shared<ComponentManager>();
 		mEntityManager = std::make_shared<EntityManager>();
 		mEventManager = std::make_shared<EventManager>();
 		mSystemManager = std::make_shared<SystemManager>();
-		mTextureManager = std::shared_ptr<TextureManager>();
+		mTextureManager = std::make_shared<TextureManager>(renderer);
 	}
 
 
@@ -55,6 +55,7 @@ public:
 
 	void AddComponent(Entity entity, ECS_Component *component)
 	{
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Entity Update %d : New Component: %d", entity, component->get_component_type());
 		mComponentManager->AddComponent(entity, component);
 
 		auto signature = mEntityManager->GetSignature(entity);

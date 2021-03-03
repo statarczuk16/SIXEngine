@@ -13,6 +13,26 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 
 
 
+	void Renderer_System::Init()
+	{
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Renderer_System Init");
+
+
+	}
+
+
+	void Renderer_System::Update(float dt)
+	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+
+		//Iterate through entities this system manipulates/converts
+		//(Renders Renderables to screen)
+		for (auto const& entity : m_actable_entities)
+		{
+
+		}
+	}
+
 
 	void Sprite_Factory_System::Init()
 	{
@@ -82,7 +102,7 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 				//See if the factory has the data needed to process the sprite type of the Pre_Renderable
 				if (sprite_factory_component.tile_name_string_to_rect_map_.count(pre_renderable.sprite_factory_sprite_type) > 0)
 				{
-					Renderable* renderable = new Renderable();
+					Renderable* renderable_component = new Renderable();
 					auto tile_snip_box = sprite_factory_component.tile_name_string_to_rect_map_[pre_renderable.sprite_factory_sprite_type];
 					std::shared_ptr<SDL_Rect> collision_box = std::make_shared< SDL_Rect>();
 					collision_box->x = pre_renderable.x;
@@ -90,17 +110,34 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 					collision_box->w = tile_snip_box->w;
 					collision_box->h = tile_snip_box->h;
 
-					renderable->bounding_box_ = collision_box;
-					renderable->tile_map_snip_ = tile_snip_box;
+					renderable_component->bounding_box_ = collision_box;
+					renderable_component->tile_map_snip_ = tile_snip_box;
+					auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name);
+					if (!sprite_sheet_texture)
+					{
+						printf("Sprite Factory::Texture Manager does not have texture: %s", pre_renderable.sprite_factory_name.c_str());
+						abort();
+					}
+					renderable_component->sprite_map_texture_ = sprite_sheet_texture;
+					renderable_component->tile_name_ = pre_renderable.sprite_factory_sprite_type + "_renderable";
 
-					//todo
+					//Build the apocalypse map sprite factory
+					auto new_renderable_entity = gCoordinator.CreateEntity();
+					
+					gCoordinator.AddComponent(new_renderable_entity, renderable_component);
+
+					entities_to_cleanup.push_back(entity);;
+
 				}
 				
 
 			}
 		}
 
-
+		for (Entity entity_to_clean : entities_to_cleanup)
+		{
+			gCoordinator.DestroyEntity(entity_to_clean);
+		}
 	}
 
 	void Sprite_Factory_Creator_System::Init()
@@ -283,8 +320,8 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 						std::string texture_path = SXNGN::BAD_STRING_RETURN;
 						std::string relative_sprite_sheet_path = (manifest_entry.at(1));
 						//find the tile sheet texture png. expect to find in the same folder as manifest.txt
-						texture_path = Gameutils::get_file_in_folder(relative_sprite_sheet_path);
-						if (tile_manifest_path == SXNGN::BAD_STRING_RETURN)
+						texture_path = Gameutils::get_file_in_folder(pre_factory.tile_manifest_path_,relative_sprite_sheet_path);
+						if (texture_path == SXNGN::BAD_STRING_RETURN)
 						{
 							SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Error loading TileManifest: META_SPRITE_SHEET_SOURCE: Bad texture path: %s", relative_sprite_sheet_path.c_str());
 							abort();

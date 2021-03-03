@@ -10,6 +10,7 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include<kiss_sdl.h>
+#include <ECS/Components/Camera.hpp>
 
 Coordinator gCoordinator;
 
@@ -74,15 +75,6 @@ bool init()
 			printf("Warning: Linear texture filtering not enabled!");
 		}
 
-		//Create window
-		//gWindow = SDL_CreateWindow("SDL Tutorial", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, SCREEN_WIDTH, SCREEN_HEIGHT, SDL_WINDOW_SHOWN);
-		//if (gWindow == NULL)
-		//{
-		//	printf("Window could not be created! SDL Error: %s\n", SDL_GetError());
-		//	success = false;
-		//}
-		//else
-		//{
 		g_media_folder = "uninit";
 		g_media_folder = Gameutils::find_folder_in_project_string("media");
 		if (g_media_folder == SXNGN::BAD_STRING_RETURN)
@@ -93,11 +85,11 @@ bool init()
 		std::string kiss_resource_folder = g_media_folder + "/kiss_resources/";
 		if (Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
 		{
-			printf("Found KISS media folder %s", kiss_resource_folder.c_str());
+			printf("Found KISS media folder %s\n", kiss_resource_folder.c_str());
 		}
 		else
 		{
-			printf("Fatal: Could not load kiss media folder");
+			printf("Fatal: Could not load kiss media folder\n");
 			return 0;
 		}
 		kiss_array kiss_objects;
@@ -133,7 +125,12 @@ bool init()
 
 int main(int argc, char* args[])
 {
-	gCoordinator.Init();
+	if (!init())
+	{
+		printf("Fatal: Could not init\n");
+		return 0;
+	}
+	gCoordinator.Init(gRenderer);
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
 
 	gCoordinator.AddEventListener(FUNCTION_LISTENER(Events::Window::QUIT, QuitHandler));

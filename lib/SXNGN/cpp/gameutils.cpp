@@ -6,9 +6,9 @@ std::filesystem::path Gameutils::get_working_dir()
 	return std::filesystem::current_path();
 }
 
-std::string Gameutils::get_file_in_folder(std::string file_in_folder)
+std::string Gameutils::get_file_in_folder(std::string folder, std::string file_in_folder)
 {
-	std::filesystem::path p(file_in_folder);
+	std::filesystem::path p(folder);
 	if (std::filesystem::exists(p))
 	{
 		p.replace_filename(file_in_folder);
