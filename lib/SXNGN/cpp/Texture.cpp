@@ -159,6 +159,34 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 	
 }
 
+void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+{
+	//Set rendering space and render to screen
+	SDL_Rect renderQuad = bounding_box;
+
+	//Set clip rendering dimensions
+	//renderQuad.w = clip->w;
+	//renderQuad.h = clip->h;
+
+	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
+	renderQuad.x *= SXNGN::Database::get_scale();
+	renderQuad.y *= SXNGN::Database::get_scale();
+	renderQuad.w *= SXNGN::Database::get_scale();
+	renderQuad.h *= SXNGN::Database::get_scale();
+	//Render to screen
+	if (mTexture_)
+	{
+		SDL_RenderCopyEx(renderer_, mTexture_, &clip, &renderQuad, angle, center, flip);
+	}
+	else
+	{
+		//Render red filled quad
+		SDL_SetRenderDrawColor(renderer_, 0xFF, 0xCC, 0xCC, 0xFF);
+		SDL_RenderFillRect(renderer_, &renderQuad);
+	}
+
+}
+
 int SXNGN::Texture::getWidth()
 {
 	return mWidth_;

@@ -2,12 +2,12 @@
 
 #include "ECS/Core/System.hpp"
 #include <memory>
-
-
+#include <SDL.h>
+#include <ECS/Components/Camera.hpp>
 
 
 class Event;
-
+using ECS_Camera = SXNGN::ECS::Components::Camera;
 
 
 class Renderer_System : public System
@@ -19,6 +19,11 @@ public:
 
 private:
 
+	bool object_in_view(ECS_Camera camera, SDL_Rect object);
+
+	SDL_Rect determine_camera_lens_scaled(ECS_Camera camera);
+
+	SDL_Rect determine_camera_lens_unscaled(ECS_Camera camera);
 
 };
 

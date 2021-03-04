@@ -11,6 +11,10 @@
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Camera_System Init");
 	}
 
+	/// <summary>
+	/// Camera's goals: Don't do much, just follow around the target.
+	/// </summary>
+	/// <param name="dt"></param>
 	void Camera_System::Update(float dt)
 	{
 
@@ -21,9 +25,10 @@
 		}
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 
+		//search for events
 		for (auto const& entity : m_actable_entities)
 		{
-
+			//such as change of target
 
 		}
 			
@@ -42,19 +47,17 @@
 			return;
 		}
 
+		//Find the x/y of the target entity and update the camera position accordingly
 		if (target_sprite->get_component_type() == SXNGN::ECS::Components::ComponentTypeEnum::RENDERABLE)
 		{
 			SXNGN::ECS::Components::Renderable *target_sprite_renderable = (SXNGN::ECS::Components::Renderable*) target_sprite;
 			
-			camera->set_position_actual(*target_sprite_renderable->bounding_box_);
-
-
-
-
+			camera->set_position_actual(target_sprite_renderable->bounding_box_);
+			SDL_Rect position_scaled = target_sprite_renderable->bounding_box_;
+			position_scaled.x *= SXNGN::Database::get_scale();
+			position_scaled.y *= SXNGN::Database::get_scale();
+			camera->set_position_scaled(position_scaled);
 		}
-
-		camera->set_position_actual(target_sprite->
-		)
 
 
 

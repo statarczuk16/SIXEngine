@@ -1,3 +1,4 @@
+#pragma warning(N:4596)
 
 #include "ECS/Components/Renderable.hpp"
 #include "ECS/Core/Coordinator.hpp"
@@ -11,6 +12,7 @@
 #include <SDL_image.h>
 #include<kiss_sdl.h>
 #include <ECS/Components/Camera.hpp>
+#include <Timer.h>
 
 Coordinator gCoordinator;
 
@@ -117,7 +119,7 @@ bool init()
 		//}
 	}
 
-	SXNGN::Database::set_scale(SXNGN::TILE_WIDTH_SCALE);
+	SXNGN::Database::set_scale(1);// SXNGN::TILE_WIDTH_SCALE);
 
 	return success;
 }
@@ -203,29 +205,85 @@ int main(int argc, char* args[])
 	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
 
 
+	SDL_Rect camera_lens;
+	camera_lens.h = SCREEN_HEIGHT;
+	camera_lens.w = SCREEN_WIDTH;
+	camera_lens.x = 0;
+	camera_lens.y = 0;
+
+	SDL_Rect camera_position;
+	camera_position.x = 0;
+	camera_position.y = 0;
+	camera_position.w = 0;
+	camera_position.h = 0;
+
+	SXNGN::ECS::Components::Camera::init_instance(camera_lens, camera_position, g_screen_bounds);
+
+
 
 
 	float dt = 0.0f;
+	SXNGN::Timer dt_timer;//time passed during this frame "delta t"
+	SXNGN::Timer frame_timer;//use to calculate frame rate
+	SXNGN::Timer frame_cap_timer;//use to enforce frame cap
+	frame_timer.start();
 
+	float fps_avg = 0.0;
+	float dt = 0.0;
+	float game_dt;
+
+	int frame_count = 0;
 	while (!quit)
 	{
+		/////////////////////////////////Frame Start 
+		frame_cap_timer.start();//this timer must reached ticks per frame before the next frame can start
+		
+								/////////Event Handling
 		while (SDL_PollEvent(&e) != 0)
 		{
-
+			//TODO queue up and add to event component type
 		}
-		auto startTime = std::chrono::high_resolution_clock::now();
+		//Todo update event handling system
 
+
+		/////////////////////////////////Physics/Movement
+		//Phys start
+		dt = dt_timer.getTicks() / 1000.f;//
+		game_dt = dt;
+		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
+		//todo movement system
+
+
+		dt_timer.start(); //restart delta t for next frame
+		//Phys End
+		/////////////////////////////////Rendering
+		//Render Setup
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderClear(gRenderer);
+		//System Related to Rendering but Don't Render
 		sprite_factory_creator_system->Update(dt);
-
 		sprite_factory_system->Update(dt);
+		//Render UI
+		//TODO add UI 
+		//Render Game
+		renderer_system->Update(dt);
 
 		auto stopTime = std::chrono::high_resolution_clock::now();
 
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderClear(gRenderer);
+		//Render End
 		SDL_RenderPresent(gRenderer);
+		/////////////////////////////////Frame End
+		fps_avg = frame_count / (frame_timer.getTicks() / 1000.f);
+		if (fps_avg > 2000000)
+		{
+			fps_avg = 0;
+		}
+		if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())
+		{
+			SDL_Delay(SXNGN::Database::get_screen_ticks_per_frame() - frame_cap_timer.getTicks());
+		}
+		++frame_count;
 
-		dt = std::chrono::duration<float, std::chrono::seconds::period>(stopTime - startTime).count();
 	}
 
 

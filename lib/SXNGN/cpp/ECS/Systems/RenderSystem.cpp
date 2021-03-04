@@ -1,16 +1,18 @@
-#include "ECS/Systems/RenderSystem.hpp"
-#include "ECS/Components/Renderable.hpp"
-#include "ECS/Core/Coordinator.hpp"
+#include <ECS/Systems/RenderSystem.hpp>
+#include <ECS/Components/Renderable.hpp>
+#include <ECS/Core/Coordinator.hpp>
 #include <fstream>
 #include <Database.h>
 #include <gameutils.h>
+
+#include <Collision.h>
 
 
 using Pre_Sprite_Factory = SXNGN::ECS::Components::Pre_Sprite_Factory;
 using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
-
+using ECS_Camera = SXNGN::ECS::Components::Camera;
 
 
 	void Renderer_System::Init()
@@ -20,15 +22,138 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 
 	}
 
+	bool Renderer_System::object_in_view(ECS_Camera camera, SDL_Rect object_bounds)
+	{
+		//Have to scale up object to compare to the camera
+		object_bounds.x *= SXNGN::Database::get_scale();
+		object_bounds.y *= SXNGN::Database::get_scale();
+		object_bounds.w *= SXNGN::Database::get_scale();
+		object_bounds.h *= SXNGN::Database::get_scale();
+		SDL_Rect scaled_camera_lens = determine_camera_lens_scaled(camera);
+
+		//Note object_bounds.w * 2 -- extra buffer so objects a bit out of camera range are still rendered
+		//dont want stuff to disappear//appear while the player can still see them
+		if (SXNGN::CollisionChecks::checkCollisionBuffer(scaled_camera_lens, object_bounds, object_bounds.w * 2))
+		{
+			return true;
+		}
+		return false;
+	}
+
+	SDL_Rect Renderer_System::determine_camera_lens_scaled(ECS_Camera camera)
+	{
+		SDL_Rect return_view;
+		SDL_Rect position_scaled = camera.position_scaled_;
+		SDL_Rect screen_bounds = camera.screen_bounds_;
+		SDL_Rect lens = camera.lens_;
+
+		//bounding box centers are at the top left of the box.
+		//If the camera is tracking a target at (10,10), then the top left of the camera vision square should not be the target
+		//instead the top left vision square of the camera should be some ways left and some ways above the tracked target
+		//such that a tracked target is in the center of the view (rather than being at the top left)
+		return_view.x = position_scaled.x - (lens.w / 2);
+		return_view.y = position_scaled.y - (lens.h / 2);
+		return_view.w = lens.w;
+		return_view.h = lens.h;
+
+		SDL_Rect screen_bounds_scaled = screen_bounds;
+
+		screen_bounds_scaled.x *= SXNGN::Database::get_scale();
+		screen_bounds_scaled.y *= SXNGN::Database::get_scale();
+		screen_bounds_scaled.w *= SXNGN::Database::get_scale();
+		screen_bounds_scaled.h *= SXNGN::Database::get_scale();
+
+
+		//don't allow camera top-right view square point to leave screen
+		if (return_view.x < screen_bounds_scaled.x)
+		{
+			return_view.x = screen_bounds_scaled.x;
+		}
+		if (return_view.x > (screen_bounds_scaled.x + screen_bounds_scaled.w))
+		{
+			return_view.x = screen_bounds_scaled.x + screen_bounds_scaled.w;
+		}
+
+		if (return_view.y < screen_bounds_scaled.y)
+		{
+			return_view.y = screen_bounds_scaled.y;
+		}
+		if (return_view.y > (screen_bounds_scaled.y + screen_bounds_scaled.h))
+		{
+			return_view.y = screen_bounds_scaled.y + screen_bounds_scaled.h;
+		}
+
+		return return_view;
+	}
+
+	SDL_Rect Renderer_System::determine_camera_lens_unscaled(ECS_Camera camera)
+	{
+		SDL_Rect current_view = determine_camera_lens_scaled(camera);
+		current_view.x /= SXNGN::Database::get_scale();
+		current_view.y /= SXNGN::Database::get_scale();
+		return current_view;
+	}
+
 
 	void Renderer_System::Update(float dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
-
+		ECS_Camera camera = *ECS_Camera::get_instance();
+		//if (camera = nullptr)
+		//{
+		//	return;
+		//}
 		//Iterate through entities this system manipulates/converts
 		//(Renders Renderables to screen)
+		SDL_Rect render_quad = { 0,0,0,0 };
 		for (auto const& entity : m_actable_entities)
 		{
+			//Search for Pre-Renderables
+			ECS_Component* data = gCoordinator.TryGetComponent(entity, ComponentTypeEnum::RENDERABLE);
+			Renderable* renderable_ptr;
+			if (data && data->get_component_type() == ComponentTypeEnum::RENDERABLE)
+			{
+				renderable_ptr = (Renderable*)data;
+			}
+			else
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Renderable of Entity ID %2d is not a renderable!", entity);
+				continue;
+			}
+			Renderable renderable = *renderable_ptr;
+
+			//Mutex go here - don't need pointer anymore
+			//Do not ever free any component ptr retrieved from coordinator!!!
+
+			//If the renderable is on screen (within camera lens)
+			if (object_in_view(camera, renderable.bounding_box_))
+			{
+
+				SDL_Rect camera_lens = determine_camera_lens_unscaled(camera);
+				//get the position of this object with respect to the camera lens
+				int texture_pos_wrt_cam_x = renderable.bounding_box_.x - camera_lens.x;
+				int texture_pos_wrt_cam_y = renderable.bounding_box_.y - camera_lens.y;
+
+				//inefficient, but here for debug/readbility
+				renderable.bounding_box_.x = texture_pos_wrt_cam_x;
+				renderable.bounding_box_.y = texture_pos_wrt_cam_y;
+
+
+				renderable.sprite_map_texture_
+					->render2(renderable.bounding_box_, renderable.tile_map_snip_);
+			}
+		
+			if (renderable.sprite_map_texture_ != nullptr)
+			{
+				renderable.sprite_map_texture_->render2(renderable.bounding_box_, renderable.tile_map_snip_);
+			}
+			else
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Entity ID %2d is null!", entity);
+				
+			}
+			
+
 
 		}
 	}
@@ -104,14 +229,14 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 				{
 					Renderable* renderable_component = new Renderable();
 					auto tile_snip_box = sprite_factory_component.tile_name_string_to_rect_map_[pre_renderable.sprite_factory_sprite_type];
-					std::shared_ptr<SDL_Rect> collision_box = std::make_shared< SDL_Rect>();
-					collision_box->x = pre_renderable.x;
-					collision_box->y = pre_renderable.y;
-					collision_box->w = tile_snip_box->w;
-					collision_box->h = tile_snip_box->h;
+					SDL_Rect collision_box;
+					collision_box.x = pre_renderable.x;
+					collision_box.y = pre_renderable.y;
+					collision_box.w = tile_snip_box->w;
+					collision_box.h = tile_snip_box->h;
 
 					renderable_component->bounding_box_ = collision_box;
-					renderable_component->tile_map_snip_ = tile_snip_box;
+					renderable_component->tile_map_snip_ = *tile_snip_box;
 					auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name);
 					if (!sprite_sheet_texture)
 					{

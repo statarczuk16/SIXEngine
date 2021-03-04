@@ -49,8 +49,8 @@ namespace SXNGN::ECS::Components {
 		{
 			component_type = ComponentTypeEnum::RENDERABLE;
 		}
-		std::shared_ptr<SDL_Rect> bounding_box_;
-		std::shared_ptr<SDL_Rect> tile_map_snip_;
+		SDL_Rect bounding_box_;
+		SDL_Rect tile_map_snip_;
 		std::string tile_name_;
 		std::shared_ptr<SXNGN::Texture> sprite_map_texture_;
 	};
