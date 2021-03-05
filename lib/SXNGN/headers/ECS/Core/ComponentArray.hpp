@@ -5,7 +5,9 @@
 #include <cassert>
 #include <unordered_map>
 #include <ECS/Core/Component.hpp>
-
+#include <thread>
+#include <mutex>
+#include <condition_variable>
 /**
 class IComponentArray
 {
@@ -66,6 +68,9 @@ public:
 		return mComponentArray[mEntityToIndexMap[entity]];
 	}
 
+
+	
+
 	ECS_Component* TryGetData(Entity entity)
 	{
 		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
@@ -74,6 +79,56 @@ public:
 		}
 
 		return mComponentArray[mEntityToIndexMap[entity]];
+	}
+
+
+	//Thread safe - get a read-only copy of the data
+
+	const ECS_Component* GetDataReadOnly(Entity entity)
+	{
+		std::lock_guard<std::mutex> guard(component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		assert(mEntityToIndexMap.find(entity) != mEntityToIndexMap.end() && "Retrieving non-existent component.");
+		auto component_ref = mComponentArray[mEntityToIndexMap[entity]];
+		const ECS_Component* const_ref(component_ref); //make a read-only copy of the data to return
+		return const_ref;
+	} 
+
+	//Get a modifiable instance of the component for this entity
+	//Do not allow any changes to the component array until CheckInData() is called
+	//When checking out data, you take the with you by which the data can be accessed (unique_lock).
+	//DO NOT DELETE any pointer returned from this
+	std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckoutData(Entity entity)
+	{
+		//Lock the array until the data is checked back in (under "authority" of component_array_guard)
+		//(Thread entering this function will block here until it can get the lock)
+		std::unique_ptr<std::unique_lock<std::mutex>> check_out_component_lock = std::make_unique< std::unique_lock<std::mutex>>(component_array_guard);
+		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		{
+			//dont lock if there is nothing to return
+			check_out_component_lock->unlock();
+			return std::make_pair(nullptr, nullptr);
+		}
+		//make a pointer to the lock so it can be returned to user
+		auto raw_ptr = mComponentArray[mEntityToIndexMap[entity]];
+		return std::make_pair(raw_ptr, std::move(check_out_component_lock));
+	} 
+
+	//See above
+	//Return the key so others can check out data
+	void CheckInData(Entity entity, std::unique_ptr<std::unique_lock<std::mutex>> key)
+	{
+		//(If they return a broken key, unlock the vault so others can get in)
+		if (key == nullptr)
+		{
+			printf("CheckInData:: nullptr key return. Unlocking mutex");
+			component_array_guard.unlock();
+		}
+		//use returned key to unlock the data
+		if (key->owns_lock())
+		{
+			key->unlock();
+		}
+		key = nullptr;
 	}
 
 	void EntityDestroyed(Entity entity)
@@ -89,4 +144,6 @@ private:
 	std::unordered_map<Entity, size_t> mEntityToIndexMap{};
 	std::unordered_map<size_t, Entity> mIndexToEntityMap{};
 	size_t mSize{};
+	std::mutex component_array_guard;//mutex used to guard this CompnentArray's data
+
 };

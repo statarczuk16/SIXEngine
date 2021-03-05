@@ -17,7 +17,7 @@ public:
 		}
 	}
 
-	Entity CreateEntity()
+	Entity CreateEntity(bool quiet = false)
 	{
 		assert(mLivingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
 

@@ -137,7 +137,7 @@
 		//Loading success flag
 		bool success = true;
 		g_media_folder = "uninit";
-		g_media_folder = Gameutils::find_folder_in_project_string("media");
+		g_media_folder = SXNGN::Gameutils::find_folder_in_project_string("media");
 		if (g_media_folder == SXNGN::BAD_STRING_RETURN)
 		{
 			std::cout << "Warning: " << " Could not find media folder" << std::endl;

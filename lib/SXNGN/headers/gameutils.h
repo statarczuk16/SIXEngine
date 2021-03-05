@@ -5,7 +5,7 @@
 #include <Constants.h>
 #include <filesystem>
 
-
+namespace SXNGN {
 	class Gameutils
 	{
 	public:
@@ -35,4 +35,4 @@
 		static double adjust_dbl_abs_value_within_range(double value_in, double adjustment, double max_val, double min_val);
 
 	};
-
+}

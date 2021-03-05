@@ -1,15 +1,20 @@
 #pragma once
+#include <cstdint>
 
 namespace SXNGN::ECS::Components {
 
-enum class ComponentTypeEnum : std::uint8_t
+	enum class ComponentTypeEnum : std::uint8_t
 {
 	UNKNOWN,
 	RENDERABLE,
 	PRE_RENDERABLE,
 	SPRITE_FACTORY,
 	PRE_SPRITE_FACTORY,
-	CAMERA
+	CAMERA,
+	MOVEABLE,
+	INPUT_CACHE,
+	INPUT_TAGS,
+	COLLISION
 };
 
 
@@ -23,6 +28,8 @@ enum class ComponentTypeEnum : std::uint8_t
 	{
 		return component_type;
 	}
+
+
 	protected:
 		ComponentTypeEnum component_type;
 	};

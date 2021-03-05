@@ -211,7 +211,7 @@ int main(int argc, char** argv)
 	int textbox_width, textbox_height, window2_width, window2_height,
 		draw, quit;
 
-	std::string kiss_resource_folder = Gameutils::find_folder_in_project_string("media");
+	std::string kiss_resource_folder = SXNGN::Gameutils::find_folder_in_project_string("media");
 	if (kiss_resource_folder == SXNGN::BAD_STRING_RETURN)
 	{
 		printf("Fatal: Could not load kiss media folder");
@@ -220,7 +220,7 @@ int main(int argc, char** argv)
 	else
 	{
 		kiss_resource_folder += "/kiss_resources/";
-		if (Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
+		if (SXNGN::Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
 		{
 			printf("Found KISS media folder %s", kiss_resource_folder.c_str());
 		}

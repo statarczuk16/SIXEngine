@@ -2,6 +2,7 @@
 
 #include "ECS/Core/Types.hpp"
 #include <set>
+#include <vector>
 
 
 class System
@@ -23,5 +24,9 @@ public:
 	//Eg. Sprite_Factory is a component that can turn a Pre_Renderable into a Renderable
 	//Sprite_Factory_System takes in Pre_Renderables and uses the entity containing the corresponding
 	//Sprite_Factory to turn it into a Renerbble
+
+protected:
+	//Entities to delete after update()
+	std::vector<Entity> entities_to_cleanup;
 	
 };

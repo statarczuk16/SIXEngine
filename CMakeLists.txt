@@ -82,24 +82,24 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
 #	${CMAKE_SOURCE_DIR}/lib/nanogui-sdl/sdlgui/*.h
 #	${CMAKE_SOURCE_DIR}/lib/nanogui-sdl/sdlgui/*.cpp
 #	)
-#message("Nanogui Sources: "  ${NNGUI_SOURCES}) 
+#message("Nanogui Sources: "  ${NNGUI_SOURCES})  
 #message("Nanogui Extra Libs: "  ${NNGUI_LIBS}) 
 
 ######### End Nanogui
 
 #include_directories(${CMAKE_SOURCE_DIR}/src/headers)
-add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}    "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp")
+add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}    "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
 target_link_libraries(LevelEditor ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})   
 
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}   "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp")
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}   "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
 target_link_libraries(HoplonSimulator ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES}) 
 
-add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}         "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp")
+add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}         "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
 target_link_libraries(KissExample ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} )
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp")
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
 target_link_libraries(ECS_Demo ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} )
-
+ 
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 

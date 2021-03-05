@@ -13,6 +13,7 @@ using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
 using ECS_Camera = SXNGN::ECS::Components::Camera;
+using Gameutils = SXNGN::Gameutils;
 
 
 	void Renderer_System::Init()
@@ -106,8 +107,12 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 		//Iterate through entities this system manipulates/converts
 		//(Renders Renderables to screen)
 		SDL_Rect render_quad = { 0,0,0,0 };
-		for (auto const& entity : m_actable_entities)
+		auto it = m_actable_entities.begin();
+		//for (auto const& entity : m_actable_entities)
+		while (it != m_actable_entities.end())
 		{
+			auto const& entity = *it;
+			it++;
 			//Search for Pre-Renderables
 			ECS_Component* data = gCoordinator.TryGetComponent(entity, ComponentTypeEnum::RENDERABLE);
 			Renderable* renderable_ptr;
@@ -173,8 +178,13 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 		std::vector<Entity> entities_to_cleanup;
 		//Iterate through entities this system manipulates/converts
 		//(Mostly Pre_Renderables) -> Renderables
-		for (auto const& entity : m_actable_entities)
+
+		auto it = m_actable_entities.begin();
+		//for (auto const& entity : m_actable_entities)
+		while (it != m_actable_entities.end())
 		{
+			auto const& entity = *it;
+			it++;
 			//Search for Pre-Renderables
 			ECS_Component *data = gCoordinator.TryGetComponent(entity, ComponentTypeEnum::PRE_RENDERABLE);
 			Pre_Renderable *pre_renderable_ptr;
@@ -230,10 +240,10 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 					Renderable* renderable_component = new Renderable();
 					auto tile_snip_box = sprite_factory_component.tile_name_string_to_rect_map_[pre_renderable.sprite_factory_sprite_type];
 					SDL_Rect collision_box;
-					collision_box.x = pre_renderable.x;
-					collision_box.y = pre_renderable.y;
-					collision_box.w = tile_snip_box->w;
-					collision_box.h = tile_snip_box->h;
+					collision_box.x = (int) pre_renderable.x;
+					collision_box.y = (int) pre_renderable.y;
+					collision_box.w = (int) tile_snip_box->w;
+					collision_box.h = (int) tile_snip_box->h;
 
 					renderable_component->bounding_box_ = collision_box;
 					renderable_component->tile_map_snip_ = *tile_snip_box;
@@ -247,11 +257,10 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 					renderable_component->tile_name_ = pre_renderable.sprite_factory_sprite_type + "_renderable";
 
 					//Build the apocalypse map sprite factory
-					auto new_renderable_entity = gCoordinator.CreateEntity();
 					
-					gCoordinator.AddComponent(new_renderable_entity, renderable_component);
-
-					entities_to_cleanup.push_back(entity);;
+					gCoordinator.AddComponent(entity, renderable_component);
+					gCoordinator.RemoveComponent(entity, pre_renderable.get_component_type());
+					
 
 				}
 				
@@ -275,10 +284,12 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 	void Sprite_Factory_Creator_System::Update(float dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
-		std::vector<Entity> entities_to_cleanup;
-
-		for (auto const& entity : m_actable_entities)
+		auto it = m_actable_entities.begin();
+		//for (auto const& entity : m_actable_entities)
+		while(it != m_actable_entities.end())
 		{
+			auto const& entity = *it;
+			it++;
 
 			//go from a map file to a string
 			std::map<int, std::string> tile_name_int_to_string_map;
@@ -474,11 +485,9 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 
 			in.close();
 			
-			entities_to_cleanup.push_back(entity);
-
-
-
-			auto sprite_factory_entity = gCoordinator.CreateEntity();
+			
+			//Remove the Pre Sprit Factory Component from the Entity
+			//And add a Sprite Factory 
 			SXNGN::ECS::Components::Sprite_Factory* sprite_factory_component = new Sprite_Factory();
 			sprite_factory_component->sprite_factory_name = pre_factory.name_,
 				sprite_factory_component->tile_height_ = tile_height;
@@ -486,7 +495,9 @@ using ECS_Camera = SXNGN::ECS::Components::Camera;
 			sprite_factory_component->tile_name_int_to_string_map_ = tile_name_int_to_string_map;
 			sprite_factory_component->tile_name_string_to_rect_map_ = tile_name_string_to_rect_map;
 
-			gCoordinator.AddComponent(sprite_factory_entity, sprite_factory_component);
+			gCoordinator.AddComponent(entity, sprite_factory_component);
+
+			gCoordinator.RemoveComponent(entity, pre_factory.get_component_type());
 
 		}
 

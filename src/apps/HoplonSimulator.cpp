@@ -116,14 +116,14 @@ bool init()
 		//else
 		//{
 			g_media_folder = "uninit";
-			g_media_folder = Gameutils::find_folder_in_project_string("media");
+			g_media_folder = SXNGN::Gameutils::find_folder_in_project_string("media");
 			if (g_media_folder == SXNGN::BAD_STRING_RETURN)
 			{
 				std::cout << "Fatal: " << " Could not find media folder" << std::endl;
 				return 0;
 			}
 			std::string kiss_resource_folder = g_media_folder + "/kiss_resources/";
-			if (Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
+			if (SXNGN::Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
 			{
 				printf("Found KISS media folder %s", kiss_resource_folder.c_str());
 			}

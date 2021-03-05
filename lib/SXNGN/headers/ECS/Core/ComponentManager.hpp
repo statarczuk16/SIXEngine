@@ -57,8 +57,37 @@ public:
 
 	ECS_Component* TryGetComponent(Entity entity, ComponentTypeEnum component_type)
 	{
-		return GetComponentArray(component_type)->TryGetData(entity);
+		auto ptr = GetComponentArray(component_type)->TryGetData(entity);
+		if (ptr->get_component_type() != component_type)
+		{
+			printf("ComponentManager::TryGetComponent wrong component type in array - expected %2d, received %2d",component_type, ptr->get_component_type());
+			return nullptr;
+		}
+		return ptr;
 	}
+
+	
+	const ECS_Component* GetComponentReadOnly(Entity entity, ComponentTypeEnum component_type)
+	{
+		return GetComponentArray(component_type)->GetDataReadOnly(entity);
+	} 
+
+
+	std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
+	{
+		return GetComponentArray(component_type)->CheckoutData(entity);
+	}
+
+	void CheckInComponent(ComponentTypeEnum component_type, Entity entity, std::unique_ptr<std::unique_lock<std::mutex>> key)
+	{
+		return GetComponentArray(component_type)->CheckInData(entity, std::move(key));
+	}
+
+
+
+
+	//fixme add some mutex method here to manage requests for components
+	//Use template to return value of requested component
 
 	void EntityDestroyed(Entity entity)
 	{

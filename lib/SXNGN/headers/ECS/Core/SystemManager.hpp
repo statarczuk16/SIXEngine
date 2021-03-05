@@ -55,9 +55,13 @@ public:
 		}
 	}
 
-	void EntitySignatureChanged(Entity entity, Signature entitySignature)
+	void EntitySignatureChanged(Entity entity, Signature entitySignature, bool quiet = false)
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID: %2d : New Signature: %d",entity,entitySignature);
+		if (!quiet)
+		{
+			SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID: %2d : New Signature: %d", entity, entitySignature);
+
+		}
 
 		for (auto const& pair : mSystems)
 		{
@@ -68,7 +72,11 @@ public:
 			//Logical AND to see if entity has all the components of this system
 			if ((entitySignature & systemSignatureAct) == systemSignatureAct)
 			{
-				SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to System Actables: System: %s",entity, type);
+				if (!quiet)
+				{
+					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to System Actables: System: %s", entity, type);
+
+				}
 				system->m_actable_entities.insert(entity);
 			}
 			else
@@ -81,7 +89,11 @@ public:
 				if (or_result.any())
 				{
 					system->m_entities_of_interest.insert(entity);
-					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to System Interests: System: %s",entity, type);
+					if (!quiet)
+					{
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to System Interests: System: %s", entity, type);
+
+					}
 				}
 				else
 				{

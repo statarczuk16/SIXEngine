@@ -27,9 +27,9 @@ public:
 
 
 	// Entity methods
-	Entity CreateEntity()
+	Entity CreateEntity(bool quiet = false)
 	{
-		return mEntityManager->CreateEntity();
+		return mEntityManager->CreateEntity(false);
 	}
 
 	void DestroyEntity(Entity entity)
@@ -53,16 +53,20 @@ public:
 		mComponentManager->RegisterComponent(component_type);
 	}
 
-	void AddComponent(Entity entity, ECS_Component *component)
+	void AddComponent(Entity entity, ECS_Component *component, bool quiet = false)
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Entity Update %d : New Component: %d", entity, component->get_component_type());
+		if (!quiet)
+		{
+			SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Entity Update %d : New Component: %d", entity, component->get_component_type());
+		}
+		
 		mComponentManager->AddComponent(entity, component);
 
 		auto signature = mEntityManager->GetSignature(entity);
 		signature.set(mComponentManager->GetComponentType(component->get_component_type()), true);
 		mEntityManager->SetSignature(entity, signature);
 
-		mSystemManager->EntitySignatureChanged(entity, signature);
+		mSystemManager->EntitySignatureChanged(entity, signature, quiet);
 	}
 
 	void RemoveComponent(Entity entity, ComponentTypeEnum component_type)
@@ -86,6 +90,44 @@ public:
 		return mComponentManager->TryGetComponent(entity, component_type);
 	}
 
+	/// <summary>
+	/// Thread safe - thread waits until data is available, then returns with a COPY of it.
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <param name="component_type"></param>
+	/// <returns></returns>
+	/// 
+	///**
+	const ECS_Component* GetComponentReadOnly(Entity entity, ComponentTypeEnum component_type)
+	{
+		
+		return mComponentManager->GetComponentReadOnly(entity, component_type);
+	}
+
+	/// <summary>
+	/// Thread safe access to data. Thread asks for component of an entity and is given the data and the key that is used to access it.
+	/// (Other threads cannot access that same data without the key)
+	/// The only function of they is that it must be returned with CheckInComponent before other threads can access the data.
+	/// Do not ever use without calling CheckInComponent when done.
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <param name="component_type"></param>
+	/// <returns></returns>
+	std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
+	{
+		return mComponentManager->CheckOutComponent(entity, component_type);
+	}
+
+	/// <summary>
+	/// Used by a thread to return checked-out data.
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <param name="component_type"></param>
+	/// <param name="data_and_key"></param>
+	void CheckInComponent(ComponentTypeEnum component_type, Entity entity, std::unique_ptr<std::unique_lock<std::mutex>> key)
+	{
+		return mComponentManager->CheckInComponent(component_type, entity, std::move(key));
+	}
 	ComponentTypeHash GetComponentType(ComponentTypeEnum component_type)
 	{
 		return mComponentManager->GetComponentType(component_type);

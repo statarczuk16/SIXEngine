@@ -1,8 +1,11 @@
 #pragma warning(N:4596)
 
 #include "ECS/Components/Renderable.hpp"
+#include "ECS/Components/UserInput.hpp"
 #include "ECS/Core/Coordinator.hpp"
 #include "ECS/Systems/RenderSystem.hpp"
+#include "ECS/Systems/PhysicsSystem.hpp"
+#include "ECS/Systems/UserInputSystem.hpp"
 #include <chrono>
 #include <random>
 #include <Database.h>
@@ -13,6 +16,7 @@
 #include<kiss_sdl.h>
 #include <ECS/Components/Camera.hpp>
 #include <Timer.h>
+#include <ECS/Components/Collision.hpp>
 
 Coordinator gCoordinator;
 
@@ -33,12 +37,15 @@ const int SCREEN_HEIGHT = 400;
 const int LEVEL_WIDTH_PIXELS = 800;
 const int LEVEL_HEIGHT_PIXELS = 600;
 
+SXNGN::Database g_database; //static can be accessed anywhere, but must intialize
 
 
 using Pre_Sprite_Factory = SXNGN::ECS::Components::Pre_Sprite_Factory;
 using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
+using Collision = SXNGN::ECS::Components::Collision;
+using Gameutils = SXNGN::Gameutils;
 
 
 void QuitHandler(Event& event)
@@ -142,6 +149,12 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_RENDERABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::RENDERABLE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::CAMERA);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::INPUT_CACHE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::INPUT_TAGS);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::MOVEABLE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::COLLISION);
+
 
 
 	//Sprite Factory Creator system looks for Pre_Sprite_Factories and uses them create Sprite_Factories
@@ -173,7 +186,34 @@ int main(int argc, char* args[])
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::RENDERABLE));
 		gCoordinator.SetSystemSignatureActable<Renderer_System>(signature);
 	}
-	//renderer_system->Init();
+	renderer_system->Init();
+
+
+	auto input_system = gCoordinator.RegisterSystem<User_Input_System>();
+	{
+		//User_Input_System ACTS on any entity that has INPUT_CACHE (it USES input_cache)
+		Signature signature_actable;
+		signature_actable.set(gCoordinator.GetComponentType(ComponentTypeEnum::INPUT_CACHE));
+		gCoordinator.SetSystemSignatureActable<User_Input_System>(signature_actable);
+		//User_Input_System is INTERESTED in any entity that has INPUT_TAGS (It uses input_cache to apply input to entities according to their INPUT_TAGS)
+		Signature signature_of_interest;
+		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::INPUT_TAGS));
+		gCoordinator.SetSystemSignatureOfInterest<User_Input_System>(signature_of_interest);
+	}
+	input_system->Init();
+
+	auto physics_system = gCoordinator.RegisterSystem<Physics_System>();
+	{
+		//User_Input_System ACTS on any entity that has MOVEABLE (it moves objects around)
+		Signature signature_actable;
+		signature_actable.set(gCoordinator.GetComponentType(ComponentTypeEnum::MOVEABLE));
+		gCoordinator.SetSystemSignatureActable<Physics_System>(signature_actable);
+		//User_Input_System is INTERESTED in any entity that has COLLISION (Checks collision data while moving actables)
+		Signature signature_of_interest;
+		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
+		gCoordinator.SetSystemSignatureOfInterest<Physics_System>(signature_of_interest);
+	}
+	physics_system->Init();
 
 
 	SDL_Event e;
@@ -203,6 +243,21 @@ int main(int argc, char* args[])
 	pre_renderable->sprite_factory_name = "APOCALYPSE_MAP";
 	pre_renderable->sprite_factory_sprite_type = "GUNMAN_1";
 	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
+	SXNGN::ECS::Components::Moveable* moveable = new Moveable();
+	moveable->position_box_.x = 0;
+	moveable->position_box_.y = 0;
+	moveable->position_box_.w = 16;
+	moveable->position_box_.h = 16;
+	moveable->moveable_type_ = SXNGN::ECS::Components::MoveableType::VELOCITY;
+	moveable->m_speed_m_s = 2;
+	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
+	SXNGN::ECS::Components::Collision* collision = new Collision();
+	collision->collision_box_ = moveable->position_box_;
+	gCoordinator.AddComponent(pre_renderable_test_entity, collision);
+	SXNGN::ECS::Components::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
+	input_tags_comp->input_tags_.insert(SXNGN::ECS::Components::User_Input_Tags::WASD_CONTROL);
+	input_tags_comp->input_tags_.insert(SXNGN::ECS::Components::User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
+	gCoordinator.AddComponent(pre_renderable_test_entity, input_tags_comp);
 
 
 	SDL_Rect camera_lens;
@@ -222,7 +277,7 @@ int main(int argc, char* args[])
 
 
 
-	float dt = 0.0f;
+
 	SXNGN::Timer dt_timer;//time passed during this frame "delta t"
 	SXNGN::Timer frame_timer;//use to calculate frame rate
 	SXNGN::Timer frame_cap_timer;//use to enforce frame cap
@@ -233,17 +288,32 @@ int main(int argc, char* args[])
 	float game_dt;
 
 	int frame_count = 0;
+	std::vector<SDL_Event> events_this_frame;
 	while (!quit)
 	{
 		/////////////////////////////////Frame Start 
 		frame_cap_timer.start();//this timer must reached ticks per frame before the next frame can start
 		
-								/////////Event Handling
+		/////////////////////////////////Handle Game State
+		//Todo game state
+		/////////////////////////////////Event Handling
+		events_this_frame.clear();
 		while (SDL_PollEvent(&e) != 0)
 		{
-			//TODO queue up and add to event component type
+			events_this_frame.push_back(e);
+			//queue up and add to event component type
 		}
-		//Todo update event handling system
+		//If any input occured, create an entity to carry them to the input_system
+		if (!events_this_frame.empty())
+		{
+			auto input_event = gCoordinator.CreateEntity();
+			SXNGN::ECS::Components::User_Input_Cache* input_cache = new User_Input_Cache();
+			input_cache->events_ = events_this_frame;
+			gCoordinator.AddComponent(input_event, input_cache, true);
+			//update event handling system
+			input_system->Update(dt);
+		}
+		
 
 
 		/////////////////////////////////Physics/Movement
@@ -251,7 +321,7 @@ int main(int argc, char* args[])
 		dt = dt_timer.getTicks() / 1000.f;//
 		game_dt = dt;
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
-		//todo movement system
+		physics_system->Update(dt);
 
 
 		dt_timer.start(); //restart delta t for next frame
