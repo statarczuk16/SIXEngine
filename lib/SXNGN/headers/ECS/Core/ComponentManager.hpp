@@ -1,17 +1,17 @@
 #pragma once
 
-#include "ECS/Core/ComponentArray.hpp"
-#include "ECS/Core/Types.hpp"
-#include <any>
+#include <ECS/Core/ComponentArray.hpp>
+#include <ECS/Core/Types.hpp>
 #include <memory>
 #include <unordered_map>
+#include <vector>
 
 
 class ComponentManager
 {
 
 public:
-	
+
 	void RegisterComponent(ComponentTypeEnum component_type)
 	{
 
@@ -25,7 +25,7 @@ public:
 
 	ComponentTypeHash GetComponentType(ComponentTypeEnum component_type)
 	{
-		
+
 		if (mComponentTypes.find(component_type) == mComponentTypes.end())
 		{
 			const char* component_type_str = typeid(component_type).name();
@@ -37,7 +37,7 @@ public:
 		return mComponentTypes[component_type];
 	}
 
-	
+
 	void AddComponent(Entity entity, ECS_Component *component)
 	{
 		ComponentTypeEnum component_type = component->get_component_type();
@@ -66,11 +66,11 @@ public:
 		return ptr;
 	}
 
-	
+
 	const ECS_Component* GetComponentReadOnly(Entity entity, ComponentTypeEnum component_type)
 	{
 		return GetComponentArray(component_type)->GetDataReadOnly(entity);
-	} 
+	}
 
 
 	std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
@@ -114,7 +114,7 @@ public:
 		}
 		return return_components;
 	}
-	
+
 
 private:
 

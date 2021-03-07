@@ -4,13 +4,15 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 project(RiskTheSix)
 
-#set(Boost_USE_STATIC_LIBS ON) 
+set(SDL2_USE_STATIC_LIBS OFF) 
 #set(Boost_USE_MULTITHREADED ON)  
 #set(Boost_USE_STATIC_RUNTIME OFF) 
 
-list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/../vclib/")
+list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
 
 find_package(SDL2 CONFIG REQUIRED)
+
+
 
 find_package(SDL2_IMAGE CONFIG REQUIRED)  
 
@@ -18,19 +20,66 @@ find_package(SDL2_TTF CONFIG REQUIRED)
   
 #find_package(Boost REQUIRED COMPONENTS filesystem) 
 
-find_package(OpenGL REQUIRED)
+#find_package(OpenGL REQUIRED)
 
- 
+if(SDL2_USE_STATIC_LIBS)
+	if(MSVC)
+		
+	else()
+		
+		#SET(GCC_SDL2_COMPILER_FLAGS "-I${SDL2_INCLUDE_DIRS}/SDL2  -Dmain=SDL_main")
+		SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_SDL2_COMPILER_FLAGS}")
+		message("SDL2 GCC Compiler Flags: ${GCC_SDL2_COMPILER_FLAGS}")
+			add_definitions(-DSDL_MAIN_HANDLED)
+	endif()
+
+else ()
+	set(SDL2_LIBRARIES "SDL2")
+	add_library(${SDL2_LIBRARIES} SHARED IMPORTED GLOBAL)
+	set_target_properties(
+	${SDL2_LIBRARIES}
+	PROPERTIES
+		IMPORTED_LOCATION ${SDL2_DLL_IMPORTED_LOCATION}
+		IMPORTED_IMPLIB ${SDL2_DLL_IMPORTED_IMBLIB}
+		)
+	set(SDL2_LIBRARIES "SDL2 -lmingw32 -mwindows")
+	set(SDL2_IMAGE_LIBRARIES "SDL2_Image")
+	add_library(${SDL2_IMAGE_LIBRARIES} SHARED IMPORTED GLOBAL)
+	set_target_properties(
+	${SDL2_IMAGE_LIBRARIES}
+	PROPERTIES
+		IMPORTED_LOCATION ${SDL2_IMAGE_DLL_IMPORTED_LOCATION}
+		IMPORTED_IMPLIB ${SDL2_IMAGE_DLL_IMPORTED_IMBLIB}
+		)	
+		
+	set(SDL2_TTF_LIBRARIES "SDL2_TTF")
+	add_library(${SDL2_TTF_LIBRARIES} SHARED IMPORTED GLOBAL)
+	set_target_properties(
+	${SDL2_TTF_LIBRARIES}
+	PROPERTIES
+		IMPORTED_LOCATION ${SDL2_TTF_DLL_IMPORTED_LOCATION}
+		IMPORTED_IMPLIB ${SDL2_TTF_DLL_IMPORTED_IMBLIB}
+		)	
+	
+endif ()
 
 message("SDL2_LIBRARIES: "  ${SDL2_LIBRARIES}) 
-message("SDL2_INCLUDE: "  ${SDL2_INCLUDE_DIR})
+message("SDL2_INCLUDE: "  ${SDL2_INCLUDE_DIRS})
 message("SDL2_IMAGE_LIBRARIES: "  ${SDL2_IMAGE_LIBRARIES})
-message("SDL2_IMAGE_INCLUDE: "  ${SDL2_IMAGE_INCLUDE_DIR}) 
+message("SDL2_IMAGE_INCLUDE: "  ${SDL2_IMAGE_INCLUDE_DIRS}) 
 message("SDL2_TTF_LIBRARIES: "  ${SDL2_TTF_LIBRARIES}) 
-message("SDL2_TTF_INCLUDE: "  ${SDL2_TTF_INCLUDE_DIR})
+message("SDL2_TTF_INCLUDE: "  ${SDL2_TTF_INCLUDE_DIRS})
+
+message("")
+if(SDL2_USE_STATIC_LIBS)
+	message("Using SDL Libraries: Statically")
+else ()
+	message("Using SDL Libraries: Dynamic Linked")
+endif()
+message("")
 
 #message("Boost Found: " ${Boost_FOUND}) 
-#message("Boost_INCLUDE_DIR: " ${Boost_INCLUDE_DIRS})
+#message("Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
 #message("Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS}) 
 #message("Boost_LIBRARIES: " ${Boost_LIBRARIES})
   
@@ -38,7 +87,7 @@ message("SDL2_TTF_INCLUDE: "  ${SDL2_TTF_INCLUDE_DIR})
 #message("OpenGL Libraries: " ${OPENGL_LIBRARIES})
 
 #include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
-include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR})
+include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS})
  
  ######### SXNGN
 #include the SXNGN Sources (game engine)
@@ -50,7 +99,6 @@ file(GLOB_RECURSE SXNGN_SOURCES
 	
 message("SXNGN Sources: "  ${SXNGN_SOURCES})
 include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)  
-
 
  ######### KISS (GUI)
  file(GLOB_RECURSE KISS_SOURCES
@@ -88,17 +136,17 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
 ######### End Nanogui
 
 #include_directories(${CMAKE_SOURCE_DIR}/src/headers)
-add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}    "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
+add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} )
 target_link_libraries(LevelEditor ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})   
 
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}   "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
 target_link_libraries(HoplonSimulator ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES}) 
 
-add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}         "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
+add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
 target_link_libraries(KissExample ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} )
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  "lib/SXNGN/headers/ECS/Core/Component.hpp" "lib/SXNGN/headers/ECS/Core/TextureManager.hpp" "lib/SXNGN/headers/ECS/Systems/CameraSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CameraSystem.cpp" "lib/SXNGN/cpp/ECS/Components/Camera.cpp" "lib/SXNGN/headers/ECS/Components/Moveable.hpp" "lib/SXNGN/headers/ECS/Components/UserInput.hpp" "lib/SXNGN/headers/ECS/Systems/UserInputSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/UserInputSystem.cpp" "lib/SXNGN/headers/UI/UserInputUtils.hpp" "lib/SXNGN/cpp/UI/UserInputUtils.cpp" "lib/SXNGN/headers/ECS/Systems/PhysicsSystem.hpp" "lib/SXNGN/headers/ECS/Components/Collision.hpp")
-target_link_libraries(ECS_Demo ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} )
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
+target_link_libraries(ECS_Demo ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

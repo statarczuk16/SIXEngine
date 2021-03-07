@@ -6,6 +6,8 @@
 #include "ECS/Systems/RenderSystem.hpp"
 #include "ECS/Systems/PhysicsSystem.hpp"
 #include "ECS/Systems/UserInputSystem.hpp"
+#include <ECS/Components/Collision.hpp>
+#include <ECS/Components/Camera.hpp>
 #include <chrono>
 #include <random>
 #include <Database.h>
@@ -14,9 +16,9 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include<kiss_sdl.h>
-#include <ECS/Components/Camera.hpp>
+
 #include <Timer.h>
-#include <ECS/Components/Collision.hpp>
+
 
 Coordinator gCoordinator;
 
@@ -44,7 +46,7 @@ using Pre_Sprite_Factory = SXNGN::ECS::Components::Pre_Sprite_Factory;
 using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
-using Collision = SXNGN::ECS::Components::Collision;
+using Collision = SXNGN::ECS::Components::CollisionComponent;
 using Gameutils = SXNGN::Gameutils;
 
 
@@ -251,7 +253,7 @@ int main(int argc, char* args[])
 	moveable->moveable_type_ = SXNGN::ECS::Components::MoveableType::VELOCITY;
 	moveable->m_speed_m_s = 2;
 	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
-	SXNGN::ECS::Components::Collision* collision = new Collision();
+	Collision* collision = new Collision();
 	collision->collision_box_ = moveable->position_box_;
 	gCoordinator.AddComponent(pre_renderable_test_entity, collision);
 	SXNGN::ECS::Components::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
@@ -291,9 +293,9 @@ int main(int argc, char* args[])
 	std::vector<SDL_Event> events_this_frame;
 	while (!quit)
 	{
-		/////////////////////////////////Frame Start 
+		/////////////////////////////////Frame Start
 		frame_cap_timer.start();//this timer must reached ticks per frame before the next frame can start
-		
+
 		/////////////////////////////////Handle Game State
 		//Todo game state
 		/////////////////////////////////Event Handling
@@ -313,7 +315,7 @@ int main(int argc, char* args[])
 			//update event handling system
 			input_system->Update(dt);
 		}
-		
+
 
 
 		/////////////////////////////////Physics/Movement
@@ -334,7 +336,7 @@ int main(int argc, char* args[])
 		sprite_factory_creator_system->Update(dt);
 		sprite_factory_system->Update(dt);
 		//Render UI
-		//TODO add UI 
+		//TODO add UI
 		//Render Game
 		renderer_system->Update(dt);
 

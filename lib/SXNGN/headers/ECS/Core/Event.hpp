@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ECS/Core/Types.hpp"
+#include <ECS/Core/Types.hpp>
 #include <any>
 #include <unordered_map>
 

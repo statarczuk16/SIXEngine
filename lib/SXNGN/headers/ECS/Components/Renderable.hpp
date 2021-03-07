@@ -1,6 +1,6 @@
 #pragma once
 
-#include "SDL.h"
+#include <SDL.h>
 #include <Sprite/Tile.h>
 #include <memory>
 #include <ECS/Core/Component.hpp>
@@ -37,7 +37,7 @@ namespace SXNGN::ECS::Components {
 	};
 	return manifest_string_to_type_map_;
 	}
-	
+
 
 
 	/// <summary>
@@ -82,7 +82,7 @@ namespace SXNGN::ECS::Components {
 		{
 			component_type = ComponentTypeEnum::SPRITE_FACTORY;
 		}
-		
+
 		std::string sprite_factory_name;
 		//From manifest, the width and height of tiles in the sprite sheet (pixels)
 		size_t tile_width_, tile_height_;

@@ -2,6 +2,7 @@
 #include <Texture.h>
 #include <Sprite/Tile.h>
 #include <Physics.h>
+#include <cmath>
 
 
 SXNGN::Entity::Entity(std::shared_ptr< SXNGN::Tile> tile, int speed) : Object(tile, speed)
@@ -56,19 +57,19 @@ void SXNGN::Entity::Entity::handleEvent(SDL_Event& e)
 		case SDLK_LEFT: f_app_n_x_ -= -speed_x_n_; break;
 		case SDLK_RIGHT: f_app_n_x_ -= speed_x_n_; break;
 		}
-	} 
+	}
 }
 
 void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, float time_step)
 {
 
-		
+
 		SDL_Rect prev_box = collision_box_;
 		int x_bound_max = level_bounds.x + level_bounds.w;
 		int x_bound_min = level_bounds.x;
 		int y_bound_max = level_bounds.y + level_bounds.h;
 		int y_bound_min = level_bounds.y;
-		
+
 		double x_friction_acc_m_s_s = 0.0;
 		double y_friction_acc_m_s_s = 0.0;
 
@@ -82,13 +83,13 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 
 
 
-		
+
 		x_friction_acc_m_s_s = SXNGN::Physics::get_friction_acc(weight_kg_, 2.0, phys_m_vel_x_m_s_, f_app_n_x_, Physics::MoveType::WALK);
 		y_friction_acc_m_s_s = SXNGN::Physics::get_friction_acc(weight_kg_, 2.0, phys_m_vel_y_m_s_, f_app_n_y_, Physics::MoveType::WALK);
 
 
 
-		
+
 		//Accelerate due to force applied
 		x_app_acc_m_s_s = SXNGN::Physics::get_applied_force_acc(double(f_app_n_x_), weight_kg_);
 		y_app_acc_m_s_s = SXNGN::Physics::get_applied_force_acc(double(f_app_n_y_), weight_kg_);
@@ -117,7 +118,7 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 		//move according to current acceleration
 		phys_m_vel_x_m_s_ = Physics::adjust_velocity_by_acc(m_acc_x_m_s_s_, phys_m_vel_x_m_s_, time_step, m_max_vel_m_s_);
 		phys_m_vel_y_m_s_ = Physics::adjust_velocity_by_acc(m_acc_y_m_s_s_, phys_m_vel_y_m_s_, time_step, m_max_vel_m_s_);
-		
+
 		phys_x += SXNGN::PIXELS_TO_METERS * ( phys_m_vel_x_m_s_ * time_step);
 		collision_box_.x = int(round(phys_x));
 

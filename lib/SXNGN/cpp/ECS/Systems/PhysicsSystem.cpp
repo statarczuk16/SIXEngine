@@ -16,7 +16,7 @@ void Physics_System::Init()
 //readonly get of immoveables
 //mutex check out of moveables
 //will probably need to update recursivelly for moveables
-//for now 
+//for now
 void Physics_System::Update(float dt)
 {
 
@@ -54,10 +54,10 @@ void Physics_System::Update(float dt)
 		{
 			//Check if Moveable also has Collisions
 			//If so, call Update_Position_With_Collision -> Read in all Collision data if have not done so yet (Read only, not checkout)
-			//Update currenty entity's collision data in the read-only vector 
+			//Update currenty entity's collision data in the read-only vector
 			if (check_out_collision.first)
 			{
-				
+
 				if (!loaded_collisionables)
 				{
 					auto collisionables_to_entity_ids = Load_Collision_Data(m_entities_of_interest);
@@ -70,7 +70,7 @@ void Physics_System::Update(float dt)
 			//If no Collision, Update_Position_Without_Collision
 			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move.first);
 			//update position
-			Update_Position(moveable_ptr, entity_actable,collisionables,collisionable_entity_ids, dt);
+			Update_Position_With_Collision(moveable_ptr, entity_actable,collisionables,collisionable_entity_ids, dt);
 			//check data back in
 			gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_actable, std::move(check_out_move.second));
 			gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity_actable, std::move(check_out_collision.second));
@@ -102,7 +102,7 @@ void Physics_System::Update_Position_With_Collision(Moveable* moveable, Entity m
 {
 	SDL_Rect prev_pos = moveable->position_box_;
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
-	auto this_moveable_collision = gCoordinator
+	auto this_moveable_collision = gCoordinator;
 	std::vector<std::vector<const SXNGN::ECS::Components::CollisionComponent*>> collisions;
 	switch (moveable->moveable_type_)
 	{

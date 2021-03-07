@@ -14,7 +14,7 @@ SXNGN::MultiSprite::MultiSprite(std::vector<std::vector<std::shared_ptr<SXNGN::T
 	SDL_Rect bounding_box;
 	bounding_box.x = 0;
 	bounding_box.y = 0;
-	//tile_matrix must be rectangular 
+	//tile_matrix must be rectangular
 	bounding_box.w = tile_matrix.at(0).size() * SXNGN::BASE_TILE_WIDTH;
 	bounding_box.h = tile_matrix.size() * SXNGN::BASE_TILE_HEIGHT;
 }
@@ -25,7 +25,7 @@ void SXNGN::MultiSprite::update_tiles(std::vector<std::vector<std::shared_ptr<SX
 	SDL_Rect bounding_box;
 	bounding_box.x = 0;
 	bounding_box.y = 0;
-	//tile_matrix must be rectangular 
+	//tile_matrix must be rectangular
 	bounding_box.w = tile_matrix.at(0).size() * SXNGN::BASE_TILE_WIDTH;
 	bounding_box.h = tile_matrix.size() * SXNGN::BASE_TILE_HEIGHT;
 	bounding_box_ = std::make_shared<SDL_Rect>(bounding_box);
@@ -169,7 +169,7 @@ SXNGN::TileHandler::TileHandler(SDL_Renderer* renderer, std::string sourcePath)
 {
 	if (renderer == nullptr)
 	{
-		throw std::exception("Warn TileHandler:: pointer to renderer was null");
+		throw std::exception();
 	}
 	tileTexture_ = std::make_shared<SXNGN::Texture>(renderer);
 
@@ -179,13 +179,13 @@ SXNGN::TileHandler::TileHandler(SDL_Renderer* renderer, std::string sourcePath)
 	//Load tile texture
 	if (!tileTexture_->loadFromFile(tileSheetPath))
 	{
-		throw std::exception("Warn TileHandler:: Failed to load tile set texture");
+		throw std::exception();
 	}
 
 	if (!(Gameutils::file_exists(manifest_path)))
 	{
 		printf("Warn TileHandler::Init Failed to find tile manifest");
-		throw std::exception("Warn TileHandler:: Failed to find tile manifest");
+		throw std::exception();
 	}
 
 	tile_manifest_path_ = manifest_path;
@@ -195,7 +195,7 @@ SXNGN::TileHandler::TileHandler(SDL_Renderer* renderer, std::string sourcePath)
 	if (!success)
 	{
 		printf("Warn TileHandler:: failed to load tile manifest");
-		throw std::exception("Warn TileHandler:: Failed to load tile names");
+		throw std::exception();
 	}
 
 
@@ -259,7 +259,8 @@ SXNGN::Tile SXNGN::TileHandler::generateTile(std::string tile_name)
 	}
 	else
 	{
-		throw std::exception("Warn generateTile: not tile of that name");
+	    printf("Warn generateTile: not tile of name: %s",tile_name.c_str());
+		throw std::exception();
 	}
 }
 
@@ -380,7 +381,7 @@ bool SXNGN::TileHandler::initTilesNamesFromManifest()
 				{
 					line_split_results.push_back(w);
 				}
-				
+
 				w = "";
 			}
 			else
@@ -572,7 +573,7 @@ bool SXNGN::TileHandler::loadTileMap(std::vector<SXNGN::Tile>& tiles, std::strin
 				{
 					line_split_results.push_back(std::stoi(w));
 				}
-				
+
 				w = "";
 			}
 			else
@@ -605,7 +606,7 @@ bool SXNGN::TileHandler::loadTileMap(std::vector<SXNGN::Tile>& tiles, std::strin
 			std::shared_ptr<SDL_Rect> tile_collision_box = std::make_shared < SDL_Rect>();
 
 			//Make sure the int in the map corresponds to a tilename for this tilemap spritesheet
-			//Eg, should be a map for every number to something like "DIRT" or "TOP_LEFT_CAR" 
+			//Eg, should be a map for every number to something like "DIRT" or "TOP_LEFT_CAR"
 			if (tile_name_int_to_string_map_.count(tile_name_int) != 1)
 			{
 				printf("Error loading map: Unexpected tile type\n");
