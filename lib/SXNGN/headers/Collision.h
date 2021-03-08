@@ -7,7 +7,7 @@ namespace SXNGN {
 	class Tile;
 
 	namespace ECS { namespace Components {
-		class CollisionComponent;
+		class Collisionable;
 	} } 
 	
 
@@ -32,9 +32,9 @@ namespace SXNGN {
 		/// <param name="box"></param>
 		/// <param name=""></param>
 		/// <returns></returns>
-		static std::vector<std::vector<const SXNGN::ECS::Components::CollisionComponent*>>  determineCollisions(SDL_Rect box, std::vector<const SXNGN::ECS::Components::CollisionComponent*>, int buffer);
+		static std::vector<std::vector<const SXNGN::ECS::Components::Collisionable*>>  determineCollisions(SDL_Rect box, std::vector<const SXNGN::ECS::Components::Collisionable*>, int buffer);
 
-		//static std::vector<std::vector<CollisionComponent>> determineCollisions(SDL_Rect box, std::vector<CollisionComponent> collision_components, int buffer);
+		//static std::vector<std::vector<Collisionable>> determineCollisions(SDL_Rect box, std::vector<Collisionable> collision_components, int buffer);
 	};
 
 }

@@ -17,9 +17,9 @@ namespace SXNGN::ECS::Components {
 	/// <summary>
 	/// Contains all data needed to handle a collision between two entities that both have collision
 	/// </summary>
-	struct CollisionComponent : ECS_Component
+	struct Collisionable : ECS_Component
 	{
-		CollisionComponent()
+		Collisionable()
 		{
 			component_type = ComponentTypeEnum::COLLISION;
 			collision_type_ = CollisionType::IMMOVEABLE;

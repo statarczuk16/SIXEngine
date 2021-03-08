@@ -28,7 +28,7 @@ list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 
-#message("Hint Start:" ${SDL_HINT_START})
+#message("Hint Start:" ${SDL_HINT_START}) 
 #message("Hint End:" ${SDL_HINT_END})
 
 #Goal: SDL2_PATH should land in the folder with bin,include,etc. regardless of version.
@@ -38,7 +38,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 # will return this/is/VERSION1.2 or this/is/VERSION1.3 etc. (accounts for differing versions)
 find_path(SDL2_PATH_ NAMES ${SDL_HINT_END}/SDL.h PATHS ${SDL_HINT_START})
 
-message("SDL2_PATH_":  ${SDL2_PATH_})
+message("SDL2_PATH_:"  ${SDL2_PATH_})
 set(SDL2_PATH ${SDL2_PATH_} CACHE BOOL "" FORCE) #Override the cache variable SDL2_PATH which affects operation of find_package(SDL2)
 message("SDL2_PATH: " ${SDL2_PATH})
 find_package(SDL2 REQUIRED)
@@ -47,13 +47,13 @@ find_path(SDL2_IMAGE_PATH_ NAMES ${SDL_HINT_END}/SDL_Image.h PATHS ${SDL_HINT_ST
 message("SDL2_IMAGE_PATH_: " ${SDL2_IMAGE_PATH_})
 set(SDL2_IMAGE_PATH  ${SDL2_IMAGE_PATH_} CACHE BOOL "" FORCE)
 message("SDL2_IMAGE_PATH: " ${SDL2_IMAGE_PATH})
-find_package(SDL2_IMAGE REQUIRED)  
+find_package(SDL2_image REQUIRED)  
 
 find_path(SDL2_TTF_PATH_ NAMES ${SDL_HINT_END}/SDL_TTF.h PATHS ${SDL_HINT_START})
 message("SDL2_TTF_PATH_: " ${SDL2_TTF_PATH_})
 set(SDL2_TTF_PATH  ${SDL2_TTF_PATH_} CACHE BOOL "" FORCE)
 message("SDL2_TTF_PATH: " ${SDL2_TTF_PATH})
-find_package(SDL2_TTF REQUIRED) 
+find_package(SDL2_ttf REQUIRED) 
 
  
  ######### SXNGN

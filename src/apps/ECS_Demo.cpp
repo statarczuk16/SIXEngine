@@ -4,7 +4,7 @@
 #include "ECS/Components/UserInput.hpp"
 #include "ECS/Core/Coordinator.hpp"
 #include "ECS/Systems/RenderSystem.hpp"
-#include "ECS/Systems/PhysicsSystem.hpp"
+#include "ECS/Systems/MovementSystem.hpp"
 #include "ECS/Systems/UserInputSystem.hpp"
 #include <ECS/Components/Collision.hpp>
 #include <ECS/Components/Camera.hpp>
@@ -46,7 +46,7 @@ using Pre_Sprite_Factory = SXNGN::ECS::Components::Pre_Sprite_Factory;
 using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
-using Collision = SXNGN::ECS::Components::CollisionComponent;
+using Collisionable = SXNGN::ECS::Components::Collisionable;
 using Gameutils = SXNGN::Gameutils;
 
 
@@ -204,18 +204,18 @@ int main(int argc, char* args[])
 	}
 	input_system->Init();
 
-	auto physics_system = gCoordinator.RegisterSystem<Physics_System>();
+	auto movement_system = gCoordinator.RegisterSystem<Movement_System>();
 	{
 		//User_Input_System ACTS on any entity that has MOVEABLE (it moves objects around)
 		Signature signature_actable;
 		signature_actable.set(gCoordinator.GetComponentType(ComponentTypeEnum::MOVEABLE));
-		gCoordinator.SetSystemSignatureActable<Physics_System>(signature_actable);
+		gCoordinator.SetSystemSignatureActable<Movement_System>(signature_actable);
 		//User_Input_System is INTERESTED in any entity that has COLLISION (Checks collision data while moving actables)
 		Signature signature_of_interest;
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
-		gCoordinator.SetSystemSignatureOfInterest<Physics_System>(signature_of_interest);
+		gCoordinator.SetSystemSignatureOfInterest<Movement_System>(signature_of_interest);
 	}
-	physics_system->Init();
+	movement_system->Init();
 
 
 	SDL_Event e;
@@ -246,15 +246,15 @@ int main(int argc, char* args[])
 	pre_renderable->sprite_factory_sprite_type = "GUNMAN_1";
 	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
 	SXNGN::ECS::Components::Moveable* moveable = new Moveable();
-	moveable->position_box_.x = 0;
-	moveable->position_box_.y = 0;
-	moveable->position_box_.w = 16;
-	moveable->position_box_.h = 16;
+	moveable->m_pos_x_m = 0.0;
+	moveable->m_pos_y_m = 0.0;
+
 	moveable->moveable_type_ = SXNGN::ECS::Components::MoveableType::VELOCITY;
-	moveable->m_speed_m_s = 2;
-	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
-	Collision* collision = new Collision();
-	collision->collision_box_ = moveable->position_box_;
+	moveable->m_speed_m_s = 20;
+	gCoordinator.AddComponent(pre_renderable_test_entity, moveable);
+	Collisionable* collision = new Collisionable();
+	collision->collision_box_.x = round(moveable->m_pos_x_m);
+	collision->collision_box_.y = round(moveable->m_pos_y_m);
 	gCoordinator.AddComponent(pre_renderable_test_entity, collision);
 	SXNGN::ECS::Components::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
 	input_tags_comp->input_tags_.insert(SXNGN::ECS::Components::User_Input_Tags::WASD_CONTROL);
@@ -323,7 +323,7 @@ int main(int argc, char* args[])
 		dt = dt_timer.getTicks() / 1000.f;//
 		game_dt = dt;
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
-		physics_system->Update(dt);
+		movement_system->Update(dt);
 
 
 		dt_timer.start(); //restart delta t for next frame

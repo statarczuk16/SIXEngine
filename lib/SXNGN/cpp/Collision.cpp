@@ -117,10 +117,10 @@ namespace SXNGN {
 	}
 
 	using CollisionType = SXNGN::ECS::Components::CollisionType;
-	 std::vector<std::vector<const SXNGN::ECS::Components::CollisionComponent*>> CollisionChecks::determineCollisions(SDL_Rect box, std::vector<const SXNGN::ECS::Components::CollisionComponent*> collision_components, int buffer)
+	 std::vector<std::vector<const SXNGN::ECS::Components::Collisionable*>> CollisionChecks::determineCollisions(SDL_Rect box, std::vector<const SXNGN::ECS::Components::Collisionable*> collision_components, int buffer)
 	{
-		 std::vector<const SXNGN::ECS::Components::CollisionComponent*> immoveable_collisions;
-		 std::vector<const SXNGN::ECS::Components::CollisionComponent*> elastic_collisions;
+		 std::vector<const SXNGN::ECS::Components::Collisionable*> immoveable_collisions;
+		 std::vector<const SXNGN::ECS::Components::Collisionable*> elastic_collisions;
 
 		for(int i = 0; i < collision_components.size(); i++)
 		{
@@ -142,7 +142,7 @@ namespace SXNGN {
 			}
 		}
 
-		std::vector<std::vector<const SXNGN::ECS::Components::CollisionComponent*>> ret = { immoveable_collisions , elastic_collisions };
+		std::vector<std::vector<const SXNGN::ECS::Components::Collisionable*>> ret = { immoveable_collisions , elastic_collisions };
 		return ret;
 	}
 }

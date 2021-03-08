@@ -60,7 +60,7 @@
 						if (check_out_move.first)
 						{
 							Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move.first);
-							Translate_User_Input_To_Movement(moveable_ptr, keyboard_events, dt);
+							Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
 							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest, std::move(check_out_move.second));
 						}
 					}
@@ -77,7 +77,7 @@
 		}
 	}
 
-	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, std::vector<SDL_Event> keyboard_inputs, float dt)
+	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt)
 	{
 			
 		if (moveable)
@@ -86,13 +86,13 @@
 			{
 			case MoveableType::VELOCITY:
 			{
-				auto x_y = UserInputUtils::wasd_to_x_y(keyboard_inputs);
+				std::pair<Sint32,Sint32> x_y = UserInputUtils::wasd_to_x_y(keyboard_inputs);
 				if (x_y.first != 0 || x_y.second!= 0)
 				{
-					printf("Moving Entity: Velocity: (%zd,%zd)\n", x_y.first, x_y.second);
+					//printf("UserInputSystem: Moving Entity %2d: Velocity: (%d,%d)\n",entity, x_y.first, x_y.second);
 				}
-				moveable->m_vel_x_m_s = x_y.first * moveable->m_speed_m_s;
-				moveable->m_vel_y_m_s = x_y.second * moveable->m_speed_m_s;
+				moveable->m_vel_x_m_s += (x_y.first * moveable->m_speed_m_s);
+				moveable->m_vel_y_m_s += (x_y.second * moveable->m_speed_m_s);
 			}
 			break;
 			case MoveableType::FORCE:

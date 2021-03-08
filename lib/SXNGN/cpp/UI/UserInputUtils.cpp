@@ -34,11 +34,11 @@ namespace SXNGN {
 		return ret;
 	}
 
-	std::pair<size_t, size_t> UserInputUtils::wasd_to_x_y(std::vector<SDL_Event> events)
+	std::pair<Sint32, Sint32> UserInputUtils::wasd_to_x_y(std::vector<SDL_Event> events)
 	{
-		size_t x = 0.0;
-		size_t y = 0.0;
-		size_t add_amount = 1;
+		Sint32 x = 0.0;
+		Sint32 y = 0.0;
+		Sint32 add_amount = 1;
 		for (auto event : events)
 		{
 			auto e = event;

@@ -24,7 +24,7 @@ public:
 
 	void Update_Mouse_State(std::vector<SDL_Event> mouse_events, float dt);
 
-	void Translate_User_Input_To_Movement(Moveable* moveable, std::vector<SDL_Event> keyboard_inputs, float dt);
+	void Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt);
 
 
 private:

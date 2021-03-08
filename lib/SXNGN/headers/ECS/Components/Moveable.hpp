@@ -26,11 +26,21 @@ namespace SXNGN::ECS::Components {
 		Moveable()
 		{
 			component_type = ComponentTypeEnum::MOVEABLE;
+			//position_box_.x = 0;
+			//position_box_.y = 0;
+			//position_box_.w = 1;
+			//position_box_.h = 1;
+
+
 		}
-		SDL_Rect position_box_;
-		size_t m_vel_x_m_s = 0;//current speed
-		size_t m_vel_y_m_s = 0;
-		size_t m_speed_m_s = 0;//velocity added/removed per event
+		//SDL_Rect position_box_;
+		double m_pos_x_m = 0;//current speed
+		double m_pos_y_m = 0;//current speed
+		double m_prev_pos_x_m = 0;//current speed
+		double m_prev_pos_y_m = 0;//current speed
+		Sint32 m_vel_x_m_s = 0;//current speed
+		Sint32 m_vel_y_m_s = 0;
+		Sint32 m_speed_m_s = 0;//velocity added/removed per event
 		MoveableType moveable_type_ = MoveableType::VELOCITY;
 	};
 }
