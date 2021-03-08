@@ -111,11 +111,11 @@ void Physics_System::Update_Position_With_Collision(Moveable* moveable, Entity m
 
 			moveable->position_box_.x += int(moveable->m_vel_x_m_s * dt);
 			moveable->position_box_.y += int(moveable->m_vel_y_m_s * dt);
-			collisions = SXNGN::CollisionChecks::determineCollisions(moveable->position_box_, collisionables, 0);
+			/**collisions = SXNGN::CollisionChecks::determineCollisions(moveable->position_box_, collisionables, 0);
 			if (collisions[0].empty() && collisions[1].empty())
 			{
 
-			}
+			}**/
 		}
 	}
 }

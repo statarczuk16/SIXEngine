@@ -4,90 +4,57 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 project(RiskTheSix)
 
-set(SDL2_USE_STATIC_LIBS OFF) 
-#set(Boost_USE_MULTITHREADED ON)  
-#set(Boost_USE_STATIC_RUNTIME OFF) 
-
-list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
-
-find_package(SDL2 CONFIG REQUIRED)
 
 
+set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 
-find_package(SDL2_IMAGE CONFIG REQUIRED)  
-
-find_package(SDL2_TTF CONFIG REQUIRED)
-  
-#find_package(Boost REQUIRED COMPONENTS filesystem) 
-
-#find_package(OpenGL REQUIRED)
-
-if(SDL2_USE_STATIC_LIBS)
-	if(MSVC)
-		
+#The findsdl module needs a starting path to look for SDL2
+#Try to determine the right path based on mingw/visual and 32/64bit
+if(MSVC)
+	set(SDL_HINT_END "include/")
+	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)
+elseif (MINGW)
+	set(SDL_HINT_END "include/SDL2")
+	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8) #64 bit systems have length 8 words
+		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/x86_64-w64-mingw32/)
 	else()
-		
-		#SET(GCC_SDL2_COMPILER_FLAGS "-I${SDL2_INCLUDE_DIRS}/SDL2  -Dmain=SDL_main")
-		SET(CMAKE_CXX_FLAGS  "${CMAKE_CXX_FLAGS} ${GCC_SDL2_COMPILER_FLAGS}")
-		message("SDL2 GCC Compiler Flags: ${GCC_SDL2_COMPILER_FLAGS}")
-			add_definitions(-DSDL_MAIN_HANDLED)
+		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/)
 	endif()
-
-else ()
-	set(SDL2_LIBRARIES "SDL2")
-	add_library(${SDL2_LIBRARIES} SHARED IMPORTED GLOBAL)
-	set_target_properties(
-	${SDL2_LIBRARIES}
-	PROPERTIES
-		IMPORTED_LOCATION ${SDL2_DLL_IMPORTED_LOCATION}
-		IMPORTED_IMPLIB ${SDL2_DLL_IMPORTED_IMBLIB}
-		)
-	set(SDL2_LIBRARIES "SDL2 -lmingw32 -mwindows")
-	set(SDL2_IMAGE_LIBRARIES "SDL2_Image")
-	add_library(${SDL2_IMAGE_LIBRARIES} SHARED IMPORTED GLOBAL)
-	set_target_properties(
-	${SDL2_IMAGE_LIBRARIES}
-	PROPERTIES
-		IMPORTED_LOCATION ${SDL2_IMAGE_DLL_IMPORTED_LOCATION}
-		IMPORTED_IMPLIB ${SDL2_IMAGE_DLL_IMPORTED_IMBLIB}
-		)	
-		
-	set(SDL2_TTF_LIBRARIES "SDL2_TTF")
-	add_library(${SDL2_TTF_LIBRARIES} SHARED IMPORTED GLOBAL)
-	set_target_properties(
-	${SDL2_TTF_LIBRARIES}
-	PROPERTIES
-		IMPORTED_LOCATION ${SDL2_TTF_DLL_IMPORTED_LOCATION}
-		IMPORTED_IMPLIB ${SDL2_TTF_DLL_IMPORTED_IMBLIB}
-		)	
-	
-endif ()
-
-message("SDL2_LIBRARIES: "  ${SDL2_LIBRARIES}) 
-message("SDL2_INCLUDE: "  ${SDL2_INCLUDE_DIRS})
-message("SDL2_IMAGE_LIBRARIES: "  ${SDL2_IMAGE_LIBRARIES})
-message("SDL2_IMAGE_INCLUDE: "  ${SDL2_IMAGE_INCLUDE_DIRS}) 
-message("SDL2_TTF_LIBRARIES: "  ${SDL2_TTF_LIBRARIES}) 
-message("SDL2_TTF_INCLUDE: "  ${SDL2_TTF_INCLUDE_DIRS})
-
-message("")
-if(SDL2_USE_STATIC_LIBS)
-	message("Using SDL Libraries: Statically")
-else ()
-	message("Using SDL Libraries: Dynamic Linked")
 endif()
-message("")
 
-#message("Boost Found: " ${Boost_FOUND}) 
-#message("Boost_INCLUDE_DIRS: " ${Boost_INCLUDE_DIRS})
-#message("Boost_LIBRARY_DIRS: " ${Boost_LIBRARY_DIRS}) 
-#message("Boost_LIBRARIES: " ${Boost_LIBRARIES})
-  
-#message("OpenGL Found" ${OPENGL_FOUND})
-#message("OpenGL Libraries: " ${OPENGL_LIBRARIES})
+#put external libraries on path
+list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
+#put the cmake sdl tools on the path
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
-#include_directories(${SDL2_INCLUDE_DIR} ${SDL2_IMAGE_INCLUDE_DIR} ${SDL2_TTF_INCLUDE_DIR} ${Boost_INCLUDE_DIRS})
-include_directories(${SDL2_INCLUDE_DIRS} ${SDL2_IMAGE_INCLUDE_DIRS} ${SDL2_TTF_INCLUDE_DIRS})
+
+#message("Hint Start:" ${SDL_HINT_START})
+#message("Hint End:" ${SDL_HINT_END})
+
+#Goal: SDL2_PATH should land in the folder with bin,include,etc. regardless of version.
+# eg SIXEngine/vclib/visual/SDL2-2.0.14 or SIXEngine/vclib/mingw/SDL2-2.0.14/x86_64-w64-mingw32
+# if have a path called this/is/VERSION1.2/path/to/stuff.dll
+# find_path(NEW_PATH, NAMES, path/to/stuff.dll, PATHS, this/is/*/)
+# will return this/is/VERSION1.2 or this/is/VERSION1.3 etc. (accounts for differing versions)
+find_path(SDL2_PATH_ NAMES ${SDL_HINT_END}/SDL.h PATHS ${SDL_HINT_START})
+
+message("SDL2_PATH_":  ${SDL2_PATH_})
+set(SDL2_PATH ${SDL2_PATH_} CACHE BOOL "" FORCE) #Override the cache variable SDL2_PATH which affects operation of find_package(SDL2)
+message("SDL2_PATH: " ${SDL2_PATH})
+find_package(SDL2 REQUIRED)
+
+find_path(SDL2_IMAGE_PATH_ NAMES ${SDL_HINT_END}/SDL_Image.h PATHS ${SDL_HINT_START})
+message("SDL2_IMAGE_PATH_: " ${SDL2_IMAGE_PATH_})
+set(SDL2_IMAGE_PATH  ${SDL2_IMAGE_PATH_} CACHE BOOL "" FORCE)
+message("SDL2_IMAGE_PATH: " ${SDL2_IMAGE_PATH})
+find_package(SDL2_IMAGE REQUIRED)  
+
+find_path(SDL2_TTF_PATH_ NAMES ${SDL_HINT_END}/SDL_TTF.h PATHS ${SDL_HINT_START})
+message("SDL2_TTF_PATH_: " ${SDL2_TTF_PATH_})
+set(SDL2_TTF_PATH  ${SDL2_TTF_PATH_} CACHE BOOL "" FORCE)
+message("SDL2_TTF_PATH: " ${SDL2_TTF_PATH})
+find_package(SDL2_TTF REQUIRED) 
+
  
  ######### SXNGN
 #include the SXNGN Sources (game engine)
@@ -110,50 +77,13 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)
 message("KISS Sources: "  ${KISS_SOURCES}) 
 include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
  
-######### Nanogui (GUI)
-# Disable building extras we won't need (pure C++ project)
-#set(NANOGUI_BUILD_EXAMPLE ON CACHE BOOL " " FORCE)
-#set(NANOGUI_BUILD_PYTHON  OFF CACHE BOOL " " FORCE)
-#set(NANOGUI_INSTALL       OFF CACHE BOOL " " FORCE)
-# you could add the NANOGUI_BUILD_SHARED part here
-
-# Add the configurations from nanogui
-#add_subdirectory(${CMAKE_SOURCE_DIR}/lib/nanogui-sdl)  # this executes ext/nanogui/CMakeLists.txt for you 
-
-# Various preprocessor definitions have been generated by NanoGUI
-#add_definitions(${NANOGUI_EXTRA_DEFS}) 
-
-# On top of adding the path to nanogui/include, you may need extras
-#include_directories(${CMAKE_SOURCE_DIR}/lib/nanogui-sdl) # make sure you have this
-
-#file(GLOB_RECURSE NNGUI_SOURCES
-#	${CMAKE_SOURCE_DIR}/lib/nanogui-sdl/sdlgui/*.h
-#	${CMAKE_SOURCE_DIR}/lib/nanogui-sdl/sdlgui/*.cpp
-#	)
-#message("Nanogui Sources: "  ${NNGUI_SOURCES})  
-#message("Nanogui Extra Libs: "  ${NNGUI_LIBS}) 
-
-######### End Nanogui
-
-#include_directories(${CMAKE_SOURCE_DIR}/src/headers)
-add_executable(LevelEditor "src/apps/LevelEditor.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} )
-target_link_libraries(LevelEditor ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})   
-
+#add an executable for anything that will turn into an exe or whatever other executable format
 add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
-target_link_libraries(HoplonSimulator ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES}) 
-
-add_executable(KissExample "src/apps/kiss_example1.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
-target_link_libraries(KissExample ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES} )
+target_link_libraries(HoplonSimulator SDL2::Main SDL2::Image SDL2::TTF)
 
 add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
-target_link_libraries(ECS_Demo ${SDL2_LIBRARIES} ${SDL2_IMAGE_LIBRARIES} ${SDL2_TTF_LIBRARIES})
+target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 
-
-#Copy DLLs to output
-#add_custom_command(TARGET SDL2Test POST_BUILD        # Adds a post-build event to SDL2Test
-#    COMMAND ${CMAKE_COMMAND} -E copy_if_different  # which executes "cmake - E copy_if_different..."
-#        "${SDL2_LIBRARIES}../.dll)"      # <--this is in-file
-#        $<CMAKE_BINARY_DIR:SDL2Test)                 # <--this is out-file path

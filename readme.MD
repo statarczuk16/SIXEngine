@@ -6,7 +6,7 @@ and may not be redistributed without written permission.
 
 # About
 
-This is a C++ game engine using SDL2 and maybe someday OpenGL. It is geared toward top-down, tile based games. 
+This is an Entity Component System Architecture game engine aimed at 2D tile based games. 
 
 # Install/Use
 
@@ -14,41 +14,67 @@ Dependencies:
 SDL2
 SDL2_TTF
 SDL2_Image
-Boost
-kiss_sdl (https://github.com/actsl/kiss_sdl)
+kiss_sdl (https://github.com/actsl/kiss_sdl) (Modified for this project, version included must be used)
+C++ 17
 
-Cmake will look for these libraries in the vc_lib directory if not elsewhere wherever you put libraries.
-There must be a config.cmake for each library, which are not usually distributed with the cmake library downloads. Therefore, take the ones from SXNGN/docs and place into the library downloads like so:
+These dependencies are all included in the repo. You will have better luck using these ones then whatever is
+installed on your system. 
 
-Example showing how vclib should be set up. This is where cmakelists.txt will look for the libraries.
+The vclib.../bin folder corresponding to your compiler/architecture must be added to the path
+else you will get "no such sdl.dll" type errors.
 
 <pre>
-└── SXNGN
-│   │   README.md (you are here)
+└── README.md (you are here)
+│ 
+└── SRC
+│   │   
 │      
 └───vclib
     │   
-	└──	SDL2_image-2.0.5
-			sdl2_image-config.cmake
-    └──	SDL2_ttf-2.0.15
-			sdl2_ttf-config.cmake
-	└──	SDL2_2.0.14
-			sdl2-config.cmake
+	└──	visual 
+		└── SDL2_image-2.0.5 
+		└── SDL2_ttf-2.0.15
+		└── SDL2_2.0.14
+	
+	└──	mingw 
+		└── SDL2_image-2.0.5
+		└── SDL2_ttf-2.0.15
+		└── SDL2_2.0.14
+
 </pre>
 
-			
-To use in an IDE, open this directory in a C++ IDE that supports CMake such as Visual Studio or CLion and build as normal. 
+## Visual Studio	
+* Simply download the repo and open the parent folder (the one with this readme) with "open folder". 
+* Provided you have the cmake plugin, you should just have to build as normal.
+* All the SDL DLLs must be on your path or copy/pasted to the generated exe's location
+## Clion
+* Same as above, though I have not tested it.
+## Codeblocks/Other MinGW/GCC IDE
+* You must have a C++17 mingw install. You can likely find a guide online for getting Codeblocks set up for C++17 mingw.
+** Make sure the C++17 compiler flags are set. std::filesystem is the main C++17 dependency in this project.
+* Download Cmake gui
+* Point Cmake gui to this folder as the source
+* Create a build folder in this folder and point Cmake to it as the build destination
+* Click "Configure" 
+* When Cmake asks for compiler information, tell it to use Mingw Makefiles or Codeblocks Mingw Makefiles
+** Not sure if there's a difference between the two
+* Cmake should find sdl, sdl-image, and sdl-ttf in the vclib directory. 
+** If you have sdl2 in your mingw directory already, it may find it there instead.
+*** This may introduce "SDL.h" vs "SDL2/SDL.h" C++ include errors. 
+*** You can solve this by removing your mingw SDL2 folder so cmake is forced to use the SDL2 in vclib
+*** Or you can hard-code SDL2_PATH in cmakelists.txt to the bin,include,lib, etc area of the SDL2 area in vclib.
+* Click "Generate" -> will generate makefiles and a codeblocks project (CBP)
+* Open Codeblocks and open the CPB
+* Build/run as normal
+* All the SDL DLLs must be on your path or copy/pasted to the generated exe's location
+## MINGW/Visual Terminal
+* To build in terminal, create a "build" directory at the same level as this readme.
+* "cd build"
+* "cmake .."
+* "make" 
+* Run the resulting application
 
-To build in terminal, create a "build" directory at the same level as this readme.
-"cd build"
-"cmake .."
-"make" (or whatever you are using to build - the point of cmake is that you should be able to use make or visual studio or whatever to compile)
-
-Note: I use Visual Studio 2019 on Windows 10, so it has only been tested there.
-
-Don't forget that the .dll files in each library used must be either next to the final .exe you intend to run or on your system path. 
-
-# Adding an application
+# Code a new application
 
 Note the presence of the src/apps folder. 
 
