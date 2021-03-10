@@ -108,7 +108,7 @@ namespace SXNGN {
 		//The tile type
 		TileType tile_type_;
 
-		std::string tile_name_;
+		std::string renderable_name_;
 	};
 
 	class TileHandler

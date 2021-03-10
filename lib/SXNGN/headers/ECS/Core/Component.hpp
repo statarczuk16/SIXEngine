@@ -1,20 +1,23 @@
 #pragma once
 #include <cstdint>
-
+#include <nlohmann/json.hpp>
 namespace SXNGN::ECS::Components {
 
 	enum class ComponentTypeEnum : std::uint8_t
 {
 	UNKNOWN,
 	RENDERABLE,
+	RENDERABLE_BATCH,
 	PRE_RENDERABLE,
+	PRE_RENDERABLE_BATCH,
 	SPRITE_FACTORY,
 	PRE_SPRITE_FACTORY,
 	CAMERA,
 	MOVEABLE,
 	INPUT_CACHE,
 	INPUT_TAGS,
-	COLLISION
+	COLLISION,
+	TILE
 };
 
 
@@ -24,11 +27,11 @@ namespace SXNGN::ECS::Components {
 	{
 		component_type = ComponentTypeEnum::UNKNOWN;
 	}
+
 	ComponentTypeEnum get_component_type()
 	{
 		return component_type;
 	}
-
 
 	protected:
 		ComponentTypeEnum component_type;

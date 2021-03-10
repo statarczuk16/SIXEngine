@@ -10,7 +10,8 @@ namespace SXNGN::ECS::Components {
 	enum class CollisionType
 	{
 		IMMOVEABLE,
-		ELASTIC
+		ELASTIC,
+		NONE
 	};
 
 

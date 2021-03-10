@@ -69,21 +69,17 @@ public:
 	}
 
 
-	
-
 	ECS_Component* TryGetData(Entity entity)
 	{
 		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
 		{
 			return nullptr;
 		}
-
 		return mComponentArray[mEntityToIndexMap[entity]];
 	}
 
 
 	//Thread safe - get a read-only copy of the data
-
 	const ECS_Component* GetDataReadOnly(Entity entity)
 	{
 		std::lock_guard<std::mutex> guard(component_array_guard);//Wait until data is available (no other theadss have checked it out)
@@ -92,6 +88,20 @@ public:
 		const ECS_Component* const_ref(component_ref); //make a read-only copy of the data to return
 		return const_ref;
 	} 
+
+	//Thread safe - get a read-only copy of the data
+	const ECS_Component* TryGetDataReadOnly(Entity entity)
+	{
+		std::lock_guard<std::mutex> guard(component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
+		{
+			auto component_ref = mComponentArray[mEntityToIndexMap[entity]];
+			const ECS_Component* const_ref(component_ref); //make a read-only copy of the data to return
+			return const_ref;
+		}
+		return nullptr;
+		
+	}
 
 	//Get a modifiable instance of the component for this entity
 	//Do not allow any changes to the component array until CheckInData() is called

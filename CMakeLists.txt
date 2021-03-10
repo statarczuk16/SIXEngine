@@ -21,7 +21,7 @@ elseif (MINGW)
 		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/)
 	endif()
 endif()
-
+ 
 #put external libraries on path
 list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
 #put the cmake sdl tools on the path
@@ -62,10 +62,10 @@ file(GLOB_RECURSE SXNGN_SOURCES
 	${CMAKE_SOURCE_DIR}/lib/SXNGN/headers/*.h
 	${CMAKE_SOURCE_DIR}/lib/SXNGN/cpp/*.hpp
 	${CMAKE_SOURCE_DIR}/lib/SXNGN/cpp/*.cpp
-	)
+	) 
 	
 message("SXNGN Sources: "  ${SXNGN_SOURCES})
-include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)  
+include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)   
 
  ######### KISS (GUI)
  file(GLOB_RECURSE KISS_SOURCES
@@ -75,13 +75,29 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/SXNGN/headers)
 	)
 	
 message("KISS Sources: "  ${KISS_SOURCES}) 
-include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
+include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/) 
+ 
+  ######### NLOHMANN JSON (JSON C++ Library)
+ file(GLOB_RECURSE JSON_SOURCES
+	${CMAKE_SOURCE_DIR}/lib/json/nlohmann/*.hpp
+	)
+	
+message("JSON Sources: "  ${JSON_SOURCES}) 
+include_directories(${CMAKE_SOURCE_DIR}/lib/json/)	
+
+  ######### Cereal (Serialization Library)
+# file(GLOB_RECURSE CEREAL_SOURCES
+#	${CMAKE_SOURCE_DIR}/lib/cereal/*.hpp
+#	)
+#	
+#message("Cereal Sources: "  ${CEREAL_SOURCES}) 
+#include_directories(${CMAKE_SOURCE_DIR}/lib/cereal/)	
  
 #add an executable for anything that will turn into an exe or whatever other executable format
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES} )
 target_link_libraries(HoplonSimulator SDL2::Main SDL2::Image SDL2::TTF)
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES})
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES})
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

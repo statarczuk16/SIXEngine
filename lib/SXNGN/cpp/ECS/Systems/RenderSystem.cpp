@@ -1,5 +1,5 @@
 #include <ECS/Systems/RenderSystem.hpp>
-#include <ECS/Components/Renderable.hpp>
+
 #include <ECS/Core/Coordinator.hpp>
 #include <fstream>
 #include <Database.h>
@@ -14,6 +14,8 @@ using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
 using ECS_Camera = SXNGN::ECS::Components::Camera;
 using Gameutils = SXNGN::Gameutils;
+
+using RenderLayer = SXNGN::ECS::Components::RenderLayer;
 
 
 	void Renderer_System::Init()
@@ -108,58 +110,86 @@ using Gameutils = SXNGN::Gameutils;
 		//(Renders Renderables to screen)
 		SDL_Rect render_quad = { 0,0,0,0 };
 		auto it = m_actable_entities.begin();
+		std::vector<const Renderable*> renderables_ground_layer;
+		std::vector<const Renderable*> renderables_object_layer;
+		std::vector<const Renderable*> renderables_air_layer;
+		std::vector<const Renderable*> renderables_ui_layer;
 		//for (auto const& entity : m_actable_entities)
 		while (it != m_actable_entities.end())
 		{
 			auto const& entity = *it;
 			it++;
 			//Search for Pre-Renderables
-			ECS_Component* data = gCoordinator.TryGetComponent(entity, ComponentTypeEnum::RENDERABLE);
-			Renderable* renderable_ptr;
-			if (data && data->get_component_type() == ComponentTypeEnum::RENDERABLE)
-			{
-				renderable_ptr = (Renderable*)data;
-			}
-			else
-			{
-				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Renderable of Entity ID %2d is not a renderable!", entity);
-				continue;
-			}
-			Renderable renderable = *renderable_ptr;
-
-			//Mutex go here - don't need pointer anymore
-			//Do not ever free any component ptr retrieved from coordinator!!!
-
-			//If the renderable is on screen (within camera lens)
-			if (object_in_view(camera, renderable.bounding_box_))
-			{
-
-				SDL_Rect camera_lens = determine_camera_lens_unscaled(camera);
-				//get the position of this object with respect to the camera lens
-				int texture_pos_wrt_cam_x = renderable.bounding_box_.x - camera_lens.x;
-				int texture_pos_wrt_cam_y = renderable.bounding_box_.y - camera_lens.y;
-
-				//inefficient, but here for debug/readbility
-				renderable.bounding_box_.x = texture_pos_wrt_cam_x;
-				renderable.bounding_box_.y = texture_pos_wrt_cam_y;
-
-
-				renderable.sprite_map_texture_
-					->render2(renderable.bounding_box_, renderable.tile_map_snip_);
-			}
-		
-			if (renderable.sprite_map_texture_ != nullptr)
-			{
-				renderable.sprite_map_texture_->render2(renderable.bounding_box_, renderable.tile_map_snip_);
-			}
-			else
-			{
-				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Entity ID %2d is null!", entity);
-				
-			}
+			const ECS_Component* data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::RENDERABLE);
+			const Renderable* renderable_ptr = static_cast<const Renderable*>(data);
 			
+			switch (renderable_ptr->render_layer_)
+			{
+			case RenderLayer::AIR_LAYER: renderables_air_layer.push_back(renderable_ptr); break;
+			case RenderLayer::GROUND_LAYER: renderables_ground_layer.push_back(renderable_ptr); break;
+			case RenderLayer::OBJECT_LAYER: renderables_object_layer.push_back(renderable_ptr); break;
+			case RenderLayer::UI_LAYER: renderables_ui_layer.push_back(renderable_ptr); break;
+				default : 
+				{
+					printf("RenderSystem: Renderable %s has unknown RenderLayer\n", renderable_ptr->renderable_name_.c_str());
+					abort();
+				}
+			}
+		}
 
+		//Order of these matters. UI should appear over ground, etc
+		for (auto renderable : renderables_ground_layer)
+		{
+			Render(renderable, camera);
+		}
+		for (auto renderable : renderables_object_layer)
+		{
+			Render(renderable, camera);
+		}
+		for (auto renderable : renderables_air_layer)
+		{
+			Render(renderable, camera);
+		}
+		for (auto renderable : renderables_ui_layer)
+		{
+			Render(renderable, camera);
+		}
+		
+	}
 
+	void Renderer_System::Render(const Renderable* renderable, ECS_Camera camera)
+	{
+		SDL_Rect bounding_box;
+		bounding_box.x = renderable->x_;
+		bounding_box.y = renderable->y_;
+		bounding_box.w = renderable->tile_map_snip_.w;
+		bounding_box.h = renderable->tile_map_snip_.h;
+		//If the renderable is on screen (within camera lens)
+		if (object_in_view(camera, bounding_box))
+		{
+
+			SDL_Rect camera_lens = determine_camera_lens_unscaled(camera);
+			//get the position of this object with respect to the camera lens
+			int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
+			int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
+
+			//inefficient, but here for debug/readbility
+			SDL_Rect render_quad;
+			render_quad.x = texture_pos_wrt_cam_x;
+			render_quad.y = texture_pos_wrt_cam_y;
+			render_quad.w = bounding_box.w;
+			render_quad.h = bounding_box.h;
+
+			if (renderable->sprite_map_texture_ != nullptr)
+			{
+				renderable->sprite_map_texture_
+					->render2(render_quad, renderable->tile_map_snip_);
+			}
+			else
+			{
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable->renderable_name_);
+				abort();
+			}
 		}
 	}
 
@@ -198,8 +228,8 @@ using Gameutils = SXNGN::Gameutils;
 			}
 			Pre_Renderable pre_renderable = *pre_renderable_ptr;
 
-			std::string factory_name = pre_renderable.sprite_factory_name;
-			std::string sprite_type = pre_renderable.sprite_factory_sprite_type;
+			std::string factory_name = pre_renderable.sprite_factory_name_;
+			std::string sprite_type = pre_renderable.sprite_factory_sprite_type_;
 
 			SXNGN::ECS::Components::Sprite_Factory sprite_factory_component;
 			//fixme - move sprite factories into singleton components
@@ -212,7 +242,7 @@ using Gameutils = SXNGN::Gameutils;
 				if (data!=nullptr && data->get_component_type() == ComponentTypeEnum::SPRITE_FACTORY)
 				{
 					factory = (Sprite_Factory*)data;
-					if (factory->sprite_factory_name == factory_name)
+					if (factory->sprite_factory_name_ == factory_name)
 					{
 						found_sprite_factory = true;
 						sprite_factory_component = *factory;
@@ -229,32 +259,39 @@ using Gameutils = SXNGN::Gameutils;
 			//But don't delete... maybe someone will create that Sprite_Factory in the future
 			if (!found_sprite_factory)
 			{
-				printf("Sprite Factory doesn't exist: %s\n", pre_renderable.sprite_factory_name.c_str());
+				printf("Sprite Factory doesn't exist: %s\n", pre_renderable.sprite_factory_name_.c_str());
 				continue;
 			}
 			else
 			{
 				//See if the factory has the data needed to process the sprite type of the Pre_Renderable
-				if (sprite_factory_component.tile_name_string_to_rect_map_.count(pre_renderable.sprite_factory_sprite_type) > 0)
+				if (sprite_factory_component.tile_name_string_to_rect_map_.count(pre_renderable.sprite_factory_sprite_type_) > 0)
 				{
-					Renderable* renderable_component = new Renderable();
-					auto tile_snip_box = sprite_factory_component.tile_name_string_to_rect_map_[pre_renderable.sprite_factory_sprite_type];
-					SDL_Rect collision_box;
-					collision_box.x = (int) pre_renderable.x;
-					collision_box.y = (int) pre_renderable.y;
-					collision_box.w = (int) tile_snip_box->w;
-					collision_box.h = (int) tile_snip_box->h;
-
-					renderable_component->bounding_box_ = collision_box;
-					renderable_component->tile_map_snip_ = *tile_snip_box;
-					auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name);
+					auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name_);
 					if (!sprite_sheet_texture)
 					{
-						printf("Sprite Factory::Texture Manager does not have texture: %s", pre_renderable.sprite_factory_name.c_str());
+						printf("Sprite Factory::Texture Manager does not have texture: %s", pre_renderable.sprite_factory_name_.c_str());
 						abort();
 					}
-					renderable_component->sprite_map_texture_ = sprite_sheet_texture;
-					renderable_component->tile_name_ = pre_renderable.sprite_factory_sprite_type + "_renderable";
+
+					auto tile_snip_box = sprite_factory_component.tile_name_string_to_rect_map_[pre_renderable.sprite_factory_sprite_type_];
+					Renderable* renderable_component = new Renderable(
+						pre_renderable.x,
+						pre_renderable.y,
+						*tile_snip_box,
+						pre_renderable.sprite_factory_name_,
+						pre_renderable.sprite_factory_sprite_type_,
+						sprite_sheet_texture,
+						pre_renderable.render_layer_,
+						pre_renderable.name_
+					);
+					
+					renderable_component->render_layer_ = pre_renderable.render_layer_;
+					if (renderable_component->render_layer_ == SXNGN::ECS::Components::RenderLayer::UNKNOWN)
+					{
+						printf("RenderSystem:: %s has unknown RenderLayer", renderable_component->renderable_name_.c_str());
+						abort();
+					}
 
 					//Build the apocalypse map sprite factory
 					
@@ -489,7 +526,7 @@ using Gameutils = SXNGN::Gameutils;
 			//Remove the Pre Sprit Factory Component from the Entity
 			//And add a Sprite Factory 
 			SXNGN::ECS::Components::Sprite_Factory* sprite_factory_component = new Sprite_Factory();
-			sprite_factory_component->sprite_factory_name = pre_factory.name_,
+			sprite_factory_component->sprite_factory_name_ = pre_factory.name_,
 				sprite_factory_component->tile_height_ = tile_height;
 			sprite_factory_component->tile_width_ = tile_width;
 			sprite_factory_component->tile_name_int_to_string_map_ = tile_name_int_to_string_map;

@@ -99,14 +99,14 @@ public:
 		}
 	}
 
-	std::vector<SXNGN::ECS::Components::ECS_Component*> get_all_entity_data(Entity entity)
+	std::vector<const ECS_Component*> Get_All_Entity_Data_Read_Only(Entity entity)
 	{
-		std::vector<SXNGN::ECS::Components::ECS_Component*> return_components;
+		std::vector<const ECS_Component*> return_components;
 		for (auto component_type : mComponentTypes)
 		{
 			ComponentTypeEnum component_type_enum = component_type.first;
 			auto comp_arr = (mComponentArrays[component_type_enum]);
-			auto component = comp_arr->TryGetData(entity);
+			auto component = comp_arr->TryGetDataReadOnly(entity);
 			if (component)
 			{
 				return_components.push_back(component);

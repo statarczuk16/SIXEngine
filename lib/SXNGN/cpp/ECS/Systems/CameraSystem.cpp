@@ -51,9 +51,14 @@
 		if (target_sprite->get_component_type() == SXNGN::ECS::Components::ComponentTypeEnum::RENDERABLE)
 		{
 			SXNGN::ECS::Components::Renderable *target_sprite_renderable = (SXNGN::ECS::Components::Renderable*) target_sprite;
-			
-			camera->set_position_actual(target_sprite_renderable->bounding_box_);
-			SDL_Rect position_scaled = target_sprite_renderable->bounding_box_;
+			SDL_Rect position; 
+			position.x = target_sprite_renderable->x_;
+			position.y = target_sprite_renderable->y_;
+			position.w = target_sprite_renderable->tile_map_snip_.w;
+			position.h = target_sprite_renderable->tile_map_snip_.h;
+
+			camera->set_position_actual(position);
+			SDL_Rect position_scaled = position;
 			position_scaled.x *= SXNGN::Database::get_scale();
 			position_scaled.y *= SXNGN::Database::get_scale();
 			camera->set_position_scaled(position_scaled);

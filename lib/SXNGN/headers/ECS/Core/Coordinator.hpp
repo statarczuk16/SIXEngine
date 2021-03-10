@@ -41,9 +41,9 @@ public:
 		mSystemManager->EntityDestroyed(entity);
 	}
 
-	std::vector<SXNGN::ECS::Components::ECS_Component> get_all_entity_data(Entity entity)
+	std::vector<const ECS_Component*> Get_All_Entity_Data_Read_Only(Entity entity)
 	{
-		
+		return mComponentManager->Get_All_Entity_Data_Read_Only(entity);
 	}
 
 	// Component methods

@@ -1,13 +1,14 @@
 #pragma warning(N:4596)
 
-#include "ECS/Components/Renderable.hpp"
-#include "ECS/Components/UserInput.hpp"
+
 #include "ECS/Core/Coordinator.hpp"
 #include "ECS/Systems/RenderSystem.hpp"
 #include "ECS/Systems/MovementSystem.hpp"
 #include "ECS/Systems/UserInputSystem.hpp"
-#include <ECS/Components/Collision.hpp>
-#include <ECS/Components/Camera.hpp>
+#include <ECS/Components/Components.hpp>
+#include <ECS/Utilities/Entity_Builder_Utils.hpp>
+#include <ECS/Utilities/JSON_Utils.hpp>
+
 #include <chrono>
 #include <random>
 #include <Database.h>
@@ -16,8 +17,10 @@
 #include <SDL.h>
 #include <SDL_image.h>
 #include<kiss_sdl.h>
-
+#include <nlohmann/json.hpp>
 #include <Timer.h>
+#include <fstream>
+#include <tuple>
 
 
 Coordinator gCoordinator;
@@ -25,6 +28,8 @@ Coordinator gCoordinator;
 static bool quit = false;
 
 std::string g_media_folder = SXNGN::BAD_STRING_RETURN;//todo put in database?
+
+std::string g_save_folder = SXNGN::BAD_STRING_RETURN;//todo put in database?
 
 SDL_Renderer* gRenderer = NULL;
 
@@ -47,8 +52,10 @@ using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
 using Collisionable = SXNGN::ECS::Components::Collisionable;
+using Tile = SXNGN::ECS::Components::Tile;
 using Gameutils = SXNGN::Gameutils;
-
+using json = nlohmann::json;
+using entity_builder = SXNGN::ECS::Entity_Builder_Utils;
 
 void QuitHandler(Event& event)
 {
@@ -86,13 +93,22 @@ bool init()
 			printf("Warning: Linear texture filtering not enabled!");
 		}
 
-		g_media_folder = "uninit";
+		
 		g_media_folder = Gameutils::find_folder_in_project_string("media");
 		if (g_media_folder == SXNGN::BAD_STRING_RETURN)
 		{
 			std::cout << "Fatal: " << " Could not find media folder" << std::endl;
 			return 0;
 		}
+
+		g_save_folder = Gameutils::find_folder_in_project_string("save");
+		if (g_save_folder == SXNGN::BAD_STRING_RETURN)
+		{
+			std::cout << "Fatal: " << " Could not find save folder" << std::endl;
+			return 0;
+		}
+
+
 		std::string kiss_resource_folder = g_media_folder + "/kiss_resources/";
 		if (Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
 		{
@@ -144,6 +160,8 @@ int main(int argc, char* args[])
 	gCoordinator.Init(gRenderer);
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
 
+	
+
 	gCoordinator.AddEventListener(FUNCTION_LISTENER(Events::Window::QUIT, QuitHandler));
 
 
@@ -156,8 +174,10 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::INPUT_TAGS);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MOVEABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::COLLISION);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::TILE);
 
 
+	
 
 	//Sprite Factory Creator system looks for Pre_Sprite_Factories and uses them create Sprite_Factories
 	auto sprite_factory_creator_system = gCoordinator.RegisterSystem<Sprite_Factory_Creator_System>();
@@ -217,6 +237,23 @@ int main(int argc, char* args[])
 	}
 	movement_system->Init();
 
+	json j2 = {
+  {"pi", 3.141},
+  {"happy", true},
+  {"name", "Niels"},
+  {"nothing", nullptr},
+  {"answer", {
+	{"everything", 42}
+  }},
+  {"list", {1, 0, 2}},
+  {"object", {
+	{"currency", "USD"},
+	{"value", 42.99}
+  }}
+	};
+
+	std::cout << j2;
+
 
 	SDL_Event e;
 
@@ -239,27 +276,41 @@ int main(int argc, char* args[])
 	apocalypse_map_pre->tile_manifest_path_ = apoc_tile_manifest_path;
 	gCoordinator.AddComponent(apoc_map_pre_entity, apocalypse_map_pre);
 
-	//Build a tile to render
-	auto pre_renderable_test_entity = gCoordinator.CreateEntity();
-	SXNGN::ECS::Components::Pre_Renderable* pre_renderable = new Pre_Renderable();
-	pre_renderable->sprite_factory_name = "APOCALYPSE_MAP";
-	pre_renderable->sprite_factory_sprite_type = "GUNMAN_1";
-	gCoordinator.AddComponent(pre_renderable_test_entity, pre_renderable);
-	SXNGN::ECS::Components::Moveable* moveable = new Moveable();
-	moveable->m_pos_x_m = 0.0;
-	moveable->m_pos_y_m = 0.0;
+	Entity test_person = entity_builder::Create_Person(gCoordinator, 0, 0, "APOCALYPSE_MAP", "GUNMAN_1", true);
 
-	moveable->moveable_type_ = SXNGN::ECS::Components::MoveableType::VELOCITY;
-	moveable->m_speed_m_s = 20;
-	gCoordinator.AddComponent(pre_renderable_test_entity, moveable);
-	Collisionable* collision = new Collisionable();
-	collision->collision_box_.x = round(moveable->m_pos_x_m);
-	collision->collision_box_.y = round(moveable->m_pos_y_m);
-	gCoordinator.AddComponent(pre_renderable_test_entity, collision);
-	SXNGN::ECS::Components::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
-	input_tags_comp->input_tags_.insert(SXNGN::ECS::Components::User_Input_Tags::WASD_CONTROL);
-	input_tags_comp->input_tags_.insert(SXNGN::ECS::Components::User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
-	gCoordinator.AddComponent(pre_renderable_test_entity, input_tags_comp);
+	Entity test_Tile = entity_builder::Create_Tile(gCoordinator, 0, 0, "APOCALYPSE_MAP", "ROCK_GROUND", SXNGN::ECS::Components::CollisionType::NONE);
+
+	//todo save utility or game state
+	std::string savefile = g_save_folder + "/save1.json";
+	std::ifstream ifs(savefile);
+	json jf = json::parse(ifs);
+	std::cout << jf << std::endl;
+
+	std::tuple<std::vector<Pre_Renderable>, std::vector<Collisionable>, std::vector<Tile>> game_map;
+	for (auto& [key, val] : jf.items())
+	{
+		std::cout << "key: " << key << ", value:" << val << '\n';
+		if (key == "map")
+		{
+			game_map = SXNGN::ECS::JSON_Utils::json_to_tile_batch(val);
+		}
+	}
+
+	auto game_map_pre_renders = std::get<0>(game_map);
+	auto game_map_collisionables = std::get<1>(game_map);
+	auto game_map_tiles = std::get<2>(game_map);
+
+	for (int i = 0; i < game_map_pre_renders.size(); i++)
+	{
+		auto map_tile_entity = gCoordinator.CreateEntity();
+		Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
+		gCoordinator.AddComponent(map_tile_entity, pre_render, true);
+		Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
+		gCoordinator.AddComponent(map_tile_entity, collisionable, true);
+		Tile* tile = new Tile(game_map_tiles.at(i));
+		gCoordinator.AddComponent(map_tile_entity, tile, true);
+	}
+
 
 
 	SDL_Rect camera_lens;

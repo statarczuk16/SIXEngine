@@ -1,5 +1,6 @@
 #pragma once
 
+#include <ECS/Components/Renderable.hpp>
 #include "ECS/Core/System.hpp"
 #include <memory>
 #include <SDL.h>
@@ -8,6 +9,7 @@
 
 class Event;
 using ECS_Camera = SXNGN::ECS::Components::Camera;
+using Renderable = SXNGN::ECS::Components::Renderable;
 
 
 class Renderer_System : public System
@@ -24,6 +26,8 @@ private:
 	SDL_Rect determine_camera_lens_scaled(ECS_Camera camera);
 
 	SDL_Rect determine_camera_lens_unscaled(ECS_Camera camera);
+
+	void Render(const Renderable* renderable, ECS_Camera camera);
 
 };
 

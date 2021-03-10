@@ -85,7 +85,7 @@ SXNGN::Tile::Tile(
 
 	//Get the tile type
 	tile_type_ = tile_type;
-	tile_name_ = tile_name;
+	renderable_name_ = tile_name;
 
 	tile_texture_ = tileTexture;
 }
@@ -105,7 +105,7 @@ SXNGN::Tile::Tile(
 
 	//Get the tile type
 	tile_type_ = tile_type;
-	tile_name_ = tile_name;
+	renderable_name_ = tile_name;
 
 	tile_texture_ = tileTexture;
 }
@@ -115,7 +115,7 @@ SXNGN::Tile::Tile(
 
 std::string SXNGN::Tile::getTileName()
 {
-	return tile_name_;
+	return renderable_name_;
 }
 
 SXNGN::TileType SXNGN::Tile::getType()

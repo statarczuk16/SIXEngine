@@ -7,7 +7,6 @@
 void Movement_System::Init()
 {
 	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Renderer_System Init");
-
 }
 
 //fixme
@@ -78,8 +77,8 @@ void Movement_System::Update_Position(Moveable* moveable, Entity moveable_id, fl
 		{
 			
 			Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox.first);
-			render_ptr->bounding_box_.x = round(moveable->m_pos_x_m);
-			render_ptr->bounding_box_.y = round(moveable->m_pos_y_m);
+			render_ptr->x_ = int(round(moveable->m_pos_x_m));
+			render_ptr->y_ = int(round(moveable->m_pos_y_m));
 			
 			if (moveable->m_pos_x_m != moveable->m_prev_pos_x_m || moveable->m_pos_y_m != moveable->m_prev_pos_y_m)
 			{

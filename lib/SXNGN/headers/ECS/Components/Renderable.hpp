@@ -6,6 +6,7 @@
 #include <ECS/Core/Component.hpp>
 #include <unordered_map>
 
+
 using ComponentTypeEnum = SXNGN::ECS::Components::ComponentTypeEnum;
 
 namespace SXNGN::ECS::Components {
@@ -21,6 +22,16 @@ namespace SXNGN::ECS::Components {
 		META_WIDTH,
 		META_SPRITE_SHEET_SOURCE,
 		UNKNOWN
+	};
+
+	enum class RenderLayer
+	{
+		UNKNOWN,
+		GROUND_LAYER,
+		OBJECT_LAYER,
+		AIR_LAYER,
+		UI_LAYER
+		
 	};
 
 	//just a fancy way of making this a constant/accessible elsewhhere
@@ -40,19 +51,42 @@ namespace SXNGN::ECS::Components {
 
 
 
+
 	/// <summary>
 	/// Contains all data needed to render a BASE_TILE_WIDTH*BASE_TILE_HEIGHT sprite
 	/// </summary>
 	struct Renderable : ECS_Component
 	{
-		Renderable()
+		Renderable(Sint32 x, Sint32 y, SDL_Rect tile_map_snip, std::string sprite_factory_name, std::string sprite_factory_sprite_type, std::shared_ptr<SXNGN::Texture> sprite_map_texture, Components::RenderLayer render_layer, std::string renderable_name = "Nameless Renderable")
 		{
 			component_type = ComponentTypeEnum::RENDERABLE;
+			x_ = x;
+			y_ = y;
+			tile_map_snip_ = tile_map_snip;
+			renderable_name_ = renderable_name;
+			sprite_map_texture_ = sprite_map_texture;
+			render_layer_ = render_layer;
+			sprite_factory_name_ = sprite_factory_name;
+			sprite_factory_sprite_type_ = sprite_factory_sprite_type;
 		}
-		SDL_Rect bounding_box_;
+
+		SDL_Rect get_bounding_box()
+		{
+			SDL_Rect box;
+			box.x = x_;
+			box.y = y_;
+			box.w = tile_map_snip_.w;
+			box.h = tile_map_snip_.h;
+			return box;
+		}
+		//SDL_Rect bounding_box_;
+		Sint32 x_, y_;
 		SDL_Rect tile_map_snip_;
-		std::string tile_name_;
+		std::string renderable_name_;
 		std::shared_ptr<SXNGN::Texture> sprite_map_texture_;
+		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
+		std::string sprite_factory_name_;//path to the sprite sheet to create from
+		std::string sprite_factory_sprite_type_;//name of the sprite to use
 	};
 
 	/// <summary>
@@ -60,17 +94,49 @@ namespace SXNGN::ECS::Components {
 	/// </summary>
 	struct Pre_Renderable : ECS_Component
 	{
-		Pre_Renderable()
+		Pre_Renderable(Sint32 x_in, Sint32 y_in, std::string sprite_sheet, std::string sprite_name, Components::RenderLayer render_layer, std::string name = "Unnamed Renderable")
 		{
+			sprite_factory_name_ = sprite_sheet;
+			sprite_factory_sprite_type_ = sprite_name;
+			render_layer_ = render_layer;
+			x = x_in;
+			y = y_in;
+			name_ = name;
 			component_type = ComponentTypeEnum::PRE_RENDERABLE;
-			sprite_factory_name = SXNGN::BAD_STRING_RETURN;
-			sprite_factory_sprite_type = SXNGN::BAD_STRING_RETURN;
-			x = 0;
-			y = 0;
 		}
-		std::string sprite_factory_name;//path to the sprite sheet to create from
-		std::string sprite_factory_sprite_type;//name of the sprite to use
-		size_t x, y;
+		std::string sprite_factory_name_;//path to the sprite sheet to create from
+		std::string sprite_factory_sprite_type_;//name of the sprite to use
+		std::string name_;
+		Sint32 x, y;
+		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
+	};
+
+	
+
+	/// <summary>
+	/// Contains all data needed to render a collection
+	/// </summary>
+	struct Renderable_Batch : ECS_Component
+	{
+		Renderable_Batch()
+		{
+			component_type = ComponentTypeEnum::RENDERABLE_BATCH;
+		}
+		std::vector<Renderable> renderables;
+	};
+
+
+
+	/// <summary>
+	/// Contains all the data needed to tell the Renderable_Creator_System how to create a Renderable from this
+	/// </summary>
+	struct Pre_Renderable_Batch : ECS_Component
+	{
+		Pre_Renderable_Batch()
+		{
+			component_type = ComponentTypeEnum::PRE_RENDERABLE_BATCH;
+		}
+		std::vector<Pre_Renderable> pre_renderables;
 	};
 
 	/// <summary>
@@ -83,7 +149,7 @@ namespace SXNGN::ECS::Components {
 			component_type = ComponentTypeEnum::SPRITE_FACTORY;
 		}
 
-		std::string sprite_factory_name;
+		std::string sprite_factory_name_;
 		//From manifest, the width and height of tiles in the sprite sheet (pixels)
 		size_t tile_width_, tile_height_;
 
