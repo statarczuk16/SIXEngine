@@ -5,7 +5,7 @@
 #include <cmath>
 
 
-SXNGN::Entity::Entity(std::shared_ptr< SXNGN::Tile> tile, int speed) : Object(tile, speed)
+SXNGN::PhysicsObj::PhysicsObj(std::shared_ptr< SXNGN::Tile> tile, int speed) : Object(tile, speed)
 {
 	//Initialize the collision box
 	collision_box_.x = 0;
@@ -32,7 +32,7 @@ SXNGN::Entity::Entity(std::shared_ptr< SXNGN::Tile> tile, int speed) : Object(ti
 	name_ = tile->getTileName();
 }
 
-void SXNGN::Entity::Entity::handleEvent(SDL_Event& e)
+void SXNGN::PhysicsObj::PhysicsObj::handleEvent(SDL_Event& e)
 {
 	//If a key was pressed
 	if (e.type == SDL_KEYDOWN && e.key.repeat == 0)
@@ -60,7 +60,7 @@ void SXNGN::Entity::Entity::handleEvent(SDL_Event& e)
 	}
 }
 
-void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, float time_step)
+void SXNGN::PhysicsObj::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, float time_step)
 {
 
 
@@ -124,7 +124,7 @@ void SXNGN::Entity::move(std::vector<SXNGN::Tile> tiles, SDL_Rect level_bounds, 
 
 		if ((phys_m_vel_x_m_s_ + phys_m_vel_y_m_s_) != vel_cached || (f_app_n_x_ + f_app_n_y_) != force_cached || (m_acc_x_m_s_s_ + m_acc_y_m_s_s_) != acc_cached)
 		{
-			std::cout << "Entity: " << name_ << " timestep: " << time_step << " movement: " << " force: " << f_app_n_x_ << " vel: " << phys_m_vel_x_m_s_ << " acc " << m_acc_x_m_s_s_
+			std::cout << "PhysicsObj: " << name_ << " timestep: " << time_step << " movement: " << " force: " << f_app_n_x_ << " vel: " << phys_m_vel_x_m_s_ << " acc " << m_acc_x_m_s_s_
 				<< "( " << x_app_acc_m_s_s << " + " << x_friction_acc_m_s_s << ") "
 				<< " position (dlb): " << phys_m_vel_x_m_s_ << " position (int): " << collision_box_.x
 				<< std::endl;

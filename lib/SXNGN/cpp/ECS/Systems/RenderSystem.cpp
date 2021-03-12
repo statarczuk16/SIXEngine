@@ -12,7 +12,7 @@ using Pre_Sprite_Factory = SXNGN::ECS::Components::Pre_Sprite_Factory;
 using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
 using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
 using Renderable = SXNGN::ECS::Components::Renderable;
-using ECS_Camera = SXNGN::ECS::Components::Camera;
+using ECS_Camera = SXNGN::ECS::Components::CameraComponent;
 using Gameutils = SXNGN::Gameutils;
 
 using RenderLayer = SXNGN::ECS::Components::RenderLayer;

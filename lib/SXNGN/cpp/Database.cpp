@@ -3,7 +3,7 @@
 
 Uint8 SXNGN::Database::scale_;
 Uint8 SXNGN::Database::max_fps_;
-std::shared_ptr<Coordinator> SXNGN::Database::ecs_coordinator_;
+std::shared_ptr<SXNGN::ECS::Core::Coordinator> SXNGN::Database::ecs_coordinator_;
 
 SXNGN::Database::Database()
 {
@@ -63,12 +63,12 @@ Uint8  SXNGN::Database::get_screen_ticks_per_frame()
  }
 
 
-std::shared_ptr<Coordinator> SXNGN::Database::get_coordinator()
+std::shared_ptr<SXNGN::ECS::Core::Coordinator> SXNGN::Database::get_coordinator()
 {
 	return ecs_coordinator_;
 }
 
- void SXNGN::Database::set_coordinator(std::shared_ptr<Coordinator> ecs_coordinator)
+ void SXNGN::Database::set_coordinator(std::shared_ptr<SXNGN::ECS::Core::Coordinator> ecs_coordinator)
 {
 	ecs_coordinator_ = ecs_coordinator;
 }

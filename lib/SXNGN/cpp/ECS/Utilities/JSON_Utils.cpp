@@ -5,72 +5,125 @@
 
 namespace SXNGN {
 	namespace ECS {
-		std::tuple<std::vector<Components::Pre_Renderable>, std::vector<Components::Collisionable>, std::vector<Components::Tile>>
-			JSON_Utils::json_to_tile_batch(nlohmann::json jf)
-		{
-			int tiles_wide = 0;
-			int tiles_high = 0;
-			std::string default_tile = SXNGN::BAD_STRING_RETURN;
-			std::string default_tileset = SXNGN::BAD_STRING_RETURN;
-			printf("Reading tile_batch from JSON\n");
-			for (auto& [key, val] : jf.items())
+		namespace Components {
+			std::tuple<std::vector<Components::Pre_Renderable>, std::vector<Components::Collisionable>, std::vector<Components::Tile>>
+				JSON_Utils::json_to_tile_batch(nlohmann::json jf)
 			{
-				if (key == "tiles_width")
+				int tiles_wide = 0;
+				int tiles_high = 0;
+				std::string default_tile = SXNGN::BAD_STRING_RETURN;
+				std::string default_tileset = SXNGN::BAD_STRING_RETURN;
+				printf("Reading tile_batch from JSON\n");
+				for (auto& [key, val] : jf.items())
 				{
-					tiles_wide = val.get<int>();
+					if (key == "tiles_width")
+					{
+						tiles_wide = val.get<int>();
+					}
+					else if (key == "tiles_height")
+					{
+						tiles_high = val.get<int>();
+					}
+					else if (key == "default_tileset")
+					{
+						default_tileset = val.get<std::string>();
+					}
+					else if (key == "default_tile")
+					{
+						default_tile = val.get<std::string>();
+					}
+					else
+					{
+						printf("!!!JSON_Utils::Error reading tile_batch with: \n");
+						std::cout << "key: " << key << ", value:" << val << '\n';
+						printf("!!! \n");
+					}
 				}
-				else if (key == "tiles_height")
+
+				printf("Preparing tile batch with:\n");
+				printf("Tileset: %s\n", default_tileset.c_str());
+				printf("Base tile: %s\n", default_tile.c_str());
+				printf("Width: %d\n", tiles_wide);
+				printf("Height: %d\n", tiles_high);
+
+				std::vector<Components::Pre_Renderable> pre_renders;
+				std::vector<Components::Collisionable> collisionables;
+				std::vector<Components::Tile> tiles;
+
+				for (int h = 0; h < tiles_high; h++)
 				{
-					tiles_high = val.get<int>();
+					for (int w = 0; w < tiles_wide; w++)
+					{
+						Sint32 x_pixels = w * SXNGN::BASE_TILE_WIDTH;
+						Sint32 y_pixels = h * SXNGN::BASE_TILE_HEIGHT;
+						SDL_Rect collision_box;
+						collision_box.x = x_pixels;
+						collision_box.y = y_pixels;
+						collision_box.w = SXNGN::BASE_TILE_WIDTH;
+						collision_box.h = SXNGN::BASE_TILE_HEIGHT;
+						auto pre_render = new Components::Pre_Renderable(x_pixels, y_pixels, default_tileset, default_tile, Components::RenderLayer::GROUND_LAYER);
+						auto collision = Entity_Builder_Utils::Create_Collisionable(collision_box, Components::CollisionType::NONE);
+						auto tile = Entity_Builder_Utils::Create_Tile(w, h);
+						pre_renders.push_back(*pre_render);
+						collisionables.push_back(*collision);
+						tiles.push_back(*tile);
+					}
 				}
-				else if (key == "default_tileset")
+				return std::make_tuple(pre_renders, collisionables, tiles);
+			}
+
+			/// <summary>
+			/// Take in a pointer to a component, return JSON conversion
+			/// </summary>
+			/// <param name="component_ptr"></param>
+			/// <returns></returns>
+			nlohmann::json JSON_Utils::component_to_json(const ECS_Component* component_ptr)
+			{
+				json js;
+				switch (component_ptr->component_type)
 				{
-					default_tileset = val.get<std::string>();
+				case ComponentTypeEnum::RENDERABLE :
+				{
+					Renderable component = *static_cast<const Renderable*>(component_ptr);
+					js = component;
+					return js;
+					break;
 				}
-				else if (key == "default_tile")
+				case ComponentTypeEnum::PRE_RENDERABLE:
 				{
-					default_tile = val.get<std::string>();
+					Pre_Renderable component = *static_cast<const Pre_Renderable*>(component_ptr);
+					js = component;
+					return js;
+					break;
 				}
-				else
-				{
-					printf("!!!JSON_Utils::Error reading tile_batch with: \n");
-					std::cout << "key: " << key << ", value:" << val << '\n';
-					printf("!!! \n");
 				}
 			}
 
-			printf("Preparing tile batch with:\n");
-			printf("Tileset: %s\n",default_tileset.c_str());
-			printf("Base tile: %s\n", default_tile.c_str());
-			printf("Width: %d\n", tiles_wide);
-			printf("Height: %d\n", tiles_high);
-
-			std::vector<Components::Pre_Renderable> pre_renders;
-			std::vector<Components::Collisionable> collisionables;
-			std::vector<Components::Tile> tiles;
-
-			for (int h = 0; h < tiles_high; h++)
+			ECS_Component* JSON_Utils::json_to_component(nlohmann::json json)
 			{
-				for (int w = 0; w < tiles_wide; w++)
+				auto component_type = json.find("component_type");
+				if (component_type == json.end())
 				{
-					Sint32 x_pixels = w * SXNGN::BASE_TILE_WIDTH;
-					Sint32 y_pixels = h * SXNGN::BASE_TILE_HEIGHT;
-					SDL_Rect collision_box;
-					collision_box.x = x_pixels;
-					collision_box.y = y_pixels;
-					collision_box.w = SXNGN::BASE_TILE_WIDTH;
-					collision_box.h = SXNGN::BASE_TILE_HEIGHT;
-					auto pre_render = new Components::Pre_Renderable(x_pixels, y_pixels, default_tileset, default_tile, Components::RenderLayer::GROUND_LAYER);
-					auto collision = Entity_Builder_Utils::Create_Collisionable(collision_box, Components::CollisionType::NONE);
-					auto tile = Entity_Builder_Utils::Create_Tile(w, h);
-					pre_renders.push_back(*pre_render);
-					collisionables.push_back(*collision);
-					tiles.push_back(*tile);
+					return nullptr;
+				}
+				std::string component_type_str = *component_type;
+				 auto find_type = ECS::Components::component_type_string_to_enum().find(component_type_str);
+				 if (find_type == ECS::Components::component_type_string_to_enum().end())
+				 {
+					 return nullptr;
+				 }
+				ComponentTypeEnum component_type_enum = find_type->second;
+				switch (component_type_enum)
+				{
+					case ComponentTypeEnum::PRE_RENDERABLE:
+					{
+						auto component_inst = json.get<Pre_Renderable>();
+						ECS_Component* component_ptr = new Pre_Renderable(component_inst);
+						return component_ptr;
+						break;
+					}
 				}
 			}
-			return std::make_tuple(pre_renders, collisionables, tiles);
 		}
-
-		
 	}
 }

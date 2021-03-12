@@ -9,11 +9,11 @@
 #include "../../headers/gameutils.h"
 
 namespace SXNGN {
-	class Entity : public Object
+	class PhysicsObj : public Object
 	{
 	public:
 		//Initializes the variables
-		Entity(std::shared_ptr<Tile> tile, int speed);
+		PhysicsObj(std::shared_ptr<Tile> tile, int speed);
 
 		virtual void handleEvent(SDL_Event& e);
 

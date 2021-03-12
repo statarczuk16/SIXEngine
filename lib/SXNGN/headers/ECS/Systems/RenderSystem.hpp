@@ -4,11 +4,11 @@
 #include "ECS/Core/System.hpp"
 #include <memory>
 #include <SDL.h>
-#include <ECS/Components/Camera.hpp>
+#include <ECS/Components/CameraComponent.hpp>
 
 
 class Event;
-using ECS_Camera = SXNGN::ECS::Components::Camera;
+using ECS_Camera = SXNGN::ECS::Components::CameraComponent;
 using Renderable = SXNGN::ECS::Components::Renderable;
 
 

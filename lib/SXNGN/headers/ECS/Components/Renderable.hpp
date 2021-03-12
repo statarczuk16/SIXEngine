@@ -1,11 +1,13 @@
 #pragma once
 
 #include <SDL.h>
-#include <Sprite/Tile.h>
+
 #include <memory>
 #include <ECS/Core/Component.hpp>
 #include <unordered_map>
-
+#include <nlohmann/json.hpp>
+#include <Texture.h>
+using nlohmann::json;
 
 using ComponentTypeEnum = SXNGN::ECS::Components::ComponentTypeEnum;
 
@@ -57,7 +59,7 @@ namespace SXNGN::ECS::Components {
 	/// </summary>
 	struct Renderable : ECS_Component
 	{
-		Renderable(Sint32 x, Sint32 y, SDL_Rect tile_map_snip, std::string sprite_factory_name, std::string sprite_factory_sprite_type, std::shared_ptr<SXNGN::Texture> sprite_map_texture, Components::RenderLayer render_layer, std::string renderable_name = "Nameless Renderable")
+		Renderable(Sint32 x, Sint32 y, SDL_Rect tile_map_snip, std::string sprite_factory_name, std::string sprite_factory_sprite_type, std::shared_ptr<Texture> sprite_map_texture, Components::RenderLayer render_layer, std::string renderable_name = "Nameless Renderable")
 		{
 			component_type = ComponentTypeEnum::RENDERABLE;
 			x_ = x;
@@ -83,11 +85,27 @@ namespace SXNGN::ECS::Components {
 		Sint32 x_, y_;
 		SDL_Rect tile_map_snip_;
 		std::string renderable_name_;
-		std::shared_ptr<SXNGN::Texture> sprite_map_texture_;
+		std::shared_ptr<Texture> sprite_map_texture_;
 		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
 		std::string sprite_factory_name_;//path to the sprite sheet to create from
 		std::string sprite_factory_sprite_type_;//name of the sprite to use
 	};
+
+	//note: saving as a pre-renderable. Can't convert the texture pointer to JSON, so it will have to go back through the factory pre-render -> render to get back to its state
+	inline void to_json(json& j, const Renderable& p) {
+		j = json{ {"component_type",component_type_enum_to_string()[ComponentTypeEnum::PRE_RENDERABLE]}, {"x", p.x_}, {"y", p.y_}, {"sprite_factory_name_", p.sprite_factory_name_}, {"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},  {"name_", p.renderable_name_},  {"render_layer_", p.render_layer_} };
+	}
+
+	inline void from_json(const json& j, Renderable& p) {
+		j.at("component_type").get_to(p.component_type);
+		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
+		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
+		j.at("name_").get_to(p.renderable_name_);
+		j.at("x").get_to(p.x_);
+		j.at("y").get_to(p.y_);
+		j.at("render_layer_").get_to(p.render_layer_);
+
+	}
 
 	/// <summary>
 	/// Contains all the data needed to tell the Renderable_Creator_System how to create a Renderable from this
@@ -111,7 +129,21 @@ namespace SXNGN::ECS::Components {
 		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
 	};
 
-	
+
+	inline void to_json(json& j, const Pre_Renderable& p) {
+		j = json{ {"component_type",p.component_type}, {"x", p.x}, {"y", p.y}, {"sprite_factory_name_", p.sprite_factory_name_}, {"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},  {"name_", p.name_},  {"render_layer_", p.render_layer_} };
+	}
+
+	inline void from_json(const json& j, Pre_Renderable& p) {
+		j.at("component_type").get_to(p.component_type);
+		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
+		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
+		j.at("name_").get_to(p.name_);
+		j.at("x").get_to(p.x);
+		j.at("y").get_to(p.y);
+		j.at("render_layer_").get_to(p.render_layer_);
+
+	}
 
 	/// <summary>
 	/// Contains all data needed to render a collection
@@ -158,7 +190,7 @@ namespace SXNGN::ECS::Components {
 		//where that string can go to a rect that is a tilesheet clip coordinate -- also used by Renderable_Creator_System to create a sprite from a name
 		std::map< std::string, std::shared_ptr<SDL_Rect>> tile_name_string_to_rect_map_;
 
-		std::shared_ptr<SXNGN::Texture> sprite_map_texture_;
+		std::shared_ptr<Texture> sprite_map_texture_;
 
 
 	};

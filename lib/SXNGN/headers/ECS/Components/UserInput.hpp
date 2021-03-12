@@ -54,9 +54,9 @@ namespace SXNGN::ECS::Components {
 	{
 	private:
 
-		//Camera::Camera(const Camera& source);
+		//CameraComponent::CameraComponent(const CameraComponent& source);
 
-		//Camera::Camera(Camera&& source);
+		//CameraComponent::CameraComponent(CameraComponent&& source);
 
 		static User_Input_State *instance_;
 		static std::mutex lock_;

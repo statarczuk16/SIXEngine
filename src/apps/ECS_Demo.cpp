@@ -54,7 +54,7 @@ using Renderable = SXNGN::ECS::Components::Renderable;
 using Collisionable = SXNGN::ECS::Components::Collisionable;
 using Tile = SXNGN::ECS::Components::Tile;
 using Gameutils = SXNGN::Gameutils;
-using json = nlohmann::json;
+using nlohmann::json;
 using entity_builder = SXNGN::ECS::Entity_Builder_Utils;
 
 void QuitHandler(Event& event)
@@ -292,7 +292,7 @@ int main(int argc, char* args[])
 		std::cout << "key: " << key << ", value:" << val << '\n';
 		if (key == "map")
 		{
-			game_map = SXNGN::ECS::JSON_Utils::json_to_tile_batch(val);
+			game_map = SXNGN::ECS::Components::JSON_Utils::json_to_tile_batch(val);
 		}
 	}
 
@@ -311,7 +311,16 @@ int main(int argc, char* args[])
 		gCoordinator.AddComponent(map_tile_entity, tile, true);
 	}
 
+	auto extracted = gCoordinator.Extract_Entity_As_JSON(1);
 
+	/**
+		json j = game_map_pre_renders;
+		std::cout << j << std::endl;
+
+	std::string savefile_out = g_save_folder + "/save2.json";
+	std::ofstream file(savefile_out);
+	file << j;
+	**/
 
 	SDL_Rect camera_lens;
 	camera_lens.h = SCREEN_HEIGHT;

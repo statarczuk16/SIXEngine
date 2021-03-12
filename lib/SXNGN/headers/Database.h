@@ -1,7 +1,10 @@
 #pragma once
-#include <ECS/Core/Coordinator.hpp>
+#include <SDL.h>
+#include <memory>
 
 namespace SXNGN {
+
+    namespace ECS::Core { class Coordinator; }
 
     class Database {
     public:
@@ -19,11 +22,9 @@ namespace SXNGN {
         static Uint8 get_screen_ticks_per_frame();
 
         
-        static std::shared_ptr<Coordinator> ecs_coordinator_;
-        static std::shared_ptr<Coordinator> get_coordinator();
-        static void set_coordinator(std::shared_ptr<Coordinator> ecs_coordinator);
-        
-
-        
+        static std::shared_ptr<ECS::Core::Coordinator> ecs_coordinator_;
+        static std::shared_ptr<ECS::Core::Coordinator> get_coordinator();
+        static void set_coordinator(std::shared_ptr<ECS::Core::Coordinator> ecs_coordinator);
+       
     };
 }

@@ -1,8 +1,10 @@
-#include <ECS/Systems/MovementSystem.hpp>
+
 #include<Collision.h>
 #include <ECS/Core/Coordinator.hpp>
 #include <Database.h>
+#include <ECS/Systems/MovementSystem.hpp>
 
+namespace SXNGN::ECS::System {
 
 void Movement_System::Init()
 {
@@ -37,7 +39,7 @@ void Movement_System::Update(float dt)
 		auto check_out_move = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::MOVEABLE);
 		if (check_out_move.first)
 		{
-			
+
 
 			//If no Collision, Update_Position_Without_Collision
 			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move.first);
@@ -50,10 +52,10 @@ void Movement_System::Update(float dt)
 	}
 }
 
-void Movement_System::Update_Position(Moveable* moveable, Entity moveable_id, float dt)
+void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, float dt)
 {
 	//SDL_Rect prev_pos = moveable->position_box_;
-	
+
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
 
 	switch (moveable->moveable_type_)
@@ -72,22 +74,22 @@ void Movement_System::Update_Position(Moveable* moveable, Entity moveable_id, fl
 			//printf("Renderable Entity %d: Pos(%g,%g) -> (%g,%g)\n", moveable_id, moveable->m_pos_x_m, moveable->m_pos_y_m, moveable->m_prev_pos_x_m, moveable->m_prev_pos_y_m);
 		}
 		auto moveable_renderbox = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::RENDERABLE);
-		
+
 		if (moveable_renderbox.first)
 		{
-			
+
 			Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox.first);
 			render_ptr->x_ = int(round(moveable->m_pos_x_m));
 			render_ptr->y_ = int(round(moveable->m_pos_y_m));
-			
+
 			if (moveable->m_pos_x_m != moveable->m_prev_pos_x_m || moveable->m_pos_y_m != moveable->m_prev_pos_y_m)
 			{
 				//printf("Renderable Entity: %2d Position: (%2d,%2d)\n", moveable_id, moveable->m_pos_x_m, moveable->m_prev_pos_x_m);
 			}
-			
+
 			gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_id, std::move(moveable_renderbox.second));
 		}
-		
+
 	}
 	case  MoveableType::FORCE:
 	{
@@ -95,6 +97,8 @@ void Movement_System::Update_Position(Moveable* moveable, Entity moveable_id, fl
 		//todo
 	}
 	}
+}
+
 }
 
 /**

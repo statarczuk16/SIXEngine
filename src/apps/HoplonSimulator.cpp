@@ -39,8 +39,8 @@ SDL_Rect g_screen_bounds;
 std::string g_media_folder = SXNGN::BAD_STRING_RETURN;
 
 //some entities
-		//Entity moves with acceleration
-std::shared_ptr< SXNGN::Entity> gunman_entity;
+		//PhysicsObj moves with acceleration
+std::shared_ptr< SXNGN::PhysicsObj> gunman_entity;
 //Object moves with constant velocity
 std::shared_ptr< SXNGN::Object> barrel_object;
 
@@ -295,7 +295,7 @@ int main(int argc, char* args[])
 			g_tile_handler_apocalpyse_map_->generateTileRef("GUNMAN_1");
 		if (gunman_tile)
 		{
-			gunman_entity = std::make_shared< SXNGN::Entity>(gunman_tile, 3000);
+			gunman_entity = std::make_shared< SXNGN::PhysicsObj>(gunman_tile, 3000);
 		}
 		else
 		{
