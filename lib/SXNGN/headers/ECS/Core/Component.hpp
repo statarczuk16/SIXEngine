@@ -20,7 +20,9 @@ namespace SXNGN::ECS::Components {
 	INPUT_TAGS,
 	COLLISION,
 	TILE,
-	EXTERN_ENTITY
+	JSON_ENTITY,
+	EXTERN_ENTITY,
+	EVENT,
 };
 
 	//convert enum to string for json purposes
@@ -37,8 +39,10 @@ namespace SXNGN::ECS::Components {
 			{ComponentTypeEnum::CAMERA,"CAMERA"},
 			{ComponentTypeEnum::MOVEABLE,"MOVEABLE"},
 			{ComponentTypeEnum::INPUT_CACHE,"INPUT_CACHE"},
+			{ComponentTypeEnum::INPUT_TAGS,"INPUT_TAGS"},
 			{ComponentTypeEnum::COLLISION,"COLLISION"},
 			{ComponentTypeEnum::TILE,"TILE"},
+			{ComponentTypeEnum::JSON_ENTITY,"JSON_ENTITY"},
 			{ComponentTypeEnum::EXTERN_ENTITY,"EXTERN_ENTITY"}
 
 		};
@@ -59,8 +63,10 @@ namespace SXNGN::ECS::Components {
 			{"CAMERA",ComponentTypeEnum::CAMERA},
 			{"MOVEABLE",ComponentTypeEnum::MOVEABLE},
 			{"INPUT_CACHE",ComponentTypeEnum::INPUT_CACHE},
+			{"INPUT_TAGS",ComponentTypeEnum::INPUT_TAGS},
 			{"COLLISION",ComponentTypeEnum::COLLISION},
 			{"TILE",ComponentTypeEnum::TILE},
+			{"JSON_ENTITY",ComponentTypeEnum::JSON_ENTITY},
 			{"EXTERN_ENTITY",ComponentTypeEnum::EXTERN_ENTITY}
 
 		};

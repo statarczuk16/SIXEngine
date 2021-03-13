@@ -72,6 +72,11 @@ namespace SXNGN::ECS::Components {
 			sprite_factory_sprite_type_ = sprite_factory_sprite_type;
 		}
 
+		Renderable()
+		{
+			component_type = ComponentTypeEnum::RENDERABLE;
+		}
+
 		SDL_Rect get_bounding_box()
 		{
 			SDL_Rect box;
@@ -97,7 +102,8 @@ namespace SXNGN::ECS::Components {
 	}
 
 	inline void from_json(const json& j, Renderable& p) {
-		j.at("component_type").get_to(p.component_type);
+		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
+		j.at("component_type").get_to(component_type_enum);
 		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
 		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
 		j.at("name_").get_to(p.renderable_name_);
@@ -122,6 +128,13 @@ namespace SXNGN::ECS::Components {
 			name_ = name;
 			component_type = ComponentTypeEnum::PRE_RENDERABLE;
 		}
+
+		//Need default constructor for JSON
+		Pre_Renderable()
+		{
+			component_type = ComponentTypeEnum::PRE_RENDERABLE;
+		}
+
 		std::string sprite_factory_name_;//path to the sprite sheet to create from
 		std::string sprite_factory_sprite_type_;//name of the sprite to use
 		std::string name_;
@@ -131,11 +144,12 @@ namespace SXNGN::ECS::Components {
 
 
 	inline void to_json(json& j, const Pre_Renderable& p) {
-		j = json{ {"component_type",p.component_type}, {"x", p.x}, {"y", p.y}, {"sprite_factory_name_", p.sprite_factory_name_}, {"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},  {"name_", p.name_},  {"render_layer_", p.render_layer_} };
+		j = json{ {"component_type",component_type_enum_to_string().at(p.component_type)}, {"x", p.x}, {"y", p.y}, {"sprite_factory_name_", p.sprite_factory_name_}, {"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},  {"name_", p.name_},  {"render_layer_", p.render_layer_} };
 	}
 
 	inline void from_json(const json& j, Pre_Renderable& p) {
-		j.at("component_type").get_to(p.component_type);
+		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
+		j.at("component_type").get_to(component_type_enum);
 		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
 		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
 		j.at("name_").get_to(p.name_);

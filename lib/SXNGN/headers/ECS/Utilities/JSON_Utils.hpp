@@ -1,6 +1,5 @@
 #pragma once
 
-#include <ECS/Core/Coordinator.hpp>
 #include <Constants.h>
 #include <filesystem>
 #include <ECS/Components/Components.hpp>
@@ -9,7 +8,7 @@
 namespace SXNGN {
 	namespace ECS {
 		namespace Components {
-			class JSON_Utils
+			class JSON_Utils 
 			{
 			public:
 				static std::tuple<std::vector<Components::Pre_Renderable>, std::vector<Components::Collisionable>, std::vector<Components::Tile>>

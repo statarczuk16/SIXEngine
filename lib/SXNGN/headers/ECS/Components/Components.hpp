@@ -8,3 +8,4 @@
 #include <ECS/Components/UserInput.hpp>
 #include <ECS/Components/Tile.hpp>
 #include <ECS/Components/ExternEntity.hpp>
+#include <ECS/Components/EventComponent.hpp>

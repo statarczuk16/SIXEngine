@@ -37,6 +37,27 @@ public:
 		--mLivingEntityCount;
 	}
 
+	/// <summary>
+	/// Do not make entity id available, but reset it
+	/// </summary>
+	/// <param name="entity"></param>
+	void DeactivateEntity(Entity entity)
+	{
+		assert(entity < MAX_ENTITIES && "Entity out of range.");
+		mSignatures[entity].reset();
+		//mAvailableEntities.push(entity);
+		--mLivingEntityCount;
+	}
+
+	/**
+	void ActivateEntity(Entity entity)
+	{
+		assert(mLivingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
+		++mLivingEntityCount;
+
+	}
+	**/
+
 	void SetSignature(Entity entity, Signature signature)
 	{
 		assert(entity < MAX_ENTITIES && "Entity out of range.");

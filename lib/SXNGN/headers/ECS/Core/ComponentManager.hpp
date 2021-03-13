@@ -50,6 +50,7 @@ public:
 	}
 
 
+
 	ECS_Component* GetComponent(Entity entity, ComponentTypeEnum component_type)
 	{
 		return GetComponentArray(component_type)->GetData(entity);
@@ -114,6 +115,30 @@ public:
 		}
 		return return_components;
 	}
+
+	/// <summary>
+	/// Get all of the components corresponding to an entity
+	/// REMOVES the components from the component manager, similiar to EntityDestroyed, except returns a pointer to the components
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <returns></returns>
+	std::vector<ECS_Component*> ExtractEntity(Entity entity)
+	{
+		std::vector<ECS_Component*> extracted_components;
+		for (auto component_type : mComponentTypes)
+		{
+			ComponentTypeEnum component_type_enum = component_type.first;
+			auto comp_arr = (mComponentArrays[component_type_enum]);
+			auto component = comp_arr->ExtractData(entity);
+			if (component)
+			{
+				extracted_components.push_back(component);
+			}
+		}
+		return extracted_components;
+
+	}
+
 
 
 private:

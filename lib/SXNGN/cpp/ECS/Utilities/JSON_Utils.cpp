@@ -96,6 +96,18 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				default :
+				{
+					std::string component_type_str = "Component type not in component_type_enum_to_string";
+					if (component_type_enum_to_string().count(component_ptr->component_type))
+					{
+						component_type_str = component_type_enum_to_string().at(component_ptr->component_type);
+					}
+
+					printf("JSON_Utils::component_to_json No conversion to JSON available for type %s\n", component_type_str.c_str());
+					js["component_type_"] = component_type_enum_to_string().at(component_ptr->component_type) + "_NO_JSON_CONVERSION";
+					return js;
+				}
 				}
 			}
 
@@ -115,6 +127,13 @@ namespace SXNGN {
 				ComponentTypeEnum component_type_enum = find_type->second;
 				switch (component_type_enum)
 				{
+					case ComponentTypeEnum::JSON_ENTITY:
+					{
+						auto component_inst = json.get<ExternJSONEntity>();
+						ECS_Component* component_ptr = new ExternJSONEntity(component_inst);
+						return component_ptr;
+						break;
+					}
 					case ComponentTypeEnum::PRE_RENDERABLE:
 					{
 						auto component_inst = json.get<Pre_Renderable>();

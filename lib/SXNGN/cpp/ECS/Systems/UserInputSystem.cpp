@@ -42,7 +42,7 @@
 			{
 				Update_Mouse_State(mouse_events, dt);
 			}
-
+		
 			auto it_inter = m_entities_of_interest.begin();
 			//Entities of interest are any entity that need user input
 			while (it_inter != m_entities_of_interest.end())
@@ -52,11 +52,14 @@
 
 				auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
 				User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
-				if (input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL))
+				if (input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL) && keyboard_events.empty() == false)
 				{
 
 					if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
 					{
+						
+												
+
 						auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
 						if (check_out_move.first)
 						{

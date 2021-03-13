@@ -4,7 +4,7 @@
 namespace SXNGN {
 	namespace ECS {
 
-		Entity Entity_Builder_Utils::Create_Tile(Coordinator coordinator, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, Components::CollisionType collision_type, std::string name )
+		Entity Entity_Builder_Utils::Create_Tile(Core::Coordinator coordinator, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, Components::CollisionType collision_type, std::string name )
 		{
 			auto tile_entity = coordinator.CreateEntity();
 			Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
@@ -28,7 +28,7 @@ namespace SXNGN {
 			return tile_entity;
 		}
 
-		Entity Entity_Builder_Utils::Create_Person(Coordinator coordinator, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, bool player_controlled, std::string name)
+		Entity Entity_Builder_Utils::Create_Person(Core::Coordinator coordinator, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, bool player_controlled, std::string name)
 		{
 			auto person_entity = coordinator.CreateEntity();
 			Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;

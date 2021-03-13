@@ -23,7 +23,7 @@
 #include <tuple>
 
 
-Coordinator gCoordinator;
+SXNGN::ECS::Core::Coordinator gCoordinator;
 
 static bool quit = false;
 
@@ -56,6 +56,10 @@ using Tile = SXNGN::ECS::Components::Tile;
 using Gameutils = SXNGN::Gameutils;
 using nlohmann::json;
 using entity_builder = SXNGN::ECS::Entity_Builder_Utils;
+using Coordinator = SXNGN::ECS::Core::Coordinator;
+
+using Movement_System = SXNGN::ECS::System::Movement_System;
+
 
 void QuitHandler(Event& event)
 {
@@ -311,8 +315,14 @@ int main(int argc, char* args[])
 		gCoordinator.AddComponent(map_tile_entity, tile, true);
 	}
 
-	auto extracted = gCoordinator.Extract_Entity_As_JSON(1);
+	
 
+
+
+
+	//std::cout << extracted << std::endl;
+
+	//auto json_to_entity_test = SXNGN::ECS::Components::JSON_Utils::json_to_component(extracted);
 	/**
 		json j = game_map_pre_renders;
 		std::cout << j << std::endl;
@@ -334,7 +344,7 @@ int main(int argc, char* args[])
 	camera_position.w = 0;
 	camera_position.h = 0;
 
-	SXNGN::ECS::Components::Camera::init_instance(camera_lens, camera_position, g_screen_bounds);
+	SXNGN::ECS::Components::CameraComponent::init_instance(camera_lens, camera_position, g_screen_bounds);
 
 
 

@@ -60,6 +60,48 @@ public:
 		--mSize;
 	}
 
+	/// <summary>
+	/// Remove the data from the array, return the pointer to it
+	/// </summary>
+	/// <param name="entity"></param>
+	/// <returns></returns>
+	ECS_Component* ExtractData(Entity entity)
+	{
+		ECS_Component* new_instance_to_return = nullptr;
+		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		{
+			return nullptr;
+		}
+		while (component_specific_operations_in_progress.load() > 0)
+		{
+			//waiting
+			//fixme use conditional here
+		}
+		array_wide_operation_in_progress.store(true);
+		
+		// Copy element at end into deleted element's place to maintain density
+		size_t indexOfRemovedEntity = mEntityToIndexMap[entity];
+		size_t indexOfLastElement = mSize - 1;
+		if (mComponentArray[indexOfRemovedEntity])
+		{
+			new_instance_to_return = mComponentArray[indexOfRemovedEntity];//instead of deleting, return the pointer
+			mComponentArray[indexOfRemovedEntity] = nullptr;//then overwrite the old reference to the pointer
+		}
+		mComponentArray[indexOfRemovedEntity] = mComponentArray[indexOfLastElement];
+
+		// Update map to point to moved spot
+		Entity entityOfLastElement = mIndexToEntityMap[indexOfLastElement];
+		mEntityToIndexMap[entityOfLastElement] = indexOfRemovedEntity;
+		mIndexToEntityMap[indexOfRemovedEntity] = entityOfLastElement;
+
+		mEntityToIndexMap.erase(entity);
+		mIndexToEntityMap.erase(indexOfLastElement);
+
+		--mSize;
+		return new_instance_to_return;
+	}
+
 	//If you are for some reason extremely confident the data exists
 	ECS_Component* GetData(Entity entity)
 	{
@@ -82,7 +124,7 @@ public:
 	//Thread safe - get a read-only copy of the data
 	const ECS_Component* GetDataReadOnly(Entity entity)
 	{
-		std::lock_guard<std::mutex> guard(component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until data is available (no other theadss have checked it out)
 		assert(mEntityToIndexMap.find(entity) != mEntityToIndexMap.end() && "Retrieving non-existent component.");
 		auto component_ref = mComponentArray[mEntityToIndexMap[entity]];
 		const ECS_Component* const_ref(component_ref); //make a read-only copy of the data to return
@@ -92,15 +134,14 @@ public:
 	//Thread safe - get a read-only copy of the data
 	const ECS_Component* TryGetDataReadOnly(Entity entity)
 	{
-		std::lock_guard<std::mutex> guard(component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until data is available (no other theadss have checked it out)
 		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
 		{
 			auto component_ref = mComponentArray[mEntityToIndexMap[entity]];
 			const ECS_Component* const_ref(component_ref); //make a read-only copy of the data to return
 			return const_ref;
 		}
-		return nullptr;
-		
+		return nullptr;	
 	}
 
 	//Get a modifiable instance of the component for this entity
@@ -109,9 +150,9 @@ public:
 	//DO NOT DELETE any pointer returned from this
 	std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckoutData(Entity entity)
 	{
-		//Lock the array until the data is checked back in (under "authority" of component_array_guard)
+		//Lock the array until the data is checked back in (under "authority" of master_component_array_guard)
 		//(Thread entering this function will block here until it can get the lock)
-		std::unique_ptr<std::unique_lock<std::mutex>> check_out_component_lock = std::make_unique< std::unique_lock<std::mutex>>(component_array_guard);
+		std::unique_ptr<std::unique_lock<std::mutex>> check_out_component_lock = std::make_unique< std::unique_lock<std::mutex>>(master_component_array_guard);
 		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
 		{
 			//dont lock if there is nothing to return
@@ -131,7 +172,7 @@ public:
 		if (key == nullptr)
 		{
 			printf("CheckInData:: nullptr key return. Unlocking mutex");
-			component_array_guard.unlock();
+			master_component_array_guard.unlock();
 		}
 		//use returned key to unlock the data
 		if (key->owns_lock())
@@ -154,6 +195,9 @@ private:
 	std::unordered_map<Entity, size_t> mEntityToIndexMap{};
 	std::unordered_map<size_t, Entity> mIndexToEntityMap{};
 	size_t mSize{};
-	std::mutex component_array_guard;//mutex used to guard this CompnentArray's data
+	std::mutex master_component_array_guard;//mutex used to guard this CompnentArray's data
+	std::array<std::mutex, MAX_ENTITIES> mMutexArray{};//individual locks for each component in the component array TODO implement
+	std::atomic<bool> array_wide_operation_in_progress = false; //flag that an array-wide operation is ongoing, ie, something that will affect mEntityToIndexMap. Not safe for any thread to access data in the array in any way until this is complete.
+	std::atomic<Uint8> component_specific_operations_in_progress = 0; //flag that any thread has data checked out
 
 };
