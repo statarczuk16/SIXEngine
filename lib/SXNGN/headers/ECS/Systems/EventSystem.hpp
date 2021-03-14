@@ -6,11 +6,11 @@
 #include <ECS/Components/Moveable.hpp>
 
 
-namespace SXNGN::ECS::System {
-	using Moveable = Components::Moveable;
-	using Renderable = Components::Renderable;
-	using MoveableType = Components::MoveableType;
-	//using Collisionable = SXNGN::ECS::Components::Collisionable;
+namespace SXNGN::ECS::A {
+	using Moveable = A::Moveable;
+	using Renderable = A::Renderable;
+	using MoveableType = A::MoveableType;
+	//using Collisionable = SXNGN::ECS::A::Collisionable;
 
 	class Event_System : public System
 	{
@@ -19,7 +19,7 @@ namespace SXNGN::ECS::System {
 
 		void Update(float dt);
 
-		void HandleEvent();
+		void Handle_Event(Event_Component* ec);
 
 	private:
 

@@ -9,7 +9,7 @@
 
 
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
 	enum class User_Input_Tags
 	{
@@ -71,7 +71,7 @@ namespace SXNGN::ECS::Components {
 			std::lock_guard<std::mutex> guard(lock_);//Wait until data is available (no other theadss have checked it out
 			if (instance_ == nullptr)
 			{
-				instance_ = new User_Input_State;
+				instance_ = new User_Input_State();
 			}
 			return instance_;
 		}

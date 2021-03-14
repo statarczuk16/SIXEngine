@@ -5,7 +5,7 @@
 #include <ECS/Components/Renderable.hpp>
 #include <ECS/Systems/CameraSystem.hpp>
 
-namespace SXNGN::ECS::System {
+namespace SXNGN::ECS::A {
 
 	void Camera_System::Init()
 	{
@@ -19,7 +19,7 @@ namespace SXNGN::ECS::System {
 	void Camera_System::Update(float dt)
 	{
 
-		auto camera = Components::CameraComponent::get_instance();
+		auto camera = A::CameraComponent::get_instance();
 		if (camera == nullptr)
 		{
 			return;
@@ -39,7 +39,7 @@ namespace SXNGN::ECS::System {
 		{
 			return;
 		}
-		auto target_sprite = gCoordinator.GetComponent(camera_target, Components::ComponentTypeEnum::RENDERABLE);
+		auto target_sprite = gCoordinator.GetComponentReadOnly(camera_target, A::ComponentTypeEnum::RENDERABLE);
 
 		if (target_sprite == nullptr)
 		{
@@ -49,9 +49,9 @@ namespace SXNGN::ECS::System {
 		}
 
 		//Find the x/y of the target entity and update the camera position accordingly
-		if (target_sprite->get_component_type() == Components::ComponentTypeEnum::RENDERABLE)
+		if (target_sprite->component_type == A::ComponentTypeEnum::RENDERABLE)
 		{
-			Components::Renderable* target_sprite_renderable = (Components::Renderable*) target_sprite;
+			A::Renderable* target_sprite_renderable = (A::Renderable*) target_sprite;
 			SDL_Rect position;
 			position.x = target_sprite_renderable->x_;
 			position.y = target_sprite_renderable->y_;

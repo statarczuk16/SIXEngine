@@ -7,11 +7,11 @@
 #include <ECS/Components/Collision.hpp>
 #include <ECS/Components/Renderable.hpp>
 
-namespace SXNGN::ECS::System {
-	using Moveable = Components::Moveable;
-	using Renderable = Components::Renderable;
-	using MoveableType = Components::MoveableType;
-	//using Collisionable = SXNGN::ECS::Components::Collisionable;
+namespace SXNGN::ECS::A {
+	using Moveable = A::Moveable;
+	using Renderable = A::Renderable;
+	using MoveableType = A::MoveableType;
+	//using Collisionable = SXNGN::ECS::A::Collisionable;
 
 	class Movement_System : public System
 	{

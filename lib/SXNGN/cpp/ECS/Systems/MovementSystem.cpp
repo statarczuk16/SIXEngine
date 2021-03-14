@@ -4,7 +4,7 @@
 #include <Database.h>
 #include <ECS/Systems/MovementSystem.hpp>
 
-namespace SXNGN::ECS::System {
+namespace SXNGN::ECS::A {
 
 void Movement_System::Init()
 {
@@ -126,7 +126,7 @@ void Movement_System::Update_Position_With_Collision(Moveable* moveable, Entity 
 	SDL_Rect prev_pos = moveable->position_box_;
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
 	auto this_moveable_collision = gCoordinator;
-	std::vector<std::vector<const SXNGN::ECS::Components::Collisionable*>> collisions;
+	std::vector<std::vector<const SXNGN::ECS::A::Collisionable*>> collisions;
 	switch (moveable->moveable_type_)
 	{
 		case  MoveableType::VELOCITY:

@@ -92,7 +92,7 @@ typedef enum
 
     /* Window events */
     SDL_WINDOWEVENT    = 0x200, /**< Window state change */
-    SDL_SYSWMEVENT,             /**< System specific event */
+    SDL_SYSWMEVENT,             /**< A specific event */
 
     /* Keyboard events */
     SDL_KEYDOWN        = 0x300, /**< Key pressed */
@@ -614,7 +614,7 @@ typedef union SDL_Event
     SDL_SensorEvent sensor;                 /**< Sensor event data */
     SDL_QuitEvent quit;                     /**< Quit request event data */
     SDL_UserEvent user;                     /**< Custom event data */
-    SDL_SysWMEvent syswm;                   /**< System dependent window event data */
+    SDL_SysWMEvent syswm;                   /**< A dependent window event data */
     SDL_TouchFingerEvent tfinger;           /**< Touch finger event data */
     SDL_MultiGestureEvent mgesture;         /**< Gesture event data */
     SDL_DollarGestureEvent dgesture;        /**< Gesture event data */

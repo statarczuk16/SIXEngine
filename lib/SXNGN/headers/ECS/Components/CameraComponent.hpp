@@ -9,7 +9,7 @@
 
 
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
     struct CameraComponent : ECS_Component
     {

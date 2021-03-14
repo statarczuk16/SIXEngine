@@ -5,8 +5,8 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace Components {
-			std::tuple<std::vector<Components::Pre_Renderable>, std::vector<Components::Collisionable>, std::vector<Components::Tile>>
+		namespace A {
+			std::tuple<std::vector<A::Pre_Renderable>, std::vector<A::Collisionable>, std::vector<A::Tile>>
 				JSON_Utils::json_to_tile_batch(nlohmann::json jf)
 			{
 				int tiles_wide = 0;
@@ -46,9 +46,9 @@ namespace SXNGN {
 				printf("Width: %d\n", tiles_wide);
 				printf("Height: %d\n", tiles_high);
 
-				std::vector<Components::Pre_Renderable> pre_renders;
-				std::vector<Components::Collisionable> collisionables;
-				std::vector<Components::Tile> tiles;
+				std::vector<A::Pre_Renderable> pre_renders;
+				std::vector<A::Collisionable> collisionables;
+				std::vector<A::Tile> tiles;
 
 				for (int h = 0; h < tiles_high; h++)
 				{
@@ -61,8 +61,8 @@ namespace SXNGN {
 						collision_box.y = y_pixels;
 						collision_box.w = SXNGN::BASE_TILE_WIDTH;
 						collision_box.h = SXNGN::BASE_TILE_HEIGHT;
-						auto pre_render = new Components::Pre_Renderable(x_pixels, y_pixels, default_tileset, default_tile, Components::RenderLayer::GROUND_LAYER);
-						auto collision = Entity_Builder_Utils::Create_Collisionable(collision_box, Components::CollisionType::NONE);
+						auto pre_render = new A::Pre_Renderable(x_pixels, y_pixels, default_tileset, default_tile, A::RenderLayer::GROUND_LAYER);
+						auto collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::NONE);
 						auto tile = Entity_Builder_Utils::Create_Tile(w, h);
 						pre_renders.push_back(*pre_render);
 						collisionables.push_back(*collision);
@@ -119,8 +119,8 @@ namespace SXNGN {
 					return nullptr;
 				}
 				std::string component_type_str = *component_type;
-				 auto find_type = ECS::Components::component_type_string_to_enum().find(component_type_str);
-				 if (find_type == ECS::Components::component_type_string_to_enum().end())
+				 auto find_type = ECS::A::component_type_string_to_enum().find(component_type_str);
+				 if (find_type == ECS::A::component_type_string_to_enum().end())
 				 {
 					 return nullptr;
 				 }

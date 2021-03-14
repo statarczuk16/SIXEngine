@@ -50,7 +50,7 @@ public:
 	}
 
 
-
+	/**
 	ECS_Component* GetComponent(Entity entity, ComponentTypeEnum component_type)
 	{
 		return GetComponentArray(component_type)->GetData(entity);
@@ -66,7 +66,7 @@ public:
 		}
 		return ptr;
 	}
-
+	**/
 
 	const ECS_Component* GetComponentReadOnly(Entity entity, ComponentTypeEnum component_type)
 	{

@@ -23,7 +23,7 @@
 #include <tuple>
 
 
-SXNGN::ECS::Core::Coordinator gCoordinator;
+SXNGN::ECS::A::Coordinator gCoordinator;
 
 static bool quit = false;
 
@@ -47,19 +47,15 @@ const int LEVEL_HEIGHT_PIXELS = 600;
 SXNGN::Database g_database; //static can be accessed anywhere, but must intialize
 
 
-using Pre_Sprite_Factory = SXNGN::ECS::Components::Pre_Sprite_Factory;
-using Sprite_Factory = SXNGN::ECS::Components::Sprite_Factory;
-using Pre_Renderable = SXNGN::ECS::Components::Pre_Renderable;
-using Renderable = SXNGN::ECS::Components::Renderable;
-using Collisionable = SXNGN::ECS::Components::Collisionable;
-using Tile = SXNGN::ECS::Components::Tile;
+
 using Gameutils = SXNGN::Gameutils;
 using nlohmann::json;
 using entity_builder = SXNGN::ECS::Entity_Builder_Utils;
-using Coordinator = SXNGN::ECS::Core::Coordinator;
 
-using Movement_System = SXNGN::ECS::System::Movement_System;
 
+using Movement_System = SXNGN::ECS::A::Movement_System;
+
+using namespace SXNGN::ECS::A;
 
 void QuitHandler(Event& event)
 {
@@ -274,7 +270,7 @@ int main(int argc, char* args[])
 
 	//Build the apocalypse map sprite factory
 	auto apoc_map_pre_entity = gCoordinator.CreateEntity();
-	SXNGN::ECS::Components::Pre_Sprite_Factory* apocalypse_map_pre = new Pre_Sprite_Factory();
+	Pre_Sprite_Factory* apocalypse_map_pre = new Pre_Sprite_Factory();
 	std::string apoc_tile_manifest_path = g_media_folder + "/wasteland_tile/manifest.txt";
 	apocalypse_map_pre->name_ = "APOCALYPSE_MAP";
 	apocalypse_map_pre->tile_manifest_path_ = apoc_tile_manifest_path;
@@ -282,7 +278,7 @@ int main(int argc, char* args[])
 
 	Entity test_person = entity_builder::Create_Person(gCoordinator, 0, 0, "APOCALYPSE_MAP", "GUNMAN_1", true);
 
-	Entity test_Tile = entity_builder::Create_Tile(gCoordinator, 0, 0, "APOCALYPSE_MAP", "ROCK_GROUND", SXNGN::ECS::Components::CollisionType::NONE);
+	Entity test_Tile = entity_builder::Create_Tile(gCoordinator, 0, 0, "APOCALYPSE_MAP", "ROCK_GROUND", SXNGN::ECS::A::CollisionType::NONE);
 
 	//todo save utility or game state
 	std::string savefile = g_save_folder + "/save1.json";
@@ -296,7 +292,7 @@ int main(int argc, char* args[])
 		std::cout << "key: " << key << ", value:" << val << '\n';
 		if (key == "map")
 		{
-			game_map = SXNGN::ECS::Components::JSON_Utils::json_to_tile_batch(val);
+			game_map = SXNGN::ECS::A::JSON_Utils::json_to_tile_batch(val);
 		}
 	}
 
@@ -308,11 +304,11 @@ int main(int argc, char* args[])
 	{
 		auto map_tile_entity = gCoordinator.CreateEntity();
 		Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
-		gCoordinator.AddComponent(map_tile_entity, pre_render, true);
+		gCoordinator.AddComponent(map_tile_entity, pre_render, false);
 		Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
-		gCoordinator.AddComponent(map_tile_entity, collisionable, true);
+		gCoordinator.AddComponent(map_tile_entity, collisionable, false);
 		Tile* tile = new Tile(game_map_tiles.at(i));
-		gCoordinator.AddComponent(map_tile_entity, tile, true);
+		gCoordinator.AddComponent(map_tile_entity, tile, false);
 	}
 
 	
@@ -322,7 +318,7 @@ int main(int argc, char* args[])
 
 	//std::cout << extracted << std::endl;
 
-	//auto json_to_entity_test = SXNGN::ECS::Components::JSON_Utils::json_to_component(extracted);
+	//auto json_to_entity_test = SXNGN::ECS::A::JSON_Utils::json_to_component(extracted);
 	/**
 		json j = game_map_pre_renders;
 		std::cout << j << std::endl;
@@ -344,7 +340,7 @@ int main(int argc, char* args[])
 	camera_position.w = 0;
 	camera_position.h = 0;
 
-	SXNGN::ECS::Components::CameraComponent::init_instance(camera_lens, camera_position, g_screen_bounds);
+	SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, g_screen_bounds);
 
 
 
@@ -379,7 +375,7 @@ int main(int argc, char* args[])
 		if (!events_this_frame.empty())
 		{
 			auto input_event = gCoordinator.CreateEntity();
-			SXNGN::ECS::Components::User_Input_Cache* input_cache = new User_Input_Cache();
+			SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
 			input_cache->events_ = events_this_frame;
 			gCoordinator.AddComponent(input_event, input_cache, true);
 			//update event handling system

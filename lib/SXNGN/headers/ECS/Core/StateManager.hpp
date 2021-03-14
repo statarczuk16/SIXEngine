@@ -12,10 +12,10 @@ namespace SXNGN::ECS {
 	public:
 		struct Gamestate {
 			std::shared_ptr<std::mutex> lock_;
-			std::vector <std::shared_ptr<Components::ExternEntity>> entities_;
+			std::vector <std::shared_ptr<A::ExternEntity>> entities_;
 			std::string name_;
 
-			Gamestate(std::string name, std::vector <std::shared_ptr<Components::ExternEntity>> entities)
+			Gamestate(std::string name, std::vector <std::shared_ptr<A::ExternEntity>> entities)
 			{
 				entities_ = entities;
 				name_ = name;
@@ -33,13 +33,13 @@ namespace SXNGN::ECS {
 
 		}
 
-		void cacheEntityInState(std::shared_ptr<Components::ExternEntity> entity_to_store, std::string state = "Temp")
+		void cacheEntityInState(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state = "Temp")
 		{
 
 			if (gameStates.count(state) == 0)
 			{
 				printf("stateManager: Creating new state: %s", state.c_str());
-				std::vector< std::shared_ptr<Components::ExternEntity>> new_entity_array = { entity_to_store };
+				std::vector< std::shared_ptr<A::ExternEntity>> new_entity_array = { entity_to_store };
 				Gamestate new_state(state, new_entity_array);
 				gameStates[state] = new_state;
 			
@@ -51,9 +51,9 @@ namespace SXNGN::ECS {
 			}
 		}
 
-		std::vector< std::shared_ptr<Components::ExternEntity>> retrieveStateEntities(std::string state, bool destroy)
+		std::vector< std::shared_ptr<A::ExternEntity>> retrieveStateEntities(std::string state, bool destroy)
 		{
-			std::vector< std::shared_ptr<Components::ExternEntity>> entity_array;
+			std::vector< std::shared_ptr<A::ExternEntity>> entity_array;
 			if (gameStates.count(state) != 0)
 			{
 				std::shared_ptr<std::mutex> lock = gameStates[state].lock_;

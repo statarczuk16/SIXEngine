@@ -94,10 +94,10 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/json/)
 #include_directories(${CMAKE_SOURCE_DIR}/lib/cereal/)	
  
 #add an executable for anything that will turn into an exe or whatever other executable format
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  "lib/SXNGN/headers/ECS/Core/StateManager.hpp" "lib/SXNGN/headers/ECS/Systems/MovementSystem (2).hpp" "lib/SXNGN/cpp/ECS/Systems/MovementSystem.cpp" "lib/SXNGN/headers/ECS/Components/Tile.hpp")
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  "lib/SXNGN/headers/ECS/Core/StateManager.hpp" "lib/SXNGN/headers/ECS/Systems/MovementSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/MovementSystem.cpp" "lib/SXNGN/headers/ECS/Components/Tile.hpp" "lib/SXNGN/headers/ECS/Components/MetaComponent.hpp" "lib/SXNGN/headers/ECS/Components/Renderable.hpp" "lib/SXNGN/cpp/ECS/Components/SpriteFactory.cpp")
 target_link_libraries(HoplonSimulator SDL2::Main SDL2::Image SDL2::TTF)
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  "lib/SXNGN/headers/ECS/Core/StateManager.hpp" "lib/SXNGN/headers/ECS/Systems/MovementSystem (2).hpp" "lib/SXNGN/cpp/ECS/Systems/MovementSystem.cpp" "lib/SXNGN/headers/ECS/Components/Tile.hpp")
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  "lib/SXNGN/headers/ECS/Core/StateManager.hpp" "lib/SXNGN/headers/ECS/Systems/MovementSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/MovementSystem.cpp" "lib/SXNGN/headers/ECS/Components/Tile.hpp" "lib/SXNGN/headers/ECS/Components/MetaComponent.hpp" "lib/SXNGN/headers/ECS/Components/Renderable.hpp" "lib/SXNGN/cpp/ECS/Components/SpriteFactory.cpp")
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

@@ -4,9 +4,9 @@
 #include <ECS/Core/Component.hpp>
 
 
-using ComponentTypeEnum = SXNGN::ECS::Components::ComponentTypeEnum;
+using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
 
 	enum class EventType : Uint8

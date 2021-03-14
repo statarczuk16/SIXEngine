@@ -8,21 +8,19 @@ using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
 
 namespace SXNGN::ECS::A {
 
-
+	
 	/// <summary>
 	/// Contains data about a ground level tile
 	/// </summary>
-	struct Tile : ECS_Component
+	struct MetaComponent : ECS_Component
 	{
-		Tile(Sint32 grid_x, Sint32 grid_y)
+		MetaComponent()
 		{
-			grid_y_ = grid_y;
-			grid_x_ = grid_x;
-			component_type = ComponentTypeEnum::TILE;
-
+			
 		}
-		Sint32  grid_x_;
-		Sint32  grid_y_;
+		bool saveable_ = true; //this entity can be saved to disc
+		bool all_states_ = false;//this entity should migrate to all states
+
 	};
 
 

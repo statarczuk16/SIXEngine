@@ -4,7 +4,7 @@
 #include <ECS/Core/Component.hpp>
 
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
 
 	enum class CollisionType

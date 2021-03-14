@@ -5,7 +5,7 @@
 #include <ECS/Core/Component.hpp>
 #include <ECS/Components/CameraComponent.hpp>
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
     std::shared_ptr<CameraComponent> CameraComponent::instance_;//have to define static privates in cpp as well as h
 
@@ -19,7 +19,7 @@ namespace SXNGN::ECS::Components {
         position_scaled_.h = 0;
         screen_bounds_ = screen_bounds;
         target_ = target;
-        component_type = ECS::Components::ComponentTypeEnum::CAMERA;
+        component_type = ECS::A::ComponentTypeEnum::CAMERA;
     }
 
 

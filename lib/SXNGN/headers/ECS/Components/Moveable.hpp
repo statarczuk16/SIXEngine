@@ -6,9 +6,9 @@
 #include <ECS/Core/Component.hpp>
 #include <unordered_map>
 
-//using ComponentTypeEnum = SXNGN::ECS::Components::ComponentTypeEnum;
+//using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
 
 	enum class MoveableType

@@ -15,8 +15,8 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace Core {
-			using ECS_Component = Components::ECS_Component;
+		namespace A {
+			using ECS_Component = A::ECS_Component;
 
 
 			class Coordinator
@@ -27,7 +27,7 @@ namespace SXNGN {
 					mComponentManager = std::make_shared<ComponentManager>();
 					mEntityManager = std::make_shared<EntityManager>();
 					mEventManager = std::make_shared<EventManager>();
-					mSystemManager = std::make_shared<System::SystemManager>();
+					mSystemManager = std::make_shared<A::SystemManager>();
 					mTextureManager = std::make_shared<TextureManager>(renderer);
 					mStateManager = std::make_shared<StateManager>();
 				}
@@ -36,7 +36,7 @@ namespace SXNGN {
 				// Entity methods
 				Entity CreateEntity(bool quiet = false)
 				{
-					return mEntityManager->CreateEntity(false);
+					return mEntityManager->CreateEntity(quiet);
 				}
 
 				void DestroyEntity(Entity entity)
@@ -69,11 +69,11 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity"></param>
 				/// <returns></returns>
-				std::shared_ptr<Components::ExternEntity> Extract_Entity(Entity entity)
+				std::shared_ptr<A::ExternEntity> Extract_Entity(Entity entity)
 				{
 
 					auto extracted_components =Extract_Entity_Components(entity);
-					auto extracted_entity = std::make_shared<Components::ExternEntity>(entity, extracted_components);
+					auto extracted_entity = std::make_shared<A::ExternEntity>(entity, extracted_components);
 					return extracted_entity;
 				}
 
@@ -82,7 +82,7 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity_to_store"></param>
 				/// <param name="state_to_store_in"></param>
-				void Cache_Extern_Entity(std::shared_ptr<Components::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
+				void Cache_Extern_Entity(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
 				{
 					mStateManager->cacheEntityInState(entity_to_store, state_to_store_in);
 					
@@ -96,7 +96,7 @@ namespace SXNGN {
 				/// <param name="destroy_each"></param>
 				void Dump_Cached_Entity_Vector_To_Current(std::string state_to_dump_from = "Temp", bool destroy_after = false)
 				{	
-					std::vector< std::shared_ptr<Components::ExternEntity>> entity_array = mStateManager->retrieveStateEntities(state_to_dump_from, destroy_after);
+					std::vector< std::shared_ptr<A::ExternEntity>> entity_array = mStateManager->retrieveStateEntities(state_to_dump_from, destroy_after);
 					for (auto entity : entity_array)
 					{
 						Dump_Cached_Entity_To_Current(entity);
@@ -107,7 +107,7 @@ namespace SXNGN {
 				/// Add an ExternEntity back into the system
 				/// </summary>
 				/// <param name="entity_to_dump"></param>
-				void Dump_Cached_Entity_To_Current(std::shared_ptr<Components::ExternEntity> entity_to_dump)
+				void Dump_Cached_Entity_To_Current(std::shared_ptr<A::ExternEntity> entity_to_dump)
 				{
 					Entity new_id = mEntityManager->CreateEntity();
 					for (auto component : entity_to_dump->entity_components_)
@@ -138,10 +138,10 @@ namespace SXNGN {
 					std::vector<const ECS_Component*> components = Get_All_Entity_Data_Read_Only(entity);
 					for (auto component_ptr : components)
 					{
-						json js = Components::JSON_Utils::component_to_json(component_ptr);
+						json js = A::JSON_Utils::component_to_json(component_ptr);
 						json_components.push_back(js);
 					}
-					Components::ExternJSONEntity extern_entity(entity, json_components);
+					A::ExternJSONEntity extern_entity(entity, json_components);
 					json ret = extern_entity;
 					return ret;
 				}
@@ -180,6 +180,7 @@ namespace SXNGN {
 					mSystemManager->EntitySignatureChanged(entity, signature);
 				}
 
+				/**
 				ECS_Component* GetComponent(Entity entity, ComponentTypeEnum component_type)
 				{
 					return mComponentManager->GetComponent(entity, component_type);
@@ -189,6 +190,7 @@ namespace SXNGN {
 				{
 					return mComponentManager->TryGetComponent(entity, component_type);
 				}
+				**/
 
 				/// <summary>
 				/// Thread safe - thread waits until data is available, then returns with a COPY of it.
@@ -234,7 +236,7 @@ namespace SXNGN {
 				}
 
 				template<typename T>
-				// System methods
+				// A methods
 				std::shared_ptr<T> RegisterSystem()
 				{
 					return mSystemManager->RegisterSystem<T>();
@@ -276,7 +278,7 @@ namespace SXNGN {
 				std::shared_ptr<ComponentManager> mComponentManager;
 				std::shared_ptr<EntityManager> mEntityManager;
 				std::shared_ptr<EventManager> mEventManager;
-				std::shared_ptr<System::SystemManager> mSystemManager;
+				std::shared_ptr<A::SystemManager> mSystemManager;
 				std::shared_ptr<TextureManager> mTextureManager;
 				std::shared_ptr<StateManager> mStateManager;
 				

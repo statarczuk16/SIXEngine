@@ -7,15 +7,15 @@
 #include <ECS/Components/Moveable.hpp>
 #include <memory>
 #include <vector>
-using User_Input_Cache = SXNGN::ECS::Components::User_Input_Cache;
-using User_Input_Tags = SXNGN::ECS::Components::User_Input_Tags;
-using Moveable = SXNGN::ECS::Components::Moveable;
-using User_Input_State = SXNGN::ECS::Components::User_Input_State;
-using User_Input_Tags_Collection = SXNGN::ECS::Components::User_Input_Tags_Collection;
-using MoveableType = SXNGN::ECS::Components::MoveableType;
+using User_Input_Cache = SXNGN::ECS::A::User_Input_Cache;
+using User_Input_Tags = SXNGN::ECS::A::User_Input_Tags;
+using Moveable = SXNGN::ECS::A::Moveable;
+using User_Input_State = SXNGN::ECS::A::User_Input_State;
+using User_Input_Tags_Collection = SXNGN::ECS::A::User_Input_Tags_Collection;
+using MoveableType = SXNGN::ECS::A::MoveableType;
 using UserInputUtils = SXNGN::UserInputUtils;
 
-namespace SXNGN::ECS::System {
+namespace SXNGN::ECS::A {
 
 	class User_Input_System : public System
 	{

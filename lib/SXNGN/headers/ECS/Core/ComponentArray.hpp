@@ -17,14 +17,21 @@ public:
 };
 **/
 
-using ECS_Component = SXNGN::ECS::Components::ECS_Component;
-using ComponentTypeEnum = SXNGN::ECS::Components::ComponentTypeEnum;
+using ECS_Component = SXNGN::ECS::A::ECS_Component;
+using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
 
 class ComponentArray// : public IComponentArray
 {
 public:
 	void InsertData(Entity entity, ECS_Component *component)
 	{
+		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		while (component_specific_operations_in_progress.load() > 0)
+		{
+			//waiting
+			//fixme use conditional here
+		}
+		array_wide_operation_in_progress.store(true);
 		assert(mEntityToIndexMap.find(entity) == mEntityToIndexMap.end() && "Component added to same entity more than once.");
 
 		// Put new entry at end
@@ -33,10 +40,22 @@ public:
 		mIndexToEntityMap[newIndex] = entity;
 		mComponentArray[newIndex] = component;
 		++mSize;
+		array_wide_operation_in_progress.store(false);
 	}
 
 	void RemoveData(Entity entity)
 	{
+		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until data is available (no other theadss have checked it out)
+		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		{
+			return;
+		}
+		while (component_specific_operations_in_progress.load() > 0)
+		{
+			//waiting
+			//fixme use conditional here
+		}
+		array_wide_operation_in_progress.store(true);
 		assert(mEntityToIndexMap.find(entity) != mEntityToIndexMap.end() && "Removing non-existent component.");
 
 		// Copy element at end into deleted element's place to maintain density
@@ -58,6 +77,7 @@ public:
 		mIndexToEntityMap.erase(indexOfLastElement);
 
 		--mSize;
+		array_wide_operation_in_progress.store(false);
 	}
 
 	/// <summary>
@@ -99,10 +119,12 @@ public:
 		mIndexToEntityMap.erase(indexOfLastElement);
 
 		--mSize;
+
+		array_wide_operation_in_progress.store(false);
 		return new_instance_to_return;
 	}
 
-	//If you are for some reason extremely confident the data exists
+	/**
 	ECS_Component* GetData(Entity entity)
 	{
 		assert(mEntityToIndexMap.find(entity) != mEntityToIndexMap.end() && "Retrieving non-existent component.");
@@ -119,7 +141,7 @@ public:
 		}
 		return mComponentArray[mEntityToIndexMap[entity]];
 	}
-
+	**/
 
 	//Thread safe - get a read-only copy of the data
 	const ECS_Component* GetDataReadOnly(Entity entity)
@@ -184,10 +206,8 @@ public:
 
 	void EntityDestroyed(Entity entity)
 	{
-		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
-		{
-			RemoveData(entity);
-		}
+		
+		RemoveData(entity);
 	}
 
 private:

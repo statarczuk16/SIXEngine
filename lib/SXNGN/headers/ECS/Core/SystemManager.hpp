@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <SDL.h>
 
-namespace SXNGN::ECS::System {
+namespace SXNGN::ECS::A {
 	class SystemManager
 	{
 	public:
@@ -28,7 +28,7 @@ namespace SXNGN::ECS::System {
 		{
 			const char* typeName = typeid(T).name();
 
-			assert(mSystems.find(typeName) != mSystems.end() && "System used before registered.");
+			assert(mSystems.find(typeName) != mSystems.end() && "A used before registered.");
 
 			mSignaturesActable.insert({ typeName, signature });
 		}
@@ -38,7 +38,7 @@ namespace SXNGN::ECS::System {
 		{
 			const char* typeName = typeid(T).name();
 
-			assert(mSystems.find(typeName) != mSystems.end() && "System used before registered.");
+			assert(mSystems.find(typeName) != mSystems.end() && "A used before registered.");
 
 			mSignaturesOfInterest.insert({ typeName, signature });
 		}
@@ -90,7 +90,7 @@ namespace SXNGN::ECS::System {
 				{
 					if (!quiet)
 					{
-						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to System Actables: System: %s", entity, type);
+						SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to A Actables: A: %s", entity, type);
 
 					}
 					system->m_actable_entities.insert(entity);
@@ -99,7 +99,7 @@ namespace SXNGN::ECS::System {
 				{
 					system->m_actable_entities.erase(entity);
 					//Logical OR to see if entity has ANY of the components of interest to this system
-					// (System may need data from other entities even if it does not operate on them in its main loop)
+					// (A may need data from other entities even if it does not operate on them in its main loop)
 					Signature or_result;
 					or_result = entitySignature & systemSignatureInterest;
 					if (or_result.any())
@@ -107,7 +107,7 @@ namespace SXNGN::ECS::System {
 						system->m_entities_of_interest.insert(entity);
 						if (!quiet)
 						{
-							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to System Interests: System: %s", entity, type);
+							SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "EntitySignature Changed: Entity ID %d: Added to A Interests: A: %s", entity, type);
 
 						}
 					}

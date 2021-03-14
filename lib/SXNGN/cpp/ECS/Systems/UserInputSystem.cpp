@@ -3,7 +3,7 @@
 #include <ECS/Core/Coordinator.hpp>
 
 
-
+namespace SXNGN::ECS::A {
 
 	void User_Input_System::Init()
 	{
@@ -11,7 +11,7 @@
 	}
 
 	/// <summary>
-	/// User Input System Goals: Translate user input to components that need it
+	/// User Input A Goals: Translate user input to components that need it
 	/// </summary>
 	/// <param name="dt"></param>
 	void User_Input_System::Update(float dt)
@@ -29,7 +29,7 @@
 			auto const& entity_actable = *it_act;
 			it_act++;
 
-			
+
 			auto user_input_ptr = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::INPUT_CACHE);
 			User_Input_Cache input_cache = *static_cast<const User_Input_Cache*>(user_input_ptr);
 
@@ -42,7 +42,7 @@
 			{
 				Update_Mouse_State(mouse_events, dt);
 			}
-		
+
 			auto it_inter = m_entities_of_interest.begin();
 			//Entities of interest are any entity that need user input
 			while (it_inter != m_entities_of_interest.end())
@@ -57,8 +57,8 @@
 
 					if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
 					{
-						
-												
+
+
 
 						auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
 						if (check_out_move.first)
@@ -70,7 +70,7 @@
 					}
 				}
 
-			} 
+			}
 
 			entities_to_cleanup.push_back(entity_actable);
 		}
@@ -83,15 +83,15 @@
 
 	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt)
 	{
-			
+
 		if (moveable)
 		{
 			switch (moveable->moveable_type_)
 			{
 			case MoveableType::VELOCITY:
 			{
-				std::pair<Sint32,Sint32> x_y = UserInputUtils::wasd_to_x_y(keyboard_inputs);
-				if (x_y.first != 0 || x_y.second!= 0)
+				std::pair<Sint32, Sint32> x_y = UserInputUtils::wasd_to_x_y(keyboard_inputs);
+				if (x_y.first != 0 || x_y.second != 0)
 				{
 					//printf("UserInputSystem: Moving Entity %2d: Velocity: (%d,%d)\n",entity, x_y.first, x_y.second);
 				}
@@ -111,7 +111,7 @@
 
 			}
 		}
-		
+
 	}
 
 
@@ -127,128 +127,129 @@
 			switch (e.type)
 			{
 			case SDL_MOUSEBUTTONDOWN:
+			{
+				switch (e.button.button)
 				{
-					switch (e.button.button)
-					{
-						bool left;
-						case SDL_BUTTON_LEFT:
-						{
-							current_mouse_state.left_button.down = true;
-							current_mouse_state.left_button.x = e.button.x;
-							current_mouse_state.left_button.y = e.button.y;
-							current_mouse_state.left_button.timestamp_down = e.button.timestamp;
-							break;
-						}
-						case SDL_BUTTON_RIGHT:
-						{
-							current_mouse_state.right_button.down = true;
-							current_mouse_state.right_button.x = e.button.x;
-							current_mouse_state.right_button.y = e.button.y;
-							current_mouse_state.right_button.timestamp_down = e.button.timestamp;
-							break;
-						}
-					}
-					
-					cached_mouse_state->mouse_state = current_mouse_state;
+					bool left;
+				case SDL_BUTTON_LEFT:
+				{
+					current_mouse_state.left_button.down = true;
+					current_mouse_state.left_button.x = e.button.x;
+					current_mouse_state.left_button.y = e.button.y;
+					current_mouse_state.left_button.timestamp_down = e.button.timestamp;
 					break;
 				}
-				case SDL_MOUSEBUTTONUP:
+				case SDL_BUTTON_RIGHT:
 				{
-					switch (e.button.button)
-					{
-						case SDL_BUTTON_LEFT:
-						{
-							current_mouse_state.left_button.down = false;
-							current_mouse_state.left_button.x = e.button.x;
-							current_mouse_state.left_button.y = e.button.y;
-							current_mouse_state.left_button.timestamp_up = e.button.timestamp;
-							break;
-						}
-						case SDL_BUTTON_RIGHT:
-						{
-							current_mouse_state.right_button.down= false;
-							current_mouse_state.right_button.x = e.button.x;
-							current_mouse_state.right_button.y = e.button.y;
-							current_mouse_state.right_button.timestamp_up = e.button.timestamp;
-							break;
-						}
-					}
-					//do logic
-					Uint32 right_up_minus_down = (current_mouse_state.right_button.timestamp_up - current_mouse_state.right_button.timestamp_down);
-					if (right_up_minus_down > 0 && right_up_minus_down < SXNGN::SINGLE_CLICK_THRESH_MS)
-					{
+					current_mouse_state.right_button.down = true;
+					current_mouse_state.right_button.x = e.button.x;
+					current_mouse_state.right_button.y = e.button.y;
+					current_mouse_state.right_button.timestamp_down = e.button.timestamp;
+					break;
+				}
+				}
 
-						SXNGN::UserInputUtils::Click right_click;
-						right_click.button = UserInputUtils::MOUSE_BUTTON::RIGHT;
-						right_click.time_stamp = current_mouse_state.right_button.timestamp_up;
-						right_click.x = current_mouse_state.right_button.x;
-						right_click.y = current_mouse_state.right_button.y;
-						
-						
-						Uint32 click_gap = (right_click.time_stamp - cached_mouse_state->last_right_click.time_stamp);
-						cached_mouse_state->last_right_click = right_click;
-						if (click_gap < SXNGN::DOUBLE_CLICK_THRESH_MS && click_gap > 0)
-						{
-							//printf("right double click %zd\n", click_gap);
-							cached_mouse_state->last_right_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
-							//todo launc double click event
-						}
-						else
-						{
-							//printf("right click %zd\n", click_gap);
-							//todo launch single click event
-						}
-						//clear out the state after recording a click
-						current_mouse_state.right_button.timestamp_up = 0;
-						current_mouse_state.right_button.timestamp_down = 0;
-						
-						
-					}
-					Uint32 left_up_minus_down = (current_mouse_state.left_button.timestamp_up - current_mouse_state.left_button.timestamp_down);
-					if (left_up_minus_down > 0 && left_up_minus_down < SXNGN::SINGLE_CLICK_THRESH_MS)
-					{
+				cached_mouse_state->mouse_state = current_mouse_state;
+				break;
+			}
+			case SDL_MOUSEBUTTONUP:
+			{
+				switch (e.button.button)
+				{
+				case SDL_BUTTON_LEFT:
+				{
+					current_mouse_state.left_button.down = false;
+					current_mouse_state.left_button.x = e.button.x;
+					current_mouse_state.left_button.y = e.button.y;
+					current_mouse_state.left_button.timestamp_up = e.button.timestamp;
+					break;
+				}
+				case SDL_BUTTON_RIGHT:
+				{
+					current_mouse_state.right_button.down = false;
+					current_mouse_state.right_button.x = e.button.x;
+					current_mouse_state.right_button.y = e.button.y;
+					current_mouse_state.right_button.timestamp_up = e.button.timestamp;
+					break;
+				}
+				}
+				//do logic
+				Uint32 right_up_minus_down = (current_mouse_state.right_button.timestamp_up - current_mouse_state.right_button.timestamp_down);
+				if (right_up_minus_down > 0 && right_up_minus_down < SXNGN::SINGLE_CLICK_THRESH_MS)
+				{
 
-						SXNGN::UserInputUtils::Click left_click;
-						left_click.button = UserInputUtils::MOUSE_BUTTON::LEFT;
-						left_click.time_stamp = current_mouse_state.left_button.timestamp_up;
-						left_click.x = current_mouse_state.left_button.x;
-						left_click.y = current_mouse_state.left_button.y;
-						
-						Uint32 click_gap = (left_click.time_stamp - cached_mouse_state->last_left_click.time_stamp);
-						cached_mouse_state->last_left_click = left_click;
-						if (click_gap < SXNGN::DOUBLE_CLICK_THRESH_MS && click_gap > 0)
-						{
-							//printf("left double click %zd\n",click_gap);
-							cached_mouse_state->last_left_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
-							//todo launch double click event
-						}
-						else
-						{
-							//printf("left click %zd\n", click_gap);
-							//todo launch single click event
-						}
-						
+					SXNGN::UserInputUtils::Click right_click;
+					right_click.button = UserInputUtils::MOUSE_BUTTON::RIGHT;
+					right_click.time_stamp = current_mouse_state.right_button.timestamp_up;
+					right_click.x = current_mouse_state.right_button.x;
+					right_click.y = current_mouse_state.right_button.y;
+
+
+					Uint32 click_gap = (right_click.time_stamp - cached_mouse_state->last_right_click.time_stamp);
+					cached_mouse_state->last_right_click = right_click;
+					if (click_gap < SXNGN::DOUBLE_CLICK_THRESH_MS && click_gap > 0)
+					{
+						//printf("right double click %zd\n", click_gap);
+						cached_mouse_state->last_right_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
+						//todo launc double click event
+					}
+					else
+					{
+						//printf("right click %zd\n", click_gap);
+						//todo launch single click event
 					}
 					//clear out the state after recording a click
-					current_mouse_state.left_button.timestamp_up = 0;
-					current_mouse_state.left_button.timestamp_down = 0;
-					cached_mouse_state->mouse_state = current_mouse_state;
-					break;
+					current_mouse_state.right_button.timestamp_up = 0;
+					current_mouse_state.right_button.timestamp_down = 0;
+
 
 				}
-				case SDL_MOUSEMOTION:
+				Uint32 left_up_minus_down = (current_mouse_state.left_button.timestamp_up - current_mouse_state.left_button.timestamp_down);
+				if (left_up_minus_down > 0 && left_up_minus_down < SXNGN::SINGLE_CLICK_THRESH_MS)
 				{
 
-					//do logic
-					cached_mouse_state->mouse_state = current_mouse_state;
-					break;
+					SXNGN::UserInputUtils::Click left_click;
+					left_click.button = UserInputUtils::MOUSE_BUTTON::LEFT;
+					left_click.time_stamp = current_mouse_state.left_button.timestamp_up;
+					left_click.x = current_mouse_state.left_button.x;
+					left_click.y = current_mouse_state.left_button.y;
+
+					Uint32 click_gap = (left_click.time_stamp - cached_mouse_state->last_left_click.time_stamp);
+					cached_mouse_state->last_left_click = left_click;
+					if (click_gap < SXNGN::DOUBLE_CLICK_THRESH_MS && click_gap > 0)
+					{
+						//printf("left double click %zd\n",click_gap);
+						cached_mouse_state->last_left_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
+						//todo launch double click event
+					}
+					else
+					{
+						//printf("left click %zd\n", click_gap);
+						//todo launch single click event
+					}
+
 				}
-				default: 
-				{
-					printf("Error: Update_Mouse_State got unrecognized SDL Event. Check UserInputUtils filter events and UserInputSystem Update_Mouse_State\n");
-					abort();
-				}
+				//clear out the state after recording a click
+				current_mouse_state.left_button.timestamp_up = 0;
+				current_mouse_state.left_button.timestamp_down = 0;
+				cached_mouse_state->mouse_state = current_mouse_state;
+				break;
+
+			}
+			case SDL_MOUSEMOTION:
+			{
+
+				//do logic
+				cached_mouse_state->mouse_state = current_mouse_state;
+				break;
+			}
+			default:
+			{
+				printf("Error: Update_Mouse_State got unrecognized SDL Event. Check UserInputUtils filter events and UserInputSystem Update_Mouse_State\n");
+				abort();
+			}
 			}
 		}
 
 	}
+}

@@ -263,6 +263,17 @@ static void button_sw_event(kiss_button* button, SDL_Event* e, int* draw)
 	}
 }
 
+static void button_sw2_event(kiss_button* button, SDL_Event* e, int* draw)
+{
+	std::shared_ptr<SXNGN::Tile>mailman_tile =
+		g_tile_handler_apocalpyse_map_->generateTileRef("ROCK_GROUND");
+	if (kiss_button_event(button, e, draw))
+	{
+		gunman_entity->get_sprite_ref()->getTileClipBox()->x = mailman_tile->getTileClipBox()->x;
+		gunman_entity->get_sprite_ref()->getTileClipBox()->y = mailman_tile->getTileClipBox()->y;
+	}
+}
+
 int main(int argc, char* args[])
 {
 	//Start up SDL and create window
@@ -342,9 +353,11 @@ int main(int argc, char* args[])
 
 		kiss_window window_low;
 		kiss_button button_switch = { 0 };
+		kiss_button button_switch_2 = { 0 };
 
 		kiss_window_new(&window_low, NULL, 1, 0, g_screen_bounds.h-60, g_screen_bounds.w,60);
 		kiss_button_new_uc(&button_switch, &window_low, "Switch", 20, g_screen_bounds.h - 50, 0);
+		kiss_button_new_uc(&button_switch_2, &window_low, "ASDFG", 25, g_screen_bounds.h - 50, 0);
 
 
 		window_low.visible = 1;
@@ -392,6 +405,7 @@ int main(int argc, char* args[])
 				barrel_object->handleEvent(e);
 
 				button_sw_event(&button_switch, &e, &draw_ui);
+				button_sw2_event(&button_switch_2, &e, &draw_ui);
 			}
 
 			////////////Physics
@@ -438,7 +452,7 @@ int main(int argc, char* args[])
 			///////////////Rendering UI
 			kiss_window_draw(&window_low, gRenderer);
 			kiss_button_draw(&button_switch, gRenderer);
-
+			kiss_button_draw(&button_switch_2, gRenderer);
 
 			SDL_RenderPresent(gRenderer);
 			//delay if frame finished early (so maintain capped frames per second)

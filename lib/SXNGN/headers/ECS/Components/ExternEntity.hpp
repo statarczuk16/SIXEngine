@@ -13,7 +13,7 @@
 /// then loaded from file 
 /// </summary>
 
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
 
 	struct ExternJSONEntity : ECS_Component {

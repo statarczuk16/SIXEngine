@@ -8,52 +8,53 @@
 
 
 class Event;
-using ECS_Camera = SXNGN::ECS::Components::CameraComponent;
-using Renderable = SXNGN::ECS::Components::Renderable;
+using ECS_Camera = SXNGN::ECS::A::CameraComponent;
+using Renderable = SXNGN::ECS::A::Renderable;
+namespace SXNGN::ECS::A {
+
+	class Renderer_System : public System
+	{
+	public:
+		void Init();
+
+		void Update(float dt);
+
+	private:
+
+		bool object_in_view(ECS_Camera camera, SDL_Rect object);
+
+		SDL_Rect determine_camera_lens_scaled(ECS_Camera camera);
+
+		SDL_Rect determine_camera_lens_unscaled(ECS_Camera camera);
+
+		void Render(const Renderable* renderable, ECS_Camera camera);
+
+	};
+
+	//takes in pre_renderables sprite_factory and creates a renderable/sprite
+	class Sprite_Factory_System : public System
+	{
+	public:
+		void Init();
+
+		void Update(float dt);
+
+	private:
 
 
-class Renderer_System : public System
-{
-public:
-	void Init();
+	};
 
-	void Update(float dt);
+	//Takes in pre_sprite_factory components and creates a sprite_factory_system component
+	class Sprite_Factory_Creator_System : public System
+	{
+	public:
+		void Init();
 
-private:
+		void Update(float dt);
 
-	bool object_in_view(ECS_Camera camera, SDL_Rect object);
-
-	SDL_Rect determine_camera_lens_scaled(ECS_Camera camera);
-
-	SDL_Rect determine_camera_lens_unscaled(ECS_Camera camera);
-
-	void Render(const Renderable* renderable, ECS_Camera camera);
-
-};
-
-//takes in pre_renderables sprite_factory and creates a renderable/sprite
-class Sprite_Factory_System : public System
-{
-public:
-	void Init();
-
-	void Update(float dt);
-
-private:
-
-
-};
-
-//Takes in pre_sprite_factory components and creates a sprite_factory_system component
-class Sprite_Factory_Creator_System : public System
-{
-public:
-	void Init();
-
-	void Update(float dt);
-
-private:
+	private:
 
 
 
-};
+	};
+}

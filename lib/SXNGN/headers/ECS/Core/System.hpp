@@ -3,23 +3,36 @@
 #include "ECS/Core/Types.hpp"
 #include <set>
 #include <vector>
+#include <SDL.h>
 
 
-namespace SXNGN::ECS::System {
+namespace SXNGN::ECS::A {
+
+	enum class SystemTypeEnum : Uint8
+	{
+		UnknownSys,
+		CameraSys,
+		EventSys,
+		MovementSys,
+		RenderSys,
+		UserInputSys
+	};
 
 	class System
 	{
 	public:
 		//List of entities that contain all components needed by this system. Maintained by SystemManager
-		//Only entites that have ALL of the Components of this System's Signature are added to this list
+		//Only entites that have ALL of the A of this A's Signature are added to this list
 		//An entity that loses a component in the Signature will be removed
 		std::set<Entity> m_actable_entities;
 
 		//List of entities whose data this system needs, but that it doesn't act on.
-		//An entity that ANY of the components in this System's signature will be added to this list
+		//An entity that ANY of the components in this A's signature will be added to this list
 		std::set<Entity> m_entities_of_interest;
 
-		//A System's main loop will (probably) iterate over m_actable_entities every frame
+		SystemTypeEnum system_type;
+
+		//A A's main loop will (probably) iterate over m_actable_entities every frame
 		//But will only loop over m_accessible_entities if an actable_entity required data from
 		//an accessable_entity
 

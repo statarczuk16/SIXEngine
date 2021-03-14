@@ -3,7 +3,7 @@
 #include <nlohmann/json.hpp>
 #include <SDL.h>
 #include <unordered_map>
-namespace SXNGN::ECS::Components {
+namespace SXNGN::ECS::A {
 
 	enum class ComponentTypeEnum : Uint8
 {
