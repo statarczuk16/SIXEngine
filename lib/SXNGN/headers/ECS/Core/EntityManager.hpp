@@ -23,6 +23,7 @@ public:
 
 		Entity id = mAvailableEntities.front();
 		mAvailableEntities.pop();
+		livingEntities[id] = true;
 		++mLivingEntityCount;
 
 		return id;
@@ -33,30 +34,9 @@ public:
 		assert(entity < MAX_ENTITIES && "Entity out of range.");
 
 		mSignatures[entity].reset();
-		mAvailableEntities.push(entity);
+		livingEntities[entity] = false;
 		--mLivingEntityCount;
 	}
-
-	/// <summary>
-	/// Do not make entity id available, but reset it
-	/// </summary>
-	/// <param name="entity"></param>
-	void DeactivateEntity(Entity entity)
-	{
-		assert(entity < MAX_ENTITIES && "Entity out of range.");
-		mSignatures[entity].reset();
-		//mAvailableEntities.push(entity);
-		--mLivingEntityCount;
-	}
-
-	/**
-	void ActivateEntity(Entity entity)
-	{
-		assert(mLivingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
-		++mLivingEntityCount;
-
-	}
-	**/
 
 	void SetSignature(Entity entity, Signature signature)
 	{
@@ -72,8 +52,26 @@ public:
 		return mSignatures[entity];
 	}
 
+	std::vector<std::pair<Entity, Signature>> GetAllEntitySignatures()
+	{
+		std::vector<std::pair<Entity, Signature>> ret;
+		for (int i = 0; i < mSignatures.size(); i++)
+		{
+			if (livingEntities[i] == true)
+			{
+				ret.push_back(std::make_pair(i, mSignatures[i]));
+			}
+			if (ret.size() >= mLivingEntityCount)
+			{
+				return ret;
+			}	
+		}
+		return ret;
+	}
+
 private:
 	std::queue<Entity> mAvailableEntities{};
 	std::array<Signature, MAX_ENTITIES> mSignatures{};
 	uint32_t mLivingEntityCount{};
+	std::array<bool, MAX_ENTITIES> livingEntities{false};
 };

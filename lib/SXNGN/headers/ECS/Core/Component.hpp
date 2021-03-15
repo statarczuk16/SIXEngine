@@ -23,6 +23,9 @@ namespace SXNGN::ECS::A {
 	JSON_ENTITY,
 	EXTERN_ENTITY,
 	EVENT,
+	MAIN_MENU_STATE,
+	MAIN_GAME_STATE,
+	CORE_BG_GAME_STATE
 };
 
 	//convert enum to string for json purposes
@@ -43,7 +46,10 @@ namespace SXNGN::ECS::A {
 			{ComponentTypeEnum::COLLISION,"COLLISION"},
 			{ComponentTypeEnum::TILE,"TILE"},
 			{ComponentTypeEnum::JSON_ENTITY,"JSON_ENTITY"},
-			{ComponentTypeEnum::EXTERN_ENTITY,"EXTERN_ENTITY"}
+			{ComponentTypeEnum::EXTERN_ENTITY,"EXTERN_ENTITY"},
+			{ComponentTypeEnum::MAIN_MENU_STATE,"MAIN_MENU_STATE"},
+			{ComponentTypeEnum::CORE_BG_GAME_STATE,"CORE_BG_GAME_STATE"},
+			{ComponentTypeEnum::MAIN_GAME_STATE,"MAIN_GAME_STATE"}
 
 		};
 		return component_type_enum_to_string;
@@ -67,7 +73,10 @@ namespace SXNGN::ECS::A {
 			{"COLLISION",ComponentTypeEnum::COLLISION},
 			{"TILE",ComponentTypeEnum::TILE},
 			{"JSON_ENTITY",ComponentTypeEnum::JSON_ENTITY},
-			{"EXTERN_ENTITY",ComponentTypeEnum::EXTERN_ENTITY}
+			{"EXTERN_ENTITY",ComponentTypeEnum::EXTERN_ENTITY},
+			{"MAIN_MENU_STATE",ComponentTypeEnum::MAIN_MENU_STATE},
+			{"CORE_BG_GAME_STATE",ComponentTypeEnum::CORE_BG_GAME_STATE},
+			{"MAIN_GAME_STATE",ComponentTypeEnum::MAIN_GAME_STATE}
 
 		};
 		return component_type_string_to_enum;

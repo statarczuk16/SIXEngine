@@ -50,7 +50,7 @@ SXNGN::Database g_database; //static can be accessed anywhere, but must intializ
 
 using Gameutils = SXNGN::Gameutils;
 using nlohmann::json;
-using entity_builder = SXNGN::ECS::Entity_Builder_Utils;
+using entity_builder = SXNGN::ECS::A::Entity_Builder_Utils;
 
 
 using Movement_System = SXNGN::ECS::A::Movement_System;
@@ -175,6 +175,10 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MOVEABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::COLLISION);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TILE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_MENU_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
+
 
 
 	
@@ -198,6 +202,9 @@ int main(int argc, char* args[])
 		Signature signature_of_interest;
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::SPRITE_FACTORY));
 		gCoordinator.SetSystemSignatureOfInterest<Sprite_Factory_System>(signature_of_interest);
+
+
+
 	}
 	sprite_factory_system->Init();
 
@@ -207,6 +214,7 @@ int main(int argc, char* args[])
 		Signature signature;
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::RENDERABLE));
 		gCoordinator.SetSystemSignatureActable<Renderer_System>(signature);
+
 	}
 	renderer_system->Init();
 
@@ -221,6 +229,7 @@ int main(int argc, char* args[])
 		Signature signature_of_interest;
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::INPUT_TAGS));
 		gCoordinator.SetSystemSignatureOfInterest<User_Input_System>(signature_of_interest);
+
 	}
 	input_system->Init();
 
@@ -234,26 +243,14 @@ int main(int argc, char* args[])
 		Signature signature_of_interest;
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
 		gCoordinator.SetSystemSignatureOfInterest<Movement_System>(signature_of_interest);
+
 	}
 	movement_system->Init();
 
-	json j2 = {
-  {"pi", 3.141},
-  {"happy", true},
-  {"name", "Niels"},
-  {"nothing", nullptr},
-  {"answer", {
-	{"everything", 42}
-  }},
-  {"list", {1, 0, 2}},
-  {"object", {
-	{"currency", "USD"},
-	{"value", 42.99}
-  }}
-	};
-
-	std::cout << j2;
-
+	std::vector<ComponentTypeEnum> active_game_states;
+	active_game_states.push_back(ComponentTypeEnum::MAIN_MENU_STATE);
+	active_game_states.push_back(ComponentTypeEnum::CORE_BG_GAME_STATE);
+	gCoordinator.GameStateChanged(active_game_states);
 
 	SDL_Event e;
 
@@ -275,10 +272,11 @@ int main(int argc, char* args[])
 	apocalypse_map_pre->name_ = "APOCALYPSE_MAP";
 	apocalypse_map_pre->tile_manifest_path_ = apoc_tile_manifest_path;
 	gCoordinator.AddComponent(apoc_map_pre_entity, apocalypse_map_pre);
+	gCoordinator.AddComponent(apoc_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
-	Entity test_person = entity_builder::Create_Person(gCoordinator, 0, 0, "APOCALYPSE_MAP", "GUNMAN_1", true);
+	Entity test_person = entity_builder::Create_Person(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 0, 0, "APOCALYPSE_MAP", "GUNMAN_1", true);
 
-	Entity test_Tile = entity_builder::Create_Tile(gCoordinator, 0, 0, "APOCALYPSE_MAP", "ROCK_GROUND", SXNGN::ECS::A::CollisionType::NONE);
+	Entity test_Tile = entity_builder::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 0, 0, "APOCALYPSE_MAP", "ROCK_GROUND", SXNGN::ECS::A::CollisionType::NONE);
 
 	//todo save utility or game state
 	std::string savefile = g_save_folder + "/save1.json";
@@ -309,8 +307,15 @@ int main(int argc, char* args[])
 		gCoordinator.AddComponent(map_tile_entity, collisionable, false);
 		Tile* tile = new Tile(game_map_tiles.at(i));
 		gCoordinator.AddComponent(map_tile_entity, tile, false);
+
+		gCoordinator.AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
+		
 	}
 
+	active_game_states.clear();
+	active_game_states.push_back(ComponentTypeEnum::MAIN_GAME_STATE);
+	active_game_states.push_back(ComponentTypeEnum::CORE_BG_GAME_STATE);
+	gCoordinator.GameStateChanged(active_game_states);
 	
 
 
@@ -378,6 +383,7 @@ int main(int argc, char* args[])
 			SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
 			input_cache->events_ = events_this_frame;
 			gCoordinator.AddComponent(input_event, input_cache, true);
+			gCoordinator.AddComponent(input_event, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE), true);
 			//update event handling system
 			input_system->Update(dt);
 		}

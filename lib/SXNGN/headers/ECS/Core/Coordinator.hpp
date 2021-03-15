@@ -13,6 +13,7 @@
 #include <ECS/Core/SystemManager.hpp>
 
 
+
 namespace SXNGN {
 	namespace ECS {
 		namespace A {
@@ -27,7 +28,7 @@ namespace SXNGN {
 					mComponentManager = std::make_shared<ComponentManager>();
 					mEntityManager = std::make_shared<EntityManager>();
 					mEventManager = std::make_shared<EventManager>();
-					mSystemManager = std::make_shared<A::SystemManager>();
+					mSystemManager = std::make_shared<SystemManager>();
 					mTextureManager = std::make_shared<TextureManager>(renderer);
 					mStateManager = std::make_shared<StateManager>();
 				}
@@ -54,12 +55,12 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity"></param>
 				/// <returns></returns>
-				std::vector<ECS_Component*> Extract_Entity_Components(Entity entity)
+				std::vector<ECS_Component*> Extract_Entity_Components_From_ECS(Entity entity)
 				{
 					
 					auto extracted_components = mComponentManager->ExtractEntity(entity);
 					mSystemManager->EntityDestroyed(entity);
-					mEntityManager->DeactivateEntity(entity);
+					mEntityManager->DestroyEntity(entity);
 					return extracted_components;
 				}
 
@@ -69,37 +70,36 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity"></param>
 				/// <returns></returns>
-				std::shared_ptr<A::ExternEntity> Extract_Entity(Entity entity)
+				std::shared_ptr<A::ExternEntity> Extract_Entity_From_ECS(Entity entity)
 				{
 
-					auto extracted_components =Extract_Entity_Components(entity);
+					auto extracted_components =Extract_Entity_Components_From_ECS(entity);
 					auto extracted_entity = std::make_shared<A::ExternEntity>(entity, extracted_components);
 					return extracted_entity;
 				}
 
 				/// <summary>
-				/// Cache an extern_entity into an unloaded game state
+				/// Cache an extern_entity into a space - outside of the ECS
 				/// </summary>
 				/// <param name="entity_to_store"></param>
 				/// <param name="state_to_store_in"></param>
-				void Cache_Extern_Entity(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
+				void Space_Extern_Entity(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
 				{
-					mStateManager->cacheEntityInState(entity_to_store, state_to_store_in);
-					
+					mStateManager->cacheEntityInSpace(entity_to_store, state_to_store_in);	
 				}
 
 				/// <summary>
-				/// Take a vector full of ExternEntities and dump into the coordinator
+				/// Take a space full of ExternEntities and dump into the ECS
 				/// Optional, destroy the vector after.
 				/// </summary>
 				/// <param name="state_to_dump_from"></param>
 				/// <param name="destroy_each"></param>
-				void Dump_Cached_Entity_Vector_To_Current(std::string state_to_dump_from = "Temp", bool destroy_after = false)
+				void Dump_Space_To_ECS(std::string state_to_dump_from = "Temp", bool destroy_after = false)
 				{	
-					std::vector< std::shared_ptr<A::ExternEntity>> entity_array = mStateManager->retrieveStateEntities(state_to_dump_from, destroy_after);
+					std::vector< std::shared_ptr<A::ExternEntity>> entity_array = mStateManager->retrieveSpaceEntities(state_to_dump_from, destroy_after);
 					for (auto entity : entity_array)
 					{
-						Dump_Cached_Entity_To_Current(entity);
+						Dump_Spaced_Entity_To_ECS(entity);
 					}
 				}
 
@@ -107,7 +107,7 @@ namespace SXNGN {
 				/// Add an ExternEntity back into the system
 				/// </summary>
 				/// <param name="entity_to_dump"></param>
-				void Dump_Cached_Entity_To_Current(std::shared_ptr<A::ExternEntity> entity_to_dump)
+				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<A::ExternEntity> entity_to_dump)
 				{
 					Entity new_id = mEntityManager->CreateEntity();
 					for (auto component : entity_to_dump->entity_components_)
@@ -169,6 +169,8 @@ namespace SXNGN {
 					mSystemManager->EntitySignatureChanged(entity, signature, quiet);
 				}
 
+				
+
 				void RemoveComponent(Entity entity, ComponentTypeEnum component_type)
 				{
 					mComponentManager->RemoveComponent(entity, component_type);
@@ -178,6 +180,25 @@ namespace SXNGN {
 					mEntityManager->SetSignature(entity, signature);
 
 					mSystemManager->EntitySignatureChanged(entity, signature);
+				}
+
+				/// <summary>
+				/// Change all existing systems to require an entity to contain one of the active_game_states Components in order to be seen by the system
+				/// (This is how to change game state)
+				/// </summary>
+				/// <param name="active_game_states"></param>
+				/// <param name="quiet"></param>
+				void GameStateChanged(std::vector<ComponentTypeEnum> active_game_states, bool quiet = false)
+				{
+					Signature game_state_signature;
+					for (auto state : active_game_states)
+					{
+						game_state_signature.set(GetComponentType(state));
+					}
+
+					auto entity_signatures = mEntityManager->GetAllEntitySignatures();
+
+					mSystemManager->GameStateChanged(game_state_signature, entity_signatures, quiet);
 				}
 
 				/**
@@ -230,9 +251,11 @@ namespace SXNGN {
 				{
 					return mComponentManager->CheckInComponent(component_type, entity, std::move(key));
 				}
+
 				ComponentTypeHash GetComponentType(ComponentTypeEnum component_type)
 				{
 					return mComponentManager->GetComponentType(component_type);
+					//return ComponentTypeHash(component_type);
 				}
 
 				template<typename T>
@@ -241,17 +264,20 @@ namespace SXNGN {
 				{
 					return mSystemManager->RegisterSystem<T>();
 				}
+
 				template<typename T>
 				void SetSystemSignatureActable(Signature signature)
 				{
 					mSystemManager->SetSignatureActable<T>(signature);
 				}
+
 				template<typename T>
 				void SetSystemSignatureOfInterest(Signature signature)
 				{
 					mSystemManager->SetSignatureOfInterest<T>(signature);
 				}
 
+				
 
 				// Event methods
 				void AddEventListener(EventId eventId, std::function<void(Event&)> const& listener)
@@ -278,7 +304,7 @@ namespace SXNGN {
 				std::shared_ptr<ComponentManager> mComponentManager;
 				std::shared_ptr<EntityManager> mEntityManager;
 				std::shared_ptr<EventManager> mEventManager;
-				std::shared_ptr<A::SystemManager> mSystemManager;
+				std::shared_ptr<SystemManager> mSystemManager;
 				std::shared_ptr<TextureManager> mTextureManager;
 				std::shared_ptr<StateManager> mStateManager;
 				

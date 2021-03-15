@@ -5,26 +5,29 @@
 #include <cassert>
 #include <queue>
 
-namespace SXNGN::ECS {
+namespace SXNGN::ECS::A {
 
 	class StateManager
 	{
 	public:
-		struct Gamestate {
+		/// <summary>
+		/// A space is a location where ECS_Components can live when not inside of the ECS
+		/// </summary>
+		struct Space {
 			std::shared_ptr<std::mutex> lock_;
-			std::vector <std::shared_ptr<A::ExternEntity>> entities_;
+			std::vector <std::shared_ptr<ExternEntity>> entities_;
 			std::string name_;
 
-			Gamestate(std::string name, std::vector <std::shared_ptr<A::ExternEntity>> entities)
+			Space(std::string name, std::vector <std::shared_ptr<A::ExternEntity>> entities)
 			{
 				entities_ = entities;
 				name_ = name;
 				lock_ = std::make_shared<std::mutex>();
 			}
 
-			Gamestate()
+			Space()
 			{
-				printf("Gamestate::Gamestate() Calling this for some reason...\n");//compiler complains about no default constructor without this???
+				
 			}
 		};
 
@@ -33,35 +36,35 @@ namespace SXNGN::ECS {
 
 		}
 
-		void cacheEntityInState(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state = "Temp")
+		void cacheEntityInSpace(std::shared_ptr<ExternEntity> entity_to_store, std::string state = "Temp")
 		{
 
-			if (gameStates.count(state) == 0)
+			if (spaces.count(state) == 0)
 			{
-				printf("stateManager: Creating new state: %s", state.c_str());
+				printf("stateManager: Creating new space: %s", state.c_str());
 				std::vector< std::shared_ptr<A::ExternEntity>> new_entity_array = { entity_to_store };
-				Gamestate new_state(state, new_entity_array);
-				gameStates[state] = new_state;
+				Space new_state(state, new_entity_array);
+				spaces[state] = new_state;
 			
 			}
 			else
 			{
-				std::lock_guard<std::mutex> guard(*gameStates[state].lock_);
-				gameStates[state].entities_.push_back((entity_to_store));
+				std::lock_guard<std::mutex> guard(*spaces[state].lock_);
+				spaces[state].entities_.push_back((entity_to_store));
 			}
 		}
 
-		std::vector< std::shared_ptr<A::ExternEntity>> retrieveStateEntities(std::string state, bool destroy)
+		std::vector< std::shared_ptr<ExternEntity>> retrieveSpaceEntities(std::string state, bool destroy)
 		{
 			std::vector< std::shared_ptr<A::ExternEntity>> entity_array;
-			if (gameStates.count(state) != 0)
+			if (spaces.count(state) != 0)
 			{
-				std::shared_ptr<std::mutex> lock = gameStates[state].lock_;
+				std::shared_ptr<std::mutex> lock = spaces[state].lock_;
 				std::lock_guard<std::mutex> guard(*lock);
-				 entity_array = gameStates[state].entities_;
+				 entity_array = spaces[state].entities_;
 				if (destroy)
 				{
-					gameStates.erase(state);
+					spaces.erase(state);
 				}
 				return entity_array;
 			}
@@ -74,7 +77,9 @@ namespace SXNGN::ECS {
 
 
 	private:
-		std::unordered_map< std::string, Gamestate> gameStates;
-		std::unordered_map< std::string, std::mutex> stateGuards;
+		std::unordered_map< std::string, Space> spaces;
+		std::unordered_map< std::string, std::mutex> spaceGuards;
+		std::vector<ComponentTypeEnum> active_game_states;
+		
 	};
 }

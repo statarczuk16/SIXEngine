@@ -258,6 +258,7 @@ static void button_sw_event(kiss_button* button, SDL_Event* e, int* draw)
 		g_tile_handler_apocalpyse_map_->generateTileRef("MAILMAN");
 	if (kiss_button_event(button, e, draw))
 	{
+		printf("Button1\n");
 		gunman_entity->get_sprite_ref()->getTileClipBox()->x = mailman_tile->getTileClipBox()->x;
 		gunman_entity->get_sprite_ref()->getTileClipBox()->y = mailman_tile->getTileClipBox()->y;
 	}
@@ -269,6 +270,7 @@ static void button_sw2_event(kiss_button* button, SDL_Event* e, int* draw)
 		g_tile_handler_apocalpyse_map_->generateTileRef("ROCK_GROUND");
 	if (kiss_button_event(button, e, draw))
 	{
+		printf("Button2\n");
 		gunman_entity->get_sprite_ref()->getTileClipBox()->x = mailman_tile->getTileClipBox()->x;
 		gunman_entity->get_sprite_ref()->getTileClipBox()->y = mailman_tile->getTileClipBox()->y;
 	}
