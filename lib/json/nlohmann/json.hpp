@@ -3713,7 +3713,7 @@ void from_json(const BasicJsonType& j, typename std::nullptr_t& n)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_null()))
     {
-        JSON_THROW(type_error::create(302, "type must be null, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be null, but is " + std::string(j.type_name()), j));
     }
     n = nullptr;
 }
@@ -3744,7 +3744,7 @@ void get_arithmetic_value(const BasicJsonType& j, ArithmeticType& val)
         }
 
         default:
-            JSON_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name()), j));
+            JSON_THROW(type_error::create(302, "type_ must be number, but is " + std::string(j.type_name()), j));
     }
 }
 
@@ -3753,7 +3753,7 @@ void from_json(const BasicJsonType& j, typename BasicJsonType::boolean_t& b)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_boolean()))
     {
-        JSON_THROW(type_error::create(302, "type must be boolean, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be boolean, but is " + std::string(j.type_name()), j));
     }
     b = *j.template get_ptr<const typename BasicJsonType::boolean_t*>();
 }
@@ -3763,7 +3763,7 @@ void from_json(const BasicJsonType& j, typename BasicJsonType::string_t& s)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_string()))
     {
-        JSON_THROW(type_error::create(302, "type must be string, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be string, but is " + std::string(j.type_name()), j));
     }
     s = *j.template get_ptr<const typename BasicJsonType::string_t*>();
 }
@@ -3779,7 +3779,7 @@ void from_json(const BasicJsonType& j, ConstructibleStringType& s)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_string()))
     {
-        JSON_THROW(type_error::create(302, "type must be string, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be string, but is " + std::string(j.type_name()), j));
     }
 
     s = *j.template get_ptr<const typename BasicJsonType::string_t*>();
@@ -3819,7 +3819,7 @@ void from_json(const BasicJsonType& j, std::forward_list<T, Allocator>& l)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
     {
-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(j.type_name()), j));
     }
     l.clear();
     std::transform(j.rbegin(), j.rend(),
@@ -3836,7 +3836,7 @@ void from_json(const BasicJsonType& j, std::valarray<T>& l)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
     {
-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(j.type_name()), j));
     }
     l.resize(j.size());
     std::transform(j.begin(), j.end(), std::begin(l),
@@ -3927,7 +3927,7 @@ void())
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
     {
-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(j.type_name()), j));
     }
 
     from_json_array_impl(j, arr, priority_tag<3> {});
@@ -3938,7 +3938,7 @@ void from_json(const BasicJsonType& j, typename BasicJsonType::binary_t& bin)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_binary()))
     {
-        JSON_THROW(type_error::create(302, "type must be binary, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be binary, but is " + std::string(j.type_name()), j));
     }
 
     bin = *j.template get_ptr<const typename BasicJsonType::binary_t*>();
@@ -3950,7 +3950,7 @@ void from_json(const BasicJsonType& j, ConstructibleObjectType& obj)
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_object()))
     {
-        JSON_THROW(type_error::create(302, "type must be object, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be object, but is " + std::string(j.type_name()), j));
     }
 
     ConstructibleObjectType ret;
@@ -4004,7 +4004,7 @@ void from_json(const BasicJsonType& j, ArithmeticType& val)
         }
 
         default:
-            JSON_THROW(type_error::create(302, "type must be number, but is " + std::string(j.type_name()), j));
+            JSON_THROW(type_error::create(302, "type_ must be number, but is " + std::string(j.type_name()), j));
     }
 }
 
@@ -4033,14 +4033,14 @@ void from_json(const BasicJsonType& j, std::map<Key, Value, Compare, Allocator>&
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
     {
-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(j.type_name()), j));
     }
     m.clear();
     for (const auto& p : j)
     {
         if (JSON_HEDLEY_UNLIKELY(!p.is_array()))
         {
-            JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(p.type_name()), j));
+            JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(p.type_name()), j));
         }
         m.emplace(p.at(0).template get<Key>(), p.at(1).template get<Value>());
     }
@@ -4053,14 +4053,14 @@ void from_json(const BasicJsonType& j, std::unordered_map<Key, Value, Hash, KeyE
 {
     if (JSON_HEDLEY_UNLIKELY(!j.is_array()))
     {
-        JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(j.type_name()), j));
+        JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(j.type_name()), j));
     }
     m.clear();
     for (const auto& p : j)
     {
         if (JSON_HEDLEY_UNLIKELY(!p.is_array()))
         {
-            JSON_THROW(type_error::create(302, "type must be array, but is " + std::string(p.type_name()), j));
+            JSON_THROW(type_error::create(302, "type_ must be array, but is " + std::string(p.type_name()), j));
         }
         m.emplace(p.at(0).template get<Key>(), p.at(1).template get<Value>());
     }
@@ -7903,7 +7903,7 @@ struct is_sax
 {
   private:
     static_assert(is_basic_json<BasicJsonType>::value,
-                  "BasicJsonType must be of type basic_json<...>");
+                  "BasicJsonType must be of type_ basic_json<...>");
 
     using number_integer_t = typename BasicJsonType::number_integer_t;
     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
@@ -7934,7 +7934,7 @@ struct is_sax_static_asserts
 {
   private:
     static_assert(is_basic_json<BasicJsonType>::value,
-                  "BasicJsonType must be of type basic_json<...>");
+                  "BasicJsonType must be of type_ basic_json<...>");
 
     using number_integer_t = typename BasicJsonType::number_integer_t;
     using number_unsigned_t = typename BasicJsonType::number_unsigned_t;
@@ -8283,7 +8283,7 @@ class binary_reader
             {
                 std::array<char, 3> cr{{}};
                 (std::snprintf)(cr.data(), cr.size(), "%.2hhX", static_cast<unsigned char>(element_type));
-                return sax->parse_error(element_type_parse_position, std::string(cr.data()), parse_error::create(114, element_type_parse_position, "Unsupported BSON record type 0x" + std::string(cr.data()), BasicJsonType()));
+                return sax->parse_error(element_type_parse_position, std::string(cr.data()), parse_error::create(114, element_type_parse_position, "Unsupported BSON record type_ 0x" + std::string(cr.data()), BasicJsonType()));
             }
         }
     }
@@ -8893,7 +8893,7 @@ class binary_reader
             default:
             {
                 auto last_token = get_token_string();
-                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::cbor, "expected length specification (0x60-0x7B) or indefinite string type (0x7F); last byte: 0x" + last_token, "string"), BasicJsonType()));
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::cbor, "expected length specification (0x60-0x7B) or indefinite string type_ (0x7F); last byte: 0x" + last_token, "string"), BasicJsonType()));
             }
         }
     }
@@ -8992,7 +8992,7 @@ class binary_reader
             default:
             {
                 auto last_token = get_token_string();
-                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::cbor, "expected length specification (0x40-0x5B) or indefinite binary array type (0x5F); last byte: 0x" + last_token, "binary"), BasicJsonType()));
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::cbor, "expected length specification (0x40-0x5B) or indefinite binary array type_ (0x5F); last byte: 0x" + last_token, "binary"), BasicJsonType()));
             }
         }
     }
@@ -9791,7 +9791,7 @@ class binary_reader
 
             default:
                 auto last_token = get_token_string();
-                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "expected length type specification (U, i, I, l, L); last byte: 0x" + last_token, "string"), BasicJsonType()));
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "expected length type_ specification (U, i, I, l, L); last byte: 0x" + last_token, "string"), BasicJsonType()));
         }
     }
 
@@ -9861,7 +9861,7 @@ class binary_reader
             default:
             {
                 auto last_token = get_token_string();
-                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "expected length type specification (U, i, I, l, L) after '#'; last byte: 0x" + last_token, "size"), BasicJsonType()));
+                return sax->parse_error(chars_read, last_token, parse_error::create(113, chars_read, exception_message(input_format_t::ubjson, "expected length type_ specification (U, i, I, l, L) after '#'; last byte: 0x" + last_token, "size"), BasicJsonType()));
             }
         }
     }
@@ -9886,7 +9886,7 @@ class binary_reader
         if (current == '$')
         {
             result.second = get();  // must not ignore 'N', because 'N' maybe the type
-            if (JSON_HEDLEY_UNLIKELY(!unexpect_eof(input_format_t::ubjson, "type")))
+            if (JSON_HEDLEY_UNLIKELY(!unexpect_eof(input_format_t::ubjson, "type_")))
             {
                 return false;
             }
@@ -9899,7 +9899,7 @@ class binary_reader
                     return false;
                 }
                 auto last_token = get_token_string();
-                return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::ubjson, "expected '#' after type information; last byte: 0x" + last_token, "size"), BasicJsonType()));
+                return sax->parse_error(chars_read, last_token, parse_error::create(112, chars_read, exception_message(input_format_t::ubjson, "expected '#' after type_ information; last byte: 0x" + last_token, "size"), BasicJsonType()));
             }
 
             return get_ubjson_size_value(result.first);
@@ -13062,7 +13062,7 @@ class binary_writer
 
             default:
             {
-                JSON_THROW(type_error::create(317, "to serialize to BSON, top-level type must be object, but is " + std::string(j.type_name()), j));;
+                JSON_THROW(type_error::create(317, "to serialize to BSON, top-level type_ must be object, but is " + std::string(j.type_name()), j));;
             }
         }
     }
@@ -19569,7 +19569,7 @@ class basic_json
             return m_value.boolean;
         }
 
-        JSON_THROW(type_error::create(302, "type must be boolean, but is " + std::string(type_name()), *this));
+        JSON_THROW(type_error::create(302, "type_ must be boolean, but is " + std::string(type_name()), *this));
     }
 
     /// get a pointer to the value (object)
@@ -19690,7 +19690,7 @@ class basic_json
             return *ptr;
         }
 
-        JSON_THROW(type_error::create(303, "incompatible ReferenceType for get_ref, actual type is " + std::string(obj.type_name()), obj));
+        JSON_THROW(type_error::create(303, "incompatible ReferenceType for get_ref, actual type_ is " + std::string(obj.type_name()), obj));
     }
 
   public:
@@ -20118,7 +20118,7 @@ class basic_json
     {
         if (!is_binary())
         {
-            JSON_THROW(type_error::create(302, "type must be binary, but is " + std::string(type_name()), *this));
+            JSON_THROW(type_error::create(302, "type_ must be binary, but is " + std::string(type_name()), *this));
         }
 
         return *get_ptr<binary_t*>();
@@ -20129,7 +20129,7 @@ class basic_json
     {
         if (!is_binary())
         {
-            JSON_THROW(type_error::create(302, "type must be binary, but is " + std::string(type_name()), *this));
+            JSON_THROW(type_error::create(302, "type_ must be binary, but is " + std::string(type_name()), *this));
         }
 
         return *get_ptr<const binary_t*>();

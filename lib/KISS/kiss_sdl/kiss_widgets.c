@@ -139,7 +139,7 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 		button->prelightimg = kiss_prelight;
 	kiss_makerect(&button->rect, x, y, button->normalimg.w,
 		button->normalimg.h);
-	button->textcolor = kiss_white;
+	button->textcolor = kiss_black;
 	kiss_string_copy(button->text, KISS_MAX_LENGTH, text, NULL);
 	int text_width = kiss_textwidth(button->font, text, NULL);
 	if (center_text == 1)

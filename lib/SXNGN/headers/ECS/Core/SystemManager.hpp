@@ -79,7 +79,7 @@ namespace SXNGN::ECS::A {
 		void GameStateChanged(Signature game_state_signature, std::vector<std::pair<Entity, Signature>> living_entity_signatures, bool quiet = false)
 		{
 			auto start = std::chrono::high_resolution_clock::now();
-			if (!quiet)
+			if (true)//!quiet)
 			{
 				SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "GameStateChanged: new signature: %d", game_state_signature);
 			}
@@ -97,10 +97,10 @@ namespace SXNGN::ECS::A {
 				EntitySignatureChanged(entity_sig_pair.first, entity_sig_pair.second, quiet);
 			}
 			auto stop = std::chrono::high_resolution_clock::now();
-			if (!quiet)
+			if (true)//(!quiet)
 			{
 				auto duration = std::chrono::duration_cast<std::chrono::milliseconds > (stop - start);
-				SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "GameStateChanged: Updated %d Entities across %d Systems in %t ms", living_entity_signatures.size(), mSystems.size(), duration);
+				SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "GameStateChanged: Updated %d Entities across %d Systems in %d ms", living_entity_signatures.size(), mSystems.size(), duration);
 			}
 		}
 

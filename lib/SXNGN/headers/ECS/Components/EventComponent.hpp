@@ -11,56 +11,52 @@ namespace SXNGN::ECS::A {
 
 	enum class EventType : Uint8
 	{
+		UNKNOWN,
 		SAVE,
 		LOAD,
 		STATE_CHANGE
 	};
 
-	typedef struct SXNGN_Common
+	struct SXNGN_Common
 	{
 		EventType type;
 		Uint32 timestamp;
-		std::string filePath;
-	} SXNGN_Common;
+	};
 
-	typedef struct SXNGN_SaveEvent 
+	struct SXNGN_SaveEvent
 	{
-		EventType type;
-		Uint32 timestamp;
 		std::string filePath;
-	} SXNGN_SaveEvent;
+	};
 
-	typedef struct SXNGN_LoadEvent
+	struct SXNGN_LoadEvent
 	{
-		EventType type;
-		Uint32 timestamp;
 		std::string filePath;
-	} SXNGN_LoadEvent;
+	};
 
-	typedef struct SXNGN_StateChangeEvent
+	struct SXNGN_StateChangeEvent
 	{
-		EventType type;
-		Uint32 timestamp;
-		std::string new_state;
-		std::string old_state;
-		bool overwrite_old;
-		bool overwrite_new;
-	} SXNGN_StateChangeEvent;
+
+		std::forward_list<ComponentTypeEnum> new_states;
+		std::forward_list<ComponentTypeEnum> states_to_remove;
+	};
 	
-	typedef union SXNGN_Event
+	struct SXNGN_Event
 	{
-		EventType type;
+		SXNGN_Common common;
 		SXNGN_SaveEvent save;
 		SXNGN_LoadEvent load;
 		SXNGN_StateChangeEvent state_change;
-	} SXNGN_Event;
+	};
 
 	struct Event_Component : ECS_Component
 	{
+
 		Event_Component()
 		{
 			component_type = ComponentTypeEnum::EVENT;
+			e.common.type = EventType::UNKNOWN;
 		}
+		SXNGN_Event e;
 
 	};
 

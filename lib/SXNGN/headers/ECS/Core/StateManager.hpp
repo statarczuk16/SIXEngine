@@ -54,6 +54,17 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
+		void gameStateChanged(std::forward_list<ComponentTypeEnum> active_game_states)
+		{
+			active_game_states_.clear();
+			active_game_states_ = active_game_states;
+		}
+
+		std::forward_list<ComponentTypeEnum> getActiveGameStates()
+		{
+			return active_game_states_;
+		}
+
 		std::vector< std::shared_ptr<ExternEntity>> retrieveSpaceEntities(std::string state, bool destroy)
 		{
 			std::vector< std::shared_ptr<A::ExternEntity>> entity_array;
@@ -79,7 +90,7 @@ namespace SXNGN::ECS::A {
 	private:
 		std::unordered_map< std::string, Space> spaces;
 		std::unordered_map< std::string, std::mutex> spaceGuards;
-		std::vector<ComponentTypeEnum> active_game_states;
+		std::forward_list<ComponentTypeEnum> active_game_states_;
 		
 	};
 }

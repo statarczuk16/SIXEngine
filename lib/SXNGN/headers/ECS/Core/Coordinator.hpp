@@ -44,9 +44,13 @@ namespace SXNGN {
 				{
 					mEntityManager->DestroyEntity(entity);
 
+					mSystemManager->EntityDestroyed(entity);
+
+					//takes the longest because of multithread safety so do last
+					//no one will try to act on the data after system manager thinks it is gone, I think...
 					mComponentManager->EntityDestroyed(entity);
 
-					mSystemManager->EntityDestroyed(entity);
+					
 				}
 
 				/// <summary>
@@ -153,7 +157,7 @@ namespace SXNGN {
 					mComponentManager->RegisterComponent(component_type);
 				}
 
-				void AddComponent(Entity entity, ECS_Component* component, bool quiet = false)
+				void AddComponent(Entity entity, ECS_Component* component, bool quiet = true)
 				{
 					if (!quiet)
 					{
@@ -188,8 +192,10 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="active_game_states"></param>
 				/// <param name="quiet"></param>
-				void GameStateChanged(std::vector<ComponentTypeEnum> active_game_states, bool quiet = false)
+				void GameStateChanged(std::forward_list<ComponentTypeEnum> active_game_states, bool quiet = true)
 				{
+					printf("Changing game state\n");
+					mStateManager->gameStateChanged(active_game_states);
 					Signature game_state_signature;
 					for (auto state : active_game_states)
 					{
@@ -199,6 +205,11 @@ namespace SXNGN {
 					auto entity_signatures = mEntityManager->GetAllEntitySignatures();
 
 					mSystemManager->GameStateChanged(game_state_signature, entity_signatures, quiet);
+				}
+
+				std::forward_list<ComponentTypeEnum> GetActiveGameStates()
+				{
+					return mStateManager->getActiveGameStates();
 				}
 
 				/**
@@ -298,6 +309,11 @@ namespace SXNGN {
 				std::shared_ptr<TextureManager> get_texture_manager()
 				{
 					return mTextureManager;
+				}
+
+				SDL_Renderer* Get_Renderer()
+				{
+					return mTextureManager->get_renderer();
 				}
 
 			private:

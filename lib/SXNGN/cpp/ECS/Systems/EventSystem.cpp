@@ -20,7 +20,7 @@ namespace SXNGN::ECS::A {
 
 		//Iterate through entities this system manipulates/converts
 		auto it_act = m_actable_entities.begin();
-		//actable entities for user input system are UserInputCache (vector of sdl events)
+		//actable entities for event system are entities with event component
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
@@ -31,9 +31,32 @@ namespace SXNGN::ECS::A {
 			if (check_out_event.first)
 			{
 
-				Event_Component* evnt_ptr = static_cast<Event_Component*>(check_out_event.first);
-				//update position
-
+				Event_Component* event_ptr = static_cast<Event_Component*>(check_out_event.first);
+				//act on event
+				switch (event_ptr->e.common.type)
+				{
+				case EventType::STATE_CHANGE:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: State Change Event");
+					auto active_states = gCoordinator.GetActiveGameStates();
+					for (auto rs : event_ptr->e.state_change.states_to_remove)
+					{
+						active_states.remove(rs);
+					}
+					for (auto as : event_ptr->e.state_change.new_states)
+					{
+						active_states.remove(as);
+						active_states.push_front(as);
+					}
+					gCoordinator.GameStateChanged(active_states);
+					break;
+				}
+				default:
+				{
+					SDL_LogCritical(1, "Event_System::Update:: Unknown event type");
+					abort();
+				}
+				}
 				//check data back in
 				gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_actable, std::move(check_out_event.second));
 

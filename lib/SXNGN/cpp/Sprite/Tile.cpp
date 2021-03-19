@@ -294,7 +294,7 @@ bool SXNGN::TileHandler::initTileNames()
 
 	if (!in)
 	{
-		std::cout << "Cannot open tile type list";
+		std::cout << "Cannot open tile type_ list";
 		return false;
 	}
 	//Open the map
@@ -303,7 +303,7 @@ bool SXNGN::TileHandler::initTileNames()
 	while (std::getline(in, str))
 	{
 		// output the line
-		std::cout << "tile type: " << str << " mapped to " << tile_name_idx << std::endl;
+		std::cout << "tile type_: " << str << " mapped to " << tile_name_idx << std::endl;
 		tile_name_int_to_string_map_[tile_name_idx] = str;
 		tile_name_idx++;
 		// now we loop back and get the next line in 'str'
@@ -415,7 +415,7 @@ bool SXNGN::TileHandler::initTilesNamesFromManifest()
 		}
 		else
 		{
-			std::cout << "Uknown manifest entry type: " << manifest_entry_type_str << std::endl;
+			std::cout << "Uknown manifest entry type_: " << manifest_entry_type_str << std::endl;
 			continue;
 		}
 
@@ -609,7 +609,7 @@ bool SXNGN::TileHandler::loadTileMap(std::vector<SXNGN::Tile>& tiles, std::strin
 			//Eg, should be a map for every number to something like "DIRT" or "TOP_LEFT_CAR"
 			if (tile_name_int_to_string_map_.count(tile_name_int) != 1)
 			{
-				printf("Error loading map: Unexpected tile type\n");
+				printf("Error loading map: Unexpected tile type_\n");
 				map_stream.close();
 				return false;
 			}

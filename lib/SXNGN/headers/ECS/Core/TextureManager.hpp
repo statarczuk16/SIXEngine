@@ -64,6 +64,11 @@ public:
 					
 	}
 
+	SDL_Renderer* get_renderer()
+	{
+		return renderer_;
+	}
+
 private:
 	//Entities must have ALL components in signature to be added to entities_actable list of system
 	std::unordered_map < std::string, std::shared_ptr<SXNGN::Texture> > m_string_to_texture_map_;

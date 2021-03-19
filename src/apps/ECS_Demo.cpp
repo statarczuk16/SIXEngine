@@ -21,6 +21,7 @@
 #include <Timer.h>
 #include <fstream>
 #include <tuple>
+#include <ECS/Systems/EventSystem.hpp>
 
 
 SXNGN::ECS::A::Coordinator gCoordinator;
@@ -38,8 +39,8 @@ SDL_Rect g_level_bounds;
 SDL_Rect g_screen_bounds;
 
 
-const int SCREEN_WIDTH = 800;
-const int SCREEN_HEIGHT = 400;
+const int SCREEN_WIDTH = 1920;
+const int SCREEN_HEIGHT = 1080;
 
 const int LEVEL_WIDTH_PIXELS = 800;
 const int LEVEL_HEIGHT_PIXELS = 600;
@@ -68,7 +69,7 @@ bool init()
 {
 	//Initialization flag
 	bool success = true;
-
+	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 	//Initialize SDL
 	if (SDL_Init(SDL_INIT_VIDEO) < 0)
 	{
@@ -110,7 +111,7 @@ bool init()
 
 
 		std::string kiss_resource_folder = g_media_folder + "/kiss_resources/";
-		if (Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
+		if (Gameutils::file_exists(kiss_resource_folder + "/manifest_do_not_delete.txt"))
 		{
 			printf("Found KISS media folder %s\n", kiss_resource_folder.c_str());
 		}
@@ -120,7 +121,8 @@ bool init()
 			return 0;
 		}
 		kiss_array kiss_objects;
-		gRenderer = kiss_init("HOPLON", &kiss_objects, g_screen_bounds.w, g_screen_bounds.h, kiss_resource_folder.c_str());
+		std::string tile_set = "sand";
+		gRenderer = kiss_init("HOPLON", &kiss_objects, g_screen_bounds.w, g_screen_bounds.h, kiss_resource_folder.c_str(), tile_set.c_str());
 		//Create renderer for window
 		//gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		if (gRenderer == NULL)
@@ -169,7 +171,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_RENDERABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::RENDERABLE);
-	gCoordinator.RegisterComponent(ComponentTypeEnum::CAMERA);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::CAMERA_SINGLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::INPUT_CACHE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::INPUT_TAGS);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MOVEABLE);
@@ -178,6 +180,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_MENU_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 
 
 
@@ -247,9 +250,19 @@ int main(int argc, char* args[])
 	}
 	movement_system->Init();
 
-	std::vector<ComponentTypeEnum> active_game_states;
-	active_game_states.push_back(ComponentTypeEnum::MAIN_MENU_STATE);
-	active_game_states.push_back(ComponentTypeEnum::CORE_BG_GAME_STATE);
+
+	//Sprite Factory Creator system looks for Pre_Sprite_Factories and uses them create Sprite_Factories
+	auto event_system = gCoordinator.RegisterSystem<Event_System>();
+	{
+		Signature signature;
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::EVENT));
+		gCoordinator.SetSystemSignatureActable<Event_System>(signature);
+	}
+	event_system->Init();
+
+	std::forward_list<ComponentTypeEnum> active_game_states;
+	active_game_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 
 	SDL_Event e;
@@ -302,19 +315,19 @@ int main(int argc, char* args[])
 	{
 		auto map_tile_entity = gCoordinator.CreateEntity();
 		Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
-		gCoordinator.AddComponent(map_tile_entity, pre_render, false);
+		gCoordinator.AddComponent(map_tile_entity, pre_render);
 		Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
-		gCoordinator.AddComponent(map_tile_entity, collisionable, false);
+		gCoordinator.AddComponent(map_tile_entity, collisionable);
 		Tile* tile = new Tile(game_map_tiles.at(i));
-		gCoordinator.AddComponent(map_tile_entity, tile, false);
+		gCoordinator.AddComponent(map_tile_entity, tile);
 
 		gCoordinator.AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		
 	}
 
 	active_game_states.clear();
-	active_game_states.push_back(ComponentTypeEnum::MAIN_GAME_STATE);
-	active_game_states.push_back(ComponentTypeEnum::CORE_BG_GAME_STATE);
+	active_game_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 	
 
@@ -347,8 +360,28 @@ int main(int argc, char* args[])
 
 	SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, g_screen_bounds);
 
+	auto ui = UICollectionSingleton::get_instance();
+	
 
+	std::shared_ptr<kiss_window> main_menu_ui_bottom_window = std::make_shared<kiss_window>();
+	kiss_window_new(main_menu_ui_bottom_window.get(), nullptr, 1, 0, g_screen_bounds.h - 160, g_screen_bounds.w, 160);
+	main_menu_ui_bottom_window->visible = true;
+	UIContainerComponent bottom_window(nullptr, UILayer::TOP, UIType::WINDOW);
+	bottom_window.window_ = main_menu_ui_bottom_window;
+	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, bottom_window);
 
+	kiss_button* new_game_button = new kiss_button();
+	kiss_button_new_uc(new_game_button, main_menu_ui_bottom_window.get(), "New Game", 40, 0, 0);
+	UIContainerComponent start_button_c(main_menu_ui_bottom_window, UILayer::MID, UIType::BUTTON);
+	start_button_c.button_ = new_game_button;
+	Event_Component new_game_event;
+	new_game_event.e.common.type = EventType::STATE_CHANGE;
+	new_game_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+	new_game_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	start_button_c.triggered_events.push_back(new_game_event);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, start_button_c);
+
+	
 
 
 	SXNGN::Timer dt_timer;//time passed during this frame "delta t"
@@ -388,7 +421,7 @@ int main(int argc, char* args[])
 			input_system->Update(dt);
 		}
 
-
+		event_system->Update(dt);
 
 		/////////////////////////////////Physics/Movement
 		//Phys start

@@ -79,6 +79,7 @@ std::string g_current_state_str = "uninit";
 
 bool init()
 {
+	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 	//Initialization flag
 	bool success = true;
 
@@ -123,7 +124,7 @@ bool init()
 				return 0;
 			}
 			std::string kiss_resource_folder = g_media_folder + "/kiss_resources/";
-			if (SXNGN::Gameutils::file_exists(kiss_resource_folder + "/kiss_font.ttf"))
+			if (SXNGN::Gameutils::file_exists(kiss_resource_folder + "/manifest_do_not_delete.txt"))
 			{
 				printf("Found KISS media folder %s", kiss_resource_folder.c_str());
 			}
@@ -133,7 +134,7 @@ bool init()
 				return 0;
 			}
 			kiss_array kiss_objects;
-			gRenderer = kiss_init("HOPLON", &kiss_objects, g_screen_bounds.w, g_screen_bounds.h, kiss_resource_folder.c_str());
+			gRenderer = kiss_init("HOPLON", &kiss_objects, g_screen_bounds.w, g_screen_bounds.h, kiss_resource_folder.c_str(), "sand");
 			//Create renderer for window
 			//gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 			if (gRenderer == NULL)
@@ -354,15 +355,18 @@ int main(int argc, char* args[])
 		int frame_count = 0;
 
 		kiss_window window_low;
+		kiss_window window_top;
 		kiss_button button_switch = { 0 };
 		kiss_button button_switch_2 = { 0 };
 
 		kiss_window_new(&window_low, NULL, 1, 0, g_screen_bounds.h-60, g_screen_bounds.w,60);
+		kiss_window_new(&window_top, NULL, 1, 0, g_screen_bounds.h - 60, g_screen_bounds.w, 60);
 		kiss_button_new_uc(&button_switch, &window_low, "Switch", 20, g_screen_bounds.h - 50, 0);
-		kiss_button_new_uc(&button_switch_2, &window_low, "ASDFG", 25, g_screen_bounds.h - 50, 0);
+		kiss_button_new_uc(&button_switch_2, &window_top, "ASDFG", button_switch.rect.x + button_switch.rect.w, g_screen_bounds.h - 50, 1);
 
 
 		window_low.visible = 1;
+		window_top.visible = 1;
 		int draw_ui = 1;
 		//While application is running
 		while (!quit)
@@ -453,8 +457,10 @@ int main(int argc, char* args[])
 
 			///////////////Rendering UI
 			kiss_window_draw(&window_low, gRenderer);
+			kiss_window_draw(&window_top, gRenderer);
 			kiss_button_draw(&button_switch, gRenderer);
 			kiss_button_draw(&button_switch_2, gRenderer);
+
 
 			SDL_RenderPresent(gRenderer);
 			//delay if frame finished early (so maintain capped frames per second)

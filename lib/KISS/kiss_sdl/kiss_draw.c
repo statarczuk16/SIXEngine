@@ -30,7 +30,7 @@ kiss_image kiss_normal, kiss_prelight, kiss_active, kiss_bar,
 	kiss_hslider, kiss_selected, kiss_unselected, kiss_combo;
 int kiss_screen_width, kiss_screen_height;
 int kiss_textfont_size = 15;
-int kiss_buttonfont_size = 12;
+int kiss_buttonfont_size = 30;
 int kiss_click_interval = 140;
 int kiss_progress_interval = 50;
 int kiss_slider_padding = 2;
@@ -170,54 +170,67 @@ int kiss_font_new(kiss_font *font, char *fname, kiss_array *a, int size)
 	return 0;
 }
 
-SDL_Renderer* kiss_init(char* title, kiss_array *a, int w, int h, const char * resource_folder)
+SDL_Renderer* kiss_init(char* title, kiss_array *a, int w, int h, const char * resource_folder, const char * tile_set)
 {
 	SDL_Window *window;
 	SDL_Renderer *renderer;
 	SDL_Rect srect;
 	int r;
 
-	char kiss_normal_path[100] = "";
-	snprintf(kiss_normal_path, 100 , "%s%s", resource_folder, "kiss_normal.png");
+	#define KISS_MAX_FILE_PATH 100
 
-	char kiss_font_path[100] = "";
-	snprintf(kiss_font_path, 100 , "%s%s", resource_folder, "kiss_font.ttf");
 
-	char kiss_prelight_path[100] = "";
-	snprintf(kiss_prelight_path, 100 , "%s%s", resource_folder, "kiss_prelight.png");
+	char tile_set_folder[KISS_MAX_FILE_PATH] = "";
+	snprintf(tile_set_folder, KISS_MAX_FILE_PATH+1, "%s/%s/", resource_folder, tile_set);
+	if (strnlen(tile_set_folder, KISS_MAX_FILE_PATH + 1) > KISS_MAX_FILE_PATH)
+	{
+		printf("kiss_init: Fatal: tile map path: %s is greater than KISS_MAX_FILE_PATH (%d)", tile_set_folder, KISS_MAX_FILE_PATH);
+		abort();
+	}
+	
+	printf("kiss_init with resource path: %s", tile_set_folder);
 
-	char kiss_active_path[100] = "";
-	snprintf(kiss_active_path, 100 , "%s%s", resource_folder, "kiss_active.png");
+	char kiss_normal_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_normal_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_normal",tile_set,".png");
 
-	char kiss_bar_path[100] = "";
-	snprintf(kiss_bar_path, 100 , "%s%s", resource_folder, "kiss_bar.png");
+	char kiss_font_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_font_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_font",tile_set,".ttf");
 
-	char kiss_vslider_path[100] = "";
-	snprintf(kiss_vslider_path, 100 , "%s%s", resource_folder, "kiss_vslider.png");
+	char kiss_prelight_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_prelight_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_prelight",tile_set,".png");
 
-	char kiss_hslider_path[100] = "";
-	snprintf(kiss_hslider_path, 100 , "%s%s", resource_folder, "kiss_hslider.png");
+	char kiss_active_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_active_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_active",tile_set,".png");
 
-	char kiss_up_path[100] = "";
-	snprintf(kiss_up_path, 100 , "%s%s", resource_folder, "kiss_up.png");
+	char kiss_bar_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_bar_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_bar",tile_set,".png");
 
-	char kiss_down_path[100] = "";
-	snprintf(kiss_down_path, 100 , "%s%s", resource_folder, "kiss_down.png");
+	char kiss_vslider_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_vslider_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_vslider",tile_set,".png");
 
-	char kiss_left_path[100] = "";
-	snprintf(kiss_left_path, 100 , "%s%s", resource_folder, "kiss_left.png");
+	char kiss_hslider_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_hslider_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_hslider",tile_set,".png");
 
-	char kiss_right_path[100] = "";
-	snprintf(kiss_right_path, 100 , "%s%s", resource_folder, "kiss_right.png");
+	char kiss_up_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_up_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_up",tile_set,".png");
 
-	char kiss_combo_path[100] = "";
-	snprintf(kiss_combo_path, 100 , "%s%s", resource_folder, "kiss_combo.png");
+	char kiss_down_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_down_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_down",tile_set,".png");
 
-	char kiss_selected_path[100] = "";
-	snprintf(kiss_selected_path, 100 , "%s%s", resource_folder, "kiss_selected.png");
+	char kiss_left_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_left_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_left",tile_set,".png");
 
-	char kiss_unselected_path[100] = "";
-	snprintf(kiss_unselected_path, 100 , "%s%s", resource_folder, "kiss_unselected.png");
+	char kiss_right_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_right_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_right",tile_set,".png");
+
+	char kiss_combo_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_combo_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_combo",tile_set,".png");
+
+	char kiss_selected_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_selected_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_selected",tile_set,".png");
+
+	char kiss_unselected_path[KISS_MAX_FILE_PATH] = "";
+	snprintf(kiss_unselected_path, KISS_MAX_FILE_PATH , "%s%s_%s%s", tile_set_folder, "kiss_unselected",tile_set,".png");
 
 
 	r = 0;

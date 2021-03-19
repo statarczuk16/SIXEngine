@@ -11,3 +11,4 @@
 #include <ECS/Components/ExternEntity.hpp>
 #include <ECS/Components/EventComponent.hpp>
 #include <ECS/Components/StateIndicatorComponent.hpp>
+#include <ECS/Components/UI.hpp>

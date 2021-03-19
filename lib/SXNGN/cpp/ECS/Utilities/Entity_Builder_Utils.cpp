@@ -67,6 +67,17 @@ namespace SXNGN {
 
 			}
 
+			Entity Entity_Builder_Utils::Create_Event(Coordinator coordinator, ComponentTypeEnum game_state, Event_Component trigger_event, std::string name)
+			{
+				auto event_entity = coordinator.CreateEntity();
+				
+				Event_Component* event_component = new Event_Component(trigger_event);
+				coordinator.AddComponent(event_entity, event_component);
+				coordinator.AddComponent(event_entity, Create_Gamestate_Component_from_Enum(game_state));
+				return event_entity;
+			}
+
+
 			/**
 			A::Pre_Renderable* Entity_Builder_Utils::Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer)
 			{

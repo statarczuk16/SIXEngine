@@ -1,6 +1,7 @@
 #include <ECS/Systems/UserInputSystem.hpp>
 #include <UI/UserInputUtils.hpp>
 #include <ECS/Core/Coordinator.hpp>
+#include <ECS/Utilities/Entity_Builder_Utils.hpp>
 
 
 namespace SXNGN::ECS::A {
@@ -19,8 +20,7 @@ namespace SXNGN::ECS::A {
 
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::vector<Entity> entities_to_cleanup;
-		//Iterate through entities this system manipulates/converts
-		//(Mostly Pre_Renderables) -> Renderables
+
 
 		auto it_act = m_actable_entities.begin();
 		//actable entities for user input system are UserInputCache (vector of sdl events)
@@ -34,12 +34,17 @@ namespace SXNGN::ECS::A {
 			User_Input_Cache input_cache = *static_cast<const User_Input_Cache*>(user_input_ptr);
 
 			std::vector<std::vector<SDL_Event>> sorted_events = UserInputUtils::filter_sdl_events(input_cache.events_);
-			auto mouse_events = sorted_events.at(0);
-			auto keyboard_events = sorted_events.at(1);
-			auto mouse_wheel_events = sorted_events.at(2);
+			std::vector<SDL_Event> mouse_events = sorted_events.at(0);
+			std::vector<SDL_Event> keyboard_events = sorted_events.at(1);
+			std::vector<SDL_Event> mouse_wheel_events = sorted_events.at(2);
+
+
+			
 
 			if (mouse_events.empty() == false)
 			{
+				//Pass mouse events by reference - this function can remove events from the vector because the main UI takes precedence over functions downstream
+				Handle_GUI_Input(mouse_events);
 				Update_Mouse_State(mouse_events, dt);
 			}
 
@@ -57,8 +62,6 @@ namespace SXNGN::ECS::A {
 
 					if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
 					{
-
-
 
 						auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
 						if (check_out_move.first)
@@ -106,12 +109,120 @@ namespace SXNGN::ECS::A {
 			break;
 			default:
 			{
-				printf("Unsupported moveable type : %2d", moveable->moveable_type_);
+				printf("Unsupported moveable type_ : %2d", moveable->moveable_type_);
 			}
 
 			}
 		}
 
+	}
+
+	void User_Input_System::Handle_GUI_Input(std::vector<SDL_Event>& events)
+	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		auto ui = UICollectionSingleton::get_instance();
+
+		std::forward_list<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
+
+		for (auto state : active_game_states)
+		{
+			auto game_state_ui = ui->state_to_ui_map_.find(state);
+			if (game_state_ui != ui->state_to_ui_map_.end())
+			{
+				GUI_Handle_Events(events, game_state_ui->second);
+			}
+			
+		}
+	}
+
+
+	void User_Input_System::GUI_Handle_Events(std::vector<SDL_Event> &events, std::map<UILayer, std::vector<UIContainerComponent>> layer_to_ui_elements)
+	{
+		int draw_ui = 1;
+		auto coordinator = Database::get_coordinator();
+		SDL_Renderer* gRenderer = coordinator->Get_Renderer();
+		std::map<UILayer, std::vector<UIContainerComponent>>::iterator layer_it = layer_to_ui_elements.begin();
+		// Iterate through all GUI components on this layer
+			
+		while (layer_it != layer_to_ui_elements.end())
+		{
+			std::vector<SDL_Event>::iterator event_it = events.begin();
+			while (event_it != events.end())
+			{
+				SDL_Event* e = &*event_it;
+				bool event_handled = false;
+				
+				for (auto component_in_layer : layer_it->second)
+				{
+					switch (component_in_layer.type_)
+					{
+					case UIType::WINDOW:
+					{
+
+						break;
+					}
+					case UIType::BUTTON:
+					{
+						if (kiss_button_event(component_in_layer.button_, e, &draw_ui))
+						{
+							//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "GUI_HandleEvents: Button: %s activated", component_in_layer.name_.c_str());
+							for (Event_Component triggered_event : component_in_layer.triggered_events)
+							{
+								Entity event_entity = Entity_Builder_Utils::Create_Event(*coordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, triggered_event, "New Game Event");
+							}
+							event_handled = true;
+
+						}
+							break;
+					}
+					case UIType::COMBOBOX:
+					{
+						break;
+					}
+					case UIType::ENTRY:
+					{
+						break;
+					}
+					case UIType::HSCROLLBAR:
+					{
+						break;
+					}
+					case UIType::PROGRESSBAR:
+					{
+						break;
+					}
+					case UIType::SELECT_BUTTON:
+					{
+						break;
+					}
+					case UIType::TEXTBOX:
+					{
+						break;
+					}
+					case UIType::VSCROLLBAR:
+					{
+						break;
+					}
+					default:
+					{
+						printf("User_Input_System::GUI_Handle_Events Unknown UI Component Type");
+						abort();
+					}
+					}
+				}
+				if (event_handled)
+				{
+					//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "GUI_HandleEvents: Event Handled");
+					event_it = events.erase(event_it); //return iterator to element after the one erased
+				}
+				else
+				{
+					event_it++;
+				}
+			}
+			layer_it++;
+			
+		}
 	}
 
 

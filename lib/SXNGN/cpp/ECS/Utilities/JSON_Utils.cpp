@@ -98,13 +98,13 @@ namespace SXNGN {
 				}
 				default :
 				{
-					std::string component_type_str = "Component type not in component_type_enum_to_string";
+					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
 					if (component_type_enum_to_string().count(component_ptr->component_type))
 					{
 						component_type_str = component_type_enum_to_string().at(component_ptr->component_type);
 					}
 
-					printf("JSON_Utils::component_to_json No conversion to JSON available for type %s\n", component_type_str.c_str());
+					printf("JSON_Utils::component_to_json No conversion to JSON available for type_ %s\n", component_type_str.c_str());
 					js["component_type_"] = component_type_enum_to_string().at(component_ptr->component_type) + "_NO_JSON_CONVERSION";
 					return js;
 				}

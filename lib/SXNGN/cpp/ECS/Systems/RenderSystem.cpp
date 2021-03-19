@@ -25,6 +25,90 @@ namespace SXNGN::ECS::A {
 
 	}
 
+	void Renderer_System::Draw_GUI()
+	{
+		//Get the coordinator the state manager
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		//get the singleton that holds the UI elements per game state
+		auto ui = UICollectionSingleton::get_instance();
+
+		std::forward_list<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
+		//For each active game state, draw the corresponding UI elements
+		for (auto state : active_game_states)
+		{
+			auto game_state_ui = ui->state_to_ui_map_.find(state);
+			if (game_state_ui != ui->state_to_ui_map_.end())
+			{
+
+				Draw_GUI_Components(game_state_ui->second);
+			}
+
+		}
+		
+	}
+
+	
+	void Renderer_System::Draw_GUI_Components(std::map<UILayer, std::vector<UIContainerComponent>> layer_to_components)
+	{
+		auto coordinator = Database::get_coordinator();
+		SDL_Renderer* gRenderer = coordinator->Get_Renderer();
+		std::map<UILayer, std::vector<UIContainerComponent>>::iterator it = layer_to_components.begin();
+		while( it != layer_to_components.end())
+		{
+			for (auto component_in_layer : it->second)
+			{
+				switch (component_in_layer.type_)
+				{
+					case UIType::WINDOW:
+					{
+						kiss_window_draw(component_in_layer.window_.get(), gRenderer);
+						break;
+					}
+					case UIType::BUTTON:
+					{
+						kiss_button_draw(component_in_layer.button_, gRenderer);
+						break;
+					}
+					case UIType::COMBOBOX:
+					{
+						break;
+					}
+					case UIType::ENTRY:
+					{
+						break;
+					}
+					case UIType::HSCROLLBAR:
+					{
+						break;
+					}
+					case UIType::PROGRESSBAR:
+					{
+						break;
+					}
+					case UIType::SELECT_BUTTON:
+					{
+						break;
+					}
+					case UIType::TEXTBOX:
+					{
+						break;
+					}
+					case UIType::VSCROLLBAR:
+					{
+						break;
+					}
+					default:
+					{
+						printf("RenderSystem::Draw_GUI_Components:: Unknown UI Component Type");
+						abort();
+					}
+				}
+			}
+			it++;
+		}
+
+	}
+
 	bool Renderer_System::object_in_view(ECS_Camera camera, SDL_Rect object_bounds)
 	{
 		//Have to scale up object to compare to the camera
@@ -154,6 +238,9 @@ namespace SXNGN::ECS::A {
 		{
 			Render(renderable, camera);
 		}
+		//This draws the UI components in the UI Singleton, main menu buttons, etc. Precedence over renderable_ui_layer, which might be context menus in the gameplay window 
+		//whereas the singleton holds "constant" stuff corresponding to the game state
+		Draw_GUI();
 
 	}
 
@@ -416,7 +503,7 @@ namespace SXNGN::ECS::A {
 				}
 				else
 				{
-					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Uknown manifest entry type: %s", manifest_entry_type_str.c_str());
+					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Uknown manifest entry type_: %s", manifest_entry_type_str.c_str());
 					continue;
 				}
 

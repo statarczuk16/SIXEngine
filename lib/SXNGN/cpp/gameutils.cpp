@@ -175,7 +175,7 @@ namespace SXNGN {
 					// assign current file name to current_file and echo it out to the console.
 				}
 				std::string current_file = itr->path().stem().string();
-				std::cout << current_file << std::endl;
+				//std::cout << current_file << std::endl;
 
 				if (current_file == folder_name)
 				{

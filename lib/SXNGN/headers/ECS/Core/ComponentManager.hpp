@@ -15,7 +15,7 @@ public:
 	void RegisterComponent(ComponentTypeEnum component_type)
 	{
 
-		assert(mComponentTypes.find(component_type) == mComponentTypes.end() && "Registering component type more than once.");
+		assert(mComponentTypes.find(component_type) == mComponentTypes.end() && "Registering component type_ more than once.");
 
 		mComponentTypes.insert({ component_type, mNextComponentType});
 		mComponentArrays.insert({ component_type, std::make_shared<ComponentArray>() });

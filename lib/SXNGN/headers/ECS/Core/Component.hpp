@@ -14,19 +14,23 @@ namespace SXNGN::ECS::A {
 	PRE_RENDERABLE_BATCH,
 	SPRITE_FACTORY,
 	PRE_SPRITE_FACTORY,
-	CAMERA,
+	CAMERA_SINGLE,
 	MOVEABLE,
 	INPUT_CACHE,
 	INPUT_TAGS,
+	UI_SINGLE,
 	COLLISION,
 	TILE,
 	JSON_ENTITY,
 	EXTERN_ENTITY,
 	EVENT,
+	GAME_STATE_START_HERE,
 	MAIN_MENU_STATE,
 	MAIN_GAME_STATE,
 	CORE_BG_GAME_STATE
 };
+
+
 
 	//convert enum to string for json purposes
 	inline std::unordered_map<ComponentTypeEnum, std::string>& component_type_enum_to_string() {
@@ -39,7 +43,7 @@ namespace SXNGN::ECS::A {
 			{ComponentTypeEnum::PRE_RENDERABLE_BATCH,"PRE_RENDERABLE_BATCH"},
 			{ComponentTypeEnum::SPRITE_FACTORY,"SPRITE_FACTORY"},
 			{ComponentTypeEnum::PRE_SPRITE_FACTORY,"PRE_SPRITE_FACTORY"},
-			{ComponentTypeEnum::CAMERA,"CAMERA"},
+			{ComponentTypeEnum::CAMERA_SINGLE,"CAMERA_SINGLE"},
 			{ComponentTypeEnum::MOVEABLE,"MOVEABLE"},
 			{ComponentTypeEnum::INPUT_CACHE,"INPUT_CACHE"},
 			{ComponentTypeEnum::INPUT_TAGS,"INPUT_TAGS"},
@@ -66,7 +70,7 @@ namespace SXNGN::ECS::A {
 			{"PRE_RENDERABLE_BATCH",ComponentTypeEnum::PRE_RENDERABLE_BATCH},
 			{"SPRITE_FACTORY",ComponentTypeEnum::SPRITE_FACTORY},
 			{"PRE_SPRITE_FACTORY",ComponentTypeEnum::PRE_SPRITE_FACTORY},
-			{"CAMERA",ComponentTypeEnum::CAMERA},
+			{"CAMERA_SINGLE",ComponentTypeEnum::CAMERA_SINGLE},
 			{"MOVEABLE",ComponentTypeEnum::MOVEABLE},
 			{"INPUT_CACHE",ComponentTypeEnum::INPUT_CACHE},
 			{"INPUT_TAGS",ComponentTypeEnum::INPUT_TAGS},

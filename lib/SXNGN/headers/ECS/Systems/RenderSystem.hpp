@@ -5,6 +5,7 @@
 #include <memory>
 #include <SDL.h>
 #include <ECS/Components/CameraComponent.hpp>
+#include <ECS/Components/UI.hpp>
 
 
 class Event;
@@ -18,6 +19,10 @@ namespace SXNGN::ECS::A {
 		void Init();
 
 		void Update(float dt);
+
+		void Draw_GUI();
+
+		void Draw_GUI_Components(std::map<UILayer, std::vector<UIContainerComponent>> layer_to_components);
 
 	private:
 
