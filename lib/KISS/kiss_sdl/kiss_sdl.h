@@ -82,6 +82,28 @@ typedef struct dirent kiss_dirent;
 typedef DIR kiss_dir;
 #endif
 
+typedef enum h_alignment {
+	HA_NONE,
+	HA_CENTER,
+	HA_COLUMN
+} h_alignment;
+
+typedef enum v_alignment {
+	VA_NONE,
+	VA_CENTER,
+	VA_ROW
+} v_alignment;
+
+typedef enum scale_to_parent_width {
+	SP_NONE,
+	SP_FILL,
+	SP_FILL_WITH_BUFFER,
+	SP_HALF,
+	SP_THIRD,
+	SP_FOURTH
+} scale_to_parent_width;
+
+
 /* Length is number of elements, size is allocated size */
 typedef struct kiss_array {
 	void **data;
@@ -129,7 +151,8 @@ typedef struct kiss_label {
 typedef struct kiss_button {
 	int visible;
 	int focus;
-	SDL_Rect rect;
+	SDL_Rect rect; //size etc, position in relation to parent window
+	SDL_Rect r_rect; //where to actually draw (rect + parent_window)
 	int textx;
 	int texty;
 	char text[KISS_MAX_LENGTH];
@@ -141,6 +164,14 @@ typedef struct kiss_button {
 	kiss_image activeimg;
 	kiss_image prelightimg;
 	kiss_window *wdw;
+	h_alignment h_align;
+	v_alignment v_align;
+	h_alignment txt_h_align;
+	v_alignment txt_v_align;
+	int text_width;
+	scale_to_parent_width parent_scale;
+	int row;
+	int column;
 } kiss_button;
 
 typedef struct kiss_selectbutton {
@@ -257,7 +288,7 @@ typedef struct kiss_combobox {
 } kiss_combobox;
 
 extern SDL_Color kiss_white, kiss_black, kiss_green, kiss_blue,
-		kiss_lightblue;
+kiss_lightblue, kiss_ivory, kiss_sand, kiss_sand_dark;
 extern kiss_font kiss_textfont, kiss_buttonfont;
 extern kiss_image kiss_normal, kiss_prelight, kiss_active, kiss_bar,
 	kiss_up, kiss_down, kiss_left, kiss_right, kiss_vslider,
@@ -315,6 +346,9 @@ SDL_Renderer* kiss_init(char* title, kiss_array *a, int w, int h, const char * r
 int kiss_clean(kiss_array *a);
 int kiss_window_new(kiss_window *window, kiss_window *wdw, int decorate,
 	int x, int y, int w, int h);
+int determine_render_position(SDL_Rect* ui_rect, SDL_Rect* parent_rect, SDL_Rect* return_rect, h_alignment ha, v_alignment va, scale_to_parent_width sp_w, int column, int row);
+int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alignment va, int* out_x, int* out_y, int text_width, int text_height);
+
 int kiss_window_event(kiss_window *window, SDL_Event *event, int *draw);
 int kiss_window_draw(kiss_window *window, SDL_Renderer *renderer);
 int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
@@ -323,7 +357,7 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer);
 int kiss_button_new(kiss_button *button, kiss_window *wdw, char *text,
 	int x, int y);
 int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
-	int x, int y, int center_text);
+	int x, int y, int w, int h);
 int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw);
 int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer);
 int kiss_selectbutton_new(kiss_selectbutton *selectbutton, kiss_window *wdw,

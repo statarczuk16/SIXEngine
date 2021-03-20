@@ -76,7 +76,7 @@ namespace SXNGN::ECS::A {
 		/// Currently no difference between EntityDestroyed
 		/// </summary>
 		/// <param name="entity"></param>
-		void GameStateChanged(Signature game_state_signature, std::vector<std::pair<Entity, Signature>> living_entity_signatures, bool quiet = false)
+		void GameStateChanged(Signature game_state_signature, std::vector<std::pair<Entity, Signature>> living_entity_signatures, bool quiet = true)
 		{
 			auto start = std::chrono::high_resolution_clock::now();
 			if (true)//!quiet)

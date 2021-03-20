@@ -42,6 +42,9 @@ SDL_Color kiss_black = {0, 0, 0, 255};
 SDL_Color kiss_green = {0, 150, 0, 255};
 SDL_Color kiss_blue = {0, 0, 255, 255};
 SDL_Color kiss_lightblue = {200, 225, 255, 255};
+SDL_Color kiss_ivory = { 255,255,240 };
+SDL_Color kiss_sand = { 203, 193, 172 };
+SDL_Color kiss_sand_dark = { 134, 117, 83 };
 
 unsigned int kiss_getticks(void)
 {
@@ -85,9 +88,11 @@ int kiss_renderimage(SDL_Renderer *renderer, kiss_image image,
 	kiss_makerect(&dst, x, y, image.w, image.h);
 	if (clip) dst.w = clip->w;
 	if (clip) dst.h = clip->h;
-	SDL_RenderCopy(renderer, image.image, clip, &dst);
+	int success = SDL_RenderCopy(renderer, image.image, NULL, &dst);
 	return 0;
 }
+
+
 
 int kiss_rendertext(SDL_Renderer *renderer, char *text, int x, int y,
 	kiss_font font, SDL_Color color)

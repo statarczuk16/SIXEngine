@@ -152,6 +152,8 @@ namespace SXNGN::ECS::A {
                     if (components_per_layer.first == layer)
                     {
                         components_per_layer.second.push_back(component);
+                        game_state_ui_elements_it->second[layer] = components_per_layer.second;
+                        state_to_ui_map_[game_state] = game_state_ui_elements_it->second;
                         placed = true;
                         
                     }
@@ -162,6 +164,7 @@ namespace SXNGN::ECS::A {
                     std::vector<UIContainerComponent> components;
                     components.push_back(component);
                     game_state_ui_elements_it->second[layer] = components;
+                    state_to_ui_map_[game_state] = game_state_ui_elements_it->second;
                 }
                 return;
             }

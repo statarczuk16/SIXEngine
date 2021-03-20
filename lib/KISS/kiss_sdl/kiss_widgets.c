@@ -24,11 +24,182 @@
 
 #include "kiss_sdl.h"
 
+
+int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alignment va, int* out_x, int* out_y, int text_width, int text_height)
+{
+	if (parent_rect == NULL)
+	{
+		printf("kiss_widgets::determine_text_render_position null input argument");
+		abort();
+	}
+
+	*out_x = parent_rect->x;
+	*out_y = parent_rect->y;
+	//determine horizontal alignment
+	switch (ha)
+	{
+	case HA_CENTER:
+	{
+		//set x position to middle of parent window
+		*out_x = parent_rect->x + (parent_rect->w / 2) - (text_width / 2);
+		break;
+	}
+	case HA_COLUMN:
+	{
+		
+	}
+	case HA_NONE:
+	{
+		
+	}
+	default:
+	{
+		//offset ui rect by the position of parent window
+		*out_x = parent_rect->x + text_width / 10;
+		break;
+	}
+	}
+	//determine vertical alignment
+	switch (va)
+	{
+	case VA_CENTER:
+	{
+		//set y position to middle of parent window
+		*out_y = parent_rect->y + (parent_rect->h / 2) - (text_height / 1.5);
+		break;
+	}
+	default:
+	{
+		//offset ui rect by the position of parent window
+		*out_y = parent_rect->y + text_height / 10;
+		break;
+	}
+	}
+	return 0;
+
+}
+
+int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect *return_rect, h_alignment ha, v_alignment va, scale_to_parent_width sp_w, int column, int row)
+{
+	if (ui_rect == NULL || parent_rect == NULL || return_rect == NULL)
+	{
+		printf("kiss_widgets::determine_render_position null input argument");
+		abort();
+	}
+
+	return_rect->h = ui_rect->h;
+	return_rect->x = ui_rect->x;
+	return_rect->w = ui_rect->w;
+	return_rect->y = ui_rect->y;
+
+	//optional scaling of ui element to its parent window width
+	switch (sp_w)
+	{
+		case SP_FILL:
+		{
+			return_rect->w = parent_rect->w;
+			break;
+		}
+		case SP_FILL_WITH_BUFFER:
+		{
+			return_rect->w = parent_rect->w - 20;
+			break;
+		}
+		case SP_HALF:
+		{
+			return_rect->w = (parent_rect->w / 2) - 20;
+			break;
+		}
+		case SP_THIRD:
+		{
+			return_rect->w = (parent_rect->w / 3) - 20;
+			break;
+		}
+		case SP_FOURTH:
+		{
+			return_rect->w = (parent_rect->w / 4) - 20;
+			break;
+		}
+		case SP_NONE:
+		{
+			return_rect->w = ui_rect->w;
+			break;
+		}
+		default:
+		{
+			return_rect->w = ui_rect->w;
+			break;
+		}
+	}
+
+	
+	//determine horizontal alignment
+	switch (ha)
+	{
+		case HA_CENTER:
+		{
+			//set x position to middle of parent window
+			return_rect->x = parent_rect->x + (parent_rect->w / 2) - (return_rect->w/2);
+			break;
+		}
+		case HA_COLUMN:
+		{
+			//divide parent window into equally spaced chunks of size ui_rect.width
+			//and place return_rect at the input index of one of those columns
+			return_rect->x = parent_rect->w + ((parent_rect->w / return_rect->w) * column);
+			break;
+		}
+		case HA_NONE:
+		{
+			//offset ui rect by the position of parent window
+			return_rect->x = ui_rect->x + parent_rect->x;
+			break;
+		}
+		default:
+		{
+			//offset ui rect by the position of parent window
+			return_rect->x = ui_rect->x + parent_rect->x;
+			break;
+		}
+	}
+	//determine vertical alignment
+	switch (va)
+	{
+		case VA_CENTER:
+		{
+			//set y position to middle of parent window
+			return_rect->y = parent_rect->y + (parent_rect->h / 2) - (return_rect->h / 2);
+			break;
+		}
+		case VA_ROW:
+		{
+			//divide parent window into equally spaced rows of size ui_rect.height
+			//and place return_rect at the input index of one of those rows
+			return_rect->y = parent_rect->y +  (((return_rect->h)+5) * row );
+			break;
+		}
+		case VA_NONE:
+		{
+			//offset ui rect by the position of parent window
+			return_rect->y =  parent_rect->y + ui_rect->y;
+			break;
+		}
+		default:
+		{
+			//offset ui rect by the position of parent window
+			return_rect->y = parent_rect->y + ui_rect->y;
+			break;
+		}
+	}
+	return 0;
+	
+}
+
 int kiss_window_new(kiss_window *window, kiss_window *wdw, int decorate,
 	int x, int y, int w, int h)
 {
 	if (!window) return -1;
-	window->bg = kiss_white;
+	window->bg = kiss_ivory;
 	kiss_makerect(&window->rect, x, y, w, h);
 	window->decorate = decorate;
 	window->visible = 0;
@@ -59,7 +230,7 @@ int kiss_window_draw(kiss_window *window, SDL_Renderer *renderer)
 	if (!window || !window->visible || !renderer) return 0;
 	kiss_fillrect(renderer, &window->rect, window->bg);
 	if (window->decorate)
-		kiss_decorate(renderer, &window->rect, kiss_blue, kiss_edge);
+		kiss_decorate(renderer, &window->rect, kiss_sand_dark, kiss_edge);
 	return 1;
 }
 
@@ -123,11 +294,15 @@ int kiss_button_new(kiss_button *button, kiss_window *wdw, char *text,
 	button->visible = 0;
 	button->focus = 0;
 	button->wdw = wdw;
+	button->v_align = HA_NONE;
+	button->h_align = VA_NONE;
+	button->parent_scale = SP_NONE;
 	return 0;
 }
 
+
 int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
-	int x, int y, int center_text)
+	int x, int y, int w, int h)
 {
 	if (!button || !text) return -1;
 	if (button->font.magic != KISS_MAGIC) button->font = kiss_buttonfont;
@@ -137,21 +312,14 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 		button->activeimg = kiss_active;
 	if (button->prelightimg.magic != KISS_MAGIC)
 		button->prelightimg = kiss_prelight;
-	kiss_makerect(&button->rect, x, y, button->normalimg.w,
-		button->normalimg.h);
+	kiss_makerect(&button->rect, x, y, w,
+		h);
 	button->textcolor = kiss_black;
 	kiss_string_copy(button->text, KISS_MAX_LENGTH, text, NULL);
-	int text_width = kiss_textwidth(button->font, text, NULL);
-	if (center_text == 1)
-	{
-		button->textx = x + button->normalimg.w / 2 -
-			text_width / 2;
-	}
-	else
-	{
-		button->textx = x + button->normalimg.w / 10;
-	}
-	
+	button->text_width = kiss_textwidth(button->font, text, NULL);
+	button->textx = x + button->normalimg.w / 2 -
+		button->text_width / 2;
+	//button->textx = x + button->rect.w / ;
 	button->texty = y + button->normalimg.h / 2 -
 		button->font.fontheight / 2;
 	button->active = 0;
@@ -159,8 +327,16 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 	button->visible = 0;
 	button->focus = 0;
 	button->wdw = wdw;
+	button->v_align = HA_NONE;
+	button->h_align = VA_NONE;
+	button->parent_scale = SP_NONE;
+	button->row = 0;
+	button->column = 0;
+	button->txt_v_align = VA_CENTER;
+	button->txt_h_align = HA_CENTER;
 	return 0;
 }
+
 
 int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 {
@@ -173,23 +349,23 @@ int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 		return 0;
 	if (event->type == SDL_MOUSEBUTTONDOWN &&
 		kiss_pointinrect(event->button.x, event->button.y,
-		&button->rect)) {
+		&button->r_rect)) {
 		button->active = 1;
 		*draw = 1;
 	} else if (event->type == SDL_MOUSEBUTTONUP &&
 		kiss_pointinrect(event->button.x, event->button.y,
-		&button->rect) && button->active) {
+		&button->r_rect) && button->active) {
 		button->active = 0;
 		*draw = 1;
 		return 1;
 	} else if (event->type == SDL_MOUSEMOTION &&
 		kiss_pointinrect(event->motion.x, event->motion.y,
-		&button->rect)) {
+		&button->r_rect)) {
 		button->prelight = 1;
 		*draw = 1;
 	} else if (event->type == SDL_MOUSEMOTION &&
 		!kiss_pointinrect(event->motion.x, event->motion.y,
-		&button->rect)) {
+		&button->r_rect)) {
 		button->prelight = 0;
 		*draw = 1;
 		if (button->active) {
@@ -202,19 +378,41 @@ int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 
 int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 {
-	if (button && button->wdw) button->visible = button->wdw->visible;
-	if (!button || !button->visible || !renderer) return 0;
+
+	if (button && button->wdw)
+	{
+		button->visible = button->wdw->visible;
+		//pass by ref - sets button->r_rect
+		(void) determine_render_position(&button->rect, &button->wdw->rect, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
+		//pass by ref - sets textx and texty
+		(void) determine_text_render_position(&button->r_rect, button->txt_h_align, button->txt_v_align, &button->textx, &button->texty, button->text_width, button->font.fontheight);
+
+
+	}
+	if (!button || !button->visible || !renderer)
+	{
+		return 0;
+	}
+	 
 	if (button->active)
-		kiss_renderimage(renderer, button->activeimg, button->rect.x,
-			button->rect.y, NULL);
+	{
+		kiss_renderimage(renderer, button->activeimg, button->r_rect.x,
+			button->r_rect.y, &button->r_rect);
+	}
 	else if (button->prelight && !button->active)
+	{
 		kiss_renderimage(renderer, button->prelightimg,
-			button->rect.x, button->rect.y, NULL);
+			button->r_rect.x, button->r_rect.y, &button->r_rect);
+	}
 	else
-		kiss_renderimage(renderer, button->normalimg, button->rect.x,
-			button->rect.y, NULL);
+	{
+		kiss_renderimage(renderer, button->normalimg, button->r_rect.x,
+			button->r_rect.y, &button->r_rect);
+	}
 	kiss_rendertext(renderer, button->text, button->textx, button->texty,
 		button->font, button->textcolor);
+	//kiss_rendertext(renderer, button->text, button->r_rect.x, button->r_rect.y,
+	//	button->font, button->textcolor);
 	return 1;
 }
 
@@ -592,7 +790,7 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	if (!progressbar || !progressbar->visible || !renderer)
 		return 0;
 	kiss_fillrect(renderer, &progressbar->rect, progressbar->bg);
-	kiss_decorate(renderer, &progressbar->rect, kiss_blue, kiss_edge);
+	kiss_decorate(renderer, &progressbar->rect, kiss_sand_dark, kiss_edge);
 	progressbar->barrect.w = (int) (progressbar->width *
 		progressbar->fraction + 0.5);
 	kiss_makerect(&clip, 0, 0, progressbar->barrect.w,
@@ -683,7 +881,7 @@ int kiss_entry_draw(kiss_entry *entry, SDL_Renderer *renderer)
 	if (entry && entry->wdw) entry->visible = entry->wdw->visible;
 	if (!entry || !entry->visible || !renderer) return 0;
 	kiss_fillrect(renderer, &entry->rect, entry->bg);
-	color = kiss_blue;
+	color = kiss_sand;
 	if (entry->active) color = kiss_green;
 	if (entry->decorate)
 		kiss_decorate(renderer, &entry->rect, color, kiss_edge);
@@ -784,7 +982,7 @@ int kiss_textbox_draw(kiss_textbox *textbox, SDL_Renderer *renderer)
 	if (!textbox || !textbox->visible || !renderer) return 0;
 	kiss_fillrect(renderer, &textbox->rect, textbox->bg);
 	if (textbox->decorate)
-		kiss_decorate(renderer, &textbox->rect, kiss_blue,
+		kiss_decorate(renderer, &textbox->rect, kiss_sand,
 			kiss_edge);
 	if (textbox->highlightline >= 0) {
 		kiss_makerect(&highlightrect, textbox->textrect.x,

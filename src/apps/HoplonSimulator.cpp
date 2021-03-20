@@ -361,8 +361,8 @@ int main(int argc, char* args[])
 
 		kiss_window_new(&window_low, NULL, 1, 0, g_screen_bounds.h-60, g_screen_bounds.w,60);
 		kiss_window_new(&window_top, NULL, 1, 0, g_screen_bounds.h - 60, g_screen_bounds.w, 60);
-		kiss_button_new_uc(&button_switch, &window_low, "Switch", 20, g_screen_bounds.h - 50, 0);
-		kiss_button_new_uc(&button_switch_2, &window_top, "ASDFG", button_switch.rect.x + button_switch.rect.w, g_screen_bounds.h - 50, 1);
+		kiss_button_new_uc(&button_switch, &window_low, "Switch", 20, g_screen_bounds.h - 50, 0, 50);
+		kiss_button_new_uc(&button_switch_2, &window_top, "ASDFG", button_switch.rect.x + button_switch.rect.w, g_screen_bounds.h - 50, 50 ,50);
 
 
 		window_low.visible = 1;

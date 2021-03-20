@@ -180,6 +180,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_MENU_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 
 
@@ -363,16 +364,21 @@ int main(int argc, char* args[])
 	auto ui = UICollectionSingleton::get_instance();
 	
 
-	std::shared_ptr<kiss_window> main_menu_ui_bottom_window = std::make_shared<kiss_window>();
-	kiss_window_new(main_menu_ui_bottom_window.get(), nullptr, 1, 0, g_screen_bounds.h - 160, g_screen_bounds.w, 160);
-	main_menu_ui_bottom_window->visible = true;
-	UIContainerComponent bottom_window(nullptr, UILayer::TOP, UIType::WINDOW);
-	bottom_window.window_ = main_menu_ui_bottom_window;
-	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, bottom_window);
+	std::shared_ptr<kiss_window> main_menu_window = std::make_shared<kiss_window>();
+	kiss_window_new(main_menu_window.get(), nullptr, 1, 220, g_screen_bounds.h - 820, 320, 620);
+	main_menu_window->visible = true;
+	
+	UIContainerComponent mmw_container(nullptr, UILayer::TOP, UIType::WINDOW);
+	mmw_container.window_ = main_menu_window;
+	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, mmw_container);
 
 	kiss_button* new_game_button = new kiss_button();
-	kiss_button_new_uc(new_game_button, main_menu_ui_bottom_window.get(), "New Game", 40, 0, 0);
-	UIContainerComponent start_button_c(main_menu_ui_bottom_window, UILayer::MID, UIType::BUTTON);
+	kiss_button_new_uc(new_game_button, main_menu_window.get(), "New Game", 40, 0, 150, 50);
+	new_game_button->h_align = HA_CENTER;
+	new_game_button->v_align = VA_ROW;
+	new_game_button->row = 1;
+	new_game_button->parent_scale = SP_FILL_WITH_BUFFER;
+	UIContainerComponent start_button_c(main_menu_window, UILayer::MID, UIType::BUTTON);
 	start_button_c.button_ = new_game_button;
 	Event_Component new_game_event;
 	new_game_event.e.common.type = EventType::STATE_CHANGE;
@@ -380,6 +386,36 @@ int main(int argc, char* args[])
 	new_game_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
 	start_button_c.triggered_events.push_back(new_game_event);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, start_button_c);
+
+	kiss_button* load_game_button = new kiss_button();
+	kiss_button_new_uc(load_game_button, main_menu_window.get(), "Load Game", 40, 0, 150, 50);
+	load_game_button->h_align = HA_CENTER;
+	load_game_button->v_align = VA_ROW;
+	load_game_button->row = 2;
+	load_game_button->parent_scale = SP_FILL_WITH_BUFFER;
+	UIContainerComponent load_button_c(main_menu_window, UILayer::MID, UIType::BUTTON);
+	load_button_c.button_ = load_game_button;
+	Event_Component load_game_event;
+	load_game_event.e.common.type = EventType::LOAD;
+	load_game_event.e.load.filePath = "No File Path";
+	load_button_c.triggered_events.push_back(load_game_event);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, load_button_c);
+
+	kiss_button* settings_button = new kiss_button();
+	kiss_button_new_uc(settings_button, main_menu_window.get(), "Settings", 40, 0, 150, 50);
+	settings_button->h_align = HA_CENTER;
+	settings_button->v_align = VA_ROW;
+	settings_button->row = 3;
+	settings_button->parent_scale = SP_FILL_WITH_BUFFER;
+	UIContainerComponent settings_button_c(main_menu_window, UILayer::MID, UIType::BUTTON);
+	settings_button_c.button_ = settings_button;
+	Event_Component settings_state_event;
+	settings_state_event.e.common.type = EventType::STATE_CHANGE;
+	settings_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
+	settings_state_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	settings_button_c.triggered_events.push_back(settings_state_event);
+	settings_button_c.triggered_events.push_back(settings_state_event);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, settings_button_c);
 
 	
 

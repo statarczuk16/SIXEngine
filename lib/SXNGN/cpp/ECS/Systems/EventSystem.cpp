@@ -48,7 +48,7 @@ namespace SXNGN::ECS::A {
 						active_states.remove(as);
 						active_states.push_front(as);
 					}
-					gCoordinator.GameStateChanged(active_states);
+					gCoordinator.GameStateChanged(active_states, true);
 					break;
 				}
 				default:
