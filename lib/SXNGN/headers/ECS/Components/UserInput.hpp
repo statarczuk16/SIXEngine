@@ -76,9 +76,9 @@ namespace SXNGN::ECS::A {
 			return instance_;
 		}
 
-		SXNGN::UserInputUtils::MouseState mouse_state;
-		SXNGN::UserInputUtils::Click last_right_click;
-		SXNGN::UserInputUtils::Click last_left_click;
+		UserInputUtils::MouseState mouse_state;
+		UserInputUtils::Click last_right_click;
+		UserInputUtils::Click last_left_click;
 
 
 	};

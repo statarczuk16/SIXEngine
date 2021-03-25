@@ -39,8 +39,8 @@ SDL_Rect g_level_bounds;
 SDL_Rect g_screen_bounds;
 
 
-const int SCREEN_WIDTH = 1920;
-const int SCREEN_HEIGHT = 1080;
+const int SCREEN_WIDTH = 1280;
+const int SCREEN_HEIGHT = 720;
 
 const int LEVEL_WIDTH_PIXELS = 800;
 const int LEVEL_HEIGHT_PIXELS = 600;
@@ -152,6 +152,137 @@ bool init()
 }
 
 
+int init_menus()
+{
+	auto coordinator = SXNGN::Database::get_coordinator();
+	const int WINDOW_HEIGHT = 620;
+	const int WINDOW_WIDTH = 320;
+	auto ui = UICollectionSingleton::get_instance();
+
+	//************************* Main Menu
+	auto mmw_c = UserInputUtils::create_window_raw(nullptr, 220, g_screen_bounds.h - WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, mmw_c);
+
+	auto start_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "New Game", 1);
+	Event_Component new_game_event;
+	new_game_event.e.common.type = EventType::STATE_CHANGE;
+	new_game_event.e.state_change.new_states.push_front(ComponentTypeEnum::NEW_GAME_STATE);
+	new_game_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	start_button_c->triggered_events.push_back(new_game_event);
+	mmw_c->child_components_.push_back(start_button_c);
+
+	auto load_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "New Game", 2);
+	Event_Component load_game_event;
+	load_game_event.e.common.type = EventType::LOAD;
+	load_game_event.e.load.filePath = "No File Path";
+	load_button_c->triggered_events.push_back(load_game_event);
+	mmw_c->child_components_.push_back(load_button_c);
+
+	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings Game", 3);
+	Event_Component settings_state_event;
+	settings_state_event.e.common.type = EventType::STATE_CHANGE;
+	settings_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
+	settings_state_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	settings_button_c->triggered_events.push_back(settings_state_event);
+	settings_button_c->triggered_events.push_back(settings_state_event);
+	mmw_c->child_components_.push_back(settings_button_c);
+
+	auto exit_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Exit", 4);
+	Event_Component exit_button_event;
+	exit_button_event.e.common.type = EventType::EXIT;
+	exit_button_c->triggered_events.push_back(exit_button_event);
+	mmw_c->child_components_.push_back(exit_button_c);
+
+
+	//************************* Settings Menu
+
+	auto msw_container = UserInputUtils::create_window_raw(nullptr, 220, g_screen_bounds.h - WINDOW_HEIGHT, WINDOW_WIDTH*2, WINDOW_HEIGHT, UILayer::BOTTOM);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_SETTINGS_STATE, msw_container);
+
+	const int NUM_SETTINGS = 9;
+	for (int i = 0; i < NUM_SETTINGS; i++)
+	{
+		auto h_align = HA_COLUMN;
+		auto v_align = VA_ROW;
+		int row = i / 2;
+		int column = i % 2;
+		auto parent_scale = SP_HALF;
+		auto setting_button_c_row = UserInputUtils::create_button(msw_container->window_, h_align, v_align, parent_scale, UILayer::MID, (char*)("Setting " + std::to_string(i)).c_str(), row, column);
+		msw_container->child_components_.push_back(setting_button_c_row);
+	}
+
+	auto back_button_c = UserInputUtils::create_button(msw_container->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS);
+	
+	Event_Component back_state_event;
+	back_state_event.e.common.type = EventType::STATE_CHANGE;
+	back_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	back_state_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
+	back_button_c->triggered_events.push_back(back_state_event);
+	back_button_c->triggered_events.push_back(back_state_event);
+	msw_container->child_components_.push_back(back_button_c);
+
+	//************************* New Game Menu
+
+	const int NUM_SETTINGS_NG = 9;
+	auto new_game_window_c = UserInputUtils::create_window_raw(nullptr, 220, g_screen_bounds.h - WINDOW_HEIGHT, WINDOW_WIDTH * 2, WINDOW_HEIGHT, UILayer::BOTTOM);
+	ui->add_ui_element(ComponentTypeEnum::NEW_GAME_STATE, new_game_window_c);
+
+	//New Game Label
+	auto ngl_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "New Game", 0);
+	new_game_window_c->child_components_.push_back(ngl_c);
+
+	auto lwel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Width (Chunks)", 1, 1);
+	new_game_window_c->child_components_.push_back(lwel_c);
+
+	auto lwe_c = UserInputUtils::create_num_entry(new_game_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, UILayer::MID, "level_width_entry", 2, 24, TE_INT, 4, 2, 1);
+	new_game_window_c->child_components_.push_back(lwe_c);
+
+	auto lhel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Height (Chunks)", 3, 1);
+	new_game_window_c->child_components_.push_back(lhel_c);
+
+	auto lhe_c = UserInputUtils::create_num_entry(new_game_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, UILayer::MID, "level_height_entry", 2, 24, TE_INT, 4, 4, 1);
+	new_game_window_c->child_components_.push_back(lhe_c);
+
+	
+	//Callback functions for level width/height 
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_width = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		coordinator->get_state_manager()->setLevelHeightTiles(uicc->entry_->num_val);
+	};
+
+	std::function<void()> ng_update_width_b = std::bind(ng_update_width, lhe_c);
+	lhe_c->callback_functions_.push_back(ng_update_width_b);
+
+	//Callback functions for level width/height 
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_height = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		coordinator->get_state_manager()->setLevelHeightTiles(uicc->entry_->num_val);
+	};
+
+	std::function<void()> ng_update_height_b = std::bind(ng_update_height, lhe_c);
+	lwe_c->callback_functions_.push_back(ng_update_height_b);
+		
+	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1);
+	Event_Component back_state_event_ng;
+	back_state_event_ng.e.common.type = EventType::STATE_CHANGE;
+	back_state_event_ng.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	back_state_event_ng.e.state_change.states_to_remove.push_front(ComponentTypeEnum::NEW_GAME_STATE);
+	back_from_bg_button_c->triggered_events.push_back(back_state_event_ng);
+	new_game_window_c->child_components_.push_back(back_from_bg_button_c);
+		
+
+	auto back_from_bg_button_c = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS_NG);
+	Event_Component back_state_event_ng;
+	back_state_event_ng.e.common.type = EventType::STATE_CHANGE;
+	back_state_event_ng.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	back_state_event_ng.e.state_change.states_to_remove.push_front(ComponentTypeEnum::NEW_GAME_STATE);
+	back_from_bg_button_c->triggered_events.push_back(back_state_event_ng);
+	new_game_window_c->child_components_.push_back(back_from_bg_button_c);
+
+
+	return 0;
+}
+
 int main(int argc, char* args[])
 {
 	if (!init())
@@ -181,6 +312,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 
 
@@ -261,10 +393,7 @@ int main(int argc, char* args[])
 	}
 	event_system->Init();
 
-	std::forward_list<ComponentTypeEnum> active_game_states;
-	active_game_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
-	gCoordinator.GameStateChanged(active_game_states);
+
 
 	SDL_Event e;
 
@@ -288,11 +417,10 @@ int main(int argc, char* args[])
 	gCoordinator.AddComponent(apoc_map_pre_entity, apocalypse_map_pre);
 	gCoordinator.AddComponent(apoc_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
-	Entity test_person = entity_builder::Create_Person(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 0, 0, "APOCALYPSE_MAP", "GUNMAN_1", true);
-
-	Entity test_Tile = entity_builder::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 0, 0, "APOCALYPSE_MAP", "ROCK_GROUND", SXNGN::ECS::A::CollisionType::NONE);
+	
 
 	//todo save utility or game state
+	/**
 	std::string savefile = g_save_folder + "/save1.json";
 	std::ifstream ifs(savefile);
 	json jf = json::parse(ifs);
@@ -307,6 +435,7 @@ int main(int argc, char* args[])
 			game_map = SXNGN::ECS::A::JSON_Utils::json_to_tile_batch(val);
 		}
 	}
+	
 
 	auto game_map_pre_renders = std::get<0>(game_map);
 	auto game_map_collisionables = std::get<1>(game_map);
@@ -325,13 +454,13 @@ int main(int argc, char* args[])
 		gCoordinator.AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		
 	}
-
+	**/
+	std::forward_list<ComponentTypeEnum> active_game_states;
 	active_game_states.clear();
 	active_game_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
 	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
-	
-
+	init_menus();
 
 
 
@@ -360,64 +489,6 @@ int main(int argc, char* args[])
 	camera_position.h = 0;
 
 	SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, g_screen_bounds);
-
-	auto ui = UICollectionSingleton::get_instance();
-	
-
-	std::shared_ptr<kiss_window> main_menu_window = std::make_shared<kiss_window>();
-	kiss_window_new(main_menu_window.get(), nullptr, 1, 220, g_screen_bounds.h - 820, 320, 620);
-	main_menu_window->visible = true;
-	
-	UIContainerComponent mmw_container(nullptr, UILayer::TOP, UIType::WINDOW);
-	mmw_container.window_ = main_menu_window;
-	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, mmw_container);
-
-	kiss_button* new_game_button = new kiss_button();
-	kiss_button_new_uc(new_game_button, main_menu_window.get(), "New Game", 40, 0, 150, 50);
-	new_game_button->h_align = HA_CENTER;
-	new_game_button->v_align = VA_ROW;
-	new_game_button->row = 1;
-	new_game_button->parent_scale = SP_FILL_WITH_BUFFER;
-	UIContainerComponent start_button_c(main_menu_window, UILayer::MID, UIType::BUTTON);
-	start_button_c.button_ = new_game_button;
-	Event_Component new_game_event;
-	new_game_event.e.common.type = EventType::STATE_CHANGE;
-	new_game_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
-	new_game_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	start_button_c.triggered_events.push_back(new_game_event);
-	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, start_button_c);
-
-	kiss_button* load_game_button = new kiss_button();
-	kiss_button_new_uc(load_game_button, main_menu_window.get(), "Load Game", 40, 0, 150, 50);
-	load_game_button->h_align = HA_CENTER;
-	load_game_button->v_align = VA_ROW;
-	load_game_button->row = 2;
-	load_game_button->parent_scale = SP_FILL_WITH_BUFFER;
-	UIContainerComponent load_button_c(main_menu_window, UILayer::MID, UIType::BUTTON);
-	load_button_c.button_ = load_game_button;
-	Event_Component load_game_event;
-	load_game_event.e.common.type = EventType::LOAD;
-	load_game_event.e.load.filePath = "No File Path";
-	load_button_c.triggered_events.push_back(load_game_event);
-	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, load_button_c);
-
-	kiss_button* settings_button = new kiss_button();
-	kiss_button_new_uc(settings_button, main_menu_window.get(), "Settings", 40, 0, 150, 50);
-	settings_button->h_align = HA_CENTER;
-	settings_button->v_align = VA_ROW;
-	settings_button->row = 3;
-	settings_button->parent_scale = SP_FILL_WITH_BUFFER;
-	UIContainerComponent settings_button_c(main_menu_window, UILayer::MID, UIType::BUTTON);
-	settings_button_c.button_ = settings_button;
-	Event_Component settings_state_event;
-	settings_state_event.e.common.type = EventType::STATE_CHANGE;
-	settings_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
-	settings_state_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	settings_button_c.triggered_events.push_back(settings_state_event);
-	settings_button_c.triggered_events.push_back(settings_state_event);
-	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, settings_button_c);
-
-	
 
 
 	SXNGN::Timer dt_timer;//time passed during this frame "delta t"

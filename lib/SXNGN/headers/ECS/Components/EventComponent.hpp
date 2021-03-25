@@ -14,7 +14,8 @@ namespace SXNGN::ECS::A {
 		UNKNOWN,
 		SAVE,
 		LOAD,
-		STATE_CHANGE
+		STATE_CHANGE,
+		EXIT
 	};
 
 	struct SXNGN_Common

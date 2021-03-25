@@ -144,9 +144,7 @@ int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect
 		}
 		case HA_COLUMN:
 		{
-			//divide parent window into equally spaced chunks of size ui_rect.width
-			//and place return_rect at the input index of one of those columns
-			return_rect->x = parent_rect->w + ((parent_rect->w / return_rect->w) * column);
+			return_rect->x = parent_rect->x + 15 + (((return_rect->w) + 10) * column);
 			break;
 		}
 		case HA_NONE:
@@ -173,9 +171,8 @@ int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect
 		}
 		case VA_ROW:
 		{
-			//divide parent window into equally spaced rows of size ui_rect.height
-			//and place return_rect at the input index of one of those rows
-			return_rect->y = parent_rect->y +  (((return_rect->h)+5) * row );
+			//use the size of the UI element as the row size + a bit of offset
+			return_rect->y = parent_rect->y + 10 + (((return_rect->h)+5) * row );
 			break;
 		}
 		case VA_NONE:
@@ -221,6 +218,13 @@ int kiss_window_event(kiss_window *window, SDL_Event *event, int *draw)
 		kiss_pointinrect(event->button.x, event->button.y,
 		&window->rect))
 		return 1;
+	else if (event->type == SDL_MOUSEMOTION &&
+		kiss_pointinrect(event->motion.x, event->motion.y,
+			&window->rect))
+	{
+		return 1;
+	}
+
 	return 0;
 }
 
@@ -240,7 +244,7 @@ int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
 	if (!label || !text) return -1;
 	if (label->font.magic != KISS_MAGIC) label->font = kiss_textfont;
 	label->textcolor = kiss_black;
-	kiss_makerect(&label->rect, x, y, 0, 0);
+	kiss_makerect(&label->rect, x, y, 150, 50);
 	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
 	label->visible = 0;
 	label->wdw = wdw;
@@ -250,22 +254,38 @@ int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
 int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 {
 	char buf[KISS_MAX_LABEL], *p;
-	int len, y;
+	int len, y, x;
 
-	if (label && label->wdw) label->visible = label->wdw->visible;
-	if (!label || !label->visible || !renderer) return 0;
-	y = label->rect.y + label->font.spacing / 2;
+	if (label && label->wdw)
+	{
+		label->visible = label->wdw->visible;
+		//pass by ref - sets button->r_rect
+		(void)determine_render_position(&label->rect, &label->wdw->rect, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
+		//pass by ref - sets textx and texty
+		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_NONE, &x, &y, kiss_textwidth(label->font, label->text, NULL), label->r_rect.h);
+	}
+	if (!label || !label->visible || !renderer)
+	{
+		return 0;
+	}
+	y = label->r_rect.y + label->font.spacing / 2;
 	len = strlen(label->text);
 	if (len > KISS_MAX_LABEL - 2)
+	{
 		label->text[len - 1] = '\n';
+	}
 	else
+	{
 		strcat(label->text, "\n");
-	for (p = label->text; *p; p = strchr(p, '\n') + 1) {
+	}
+	for (p = label->text; *p; p = strchr(p, '\n') + 1)
+	{
 		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
-		kiss_rendertext(renderer, buf, label->rect.x, y,
+		kiss_rendertext(renderer, buf, x, y,
 			label->font, label->textcolor);
 		y += label->font.lineheight;
 	}
+	
 	label->text[len] = 0;
 	return 1;
 }
@@ -314,6 +334,7 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 		button->prelightimg = kiss_prelight;
 	kiss_makerect(&button->rect, x, y, w,
 		h);
+	kiss_makerect(&button->r_rect, x, y, w, h);
 	button->textcolor = kiss_black;
 	kiss_string_copy(button->text, KISS_MAX_LENGTH, text, NULL);
 	button->text_width = kiss_textwidth(button->font, text, NULL);
@@ -821,6 +842,10 @@ int kiss_entry_new(kiss_entry *entry, kiss_window *wdw, int decorate,
 	entry->visible = 0;
 	entry->focus = 0;
 	entry->wdw = wdw;
+	entry->lower_bound = 0;
+	entry->upper_bound = 0;
+	entry->num_val = 0;
+	entry->entry_type = TE_NONE;
 	return 0;
 }
 
@@ -835,20 +860,67 @@ int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 		return 0;
 	if (event->type == SDL_MOUSEBUTTONDOWN && !entry->active &&
 		kiss_pointinrect(event->button.x, event->button.y,
-		&entry->rect)) {
+		&entry->r_rect)) {
 		entry->active = 1;
 		SDL_StartTextInput();
 		if (entry->wdw) entry->wdw->focus = 0;
 		entry->focus = 1;
 		*draw = 1;
-	} else if (event->type == SDL_KEYDOWN && entry->active &&
-		event->key.keysym.scancode == SDL_SCANCODE_RETURN) {
+		return 1;
+	}
+	else if ((event->type == SDL_KEYDOWN && entry->active &&
+		event->key.keysym.scancode == SDL_SCANCODE_RETURN)
+	|| (event->type == SDL_MOUSEBUTTONDOWN && entry->active && !kiss_pointinrect(event->button.x, event->button.y, &entry->r_rect)))
+	{
 		entry->active = 0;
 		SDL_StopTextInput();
 		if (entry->wdw) entry->wdw->focus = 1;
 		entry->focus = 0;
 		*draw = 1;
-		return 1;
+		switch (entry->entry_type)
+		{
+			case TE_NONE:
+			{
+				break;
+			}
+			case TE_FLOAT:
+			{
+				double temp = atof(entry->text);
+				if (temp >= entry->upper_bound)
+				{
+					temp = entry->upper_bound;
+				}
+				else if (temp <= entry->lower_bound)
+				{
+					temp = entry->lower_bound;
+				}
+				entry->num_val = temp;
+				snprintf(entry->text, KISS_MAX_LENGTH, "%g", entry->num_val);
+				break;
+			}
+			case TE_INT:
+			{
+				int temp = (int)round(atoi(entry->text));
+			
+				if (temp >= entry->upper_bound)
+				{
+					temp = entry->upper_bound;
+				}
+				else if (temp <= entry->lower_bound)
+				{
+					temp = entry->lower_bound;
+				}
+				entry->num_val = (int) temp;
+				snprintf(entry->text, KISS_MAX_LENGTH, "%d", (int)entry->num_val);
+				break;
+			}
+			default:
+			{
+				printf("kiss_entry_handle bad entry->entry_type\n");
+				abort();
+			}
+		}
+		return 2; //ret 2 if "done"
 	} else if (event->type == SDL_TEXTINPUT && entry->active) {
 		if (kiss_textwidth(entry->font, entry->text,
 			event->text.text) < entry->textwidth &&
@@ -856,21 +928,29 @@ int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 			KISS_MAX_LENGTH)
 			strcat(entry->text, event->text.text);
 		*draw = 1;
+		return 1;
+	} else if (event->type == SDL_TEXTEDITING && entry->active) {
+		//todo
+		return 1;
 	} else if (event->type == SDL_KEYDOWN && entry->active &&
 		event->key.keysym.scancode == SDL_SCANCODE_BACKSPACE) {
 		kiss_backspace(entry->text);
 		*draw = 1;
+		return 1;
 	} else if (event->type == SDL_KEYDOWN && entry->active &&
 		(event->key.keysym.mod & KMOD_CTRL) &&
 		event->key.keysym.scancode == SDL_SCANCODE_U) {
 		strcpy(entry->text, "");
 		*draw = 1;
+		return 1;
 	} else if (event->type == SDL_MOUSEBUTTONDOWN && entry->active &&
 		kiss_pointinrect(event->button.x, event->button.y,
-		&entry->rect)) {
+		&entry->r_rect)) {
 		strcpy(entry->text, "");
 		*draw = 1;
+		return 1;
 	}
+	
 	return 0;
 }
 
@@ -878,15 +958,33 @@ int kiss_entry_draw(kiss_entry *entry, SDL_Renderer *renderer)
 {
 	SDL_Color color;
 
-	if (entry && entry->wdw) entry->visible = entry->wdw->visible;
-	if (!entry || !entry->visible || !renderer) return 0;
-	kiss_fillrect(renderer, &entry->rect, entry->bg);
+	if (entry && entry->wdw)
+	{
+		entry->visible = entry->wdw->visible;
+		(void)determine_render_position(&entry->rect, &entry->wdw->rect, &entry->r_rect, entry->h_align, entry->v_align, entry->parent_scale, entry->column, entry->row);
+		//pass by ref - sets textx and texty
+		(void)determine_text_render_position(&entry->r_rect, entry->txt_h_align, entry->txt_v_align, &entry->textx, &entry->texty, entry->textwidth, entry->font.fontheight);
+	}
+
+	if (!entry || !entry->visible || !renderer)
+	{
+		return 0;
+	}
+	kiss_fillrect(renderer, &entry->r_rect, entry->bg);
 	color = kiss_sand;
-	if (entry->active) color = kiss_green;
+	if (entry->active)
+	{
+		color = kiss_green;
+	}
 	if (entry->decorate)
-		kiss_decorate(renderer, &entry->rect, color, kiss_edge);
+	{
+		kiss_decorate(renderer, &entry->r_rect, color, kiss_edge);
+	}
 	color = entry->normalcolor;
-	if (entry->active) color = entry->activecolor;
+	if (entry->active)
+	{
+		color = entry->activecolor;
+	}
 	kiss_rendertext(renderer, entry->text, entry->textx, entry->texty,
 		entry->font, color);
 	return 1;

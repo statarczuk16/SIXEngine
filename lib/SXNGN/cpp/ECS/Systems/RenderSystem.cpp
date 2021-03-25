@@ -39,7 +39,6 @@ namespace SXNGN::ECS::A {
 			auto game_state_ui = ui->state_to_ui_map_.find(state);
 			if (game_state_ui != ui->state_to_ui_map_.end())
 			{
-
 				Draw_GUI_Components(game_state_ui->second);
 			}
 
@@ -47,62 +46,75 @@ namespace SXNGN::ECS::A {
 		
 	}
 
+	void Renderer_System::Draw_GUI_Component(SDL_Renderer* gRenderer, std::shared_ptr<UIContainerComponent> component_in_layer)
+	{
+		switch (component_in_layer->type_)
+		{
+			case UIType::WINDOW:
+			{
+				kiss_window_draw(component_in_layer->window_.get(), gRenderer);
+				for (auto component_in_window : component_in_layer->child_components_)
+				{
+					Draw_GUI_Component(gRenderer, component_in_window);
+				}
+				break;
+			}
+			case UIType::BUTTON:
+			{
+				kiss_button_draw(component_in_layer->button_, gRenderer);
+				break;
+			}
+			case UIType::LABEL:
+			{
+				kiss_label_draw(component_in_layer->label_, gRenderer);
+			}
+			case UIType::COMBOBOX:
+			{
+				break;
+			}
+			case UIType::ENTRY:
+			{
+				kiss_entry_draw(component_in_layer->entry_, gRenderer);
+				break;
+			}
+			case UIType::HSCROLLBAR:
+			{
+				break;
+			}
+			case UIType::PROGRESSBAR:
+			{
+				break;
+			}
+			case UIType::SELECT_BUTTON:
+			{
+				break;
+			}
+			case UIType::TEXTBOX:
+			{
+				break;
+			}
+			case UIType::VSCROLLBAR:
+			{
+				break;
+			}
+			default:
+			{
+				printf("RenderSystem::Draw_GUI_Components:: Unknown UI Component Type");
+				abort();
+			}
+		}
+	}
 	
-	void Renderer_System::Draw_GUI_Components(std::map<UILayer, std::vector<UIContainerComponent>> layer_to_components)
+	void Renderer_System::Draw_GUI_Components(std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>> layer_to_components)
 	{
 		auto coordinator = Database::get_coordinator();
 		SDL_Renderer* gRenderer = coordinator->Get_Renderer();
-		std::map<UILayer, std::vector<UIContainerComponent>>::iterator it = layer_to_components.begin();
+		std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>>::iterator it = layer_to_components.begin();
 		while( it != layer_to_components.end())
 		{
 			for (auto component_in_layer : it->second)
 			{
-				switch (component_in_layer.type_)
-				{
-					case UIType::WINDOW:
-					{
-						kiss_window_draw(component_in_layer.window_.get(), gRenderer);
-						break;
-					}
-					case UIType::BUTTON:
-					{
-						kiss_button_draw(component_in_layer.button_, gRenderer);
-						break;
-					}
-					case UIType::COMBOBOX:
-					{
-						break;
-					}
-					case UIType::ENTRY:
-					{
-						break;
-					}
-					case UIType::HSCROLLBAR:
-					{
-						break;
-					}
-					case UIType::PROGRESSBAR:
-					{
-						break;
-					}
-					case UIType::SELECT_BUTTON:
-					{
-						break;
-					}
-					case UIType::TEXTBOX:
-					{
-						break;
-					}
-					case UIType::VSCROLLBAR:
-					{
-						break;
-					}
-					default:
-					{
-						printf("RenderSystem::Draw_GUI_Components:: Unknown UI Component Type");
-						abort();
-					}
-				}
+				Draw_GUI_Component(gRenderer, component_in_layer);
 			}
 			it++;
 		}

@@ -25,15 +25,16 @@ namespace SXNGN::ECS::A {
         HSCROLLBAR,
         PROGRESSBAR,
         ENTRY,
+        LABEL,
         TEXTBOX,
         COMBOBOX
     };
 
     enum class UILayer { //order matters - layer with precedence for mouse clicks must be at the top/closest to 0
         UNKNOWN,
-        TOP,
+        BOTTOM,
         MID,
-        BOTTOM
+        TOP
     };
 
     struct UIContainerComponent 
@@ -57,20 +58,62 @@ namespace SXNGN::ECS::A {
             entry_ = nullptr;
             textbox_ = nullptr;
             combobox_ = nullptr;
+            label_ = nullptr;
             name_ = name;
         }
 
         
         void ClearUIContainerComponent()
         {
-            if (button_ !=nullptr) delete button_;
-            if (selectbutton_ != nullptr) delete selectbutton_;
-            if (vscrollbar_ != nullptr) delete vscrollbar_;
-            if (hscrollbar_ != nullptr) delete hscrollbar_;
-            if (progressbar_ != nullptr) delete progressbar_;
-            if (entry_ != nullptr) delete entry_;
-            if (textbox_ != nullptr) delete textbox_;
-            if (combobox_ != nullptr) delete textbox_;
+            if (button_ != nullptr)
+            {
+                delete button_;
+                button_ = nullptr;
+            }
+            if (selectbutton_ != nullptr)
+            {
+                delete selectbutton_;
+                selectbutton_ = nullptr;
+            }
+            if (vscrollbar_ != nullptr)
+            {
+                delete vscrollbar_;
+                vscrollbar_ = nullptr;
+            }
+            if (hscrollbar_ != nullptr)
+            {
+                delete hscrollbar_;
+                hscrollbar_ = nullptr;
+            }
+            if (progressbar_ != nullptr)
+            {
+                delete progressbar_;
+                progressbar_ = nullptr;
+            }
+            if (entry_ != nullptr)
+            {
+                delete entry_;
+                entry_ = nullptr;
+            }
+            if (textbox_ != nullptr)
+            {
+                delete textbox_;
+                textbox_ = nullptr;
+            }
+            if (combobox_ != nullptr)
+            {
+                delete combobox_;
+                combobox_ = nullptr;
+            }
+            if (label_ != nullptr)
+            {
+                delete label_;
+                label_ = nullptr;
+            }
+            for (auto component : child_components_)
+            {
+                component->ClearUIContainerComponent();
+            }
         } 
 
         UIType type_ = UIType::UNKNOWN;
@@ -82,11 +125,14 @@ namespace SXNGN::ECS::A {
         kiss_vscrollbar* vscrollbar_ = nullptr;
         kiss_hscrollbar* hscrollbar_ = nullptr;
         kiss_progressbar* progressbar_ = nullptr;
+        kiss_label* label_ = nullptr;
         kiss_entry* entry_ = nullptr;
         kiss_textbox* textbox_ = nullptr;
         kiss_combobox* combobox_ = nullptr;
         UILayer layer_ = UILayer::UNKNOWN;
         std::vector<Event_Component> triggered_events; //events triggered when this element is activated, if any
+        std::vector<std::shared_ptr<UIContainerComponent>> child_components_;
+        std::vector<std::function<void()>> callback_functions_;
 
     };
 
@@ -105,6 +151,8 @@ namespace SXNGN::ECS::A {
             component_type = ComponentTypeEnum::UI_SINGLE;
         };
 
+
+
         static std::shared_ptr<UICollectionSingleton> get_instance()
         {
             std::lock_guard<std::mutex> guard(lock_);//Wait until data is available (no other theadss have checked it out
@@ -115,11 +163,14 @@ namespace SXNGN::ECS::A {
             return instance_;
         }
 
-       void add_ui_element(ComponentTypeEnum game_state, UIContainerComponent component)
+
+
+       void add_ui_element(ComponentTypeEnum game_state, std::shared_ptr<UIContainerComponent> component_ptr)
         {
+          
             auto game_state_ui_elements_it = state_to_ui_map_.find(game_state);
-            auto layer = component.layer_;
-            if (component.type_ == UIType::UNKNOWN)
+            auto layer = component_ptr->layer_;
+            if (component_ptr->type_ == UIType::UNKNOWN)
             {
                 printf("UI::AddComponent: Trying to add unknown component type_ enum\n");
                 abort();
@@ -138,9 +189,9 @@ namespace SXNGN::ECS::A {
             {
                 printf("UI:Add_Component::Adding new Game State : %s\n", component_type_enum_to_string().at(game_state).c_str());
                 printf("UI:Add_Component::Adding new Layer to Game State: %d\n", layer);
-                std::map<UILayer, std::vector<UIContainerComponent>> layer_to_components;
-                std::vector<UIContainerComponent> components;
-                components.push_back(component);
+                std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>> layer_to_components;
+                std::vector<std::shared_ptr<UIContainerComponent>> components;
+                components.push_back(component_ptr);
                 layer_to_components[layer] = components;
                 state_to_ui_map_[game_state] = layer_to_components;
             }
@@ -151,18 +202,17 @@ namespace SXNGN::ECS::A {
                 {
                     if (components_per_layer.first == layer)
                     {
-                        components_per_layer.second.push_back(component);
+                        components_per_layer.second.push_back(component_ptr);
                         game_state_ui_elements_it->second[layer] = components_per_layer.second;
                         state_to_ui_map_[game_state] = game_state_ui_elements_it->second;
                         placed = true;
-                        
                     }
                 }
                 if (!placed)
                 {
                     printf("UI:Add_Component::Adding new Layer to Game State: %d\n", layer);
-                    std::vector<UIContainerComponent> components;
-                    components.push_back(component);
+                    std::vector<std::shared_ptr<UIContainerComponent>> components;
+                    components.push_back(component_ptr);
                     game_state_ui_elements_it->second[layer] = components;
                     state_to_ui_map_[game_state] = game_state_ui_elements_it->second;
                 }
@@ -210,7 +260,7 @@ namespace SXNGN::ECS::A {
        
        
        //unordered map first  because order does not matter, std::map for layer because order matters (need to iterate through top, then mid, then bottom, etc. when handling events)
-        std::unordered_map<ComponentTypeEnum,std::map<UILayer,std::vector<UIContainerComponent>>> state_to_ui_map_;
+        std::unordered_map<ComponentTypeEnum,std::map<UILayer,std::vector<std::shared_ptr<UIContainerComponent>>>> state_to_ui_map_;
 
        
     };

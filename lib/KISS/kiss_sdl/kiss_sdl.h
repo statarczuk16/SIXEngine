@@ -94,6 +94,7 @@ typedef enum v_alignment {
 	VA_ROW
 } v_alignment;
 
+
 typedef enum scale_to_parent_width {
 	SP_NONE,
 	SP_FILL,
@@ -102,6 +103,12 @@ typedef enum scale_to_parent_width {
 	SP_THIRD,
 	SP_FOURTH
 } scale_to_parent_width;
+
+typedef enum text_entry_type {
+	TE_NONE,
+	TE_INT,
+	TE_FLOAT
+} text_entry_type;
 
 
 /* Length is number of elements, size is allocated size */
@@ -142,10 +149,18 @@ typedef struct kiss_window {
 typedef struct kiss_label {
 	int visible;
 	SDL_Rect rect;
+	SDL_Rect r_rect;//rect to actually render to
 	char text[KISS_MAX_LABEL];
 	SDL_Color textcolor;
 	kiss_font font;
 	kiss_window *wdw;
+	h_alignment h_align;
+	v_alignment v_align;
+	h_alignment txt_h_align;
+	v_alignment txt_v_align;
+	scale_to_parent_width parent_scale;
+	int row;
+	int column;
 } kiss_label;
 
 typedef struct kiss_button {
@@ -168,10 +183,11 @@ typedef struct kiss_button {
 	v_alignment v_align;
 	h_alignment txt_h_align;
 	v_alignment txt_v_align;
-	int text_width;
 	scale_to_parent_width parent_scale;
 	int row;
 	int column;
+	int text_width;
+	
 } kiss_button;
 
 typedef struct kiss_selectbutton {
@@ -240,6 +256,7 @@ typedef struct kiss_entry {
 	int visible;
 	int focus;
 	SDL_Rect rect;
+	SDL_Rect r_rect; //position to actually render to after scaling etc
 	int decorate;
 	int textx;
 	int texty;
@@ -253,6 +270,17 @@ typedef struct kiss_entry {
 	SDL_Color bg;
 	kiss_font font;
 	kiss_window *wdw;
+	h_alignment h_align;
+	v_alignment v_align;
+	h_alignment txt_h_align;
+	v_alignment txt_v_align;
+	scale_to_parent_width parent_scale;
+	int row;
+	int column;
+	double num_val;
+	double lower_bound;
+	double upper_bound;
+	text_entry_type entry_type;
 } kiss_entry;
 
 typedef struct kiss_textbox {

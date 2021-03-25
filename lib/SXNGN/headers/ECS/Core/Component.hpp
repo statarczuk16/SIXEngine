@@ -28,7 +28,8 @@ namespace SXNGN::ECS::A {
 	MAIN_MENU_STATE,
 	MAIN_GAME_STATE,
 	CORE_BG_GAME_STATE,
-	MAIN_SETTINGS_STATE
+	NEW_GAME_STATE,
+	MAIN_SETTINGS_STATE //don't forget to add to component_type_enum_to_string and reverse when adding a new enum
 };
 
 
@@ -54,7 +55,9 @@ namespace SXNGN::ECS::A {
 			{ComponentTypeEnum::EXTERN_ENTITY,"EXTERN_ENTITY"},
 			{ComponentTypeEnum::MAIN_MENU_STATE,"MAIN_MENU_STATE"},
 			{ComponentTypeEnum::CORE_BG_GAME_STATE,"CORE_BG_GAME_STATE"},
-			{ComponentTypeEnum::MAIN_GAME_STATE,"MAIN_GAME_STATE"}
+			{ComponentTypeEnum::MAIN_GAME_STATE,"MAIN_GAME_STATE"},
+			{ComponentTypeEnum::MAIN_SETTINGS_STATE,"MAIN_SETTINGS_STATE"},
+			{ComponentTypeEnum::NEW_GAME_STATE,"NEW_GAME_STATE"}
 
 		};
 		return component_type_enum_to_string;
@@ -81,8 +84,9 @@ namespace SXNGN::ECS::A {
 			{"EXTERN_ENTITY",ComponentTypeEnum::EXTERN_ENTITY},
 			{"MAIN_MENU_STATE",ComponentTypeEnum::MAIN_MENU_STATE},
 			{"CORE_BG_GAME_STATE",ComponentTypeEnum::CORE_BG_GAME_STATE},
-			{"MAIN_GAME_STATE",ComponentTypeEnum::MAIN_GAME_STATE}
-
+			{"MAIN_GAME_STATE",ComponentTypeEnum::MAIN_GAME_STATE},
+			{"MAIN_SETTINGS_STATE",ComponentTypeEnum::MAIN_SETTINGS_STATE},
+			{"NEW_GAME_STATE",ComponentTypeEnum::NEW_GAME_STATE}
 		};
 		return component_type_string_to_enum;
 	}

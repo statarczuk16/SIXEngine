@@ -14,6 +14,8 @@ namespace SXNGN {
 	const size_t TILE_WIDTH_SCALE = 3;
 	const size_t TILE_HEIGHT_SCALE = 3;
 
+	const size_t TILES_TO_CHUNK_EDGE = 16;
+
 	const double G = 9.80; //meters per second squared gravity
 
 }

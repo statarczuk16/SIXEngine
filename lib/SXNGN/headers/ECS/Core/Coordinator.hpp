@@ -311,6 +311,11 @@ namespace SXNGN {
 					return mTextureManager;
 				}
 
+				std::shared_ptr<StateManager> get_state_manager()
+				{
+					return mStateManager;
+				}
+
 				SDL_Renderer* Get_Renderer()
 				{
 					return mTextureManager->get_renderer();

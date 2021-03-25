@@ -7,6 +7,20 @@
 
 namespace SXNGN::ECS::A {
 
+	//Chunks are 16x16 tiles
+	
+	struct LevelGenerationSettings {
+		Uint32 level_width_tiles;
+		Uint32 level_height_tiles;
+		Uint32 level_width_chunks;
+		Uint32 level_height_chunks;
+	};
+
+	struct GameSettings {
+		SDL_Rect resolution;
+		LevelGenerationSettings level_settings;
+	};
+
 	class StateManager
 	{
 	public:
@@ -31,9 +45,23 @@ namespace SXNGN::ECS::A {
 			}
 		};
 
+		void setLevelWidthTiles(Uint32 width)
+		{
+			this->game_settings.level_settings.level_width_chunks = width;
+			this->game_settings.level_settings.level_width_tiles = width * TILES_TO_CHUNK_EDGE;
+		}
+
+		void setLevelHeightTiles(Uint32 height)
+		{
+			this->game_settings.level_settings.level_height_chunks = height;
+			this->game_settings.level_settings.level_height_tiles = height * TILES_TO_CHUNK_EDGE;
+		}
+		
+
 		StateManager()
 		{
-
+			this->setLevelHeightTiles(4);
+			this->setLevelWidthTiles(4);
 		}
 
 		void cacheEntityInSpace(std::shared_ptr<ExternEntity> entity_to_store, std::string state = "Temp")
@@ -91,6 +119,7 @@ namespace SXNGN::ECS::A {
 		std::unordered_map< std::string, Space> spaces;
 		std::unordered_map< std::string, std::mutex> spaceGuards;
 		std::forward_list<ComponentTypeEnum> active_game_states_;
+		GameSettings game_settings;
 		
 	};
 }

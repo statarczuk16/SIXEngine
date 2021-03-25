@@ -28,7 +28,9 @@ namespace SXNGN::ECS::A {
 
 		void Handle_GUI_Input(std::vector<SDL_Event>& events);
 
-		void GUI_Handle_Events(std::vector<SDL_Event> &events, std::map<UILayer, std::vector<UIContainerComponent>> layer_to_ui_elements);
+		void GUI_Handle_Events(std::vector<SDL_Event> &events, std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>> layer_to_ui_elements);
+
+		bool GUI_Handle_Event(std::shared_ptr<Coordinator> coordinator, SDL_Event* e, std::shared_ptr<UIContainerComponent> component_in_layer);
 
 		void Update(float dt);
 

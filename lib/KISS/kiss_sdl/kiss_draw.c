@@ -29,7 +29,7 @@ kiss_image kiss_normal, kiss_prelight, kiss_active, kiss_bar,
 	kiss_up, kiss_down, kiss_left, kiss_right, kiss_vslider,
 	kiss_hslider, kiss_selected, kiss_unselected, kiss_combo;
 int kiss_screen_width, kiss_screen_height;
-int kiss_textfont_size = 15;
+int kiss_textfont_size = 30;
 int kiss_buttonfont_size = 30;
 int kiss_click_interval = 140;
 int kiss_progress_interval = 50;
@@ -101,6 +101,10 @@ int kiss_rendertext(SDL_Renderer *renderer, char *text, int x, int y,
 	kiss_image image;
 
 	if (!text || !renderer || !font.font) return -1;
+	if (strnlen(text, 2) == 0)
+	{
+		return 0;
+	}
 	surface = TTF_RenderUTF8_Blended(font.font, text, color);
 	image.image = SDL_CreateTextureFromSurface(renderer, surface);
 	SDL_QueryTexture(image.image, NULL, NULL, &image.w, &image.h);

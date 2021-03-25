@@ -22,7 +22,9 @@ namespace SXNGN::ECS::A {
 
 		void Draw_GUI();
 
-		void Draw_GUI_Components(std::map<UILayer, std::vector<UIContainerComponent>> layer_to_components);
+		void Draw_GUI_Components(std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>> layer_to_components);
+
+		void Draw_GUI_Component(SDL_Renderer* gRenderer, std::shared_ptr<UIContainerComponent> component_in_layer);
 
 	private:
 

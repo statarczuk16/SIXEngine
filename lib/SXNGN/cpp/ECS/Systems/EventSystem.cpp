@@ -51,6 +51,11 @@ namespace SXNGN::ECS::A {
 					gCoordinator.GameStateChanged(active_states, true);
 					break;
 				}
+				case EventType::EXIT:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Exit Event");
+					exit(EXIT_SUCCESS);
+				}
 				default:
 				{
 					SDL_LogCritical(1, "Event_System::Update:: Unknown event type");
