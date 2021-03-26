@@ -15,10 +15,22 @@ namespace SXNGN::ECS::A {
 	{
 		CLICKABLE, //can be selected with mouse
 		WASD_CONTROL, //movement controlled by keyboard
-		PLAYER_CONTROL_MOVEMENT
+		PLAYER_CONTROL_MOVEMENT,
+		CURRENTLY_SELECTED
 	};
 
 
+	/// <summary>
+	/// Contains information about how an entity responds to events
+	/// </summary>
+	struct User_Input_Tags_Collection : ECS_Component
+	{
+		User_Input_Tags_Collection()
+		{
+			component_type = ComponentTypeEnum::INPUT_TAGS;
+		}
+		std::unordered_set<User_Input_Tags> input_tags_;
+	};
 
 	/// <summary>
 	/// Contains all sdl events (user inputs) entered during a frame
@@ -35,17 +47,6 @@ namespace SXNGN::ECS::A {
 
 
 
-	/// <summary>
-	/// Contains information about how an entity responds to events
-	/// </summary>
-	struct User_Input_Tags_Collection : ECS_Component
-	{
-		User_Input_Tags_Collection()
-		{
-			component_type = ComponentTypeEnum::INPUT_TAGS;
-		}
-		std::unordered_set<User_Input_Tags> input_tags_;
-	};
 
 	/// <summary>
 	/// Singleton used to store input state

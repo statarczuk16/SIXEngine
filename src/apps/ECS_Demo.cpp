@@ -8,6 +8,7 @@
 #include <ECS/Components/Components.hpp>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
 #include <ECS/Utilities/JSON_Utils.hpp>
+#include <ECS/Utilities/Map_Utils.hpp>
 
 #include <chrono>
 #include <random>
@@ -247,11 +248,11 @@ int init_menus()
 	//Callback functions for level width/height 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_width = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
-		coordinator->get_state_manager()->setLevelHeightTiles(uicc->entry_->num_val);
+		coordinator->get_state_manager()->setLevelWidthTiles(uicc->entry_->num_val);
 	};
 
-	std::function<void()> ng_update_width_b = std::bind(ng_update_width, lhe_c);
-	lhe_c->callback_functions_.push_back(ng_update_width_b);
+	std::function<void()> ng_update_width_b = std::bind(ng_update_width, lwe_c);
+	lwe_c->callback_functions_.push_back(ng_update_width_b);
 
 	//Callback functions for level width/height 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_height = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
@@ -260,15 +261,18 @@ int init_menus()
 	};
 
 	std::function<void()> ng_update_height_b = std::bind(ng_update_height, lhe_c);
-	lwe_c->callback_functions_.push_back(ng_update_height_b);
+	lhe_c->callback_functions_.push_back(ng_update_height_b);
 		
 	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1);
-	Event_Component back_state_event_ng;
-	back_state_event_ng.e.common.type = EventType::STATE_CHANGE;
-	back_state_event_ng.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	back_state_event_ng.e.state_change.states_to_remove.push_front(ComponentTypeEnum::NEW_GAME_STATE);
-	back_from_bg_button_c->triggered_events.push_back(back_state_event_ng);
-	new_game_window_c->child_components_.push_back(back_from_bg_button_c);
+	//Callback functions for level width/height 
+	/**std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_start_game = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		
+	};**/
+
+	std::function<void()> ng_start = Map_Utils::StartNewGame;
+	new_game_start_b->callback_functions_.push_back(ng_start);
+	new_game_window_c->child_components_.push_back(new_game_start_b);
 		
 
 	auto back_from_bg_button_c = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS_NG);

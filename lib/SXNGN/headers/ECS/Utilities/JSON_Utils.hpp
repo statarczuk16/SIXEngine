@@ -5,6 +5,7 @@
 #include <ECS/Components/Components.hpp>
 #include <nlohmann/json.hpp>
 
+
 namespace SXNGN {
 	namespace ECS {
 		namespace A {

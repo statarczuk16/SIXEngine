@@ -56,6 +56,12 @@ namespace SXNGN::ECS::A {
 			this->game_settings.level_settings.level_height_chunks = height;
 			this->game_settings.level_settings.level_height_tiles = height * TILES_TO_CHUNK_EDGE;
 		}
+
+		const GameSettings* getGameSettings()
+		{
+			return &game_settings;
+		}
+
 		
 
 		StateManager()

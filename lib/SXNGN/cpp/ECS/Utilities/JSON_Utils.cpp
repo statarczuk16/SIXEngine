@@ -1,6 +1,8 @@
 #include <ECS/Utilities/JSON_Utils.hpp>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
 #include <iostream>
+#include <ECS/Utilities/Map_Utils.hpp>
+
 
 
 namespace SXNGN {
@@ -46,30 +48,11 @@ namespace SXNGN {
 				printf("Width: %d\n", tiles_wide);
 				printf("Height: %d\n", tiles_high);
 
-				std::vector<A::Pre_Renderable> pre_renders;
-				std::vector<A::Collisionable> collisionables;
-				std::vector<A::Tile> tiles;
+				
 
-				for (int h = 0; h < tiles_high; h++)
-				{
-					for (int w = 0; w < tiles_wide; w++)
-					{
-						Sint32 x_pixels = w * SXNGN::BASE_TILE_WIDTH;
-						Sint32 y_pixels = h * SXNGN::BASE_TILE_HEIGHT;
-						SDL_Rect collision_box;
-						collision_box.x = x_pixels;
-						collision_box.y = y_pixels;
-						collision_box.w = SXNGN::BASE_TILE_WIDTH;
-						collision_box.h = SXNGN::BASE_TILE_HEIGHT;
-						auto pre_render = new A::Pre_Renderable(x_pixels, y_pixels, default_tileset, default_tile, A::RenderLayer::GROUND_LAYER);
-						auto collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::NONE);
-						auto tile = Entity_Builder_Utils::Create_Tile(w, h);
-						pre_renders.push_back(*pre_render);
-						collisionables.push_back(*collision);
-						tiles.push_back(*tile);
-					}
-				}
-				return std::make_tuple(pre_renders, collisionables, tiles);
+				auto tile_map = Map_Utils::CreateTileMap(tiles_wide * TILES_TO_CHUNK_EDGE, tiles_high * TILES_TO_CHUNK_EDGE, default_tileset, default_tile);
+
+				return tile_map;
 			}
 
 			/// <summary>

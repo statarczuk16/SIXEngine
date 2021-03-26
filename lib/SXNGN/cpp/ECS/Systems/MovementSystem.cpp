@@ -8,7 +8,7 @@ namespace SXNGN::ECS::A {
 
 void Movement_System::Init()
 {
-	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Renderer_System Init");
+	SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Movement_System Init");
 }
 
 //fixme

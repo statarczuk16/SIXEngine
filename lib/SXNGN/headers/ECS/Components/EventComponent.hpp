@@ -15,8 +15,11 @@ namespace SXNGN::ECS::A {
 		SAVE,
 		LOAD,
 		STATE_CHANGE,
-		EXIT
+		EXIT,
+		MOUSE,
+		SELECTION
 	};
+
 
 	struct SXNGN_Common
 	{
@@ -27,6 +30,13 @@ namespace SXNGN::ECS::A {
 	struct SXNGN_SaveEvent
 	{
 		std::string filePath;
+	};
+
+	struct SXNGN_Selection
+	{
+		std::vector<Entity> clicked_entities;
+		std::vector<Entity> boxed_entities;
+		std::vector<Entity> double_click_entities;
 	};
 
 	struct SXNGN_LoadEvent
@@ -40,6 +50,18 @@ namespace SXNGN::ECS::A {
 		std::forward_list<ComponentTypeEnum> new_states;
 		std::forward_list<ComponentTypeEnum> states_to_remove;
 	};
+
+	enum class MouseEventType : Uint8
+	{
+		CLICK,
+		BOX
+	};
+
+	struct SXNGN_MouseEvent
+	{
+		MouseEventType type;
+		UserInputUtils::Click click;
+	};
 	
 	struct SXNGN_Event
 	{
@@ -47,6 +69,8 @@ namespace SXNGN::ECS::A {
 		SXNGN_SaveEvent save;
 		SXNGN_LoadEvent load;
 		SXNGN_StateChangeEvent state_change;
+		SXNGN_MouseEvent mouse_event;
+		SXNGN_Selection select_event;
 	};
 
 	struct Event_Component : ECS_Component

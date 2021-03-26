@@ -70,7 +70,7 @@ public:
 
 	const ECS_Component* GetComponentReadOnly(Entity entity, ComponentTypeEnum component_type)
 	{
-		return GetComponentArray(component_type)->GetDataReadOnly(entity);
+		return GetComponentArray(component_type)->TryGetDataReadOnly(entity);
 	}
 
 

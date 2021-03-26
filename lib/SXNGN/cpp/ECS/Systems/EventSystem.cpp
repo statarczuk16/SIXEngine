@@ -56,6 +56,10 @@ namespace SXNGN::ECS::A {
 					SDL_LogInfo(1, "Event_System::Update:: Got Exit Event");
 					exit(EXIT_SUCCESS);
 				}
+				case EventType::MOUSE:
+				{
+					break;
+				}
 				default:
 				{
 					SDL_LogCritical(1, "Event_System::Update:: Unknown event type");

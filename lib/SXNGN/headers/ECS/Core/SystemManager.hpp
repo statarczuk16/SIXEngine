@@ -104,7 +104,7 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
-		void EntitySignatureChanged(Entity entity, Signature entitySignature, bool quiet = false)
+		void EntitySignatureChanged(Entity entity, Signature entitySignature, bool quiet = true)
 		{
 			if (!quiet)
 			{

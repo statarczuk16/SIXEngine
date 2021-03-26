@@ -1,13 +1,19 @@
 #pragma once
 
-#include <ECS/Core/System.hpp>
+#include "ECS/Core/System.hpp"
 #include <memory>
 #include <SDL.h>
-#include <ECS/Components/Components.hpp>
+#include <ECS/Components/Moveable.hpp>
+#include <ECS/Components/Collision.hpp>
+#include <ECS/Components/Renderable.hpp>
 
 namespace SXNGN::ECS::A {
+	using Moveable = A::Moveable;
+	using Renderable = A::Renderable;
+	using MoveableType = A::MoveableType;
+	//using Collisionable = SXNGN::ECS::A::Collisionable;
 
-	class Movement_System : public System
+	class Collision_System : public System
 	{
 	public:
 		void Init();

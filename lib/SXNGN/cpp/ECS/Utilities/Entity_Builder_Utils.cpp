@@ -77,6 +77,49 @@ namespace SXNGN {
 				return event_entity;
 			}
 
+			Entity Entity_Builder_Utils::Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, UserInputUtils::Click click)
+			{
+				auto event_entity = coordinator.CreateEntity();
+
+				Event_Component* event_component = new Event_Component();
+				SXNGN_MouseEvent mouse_event;
+				mouse_event.click = click;
+				event_component->e.common.type = EventType::MOUSE;
+				event_component->e.mouse_event = mouse_event;
+				event_component->e.mouse_event.type = MouseEventType::CLICK;
+
+				Collisionable* collisionable = new Collisionable();
+				SDL_Rect click_box;
+				click_box.h = 1;
+				click_box.w = 1;
+				click_box.x = mouse_event.click.x / Database::get_scale();
+				click_box.y = mouse_event.click.y / Database::get_scale();
+				collisionable->collision_box_ = click_box;
+				collisionable->collision_tag_ = CollisionTag::EVENT;
+				collisionable->collision_type_ = CollisionType::IMMOVEABLE;
+				collisionable->buffer_pixels = 0;
+				coordinator.AddComponent(event_entity, collisionable);
+				coordinator.AddComponent(event_entity, event_component);
+				coordinator.AddComponent(event_entity, Create_Gamestate_Component_from_Enum(game_state));
+				return event_entity;
+			}
+
+			Entity Entity_Builder_Utils::Create_Selection_Event(Coordinator coordinator, ComponentTypeEnum game_state, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed )
+			{
+				auto select_entity = coordinator.CreateEntity();
+
+				Event_Component* event_component = new Event_Component();
+				SXNGN_Selection selection;
+				selection.clicked_entities = clicked;
+				selection.double_click_entities = dclicked;
+				selection.boxed_entities = boxed;
+				event_component->e.common.type = EventType::SELECTION;
+				event_component->e.select_event = selection;
+				coordinator.AddComponent(select_entity, event_component);
+				coordinator.AddComponent(select_entity, Create_Gamestate_Component_from_Enum(game_state));
+				return select_entity;
+			}
+
 
 			/**
 			A::Pre_Renderable* Entity_Builder_Utils::Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer)

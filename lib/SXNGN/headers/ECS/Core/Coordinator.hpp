@@ -142,7 +142,7 @@ namespace SXNGN {
 					std::vector<const ECS_Component*> components = Get_All_Entity_Data_Read_Only(entity);
 					for (auto component_ptr : components)
 					{
-						json js = A::JSON_Utils::component_to_json(component_ptr);
+						json js = JSON_Utils::component_to_json(component_ptr);
 						json_components.push_back(js);
 					}
 					A::ExternJSONEntity extern_entity(entity, json_components);

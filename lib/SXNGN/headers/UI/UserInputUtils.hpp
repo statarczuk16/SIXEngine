@@ -60,6 +60,7 @@ namespace SXNGN::ECS::A {
 			Uint32 time_stamp = 0;
 			Sint32 x = 0;
 			Sint32 y = 0;
+			bool double_click = false;
 		};
 	};
 

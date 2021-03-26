@@ -299,6 +299,7 @@ namespace SXNGN::ECS::A {
 
 	void User_Input_System::Update_Mouse_State(std::vector<SDL_Event> mouse_events, float dt)
 	{
+		auto gCoordinator = Database::get_coordinator();
 		//mutex controlled singleton
 		auto cached_mouse_state = User_Input_State::get_instance();
 		UserInputUtils::MouseState current_mouse_state;
@@ -373,11 +374,15 @@ namespace SXNGN::ECS::A {
 						//printf("right double click %zd\n", click_gap);
 						cached_mouse_state->last_right_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
 						//todo launc double click event
+						right_click.double_click = true;
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, right_click);
 					}
 					else
 					{
 						//printf("right click %zd\n", click_gap);
 						//todo launch single click event
+						right_click.double_click = false;
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, right_click);
 					}
 					//clear out the state after recording a click
 					current_mouse_state.right_button.timestamp_up = 0;
@@ -402,11 +407,17 @@ namespace SXNGN::ECS::A {
 						//printf("left double click %zd\n",click_gap);
 						cached_mouse_state->last_left_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
 						//todo launch double click event
+						left_click.double_click = true;
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, left_click);
+
 					}
 					else
 					{
 						//printf("left click %zd\n", click_gap);
+						// 
 						//todo launch single click event
+						left_click.double_click = false;
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, left_click);
 					}
 
 				}
