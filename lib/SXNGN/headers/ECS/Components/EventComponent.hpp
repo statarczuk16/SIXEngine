@@ -2,6 +2,7 @@
 
 #include <SDL.h>
 #include <ECS/Core/Component.hpp>
+#include <UI/UserInputUtils.hpp>
 
 
 using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
@@ -60,7 +61,7 @@ namespace SXNGN::ECS::A {
 	struct SXNGN_MouseEvent
 	{
 		MouseEventType type;
-		UserInputUtils::Click click;
+		Click click;
 	};
 	
 	struct SXNGN_Event

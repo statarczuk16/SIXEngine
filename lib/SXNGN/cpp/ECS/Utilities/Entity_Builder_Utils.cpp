@@ -34,6 +34,7 @@ namespace SXNGN {
 			Entity Entity_Builder_Utils::Create_Person(A::Coordinator coordinator, ComponentTypeEnum game_state, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, bool player_controlled, std::string name)
 			{
 				auto person_entity = coordinator.CreateEntity();
+				SDL_LogDebug(1, "Created Person Entity: %s: ID: %d", name.c_str(), person_entity);
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
 				Sint32 y_pixels = x_grid * SXNGN::BASE_TILE_HEIGHT;
 				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(x_pixels, y_pixels, sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER, name);
@@ -52,15 +53,15 @@ namespace SXNGN {
 				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, A::CollisionType::IMMOVEABLE);
 
 				coordinator.AddComponent(person_entity, collisionable);
+				SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
+				input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::CLICKABLE);
 				if (player_controlled)
 				{
-					SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
+					
 					input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::WASD_CONTROL);
 					input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
-					coordinator.AddComponent(person_entity, input_tags_comp);
-
 				}
-
+				coordinator.AddComponent(person_entity, input_tags_comp);
 				coordinator.AddComponent(person_entity, Create_Gamestate_Component_from_Enum(game_state));
 
 				return person_entity;
@@ -77,7 +78,7 @@ namespace SXNGN {
 				return event_entity;
 			}
 
-			Entity Entity_Builder_Utils::Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, UserInputUtils::Click click)
+			Entity Entity_Builder_Utils::Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, Click click)
 			{
 				auto event_entity = coordinator.CreateEntity();
 

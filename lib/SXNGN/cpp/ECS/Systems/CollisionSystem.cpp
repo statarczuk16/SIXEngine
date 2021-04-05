@@ -5,6 +5,7 @@
 #include <ECS/Systems/CollisionSystem.hpp>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
 #include <Collision.h>
+#include <vector>
 
 namespace SXNGN::ECS::A {
 
@@ -21,31 +22,100 @@ namespace SXNGN::ECS::A {
 
 		//Iterate through entities this system manipulates/converts
 		auto it_act = m_actable_entities.begin();
-		int idx = 0;
-		std::deque <std::pair<Entity,const Collisionable*>> entity_to_collisionable;
+		std::deque <std::pair<Entity,const Collisionable*>> entity_to_collisionable_unresolved;
+		std::deque <std::pair<Entity, const Collisionable*>> entity_to_collisionable_all;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions;
+		std::deque<std::pair<Entity, Entity>> confirmed_collisions_2;
 		//actable entities for event system are entities with event component
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
 			it_act++;
 
-			//thread safe checkout of data
+			
+			//draw distinction between resolved and unresolved collisionables. We don't need to check collision of resolved collisions - ones that we have already detected collision between and they have not moved (become "unresolved") since the check
 			auto data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::COLLISION);
 			const Collisionable* collisionable_ptr = static_cast<const Collisionable*>(data);
-			entity_to_collisionable.push_back(std::make_pair(idx, collisionable_ptr));
+			if (collisionable_ptr->resolved_ == false)
+			{
+				entity_to_collisionable_unresolved.push_back(std::make_pair(entity_actable, collisionable_ptr));
+			}
+			entity_to_collisionable_all.push_back(std::make_pair(entity_actable, collisionable_ptr));
 
-			idx++;
 		}
 
-		for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable.begin(); it_coll_a != entity_to_collisionable.end()-1; ++it_coll_a)
-		{ 
-			for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = it_coll_a+1; it_coll_b != entity_to_collisionable.end(); ++it_coll_b)
-			{
-				int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_a).second->buffer_pixels;
-				if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_a).second->collision_box_, collision_buffer_pixels))
+
+		if (!entity_to_collisionable_unresolved.empty())
+		{
+			int check_num = 0;
+			auto start = std::chrono::high_resolution_clock::now();
+			auto stop = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+			if(entity_to_collisionable_unresolved.size() > 500)
+			{ 
+				//method 1: iterate through all collisionables, but only do the check if one is unresolved.
+				//Advantage: since inner and outer loop use the same index, can place inner loop iterator at out loop iterator + 1 and cut out all redundant checks
+				// (if A hitting B, don't need to check B hitting A)
+				//Disadvantage: Have to at least *iterate* through a lot of resolved collisions, possibly, even if we don't have to check the collision.
+				//Should work better when there are many unresolved (moving) objects
+				check_num = 0;
+				start = std::chrono::high_resolution_clock::now();
+				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_all.begin(); it_coll_a != entity_to_collisionable_all.end() - 1; ++it_coll_a)
 				{
-					confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+					if ((*it_coll_a).second->resolved_ == true)
+					{
+						continue;
+					}
+					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = it_coll_a + 1; it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
+					{
+						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
+						//does obj a touch obj b
+						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
+						{
+							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+
+						}
+						check_num++;
+					}
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				if(true)//(!quiet)
+				{
+					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 1: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions.size(), duration);
+				}
+			}
+			else
+			{
+				//method 2: only iterate through unresolved collisionables, though check them for collision against ALL collisionables
+				//Advantage: Small outer loop to iterate through (only unresolved collisions)
+				//Disadvantage: Does not cut out redundant checks because indexes aren't the same (see advantage for above method)
+				//Should work better when there are not many unresolved collisions (moving objects)
+				check_num = 0;
+				start = std::chrono::high_resolution_clock::now();
+				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_unresolved.begin(); it_coll_a != entity_to_collisionable_unresolved.end(); ++it_coll_a)
+				{
+					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = entity_to_collisionable_all.begin(); it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
+					{
+						if ((*it_coll_a).first == (*it_coll_b).first) //don't check collision against self
+						{
+							continue;
+						}
+						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
+						//does obj a touch obj b
+						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
+						{
+							confirmed_collisions_2.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+
+						}
+						check_num++;
+					}
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				if (true)//(!quiet)
+				{
+					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions_2.size(), duration);
 				}
 			}
 		}
@@ -55,10 +125,13 @@ namespace SXNGN::ECS::A {
 
 			auto data1 = gCoordinator.CheckOutComponent(c_collision.first, ComponentTypeEnum::COLLISION);
 			auto data2 = gCoordinator.CheckOutComponent(c_collision.second, ComponentTypeEnum::COLLISION);
-			if (data1.first && data2.first)
+			if (data1 && data2)
 			{
-				Collisionable* collisionable_1 = static_cast<Collisionable*>(data1.first);
-				Collisionable* collisionable_2 = static_cast<Collisionable*>(data2.first);
+				Collisionable* collisionable_1 = static_cast<Collisionable*>(data1);
+				Collisionable* collisionable_2 = static_cast<Collisionable*>(data2);
+
+				collisionable_1->resolved_ = true;
+				collisionable_2->resolved_ = true;
 
 				//if the first collisionable is an event collision
 				if (collisionable_1->collision_tag_ == CollisionTag::EVENT)
@@ -67,67 +140,72 @@ namespace SXNGN::ECS::A {
 					auto event_data = gCoordinator.GetComponentReadOnly(c_collision.first, ComponentTypeEnum::EVENT);
 					if (event_data)
 					{
-						
+
 						const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
 						//if the event is a mouse click
-						if (event_ptr->e.common.type == EventType::MOUSE)
+						if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(c_collision.second, ComponentTypeEnum::INPUT_TAGS))
 						{
 							//see how second collisionable reacts to mouse input
 							auto input_data = gCoordinator.GetComponentReadOnly(c_collision.second, ComponentTypeEnum::INPUT_TAGS);
-							if (input_data)
-							{ 
-								const User_Input_Tags_Collection* input_tags_ptr = static_cast<const User_Input_Tags_Collection*>(input_data);
-								//if it is clickable
-								std::vector<Entity> clicked, std::vector<Entity> double_click_entities, std::vector<Entity> boxed_entities;
-								if (input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
+							
+							const User_Input_Tags_Collection* input_tags_ptr = static_cast<const User_Input_Tags_Collection*>(input_data);
+							//if it is clickable
+							std::vector<Entity> clicked;
+							std::vector<Entity> double_click_entities;
+							std::vector<Entity> boxed_entities;
+							if (input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
+							{
+								switch (event_ptr->e.mouse_event.type)
 								{
-									switch (event_ptr->e.mouse_event.type)
+									//if it's a click
+								case MouseEventType::CLICK:
+								{
+									SDL_LogDebug(1, "Entity %d Clicked\n", c_collision.first);
+									if (event_ptr->e.mouse_event.click.double_click)
 									{
-										//if it's a click
-										case MouseEventType::CLICK:
-										{
-											if (event_ptr->e.mouse_event.click.double_click)
-											{
-												double_click_entities.push_back(c_collision.second);
-											}
-											else
-											{
-												clicked.push_back(c_collision.second);
-											}
-								
-											break;
-										}
-										//or selection box
-										case MouseEventType::BOX:
-										{
-											boxed_entities.push_back(c_collision.second);
-											break;
-										}
-										default :
-										{
-											SDL_LogCritical(1, "CollisionSystem: Unknown Mouse Collision Event");
-											abort();
-										}	
+										double_click_entities.push_back(c_collision.second);
+									}
+									else
+									{
+										clicked.push_back(c_collision.second);
+									}
+
+									break;
 								}
-									Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities);
-							}
-						}
-					}
+								//or selection box
+								case MouseEventType::BOX:
+								{
+									boxed_entities.push_back(c_collision.second);
+									break;
+								}
+								default:
+								{
+									SDL_LogCritical(1, "CollisionSystem: Unknown Mouse Collision Event");
+									abort();
+								}
+								}//switch mouse event type
 
-					if (collisionable_2->collision_tag_ == CollisionTag::EVENT)
-					{
+								//create event for user input system - tell it what entities were selected by a mouse event
+								Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities);
+							}//if clickable
 
-					}
-					else if (collisionable_2->collision_tag_ == CollisionTag::PERSON)
-					{
+						}//if mouse event type
+					} //if event data present
+				}//if collisionable 1 is event
+				else if (collisionable_1->collision_tag_ == CollisionTag::PERSON)
+				{
 
-					}
 				}
 
+				//check the data back in
+				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, c_collision.first);
+				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, c_collision.second);
+			}//if both collisionables exist
 
-			}
-		}
+
+		}//for all confiermed collisions
+	}//system update
 
 
 
-	}
+	}//namespace

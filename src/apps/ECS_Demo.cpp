@@ -23,6 +23,7 @@
 #include <fstream>
 #include <tuple>
 #include <ECS/Systems/EventSystem.hpp>
+#include <ECS/Systems/CollisionSystem.hpp>
 
 
 SXNGN::ECS::A::Coordinator gCoordinator;
@@ -358,6 +359,16 @@ int main(int argc, char* args[])
 	}
 	renderer_system->Init();
 
+	//Collision system handles collision between entities but also clicks and draggable boxes etc with things in game world
+	auto collision_system = gCoordinator.RegisterSystem<Collision_System>();
+	{
+		Signature signature;
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
+		gCoordinator.SetSystemSignatureActable<Collision_System>(signature);
+
+	}
+	collision_system->Init();
+
 
 	auto input_system = gCoordinator.RegisterSystem<User_Input_System>();
 	{
@@ -532,7 +543,7 @@ int main(int argc, char* args[])
 			input_system->Update(dt);
 		}
 
-		event_system->Update(dt);
+		
 
 		/////////////////////////////////Physics/Movement
 		//Phys start
@@ -541,9 +552,14 @@ int main(int argc, char* args[])
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
 		movement_system->Update(dt);
 
+		collision_system->Update(dt);
+
+		
 
 		dt_timer.start(); //restart delta t for next frame
 		//Phys End
+		/////////////////////////////////Event System - respond to physics, input, etc
+		event_system->Update(dt);
 		/////////////////////////////////Rendering
 		//Render Setup
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);

@@ -17,7 +17,7 @@ namespace SXNGN {
 
 				static Entity Create_Event(Coordinator coordinator, ComponentTypeEnum game_state, Event_Component trigger_event, std::string name = "unnamed_person");
 
-				static Entity Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, UserInputUtils::Click click);
+				static Entity Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, Click click);
 
 				static Entity Create_Selection_Event(Coordinator coordinator, ComponentTypeEnum game_state, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed);
 

@@ -1,12 +1,10 @@
 #pragma once
 
 #include <SDL.h>
-#include <ECS/Core/Component.hpp>
 #include <unordered_set>
 #include <mutex>
+#include <ECS/Core/Component.hpp>
 #include <UI/UserInputUtils.hpp>
-
-
 
 
 namespace SXNGN::ECS::A {
@@ -77,9 +75,9 @@ namespace SXNGN::ECS::A {
 			return instance_;
 		}
 
-		UserInputUtils::MouseState mouse_state;
-		UserInputUtils::Click last_right_click;
-		UserInputUtils::Click last_left_click;
+		MouseState mouse_state;
+		Click last_right_click;
+		Click last_left_click;
 
 
 	};

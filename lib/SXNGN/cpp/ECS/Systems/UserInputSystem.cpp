@@ -67,11 +67,11 @@ namespace SXNGN::ECS::A {
 					{
 
 						auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
-						if (check_out_move.first)
+						if (check_out_move)
 						{
-							Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move.first);
+							Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
 							Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
-							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest, std::move(check_out_move.second));
+							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
 						}
 					}
 				}
@@ -302,7 +302,7 @@ namespace SXNGN::ECS::A {
 		auto gCoordinator = Database::get_coordinator();
 		//mutex controlled singleton
 		auto cached_mouse_state = User_Input_State::get_instance();
-		UserInputUtils::MouseState current_mouse_state;
+		MouseState current_mouse_state;
 		current_mouse_state = cached_mouse_state->mouse_state;
 		for (auto e : mouse_events)
 		{
@@ -360,8 +360,8 @@ namespace SXNGN::ECS::A {
 				if (right_up_minus_down > 0 && right_up_minus_down <SINGLE_CLICK_THRESH_MS)
 				{
 
-					UserInputUtils::Click right_click;
-					right_click.button = UserInputUtils::MOUSE_BUTTON::RIGHT;
+					Click right_click;
+					right_click.button = MOUSE_BUTTON::RIGHT;
 					right_click.time_stamp = current_mouse_state.right_button.timestamp_up;
 					right_click.x = current_mouse_state.right_button.x;
 					right_click.y = current_mouse_state.right_button.y;
@@ -394,8 +394,8 @@ namespace SXNGN::ECS::A {
 				if (left_up_minus_down > 0 && left_up_minus_down < SINGLE_CLICK_THRESH_MS)
 				{
 
-					UserInputUtils::Click left_click;
-					left_click.button = UserInputUtils::MOUSE_BUTTON::LEFT;
+					Click left_click;
+					left_click.button = MOUSE_BUTTON::LEFT;
 					left_click.time_stamp = current_mouse_state.left_button.timestamp_up;
 					left_click.x = current_mouse_state.left_button.x;
 					left_click.y = current_mouse_state.left_button.y;

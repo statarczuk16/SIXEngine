@@ -54,100 +54,17 @@ namespace SXNGN {
 				}
 
 				/// <summary>
-				/// Remove the entity from the system
-				/// Return all components that the entity had associated with it
+				/// Check if an entity has a component
 				/// </summary>
 				/// <param name="entity"></param>
+				/// <param name="component_type"></param>
 				/// <returns></returns>
-				std::vector<ECS_Component*> Extract_Entity_Components_From_ECS(Entity entity)
+				bool EntityHasComponent(Entity entity, ComponentTypeEnum component_type)
 				{
-					
-					auto extracted_components = mComponentManager->ExtractEntity(entity);
-					mSystemManager->EntityDestroyed(entity);
-					mEntityManager->DestroyEntity(entity);
-					return extracted_components;
-				}
-
-				/// <summary>
-				/// Remove the entity from the system
-				/// Return all components that the entity had associated with it
-				/// </summary>
-				/// <param name="entity"></param>
-				/// <returns></returns>
-				std::shared_ptr<A::ExternEntity> Extract_Entity_From_ECS(Entity entity)
-				{
-
-					auto extracted_components =Extract_Entity_Components_From_ECS(entity);
-					auto extracted_entity = std::make_shared<A::ExternEntity>(entity, extracted_components);
-					return extracted_entity;
-				}
-
-				/// <summary>
-				/// Cache an extern_entity into a space - outside of the ECS
-				/// </summary>
-				/// <param name="entity_to_store"></param>
-				/// <param name="state_to_store_in"></param>
-				void Space_Extern_Entity(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
-				{
-					mStateManager->cacheEntityInSpace(entity_to_store, state_to_store_in);	
-				}
-
-				/// <summary>
-				/// Take a space full of ExternEntities and dump into the ECS
-				/// Optional, destroy the vector after.
-				/// </summary>
-				/// <param name="state_to_dump_from"></param>
-				/// <param name="destroy_each"></param>
-				void Dump_Space_To_ECS(std::string state_to_dump_from = "Temp", bool destroy_after = false)
-				{	
-					std::vector< std::shared_ptr<A::ExternEntity>> entity_array = mStateManager->retrieveSpaceEntities(state_to_dump_from, destroy_after);
-					for (auto entity : entity_array)
-					{
-						Dump_Spaced_Entity_To_ECS(entity);
-					}
-				}
-
-				/// <summary>
-				/// Add an ExternEntity back into the system
-				/// </summary>
-				/// <param name="entity_to_dump"></param>
-				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<A::ExternEntity> entity_to_dump)
-				{
-					Entity new_id = mEntityManager->CreateEntity();
-					for (auto component : entity_to_dump->entity_components_)
-					{
-						AddComponent(new_id, component);
-					}
-				}
-
-				/// <summary>
-				/// Returns const reference to all components related to an entity
-				/// </summary>
-				/// <param name="entity"></param>
-				/// <returns></returns>
-				std::vector<const ECS_Component*> Get_All_Entity_Data_Read_Only(Entity entity)
-				{
-					return mComponentManager->Get_All_Entity_Data_Read_Only(entity);
-				}
-
-
-				/// <summary>
-				/// Copies all components related to an entity and outputs as JSON
-				/// </summary>
-				/// <param name="entity"></param>
-				/// <returns></returns>
-				json Entity_To_JSON(Entity entity)
-				{
-					std::vector<json> json_components;
-					std::vector<const ECS_Component*> components = Get_All_Entity_Data_Read_Only(entity);
-					for (auto component_ptr : components)
-					{
-						json js = JSON_Utils::component_to_json(component_ptr);
-						json_components.push_back(js);
-					}
-					A::ExternJSONEntity extern_entity(entity, json_components);
-					json ret = extern_entity;
-					return ret;
+					//The hash is a Uint8 that increments for each component type added - makes sequential storage and signatures easier. Not the same as the underlying enum value.
+					auto component_type_hash = mComponentManager->GetComponentType(component_type);
+					auto entity_signature = mEntityManager->GetSignature(entity);
+					return entity_signature[component_type_hash];
 				}
 
 				// Component methods
@@ -239,15 +156,13 @@ namespace SXNGN {
 				}
 
 				/// <summary>
-				/// Thread safe access to data. Thread asks for component of an entity and is given the data and the key that is used to access it.
-				/// (Other threads cannot access that same data without the key)
-				/// The only function of they is that it must be returned with CheckInComponent before other threads can access the data.
+				/// Thread safe access to data. Thread asks for component of an entity and is given the data 
 				/// Do not ever use without calling CheckInComponent when done.
 				/// </summary>
 				/// <param name="entity"></param>
 				/// <param name="component_type"></param>
 				/// <returns></returns>
-				std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
+				ECS_Component* CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
 				{
 					return mComponentManager->CheckOutComponent(entity, component_type);
 				}
@@ -258,9 +173,9 @@ namespace SXNGN {
 				/// <param name="entity"></param>
 				/// <param name="component_type"></param>
 				/// <param name="data_and_key"></param>
-				void CheckInComponent(ComponentTypeEnum component_type, Entity entity, std::unique_ptr<std::unique_lock<std::mutex>> key)
+				void CheckInComponent(ComponentTypeEnum component_type, Entity entity)
 				{
-					return mComponentManager->CheckInComponent(component_type, entity, std::move(key));
+					return mComponentManager->CheckInComponent(component_type, entity);
 				}
 
 				ComponentTypeHash GetComponentType(ComponentTypeEnum component_type)
@@ -319,6 +234,103 @@ namespace SXNGN {
 				SDL_Renderer* Get_Renderer()
 				{
 					return mTextureManager->get_renderer();
+				}
+
+				/// <summary>
+				/// Remove the entity from the system
+				/// Return all components that the entity had associated with it
+				/// </summary>
+				/// <param name="entity"></param>
+				/// <returns></returns>
+				std::vector<ECS_Component*> Extract_Entity_Components_From_ECS(Entity entity)
+				{
+
+					auto extracted_components = mComponentManager->ExtractEntity(entity);
+					mSystemManager->EntityDestroyed(entity);
+					mEntityManager->DestroyEntity(entity);
+					return extracted_components;
+				}
+
+				/// <summary>
+				/// Remove the entity from the system
+				/// Return all components that the entity had associated with it
+				/// </summary>
+				/// <param name="entity"></param>
+				/// <returns></returns>
+				std::shared_ptr<A::ExternEntity> Extract_Entity_From_ECS(Entity entity)
+				{
+
+					auto extracted_components = Extract_Entity_Components_From_ECS(entity);
+					auto extracted_entity = std::make_shared<A::ExternEntity>(entity, extracted_components);
+					return extracted_entity;
+				}
+
+				/// <summary>
+				/// Cache an extern_entity into a space - outside of the ECS
+				/// </summary>
+				/// <param name="entity_to_store"></param>
+				/// <param name="state_to_store_in"></param>
+				void Space_Extern_Entity(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
+				{
+					mStateManager->cacheEntityInSpace(entity_to_store, state_to_store_in);
+				}
+
+				/// <summary>
+				/// Take a space full of ExternEntities and dump into the ECS
+				/// Optional, destroy the vector after.
+				/// </summary>
+				/// <param name="state_to_dump_from"></param>
+				/// <param name="destroy_each"></param>
+				void Dump_Space_To_ECS(std::string state_to_dump_from = "Temp", bool destroy_after = false)
+				{
+					std::vector< std::shared_ptr<A::ExternEntity>> entity_array = mStateManager->retrieveSpaceEntities(state_to_dump_from, destroy_after);
+					for (auto entity : entity_array)
+					{
+						Dump_Spaced_Entity_To_ECS(entity);
+					}
+				}
+
+				/// <summary>
+				/// Add an ExternEntity back into the system
+				/// </summary>
+				/// <param name="entity_to_dump"></param>
+				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<A::ExternEntity> entity_to_dump)
+				{
+					Entity new_id = mEntityManager->CreateEntity();
+					for (auto component : entity_to_dump->entity_components_)
+					{
+						AddComponent(new_id, component);
+					}
+				}
+
+				/// <summary>
+				/// Returns const reference to all components related to an entity
+				/// </summary>
+				/// <param name="entity"></param>
+				/// <returns></returns>
+				std::vector<const ECS_Component*> Get_All_Entity_Data_Read_Only(Entity entity)
+				{
+					return mComponentManager->Get_All_Entity_Data_Read_Only(entity);
+				}
+
+
+				/// <summary>
+				/// Copies all components related to an entity and outputs as JSON
+				/// </summary>
+				/// <param name="entity"></param>
+				/// <returns></returns>
+				json Entity_To_JSON(Entity entity)
+				{
+					std::vector<json> json_components;
+					std::vector<const ECS_Component*> components = Get_All_Entity_Data_Read_Only(entity);
+					for (auto component_ptr : components)
+					{
+						json js = JSON_Utils::component_to_json(component_ptr);
+						json_components.push_back(js);
+					}
+					A::ExternJSONEntity extern_entity(entity, json_components);
+					json ret = extern_entity;
+					return ret;
 				}
 
 			private:

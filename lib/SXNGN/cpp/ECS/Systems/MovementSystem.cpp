@@ -37,16 +37,16 @@ void Movement_System::Update(float dt)
 
 		//thread safe checkout of data
 		auto check_out_move = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::MOVEABLE);
-		if (check_out_move.first)
+		if (check_out_move)
 		{
 
 
 			//If no Collision, Update_Position_Without_Collision
-			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move.first);
+			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
 			//update position
 			Update_Position(moveable_ptr, entity_actable, dt);
 			//check data back in
-			gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_actable, std::move(check_out_move.second));
+			gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_actable);
 		}
 
 	}
@@ -73,21 +73,35 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 			//printf("Renderable Entity %d: Velocity (%d,%d)\n", moveable_id, moveable->m_vel_x_m_s, moveable->m_vel_y_m_s);
 			//printf("Renderable Entity %d: Pos(%g,%g) -> (%g,%g)\n", moveable_id, moveable->m_pos_x_m, moveable->m_pos_y_m, moveable->m_prev_pos_x_m, moveable->m_prev_pos_y_m);
 		}
-		auto moveable_renderbox = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::RENDERABLE);
 
-		if (moveable_renderbox.first)
+		if (gCoordinator.EntityHasComponent(moveable_id, ComponentTypeEnum::RENDERABLE))
 		{
-
-			Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox.first);
-			render_ptr->x_ = int(round(moveable->m_pos_x_m));
-			render_ptr->y_ = int(round(moveable->m_pos_y_m));
-
-			if (moveable->m_pos_x_m != moveable->m_prev_pos_x_m || moveable->m_pos_y_m != moveable->m_prev_pos_y_m)
+			auto moveable_renderbox = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::RENDERABLE);
+			if (moveable_renderbox)
 			{
-				//printf("Renderable Entity: %2d Position: (%2d,%2d)\n", moveable_id, moveable->m_pos_x_m, moveable->m_prev_pos_x_m);
+				Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
+				render_ptr->x_ = int(round(moveable->m_pos_x_m));
+				render_ptr->y_ = int(round(moveable->m_pos_y_m));
+				if (moveable->m_pos_x_m != moveable->m_prev_pos_x_m || moveable->m_pos_y_m != moveable->m_prev_pos_y_m)
+				{
+					//printf("Renderable Entity: %2d Position: (%2d,%2d)\n", moveable_id, moveable->m_pos_x_m, moveable->m_prev_pos_x_m);
+				}
+				gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_id);
 			}
+		}
 
-			gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_id, std::move(moveable_renderbox.second));
+		if (gCoordinator.EntityHasComponent(moveable_id, ComponentTypeEnum::COLLISION))
+		{
+			auto collision_box = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::COLLISION);
+			if (collision_box)
+			{
+				Collisionable* collision_box_ptr = static_cast<Collisionable*>(collision_box);
+				collision_box_ptr->collision_box_.x = int(round(moveable->m_pos_x_m));
+				collision_box_ptr->collision_box_.y = int(round(moveable->m_pos_y_m));
+				collision_box_ptr->resolved_ = false;
+				
+				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_id);
+			}
 		}
 
 	}
@@ -100,46 +114,3 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 }
 
 }
-
-/**
-std::pair< std::vector<const Collisionable*>, std::vector<Entity>> Movement_System::Load_Collision_Data(std::set<Entity> entities_with_collision)
-{
-	auto gCoordinator = *SXNGN::Database::get_coordinator();
-	std::vector<const Collisionable*> collisionables;
-	std::vector<Entity> collisionable_entity_ids;
-	auto it_intr = entities_with_collision.begin();
-	while (it_intr != entities_with_collision.end())
-	{
-		auto const& entity_interest = *it_intr;
-		it_intr++;
-		auto collision_comp = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::COLLISION);
-		const Collisionable* collision_ptr = static_cast<const Collisionable*>(collision_comp);
-		collisionables.push_back(collision_ptr);
-		collisionable_entity_ids.push_back(entity_interest);//keep track of entity id of each collisionable to prevent an object from colliding with itself
-	}
-	return std::make_pair ( collisionables, collisionable_entity_ids);
-}
-
-
-void Movement_System::Update_Position_With_Collision(Moveable* moveable, Entity moveable_id, std::vector<const Collisionable*> collisionables, std::vector<Entity> collisionable_entity_ids, float dt)
-{
-	SDL_Rect prev_pos = moveable->position_box_;
-	auto gCoordinator = *SXNGN::Database::get_coordinator();
-	auto this_moveable_collision = gCoordinator;
-	std::vector<std::vector<const SXNGN::ECS::A::Collisionable*>> collisions;
-	switch (moveable->moveable_type_)
-	{
-		case  MoveableType::VELOCITY:
-		{
-
-			moveable->position_box_.x += int(moveable->m_vel_x_m_s * dt);
-			moveable->position_box_.y += int(moveable->m_vel_y_m_s * dt);
-			collisions = SXNGN::CollisionChecks::determineCollisions(moveable->position_box_, collisionables, 0);
-			if (collisions[0].empty() && collisions[1].empty())
-			{
-
-			}
-		}
-	}
-}
-**/

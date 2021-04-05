@@ -28,10 +28,10 @@ namespace SXNGN::ECS::A {
 
 			//thread safe checkout of data
 			auto check_out_event = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::EVENT);
-			if (check_out_event.first)
+			if (check_out_event)
 			{
 
-				Event_Component* event_ptr = static_cast<Event_Component*>(check_out_event.first);
+				Event_Component* event_ptr = static_cast<Event_Component*>(check_out_event);
 				//act on event
 				switch (event_ptr->e.common.type)
 				{
@@ -60,6 +60,11 @@ namespace SXNGN::ECS::A {
 				{
 					break;
 				}
+				case EventType::SELECTION:
+				{
+
+					break;
+				}
 				default:
 				{
 					SDL_LogCritical(1, "Event_System::Update:: Unknown event type");
@@ -67,7 +72,7 @@ namespace SXNGN::ECS::A {
 				}
 				}
 				//check data back in
-				gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_actable, std::move(check_out_event.second));
+				gCoordinator.CheckInComponent(ComponentTypeEnum::EVENT, entity_actable);
 
 				entities_to_cleanup.push_back(entity_actable);
 			}

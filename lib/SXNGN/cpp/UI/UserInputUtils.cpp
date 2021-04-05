@@ -1,5 +1,6 @@
 #include <UI/UserInputUtils.hpp>
 #include <vector>
+#include <ECS/Components/Components.hpp>
 
 namespace SXNGN::ECS::A {
 

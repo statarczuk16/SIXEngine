@@ -30,9 +30,8 @@ public:
 		{
 			const char* component_type_str = typeid(component_type).name();
 			printf("Component not registered before use: %s\n", component_type_str);
+			assert(mComponentTypes.find(component_type) != mComponentTypes.end());
 		}
-
-		assert(mComponentTypes.find(component_type) != mComponentTypes.end());
 
 		return mComponentTypes[component_type];
 	}
@@ -74,14 +73,14 @@ public:
 	}
 
 
-	std::pair<ECS_Component*, std::unique_ptr<std::unique_lock<std::mutex>>> CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
+	ECS_Component* CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
 	{
 		return GetComponentArray(component_type)->CheckoutData(entity);
 	}
 
-	void CheckInComponent(ComponentTypeEnum component_type, Entity entity, std::unique_ptr<std::unique_lock<std::mutex>> key)
+	void CheckInComponent(ComponentTypeEnum component_type, Entity entity)
 	{
-		return GetComponentArray(component_type)->CheckInData(entity, std::move(key));
+		return GetComponentArray(component_type)->CheckInData(entity);
 	}
 
 

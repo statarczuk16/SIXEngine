@@ -14,29 +14,6 @@
 
 namespace SXNGN::ECS::A {
 
-
-
-    enum class UIType {
-        UNKNOWN,
-        WINDOW,
-        BUTTON,
-        SELECT_BUTTON,
-        VSCROLLBAR,
-        HSCROLLBAR,
-        PROGRESSBAR,
-        ENTRY,
-        LABEL,
-        TEXTBOX,
-        COMBOBOX
-    };
-
-    enum class UILayer { //order matters - layer with precedence for mouse clicks must be at the top/closest to 0
-        UNKNOWN,
-        BOTTOM,
-        MID,
-        TOP
-    };
-
     struct UIContainerComponent 
     {
         UIContainerComponent()

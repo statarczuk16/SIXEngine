@@ -2,6 +2,7 @@
 
 #include <bitset>
 #include <cstdint>
+#include <SDL.h>
 
 
 // Source: https://gist.github.com/Lee-R/3839813
@@ -63,4 +64,57 @@ namespace Events {
 			const ParamId HEIGHT = "Events::Window::Resized::HEIGHT"_hash;
 		}
 	}
+}
+
+namespace SXNGN::ECS::A {
+
+	enum class MOUSE_BUTTON : Uint8 {
+		LEFT,
+		RIGHT,
+		CENTER,
+		UNKNOWN
+	};
+
+	struct MouseCoord {
+		bool down = false;
+		Sint32 x = 0;
+		Sint32 y = 0;
+		Uint32 timestamp_down = 0;
+		Uint32 timestamp_up = 0;
+	};
+
+	struct MouseState {
+		MouseCoord left_button;
+		MouseCoord right_button;
+		MouseCoord middle_button;
+	};
+
+	struct Click {
+		MOUSE_BUTTON button = MOUSE_BUTTON::UNKNOWN;
+		Uint32 time_stamp = 0;
+		Sint32 x = 0;
+		Sint32 y = 0;
+		bool double_click = false;
+	};
+
+	enum class UIType {
+		UNKNOWN,
+		WINDOW,
+		BUTTON,
+		SELECT_BUTTON,
+		VSCROLLBAR,
+		HSCROLLBAR,
+		PROGRESSBAR,
+		ENTRY,
+		LABEL,
+		TEXTBOX,
+		COMBOBOX
+	};
+
+	enum class UILayer { //order matters - layer with precedence for mouse clicks must be at the top/closest to 0
+		UNKNOWN,
+		BOTTOM,
+		MID,
+		TOP
+	};
 }

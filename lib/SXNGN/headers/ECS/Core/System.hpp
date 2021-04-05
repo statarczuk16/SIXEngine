@@ -1,6 +1,6 @@
 #pragma once
 
-#include "ECS/Core/Types.hpp"
+#include <ECS/Core/Types.hpp>
 #include <set>
 #include <vector>
 #include <SDL.h>
