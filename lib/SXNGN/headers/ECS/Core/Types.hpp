@@ -117,4 +117,5 @@ namespace SXNGN::ECS::A {
 		MID,
 		TOP
 	};
+
 }

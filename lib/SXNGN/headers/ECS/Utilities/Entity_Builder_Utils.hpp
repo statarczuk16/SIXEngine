@@ -26,7 +26,7 @@ namespace SXNGN {
 
 				static Moveable* Create_Moveable(double pos_x_m, double pos_y_m, Sint32 speed_m_s = 7, MoveableType movement_type = MoveableType::VELOCITY);
 
-				static Collisionable* Create_Collisionable(SDL_Rect collision_box,CollisionType collision_type);
+				static Collisionable* Create_Collisionable(SDL_Rect collision_box,CollisionType collision_type, CollisionTag collision_tag = CollisionTag::UNKNOWN);
 
 				static Tile* Create_Tile(Sint32 x_grid, Sint32 y_grid);
 

@@ -20,7 +20,9 @@ namespace SXNGN::ECS::A {
 		UNKNOWN,
 		EVENT,
 		PERSON,
-		PROJECTILE
+		PROJECTILE,
+		TILE,
+		OBJECT
 	};
 
 

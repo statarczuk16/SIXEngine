@@ -6,6 +6,7 @@
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
 #include <Collision.h>
 #include <vector>
+#include <ECS/Utilities/ECS_Utils.hpp>
 
 namespace SXNGN::ECS::A {
 
@@ -22,7 +23,7 @@ namespace SXNGN::ECS::A {
 
 		//Iterate through entities this system manipulates/converts
 		auto it_act = m_actable_entities.begin();
-		std::deque <std::pair<Entity,const Collisionable*>> entity_to_collisionable_unresolved;
+		std::deque <std::pair<Entity, const Collisionable*>> entity_to_collisionable_unresolved;
 		std::deque <std::pair<Entity, const Collisionable*>> entity_to_collisionable_all;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions_2;
@@ -32,7 +33,7 @@ namespace SXNGN::ECS::A {
 			auto const& entity_actable = *it_act;
 			it_act++;
 
-			
+
 			//draw distinction between resolved and unresolved collisionables. We don't need to check collision of resolved collisions - ones that we have already detected collision between and they have not moved (become "unresolved") since the check
 			auto data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::COLLISION);
 			const Collisionable* collisionable_ptr = static_cast<const Collisionable*>(data);
@@ -51,8 +52,8 @@ namespace SXNGN::ECS::A {
 			auto start = std::chrono::high_resolution_clock::now();
 			auto stop = std::chrono::high_resolution_clock::now();
 			auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
-			if(entity_to_collisionable_unresolved.size() > 500)
-			{ 
+			if (entity_to_collisionable_unresolved.size() > 500)
+			{
 				//method 1: iterate through all collisionables, but only do the check if one is unresolved.
 				//Advantage: since inner and outer loop use the same index, can place inner loop iterator at out loop iterator + 1 and cut out all redundant checks
 				// (if A hitting B, don't need to check B hitting A)
@@ -62,12 +63,12 @@ namespace SXNGN::ECS::A {
 				start = std::chrono::high_resolution_clock::now();
 				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_all.begin(); it_coll_a != entity_to_collisionable_all.end() - 1; ++it_coll_a)
 				{
-					if ((*it_coll_a).second->resolved_ == true)
-					{
-						continue;
-					}
 					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = it_coll_a + 1; it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
 					{
+						if ((*it_coll_a).second->resolved_ == true && (*it_coll_b).second->resolved_ == true)
+						{
+							continue;
+						}
 						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
 						//does obj a touch obj b
 						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
@@ -79,10 +80,10 @@ namespace SXNGN::ECS::A {
 					}
 				}
 				stop = std::chrono::high_resolution_clock::now();
-				if(true)//(!quiet)
+				if (true)//(!quiet)
 				{
 					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
-					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 1: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions.size(), duration);
+					//SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 1: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions.size(), duration);
 				}
 			}
 			else
@@ -105,7 +106,9 @@ namespace SXNGN::ECS::A {
 						//does obj a touch obj b
 						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
 						{
-							confirmed_collisions_2.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+							SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
+
+							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
 
 						}
 						check_num++;
@@ -115,97 +118,305 @@ namespace SXNGN::ECS::A {
 				if (true)//(!quiet)
 				{
 					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
-					SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions_2.size(), duration);
+					//SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions_2.size(), duration);
 				}
 			}
 		}
 
+		std::vector<Entity> collisonables_to_delete;
 		for (auto c_collision : confirmed_collisions)
 		{
 
 			auto data1 = gCoordinator.CheckOutComponent(c_collision.first, ComponentTypeEnum::COLLISION);
 			auto data2 = gCoordinator.CheckOutComponent(c_collision.second, ComponentTypeEnum::COLLISION);
+
 			if (data1 && data2)
 			{
 				Collisionable* collisionable_1 = static_cast<Collisionable*>(data1);
 				Collisionable* collisionable_2 = static_cast<Collisionable*>(data2);
-
-				collisionable_1->resolved_ = true;
-				collisionable_2->resolved_ = true;
+				Entity entity_1 = c_collision.first;
+				Entity entity_2 = c_collision.second;
+				int collision_result = 0;
 
 				//if the first collisionable is an event collision
-				if (collisionable_1->collision_tag_ == CollisionTag::EVENT)
+				
+				if (collisionable_1->collision_tag_ == CollisionTag::EVENT || collisionable_2->collision_tag_ == CollisionTag::EVENT)
 				{
-					//get the entity's event component
-					auto event_data = gCoordinator.GetComponentReadOnly(c_collision.first, ComponentTypeEnum::EVENT);
-					if (event_data)
+					if (collisionable_1->collision_tag_ == CollisionTag::EVENT)
 					{
-
-						const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
-						//if the event is a mouse click
-						if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(c_collision.second, ComponentTypeEnum::INPUT_TAGS))
-						{
-							//see how second collisionable reacts to mouse input
-							auto input_data = gCoordinator.GetComponentReadOnly(c_collision.second, ComponentTypeEnum::INPUT_TAGS);
-							
-							const User_Input_Tags_Collection* input_tags_ptr = static_cast<const User_Input_Tags_Collection*>(input_data);
-							//if it is clickable
-							std::vector<Entity> clicked;
-							std::vector<Entity> double_click_entities;
-							std::vector<Entity> boxed_entities;
-							if (input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
-							{
-								switch (event_ptr->e.mouse_event.type)
-								{
-									//if it's a click
-								case MouseEventType::CLICK:
-								{
-									SDL_LogDebug(1, "Entity %d Clicked\n", c_collision.first);
-									if (event_ptr->e.mouse_event.click.double_click)
-									{
-										double_click_entities.push_back(c_collision.second);
-									}
-									else
-									{
-										clicked.push_back(c_collision.second);
-									}
-
-									break;
-								}
-								//or selection box
-								case MouseEventType::BOX:
-								{
-									boxed_entities.push_back(c_collision.second);
-									break;
-								}
-								default:
-								{
-									SDL_LogCritical(1, "CollisionSystem: Unknown Mouse Collision Event");
-									abort();
-								}
-								}//switch mouse event type
-
-								//create event for user input system - tell it what entities were selected by a mouse event
-								Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities);
-							}//if clickable
-
-						}//if mouse event type
-					} //if event data present
-				}//if collisionable 1 is event
-				else if (collisionable_1->collision_tag_ == CollisionTag::PERSON)
-				{
-
+						collision_result = HandleCollisionEvent(collisionable_1, entity_1, collisionable_2, entity_2, gCoordinator);
+					}
+					else
+					{
+						collision_result = HandleCollisionEvent(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
+					}
 				}
+				if (collisionable_1->collision_tag_ == CollisionTag::UNKNOWN || collisionable_2->collision_tag_ == CollisionTag::UNKNOWN)
+				{
+					collision_result = HandleCollisionGeneric(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
+				}
+
+				else if (collisionable_1->collision_tag_ == CollisionTag::PERSON || collisionable_2->collision_tag_ == CollisionTag::PERSON)
+				{
+					if (collisionable_1->collision_tag_ == CollisionTag::PERSON && collisionable_2->collision_tag_ == CollisionTag::PERSON)
+					{
+						collision_result = HandleCollisionPersonPerson(collisionable_1, entity_1, collisionable_2, entity_2, gCoordinator);
+					}
+					else if (collisionable_1->collision_tag_ == CollisionTag::PROJECTILE)
+					{
+						collision_result = HandleCollisionPersonProjectile(collisionable_1, entity_1, collisionable_2, entity_2, gCoordinator);
+					}
+					else if (collisionable_2->collision_tag_ == CollisionTag::PROJECTILE)
+					{
+						collision_result = HandleCollisionPersonProjectile(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
+					}
+					else if (collisionable_1->collision_tag_ == CollisionTag::TILE)
+					{
+						collision_result = HandleCollisionPersonTile(collisionable_1, entity_1, collisionable_2, entity_2, gCoordinator);
+					}
+					else if (collisionable_2->collision_tag_ == CollisionTag::TILE)
+					{
+						collision_result = HandleCollisionPersonTile(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
+					}
+					else if (collisionable_1->collision_tag_ == CollisionTag::OBJECT)
+					{
+						collision_result = HandleCollisionPersonObject(collisionable_1, entity_1, collisionable_2, entity_2, gCoordinator);
+					}
+					else if (collisionable_2->collision_tag_ == CollisionTag::OBJECT)
+					{
+						collision_result = HandleCollisionPersonObject(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
+					}
+				}
+				
 
 				//check the data back in
 				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, c_collision.first);
 				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, c_collision.second);
+				if (collision_result == 1)
+				{
+					collisonables_to_delete.push_back(c_collision.first);
+				}
+				else if (collision_result == 2)
+				{
+					collisonables_to_delete.push_back(c_collision.second);
+				}
+				else if (collision_result == 3)
+				{
+					collisonables_to_delete.push_back(c_collision.first);
+					collisonables_to_delete.push_back(c_collision.second);
+				}
+				
+
 			}//if both collisionables exist
 
 
 		}//for all confiermed collisions
-	}//system update
+
+		for (auto entity : collisonables_to_delete)
+		{
+			gCoordinator.DestroyEntity(entity);
+		}
+	}
 
 
+	int Collision_System::HandleCollisionEvent(Collisionable* event, Entity event_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator)
+	{
+		//get the entity's event component
+		auto event_data = gCoordinator.GetComponentReadOnly(event_entity, ComponentTypeEnum::EVENT);
+		if (event_data)
+		{
+
+			const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
+			//if the event is a mouse click
+			if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(event_entity, ComponentTypeEnum::INPUT_TAGS))
+			{
+				//see how second collisionable reacts to mouse input
+				auto input_data = gCoordinator.GetComponentReadOnly(event_entity, ComponentTypeEnum::INPUT_TAGS);
+
+				const User_Input_Tags_Collection* input_tags_ptr = static_cast<const User_Input_Tags_Collection*>(input_data);
+				//if it is clickable
+				std::vector<Entity> clicked;
+				std::vector<Entity> double_click_entities;
+				std::vector<Entity> boxed_entities;
+				if (input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
+				{
+					switch (event_ptr->e.mouse_event.type)
+					{
+						//if it's a click
+					case MouseEventType::CLICK:
+					{
+						SDL_LogDebug(1, "Entity %d Clicked\n", event_entity);
+						if (event_ptr->e.mouse_event.click.double_click)
+						{
+							double_click_entities.push_back(other_entity);
+						}
+						else
+						{
+							clicked.push_back(other_entity);
+						}
+
+						break;
+					}
+					//or selection box
+					case MouseEventType::BOX:
+					{
+						boxed_entities.push_back(other_entity);
+						break;
+					}
+					default:
+					{
+						SDL_LogCritical(1, "CollisionSystem: Unknown Mouse Collision Event");
+						abort();
+					}
+					}//switch mouse event type
+
+					//create event for user input system - tell it what entities were selected by a mouse event
+					Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities);
+					event->resolved_ = true;
+				}//if clickable
+			}//if mouse event type
+		} //if event data present
+		return 0;
 
 	}//namespace
+
+
+	int Collision_System::HandleCollisionPersonPerson(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator)
+	{
+		//todo if same faction, let pass, else do not.
+		person->resolved_ = true;
+		other->resolved_ = true;
+		return 0;
+
+	}
+
+	int Collision_System::HandleCollisionPersonProjectile(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator)
+	{
+		//todo 
+		person->resolved_ = true;
+		other->resolved_ = true;
+		return 2;
+	}
+
+	int Collision_System::HandleCollisionPersonTile(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator)
+	{
+		//todo 
+		person->resolved_ = true;
+		other->resolved_ = true;
+		if (other->collision_type_ == CollisionType::IMMOVEABLE)
+		{
+			auto person_moveable = gCoordinator.CheckOutComponent(person_entity, ComponentTypeEnum::MOVEABLE);
+			if (person_moveable)
+			{
+				Moveable* moveable = static_cast<Moveable*>(person_moveable);
+				moveable->m_pos_x_m = moveable->m_prev_pos_x_m;
+				moveable->m_pos_y_m = moveable->m_prev_pos_y_m;
+				if (gCoordinator.EntityHasComponent(person_entity, ComponentTypeEnum::RENDERABLE))
+				{
+					auto moveable_renderbox = gCoordinator.CheckOutComponent(person_entity, ComponentTypeEnum::RENDERABLE);
+					if (moveable_renderbox)
+					{
+						Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
+						render_ptr->x_ = int(round(moveable->m_pos_x_m));
+						render_ptr->y_ = int(round(moveable->m_pos_y_m));
+						gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, person_entity);
+					}
+				}
+
+			}
+		}
+		return 0;
+	}
+
+	int Collision_System::HandleCollisionPersonObject(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator)
+	{
+		//todo 
+		person->resolved_ = true;
+		other->resolved_ = true;
+		if (other->collision_type_ == CollisionType::IMMOVEABLE)
+		{
+			auto person_moveable = gCoordinator.CheckOutComponent(person_entity, ComponentTypeEnum::MOVEABLE);
+			if (person_moveable)
+			{
+				Moveable* moveable = static_cast<Moveable*>(person_moveable);
+				moveable->m_pos_x_m = moveable->m_prev_pos_x_m;
+				moveable->m_pos_y_m = moveable->m_prev_pos_y_m;
+				if (gCoordinator.EntityHasComponent(person_entity, ComponentTypeEnum::RENDERABLE))
+				{
+					auto moveable_renderbox = gCoordinator.CheckOutComponent(person_entity, ComponentTypeEnum::RENDERABLE);
+					if (moveable_renderbox)
+					{
+						Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
+						render_ptr->x_ = int(round(moveable->m_pos_x_m));
+						render_ptr->y_ = int(round(moveable->m_pos_y_m));
+						gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, person_entity);
+					}
+				}
+
+			}
+		}
+		return 0;
+	}
+
+	int Collision_System::HandleCollisionGeneric(Collisionable* first, Entity first_entity, Collisionable* second, Entity second_entity, Coordinator gCoordinator)
+	{
+		//todo 
+		first->resolved_ = true;
+		second->resolved_ = true;
+		Collisionable* immoveable_obj = nullptr;
+		Collisionable* moveable_obj = nullptr;
+		Entity immoveable_entity;
+		Entity moveable_entity;
+		if (first->collision_type_ == CollisionType::IMMOVEABLE)
+		{
+			immoveable_entity = first_entity;
+			immoveable_obj = first;
+		}
+		else if (second->collision_type_ == CollisionType::IMMOVEABLE)
+		{
+			immoveable_entity = second_entity;
+			immoveable_obj = second;
+		}
+		if (immoveable_obj)
+		{
+			if (first->collision_type_ != CollisionType::IMMOVEABLE && first->collision_type_ != CollisionType::NONE)
+			{
+				moveable_entity = first_entity;
+				moveable_obj = first;
+			}
+			else if (second->collision_type_ != CollisionType::IMMOVEABLE && second->collision_type_ != CollisionType::NONE)
+			{
+				moveable_entity = second_entity;
+				moveable_obj = second;
+			}
+
+			if (moveable_obj)
+			{
+				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_entity);
+				ECS_Utils::ChangeEntityPositionLastGood(moveable_entity);
+				auto dummy = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::COLLISION);
+				
+					/**auto moveable_data = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::MOVEABLE);
+				if (moveable_data)
+				{
+					Moveable* moveable = static_cast<Moveable*>(moveable_data);
+					moveable->m_pos_x_m = moveable->m_prev_pos_x_m;
+					moveable->m_pos_y_m = moveable->m_prev_pos_y_m;
+					if (gCoordinator.EntityHasComponent(moveable_entity, ComponentTypeEnum::RENDERABLE))
+					{
+						auto moveable_renderbox = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::RENDERABLE);
+						if (moveable_renderbox)
+						{
+							Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
+							render_ptr->x_ = int(round(moveable->m_pos_x_m));
+							render_ptr->y_ = int(round(moveable->m_pos_y_m));
+							gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_entity);
+						}
+					}
+					gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_entity);
+				}**/
+			}
+		}
+		return 0;
+	}
+}

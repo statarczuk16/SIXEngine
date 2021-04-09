@@ -21,6 +21,11 @@ public:
 	{
 		assert(mLivingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
 
+		if (mAvailableEntities.empty())
+		{
+			SDL_LogCritical(1, "Out of available entities");
+			abort();
+		}
 		Entity id = mAvailableEntities.front();
 		mAvailableEntities.pop();
 		livingEntities[id] = true;
@@ -34,8 +39,13 @@ public:
 		assert(entity < MAX_ENTITIES && "Entity out of range.");
 
 		mSignatures[entity].reset();
-		livingEntities[entity] = false;
-		--mLivingEntityCount;
+		if (livingEntities[entity])
+		{
+			livingEntities[entity] = false;
+			--mLivingEntityCount;
+			mAvailableEntities.push(entity);
+		}
+
 	}
 
 	void SetSignature(Entity entity, Signature signature)

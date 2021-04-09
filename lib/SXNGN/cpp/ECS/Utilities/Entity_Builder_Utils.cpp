@@ -48,9 +48,10 @@ namespace SXNGN {
 				collision_box.x = int(round(moveable->m_pos_x_m));
 				collision_box.x = int(round(moveable->m_pos_y_m));
 				collision_box.w = SXNGN::BASE_TILE_WIDTH;
-				collision_box.w = SXNGN::BASE_TILE_HEIGHT;
+				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 
-				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, A::CollisionType::IMMOVEABLE);
+				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, CollisionType::ELASTIC, CollisionTag::PERSON);
+
 
 				coordinator.AddComponent(person_entity, collisionable);
 				SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
@@ -145,11 +146,12 @@ namespace SXNGN {
 				return moveable;
 			}
 
-			A::Collisionable* Entity_Builder_Utils::Create_Collisionable(SDL_Rect collision_box, A::CollisionType collision_type)
+			Collisionable* Entity_Builder_Utils::Create_Collisionable(SDL_Rect collision_box, A::CollisionType collision_type, CollisionTag collision_tag)
 			{
 				A::Collisionable* collision = new A::Collisionable();
 				collision->collision_box_ = collision_box;
 				collision->collision_type_ = collision_type;
+				collision->collision_tag_ = collision_tag;
 				return collision;
 			}
 

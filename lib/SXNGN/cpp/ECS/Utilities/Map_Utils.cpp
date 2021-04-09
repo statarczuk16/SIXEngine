@@ -19,9 +19,22 @@ namespace SXNGN::ECS::A {
 				collision_box.y = y_pixels;
 				collision_box.w = SXNGN::BASE_TILE_WIDTH;
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
-				auto pre_render = new A::Pre_Renderable(x_pixels, y_pixels, tileset, base_tile, A::RenderLayer::GROUND_LAYER);
-				auto collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::NONE);
-				auto tile = Entity_Builder_Utils::Create_Tile(w, h);
+				Pre_Renderable* pre_render;
+				Collisionable* collision;
+				Tile* tile;
+				if (h == 0 || h == tiles_high - 1 || w == 0 || w == tiles_wide - 1)
+				{
+					pre_render = new Pre_Renderable(x_pixels, y_pixels, tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER);
+					collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::IMMOVEABLE);
+					tile = Entity_Builder_Utils::Create_Tile(w, h);
+				}
+				else
+				{
+					pre_render = new Pre_Renderable(x_pixels, y_pixels, tileset, base_tile, A::RenderLayer::GROUND_LAYER);
+					collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::NONE);
+					tile = Entity_Builder_Utils::Create_Tile(w, h);
+				}
+				
 				pre_renders.push_back(*pre_render);
 				collisionables.push_back(*collision);
 				tiles.push_back(*tile);
@@ -54,7 +67,7 @@ namespace SXNGN::ECS::A {
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}
 
-		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 0, 0, "APOCALYPSE_MAP", "GUNMAN_1", true);
+		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_1", true);
 	
 
 	}

@@ -84,25 +84,26 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 				render_ptr->y_ = int(round(moveable->m_pos_y_m));
 				if (moveable->m_pos_x_m != moveable->m_prev_pos_x_m || moveable->m_pos_y_m != moveable->m_prev_pos_y_m)
 				{
-					//printf("Renderable Entity: %2d Position: (%2d,%2d)\n", moveable_id, moveable->m_pos_x_m, moveable->m_prev_pos_x_m);
+					//update other stuff is the entity moved
+					if (gCoordinator.EntityHasComponent(moveable_id, ComponentTypeEnum::COLLISION))
+					{
+						auto collision_box = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::COLLISION);
+						if (collision_box)
+						{
+							Collisionable* collision_box_ptr = static_cast<Collisionable*>(collision_box);
+							collision_box_ptr->collision_box_.x = int(round(moveable->m_pos_x_m));
+							collision_box_ptr->collision_box_.y = int(round(moveable->m_pos_y_m));
+							collision_box_ptr->resolved_ = false;
+
+							gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_id);
+						}
+					}
 				}
 				gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_id);
 			}
 		}
 
-		if (gCoordinator.EntityHasComponent(moveable_id, ComponentTypeEnum::COLLISION))
-		{
-			auto collision_box = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::COLLISION);
-			if (collision_box)
-			{
-				Collisionable* collision_box_ptr = static_cast<Collisionable*>(collision_box);
-				collision_box_ptr->collision_box_.x = int(round(moveable->m_pos_x_m));
-				collision_box_ptr->collision_box_.y = int(round(moveable->m_pos_y_m));
-				collision_box_ptr->resolved_ = false;
-				
-				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_id);
-			}
-		}
+		
 
 	}
 	case  MoveableType::FORCE:
