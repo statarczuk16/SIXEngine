@@ -393,7 +393,9 @@ namespace SXNGN::ECS::A {
 			if (moveable_obj)
 			{
 				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_entity);
-				ECS_Utils::ChangeEntityPositionLastGood(moveable_entity);
+				//ECS_Utils::ChangeEntityPositionLastGood(moveable_entity);
+				SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, moveable_obj->collision_box_);
+				ECS_Utils::ChangeEntityPosition(moveable_entity, new_moveable_pos.x, new_moveable_pos.y, true);
 				auto dummy = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::COLLISION);
 				
 					/**auto moveable_data = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::MOVEABLE);

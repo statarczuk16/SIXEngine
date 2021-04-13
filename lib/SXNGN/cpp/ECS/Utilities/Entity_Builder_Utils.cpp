@@ -41,7 +41,7 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, pre_renderable);
 
 
-				SXNGN::ECS::A::Moveable* moveable = Create_Moveable(x_pixels, y_pixels, 7, A::MoveableType::VELOCITY);
+				SXNGN::ECS::A::Moveable* moveable = Create_Moveable(x_pixels, y_pixels, 50, A::MoveableType::VELOCITY);
 				coordinator.AddComponent(person_entity, moveable);
 
 				SDL_Rect collision_box;

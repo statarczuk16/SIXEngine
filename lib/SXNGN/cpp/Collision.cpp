@@ -2,6 +2,7 @@
 #include <Sprite/Tile.h>
 #include <ECS/Components/Collision.hpp>
 
+
 namespace SXNGN {
 
 	bool SXNGN::CollisionChecks::checkCollision(SDL_Rect a, SDL_Rect b)
@@ -92,6 +93,79 @@ namespace SXNGN {
 
 		//If none of the sides from A are outside B
 		return true;
+	}
+
+	 SDL_Rect SXNGN::CollisionChecks::getCollisionLocation(SDL_Rect fixed, SDL_Rect moved)
+	{
+		 SDL_Rect new_move_location;
+		 //The sides of the rectangles
+		 int leftFix, leftMove;
+		 int rightFix, rightMove;
+		 int topFix, topMove;
+		 int bottomFix, bottomMove;
+
+		 //Calculate the sides of rect A
+		 leftFix = fixed.x;
+		 rightFix = fixed.x + fixed.w;
+		 topFix = fixed.y;
+		 bottomFix = fixed.y + fixed.h;
+
+		 //Calculate the sides of rect B
+		 leftMove = moved.x;
+		 rightMove = moved.x + moved.w;
+		 topMove = moved.y;
+		 bottomMove = moved.y + moved.h;
+
+		 int x_overlap = std::max(0, std::min(rightFix, rightMove) - std::max(leftFix, leftMove));
+		 int y_overlap = std::max(0, std::min(bottomFix, bottomMove) - std::max(topFix, topMove));
+		 if (!(x_overlap > 0 && y_overlap > 0))
+		 {
+			 new_move_location.x = moved.x;
+			 new_move_location.y = moved.y;
+			 return new_move_location;
+		 }
+
+		 if (x_overlap <= 0)
+		 {
+			 new_move_location.x = moved.x;
+		 }
+		 else
+		 {		
+			 //if the object that collides with the fixed object...
+			 //to the right of the fixed object
+			 //new position is the fixed object right side + moved object width
+			 if (moved.x > fixed.x)
+			 {
+				 new_move_location.x = rightFix;
+			 }
+			 else
+			 {
+				 new_move_location.x = leftFix - moved.w;
+			 }
+		 }
+
+		 if (y_overlap <= 0)
+		 {
+			 new_move_location.y = moved.y;
+		 }
+		 else
+		 {
+			 //if the object that collides with the fixed object...
+			 //to below the fixed obj
+			 //new position is the fixed object bottom + moved object height
+			 if (moved.y > fixed.y)
+			 {
+				 new_move_location.y = bottomFix;
+			 }
+			 else
+			 {
+				 new_move_location.y = topFix - moved.h;
+			 }
+		 }
+
+		 return new_move_location;
+		
+		 
 	}
 
 

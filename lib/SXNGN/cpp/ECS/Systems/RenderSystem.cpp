@@ -123,7 +123,7 @@ namespace SXNGN::ECS::A {
 
 	}
 
-	bool Renderer_System::object_in_view(ECS_Camera camera, SDL_Rect object_bounds)
+	bool Renderer_System::object_in_view(std::shared_ptr<ECS_Camera> camera, SDL_Rect object_bounds)
 	{
 		//Have to scale up object to compare to the camera
 		object_bounds.x *= SXNGN::Database::get_scale();
@@ -141,12 +141,16 @@ namespace SXNGN::ECS::A {
 		return false;
 	}
 
-	SDL_Rect Renderer_System::determine_camera_lens_scaled(ECS_Camera camera)
+	SDL_Rect Renderer_System::determine_camera_lens_scaled(std::shared_ptr<ECS_Camera> camera)
 	{
 		SDL_Rect return_view;
-		SDL_Rect position_scaled = camera.position_scaled_;
-		SDL_Rect screen_bounds = camera.screen_bounds_;
-		SDL_Rect lens = camera.lens_;
+		SDL_Rect position_actual = camera->position_actual_;
+		SDL_Rect position_scaled; 
+		position_scaled.x = position_actual.x * SXNGN::Database::get_scale();
+		position_scaled.y = position_actual.y * SXNGN::Database::get_scale();
+		camera->position_scaled_ = position_scaled;
+		SDL_Rect screen_bounds = camera->screen_bounds_;
+		SDL_Rect lens = camera->lens_;
 
 		//bounding box centers are at the top left of the box.
 		//If the camera is tracking a target at (10,10), then the top left of the camera vision square should not be the target
@@ -187,7 +191,7 @@ namespace SXNGN::ECS::A {
 		return return_view;
 	}
 
-	SDL_Rect Renderer_System::determine_camera_lens_unscaled(ECS_Camera camera)
+	SDL_Rect Renderer_System::determine_camera_lens_unscaled(std::shared_ptr<ECS_Camera> camera)
 	{
 		SDL_Rect current_view = determine_camera_lens_scaled(camera);
 		current_view.x /= SXNGN::Database::get_scale();
@@ -206,13 +210,6 @@ namespace SXNGN::ECS::A {
 		{
 			camera_ptr->set_position_actual(*camera_target_position);
 		}
-
-		auto camera = *camera_ptr;
-
-		//if (camera = nullptr)
-		//{
-		//	return;
-		//}
 		//Iterate through entities this system manipulates/converts
 		//(Renders Renderables to screen)
 		SDL_Rect render_quad = { 0,0,0,0 };
@@ -247,19 +244,19 @@ namespace SXNGN::ECS::A {
 		//Order of these matters. UI should appear over ground, etc
 		for (auto renderable : renderables_ground_layer)
 		{
-			Render(renderable, camera);
+			Render(renderable, camera_ptr);
 		}
 		for (auto renderable : renderables_object_layer)
 		{
-			Render(renderable, camera);
+			Render(renderable, camera_ptr);
 		}
 		for (auto renderable : renderables_air_layer)
 		{
-			Render(renderable, camera);
+			Render(renderable, camera_ptr);
 		}
 		for (auto renderable : renderables_ui_layer)
 		{
-			Render(renderable, camera);
+			Render(renderable, camera_ptr);
 		}
 		//This draws the UI components in the UI Singleton, main menu buttons, etc. Precedence over renderable_ui_layer, which might be context menus in the gameplay window 
 		//whereas the singleton holds "constant" stuff corresponding to the game state
@@ -267,7 +264,7 @@ namespace SXNGN::ECS::A {
 
 	}
 
-	void Renderer_System::Render(const Renderable* renderable, ECS_Camera camera)
+	void Renderer_System::Render(const Renderable* renderable, std::shared_ptr<ECS_Camera> camera)
 	{
 		SDL_Rect bounding_box;
 		bounding_box.x = renderable->x_;

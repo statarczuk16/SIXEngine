@@ -69,6 +69,9 @@ namespace SXNGN::ECS::A {
 
 		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_1", true);
 
+		auto camera = CameraComponent::get_instance();
+		camera->set_target(test_person);
+
 		
 	
 
