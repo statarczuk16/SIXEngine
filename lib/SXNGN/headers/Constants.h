@@ -10,6 +10,12 @@ namespace SXNGN {
 
 	const size_t PIXELS_TO_METERS = 16;
 
+	const size_t DEFAULT_WORLD_HEIGHT_CHUNKS = 4;
+	const size_t DEFAULT_WORLD_WIDTH_CHUNKS = 4;
+
+	const size_t DEFAULT_SCREEN_RES_WIDTH = 1280;
+	const size_t DEFAULT_SCREEN_RES_HEIGHT = 800;
+
 
 	const size_t TILE_WIDTH_SCALE = 3;
 	const size_t TILE_HEIGHT_SCALE = 3;

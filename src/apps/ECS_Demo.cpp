@@ -28,6 +28,7 @@
 
 SXNGN::ECS::A::Coordinator gCoordinator;
 
+
 static bool quit = false;
 
 std::string g_media_folder = SXNGN::BAD_STRING_RETURN;//todo put in database?
@@ -35,17 +36,6 @@ std::string g_media_folder = SXNGN::BAD_STRING_RETURN;//todo put in database?
 std::string g_save_folder = SXNGN::BAD_STRING_RETURN;//todo put in database?
 
 SDL_Renderer* gRenderer = NULL;
-
-SDL_Rect g_level_bounds;
-
-SDL_Rect g_screen_bounds;
-
-
-const int SCREEN_WIDTH = 1280;
-const int SCREEN_HEIGHT = 720;
-
-const int LEVEL_WIDTH_PIXELS = 800;
-const int LEVEL_HEIGHT_PIXELS = 600;
 
 SXNGN::Database g_database; //static can be accessed anywhere, but must intialize
 
@@ -80,15 +70,7 @@ bool init()
 	}
 	else
 	{
-		g_level_bounds.x = 0;
-		g_level_bounds.y = 0;
-		g_level_bounds.w = LEVEL_WIDTH_PIXELS;
-		g_level_bounds.h = LEVEL_HEIGHT_PIXELS;
 
-		g_screen_bounds.x = 0;
-		g_screen_bounds.y = 0;
-		g_screen_bounds.w = SCREEN_WIDTH;
-		g_screen_bounds.h = SCREEN_HEIGHT;
 
 		//Set texture filtering to linear
 		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
@@ -124,7 +106,12 @@ bool init()
 		}
 		kiss_array kiss_objects;
 		std::string tile_set = "sand";
-		gRenderer = kiss_init("HOPLON", &kiss_objects, g_screen_bounds.w, g_screen_bounds.h, kiss_resource_folder.c_str(), tile_set.c_str());
+
+		
+		gCoordinator.InitStateManager();
+		auto settings = gCoordinator.get_state_manager()->getGameSettings();
+		
+		gRenderer = kiss_init("HOPLON", &kiss_objects, settings->resolution.w, settings->resolution.h, kiss_resource_folder.c_str(), tile_set.c_str());
 		//Create renderer for window
 		//gRenderer = SDL_CreateRenderer(gWindow, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
 		if (gRenderer == NULL)
@@ -160,9 +147,10 @@ int init_menus()
 	const int WINDOW_HEIGHT = 620;
 	const int WINDOW_WIDTH = 320;
 	auto ui = UICollectionSingleton::get_instance();
-
+	auto settings = coordinator->get_state_manager()->getGameSettings();
+	auto resolution = settings->resolution;
 	//************************* Main Menu
-	auto mmw_c = UserInputUtils::create_window_raw(nullptr, 220, g_screen_bounds.h - WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
+	auto mmw_c = UserInputUtils::create_window_raw(nullptr, 220, resolution.h - WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, mmw_c);
 
 	auto start_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "New Game", 1);
@@ -198,7 +186,7 @@ int init_menus()
 
 	//************************* Settings Menu
 
-	auto msw_container = UserInputUtils::create_window_raw(nullptr, 220, g_screen_bounds.h - WINDOW_HEIGHT, WINDOW_WIDTH*2, WINDOW_HEIGHT, UILayer::BOTTOM);
+	auto msw_container = UserInputUtils::create_window_raw(nullptr, 220, resolution.h - WINDOW_HEIGHT, WINDOW_WIDTH*2, WINDOW_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_SETTINGS_STATE, msw_container);
 
 	const int NUM_SETTINGS = 9;
@@ -226,7 +214,7 @@ int init_menus()
 	//************************* New Game Menu
 
 	const int NUM_SETTINGS_NG = 9;
-	auto new_game_window_c = UserInputUtils::create_window_raw(nullptr, 220, g_screen_bounds.h - WINDOW_HEIGHT, WINDOW_WIDTH * 2, WINDOW_HEIGHT, UILayer::BOTTOM);
+	auto new_game_window_c = UserInputUtils::create_window_raw(nullptr, 220, resolution.h - WINDOW_HEIGHT, WINDOW_WIDTH * 2, WINDOW_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::NEW_GAME_STATE, new_game_window_c);
 
 	//New Game Label
@@ -298,7 +286,20 @@ int main(int argc, char* args[])
 	gCoordinator.Init(gRenderer);
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
 
-	
+	auto settings = gCoordinator.get_state_manager()->getGameSettings();
+	SDL_Rect camera_lens;
+	camera_lens.h = settings->resolution.h;
+	camera_lens.w = settings->resolution.w;
+	camera_lens.x = 0;
+	camera_lens.y = 0;
+
+	SDL_Rect camera_position;
+	camera_position.x = 0;
+	camera_position.y = 0;
+	camera_position.w = 0;
+	camera_position.h = 0;
+
+	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
 
 	gCoordinator.AddEventListener(FUNCTION_LISTENER(Events::Window::QUIT, QuitHandler));
 
@@ -491,19 +492,8 @@ int main(int argc, char* args[])
 	file << j;
 	**/
 
-	SDL_Rect camera_lens;
-	camera_lens.h = SCREEN_HEIGHT;
-	camera_lens.w = SCREEN_WIDTH;
-	camera_lens.x = 0;
-	camera_lens.y = 0;
+	
 
-	SDL_Rect camera_position;
-	camera_position.x = 0;
-	camera_position.y = 0;
-	camera_position.w = 0;
-	camera_position.h = 0;
-
-	SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, g_screen_bounds);
 
 
 	SXNGN::Timer dt_timer;//time passed during this frame "delta t"

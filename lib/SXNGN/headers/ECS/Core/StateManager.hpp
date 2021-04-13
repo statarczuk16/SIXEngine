@@ -57,6 +57,11 @@ namespace SXNGN::ECS::A {
 			this->game_settings.level_settings.level_height_tiles = height * TILES_TO_CHUNK_EDGE;
 		}
 
+		void setResolution(SDL_Rect resolution)
+		{
+			this->game_settings.resolution = resolution;
+		}
+
 		const GameSettings* getGameSettings()
 		{
 			return &game_settings;
@@ -66,8 +71,14 @@ namespace SXNGN::ECS::A {
 
 		StateManager()
 		{
-			this->setLevelHeightTiles(4);
-			this->setLevelWidthTiles(4);
+			this->setLevelHeightTiles(DEFAULT_WORLD_HEIGHT_CHUNKS);
+			this->setLevelWidthTiles(DEFAULT_WORLD_WIDTH_CHUNKS);
+			SDL_Rect resolution;
+			resolution.w = DEFAULT_SCREEN_RES_WIDTH;
+			resolution.h = DEFAULT_SCREEN_RES_HEIGHT;
+			resolution.x = 0;
+			resolution.y = 0;
+			this->setResolution(resolution);
 		}
 
 		void cacheEntityInSpace(std::shared_ptr<ExternEntity> entity_to_store, std::string state = "Temp")

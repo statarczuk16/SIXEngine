@@ -30,6 +30,10 @@ namespace SXNGN {
 					mEventManager = std::make_shared<EventManager>();
 					mSystemManager = std::make_shared<SystemManager>();
 					mTextureManager = std::make_shared<TextureManager>(renderer);
+				}
+
+				void InitStateManager()
+				{
 					mStateManager = std::make_shared<StateManager>();
 				}
 
@@ -62,6 +66,10 @@ namespace SXNGN {
 				bool EntityHasComponent(Entity entity, ComponentTypeEnum component_type)
 				{
 					//The hash is a Uint8 that increments for each component type added - makes sequential storage and signatures easier. Not the same as the underlying enum value.
+					if (!mEntityManager->EntityLiving(entity))
+					{
+						return false;
+					}
 					auto component_type_hash = mComponentManager->GetComponentType(component_type);
 					auto entity_signature = mEntityManager->GetSignature(entity);
 					return entity_signature[component_type_hash];

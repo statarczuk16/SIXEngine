@@ -4,6 +4,26 @@ namespace SXNGN {
 	namespace ECS {
 		namespace A {
 
+
+			std::shared_ptr<SDL_Rect> ECS_Utils::GetEntityPosition(Entity entity)
+			{
+				auto gCoordinator = *SXNGN::Database::get_coordinator();
+				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::MOVEABLE))
+				{
+					auto moveable_data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::MOVEABLE);
+					if (moveable_data)
+					{
+						const Moveable* moveable = static_cast<const Moveable*>(moveable_data);
+						std::shared_ptr<SDL_Rect> pos = std::make_shared<SDL_Rect>();
+						pos->x = moveable->m_pos_x_m;
+						pos->y = moveable->m_pos_y_m;
+						return pos;
+
+					}
+				}
+				return nullptr;
+			 }
+
 			void ECS_Utils::ChangeEntityPositionLastGood(Entity entity)
 			{
 				auto gCoordinator = *SXNGN::Database::get_coordinator();
@@ -19,13 +39,14 @@ namespace SXNGN {
 
 						gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
 
-						ChangeEntityPosition(entity, last_x, last_y);
+						ChangeEntityPosition(entity, last_x, last_y, true);
 					}
 				}
 			}
 
-			void ECS_Utils::ChangeEntityPosition(Entity entity, double x, double y)
+			void ECS_Utils::ChangeEntityPosition(Entity entity, double x, double y, bool confident)
 			{
+				
 				auto gCoordinator = *SXNGN::Database::get_coordinator();
 
 				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::MOVEABLE))
@@ -34,6 +55,17 @@ namespace SXNGN {
 					if (moveable_data)
 					{
 						Moveable* moveable = static_cast<Moveable*>(moveable_data);
+						if (moveable->m_pos_x_m == x && moveable->m_pos_y_m == y)
+						{
+							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
+							return;
+						}
+						if (!confident)
+						{
+							moveable->m_prev_pos_x_m = moveable->m_pos_x_m;
+							moveable->m_prev_pos_y_m = moveable->m_pos_y_m;
+						}
+						
 						moveable->m_pos_x_m = x;
 						moveable->m_pos_y_m = y;
 
@@ -61,6 +93,7 @@ namespace SXNGN {
 						Collisionable* collision_ptr = static_cast<Collisionable*>(collisionable_data);
 						collision_ptr->collision_box_.x = int(round(x));
 						collision_ptr->collision_box_.y = int(round(y));
+						collision_ptr->resolved_ = false;
 						gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity);
 					}
 				}

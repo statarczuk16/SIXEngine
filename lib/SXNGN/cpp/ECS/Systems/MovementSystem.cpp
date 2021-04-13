@@ -3,6 +3,7 @@
 #include <ECS/Core/Coordinator.hpp>
 #include <Database.h>
 #include <ECS/Systems/MovementSystem.hpp>
+#include <ECS/Utilities/ECS_Utils.hpp>
 
 namespace SXNGN::ECS::A {
 
@@ -62,48 +63,11 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 	{
 	case  MoveableType::VELOCITY:
 	{
-
-		moveable->m_prev_pos_x_m = moveable->m_pos_x_m;
-		moveable->m_prev_pos_y_m = moveable->m_pos_y_m;
-		moveable->m_pos_x_m += SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
-		moveable->m_pos_y_m += SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
-
-		if (moveable->m_vel_x_m_s > 0)
-		{
-			//printf("Renderable Entity %d: Velocity (%d,%d)\n", moveable_id, moveable->m_vel_x_m_s, moveable->m_vel_y_m_s);
-			//printf("Renderable Entity %d: Pos(%g,%g) -> (%g,%g)\n", moveable_id, moveable->m_pos_x_m, moveable->m_pos_y_m, moveable->m_prev_pos_x_m, moveable->m_prev_pos_y_m);
-		}
-
-		if (gCoordinator.EntityHasComponent(moveable_id, ComponentTypeEnum::RENDERABLE))
-		{
-			auto moveable_renderbox = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::RENDERABLE);
-			if (moveable_renderbox)
-			{
-				Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
-				render_ptr->x_ = int(round(moveable->m_pos_x_m));
-				render_ptr->y_ = int(round(moveable->m_pos_y_m));
-				if (moveable->m_pos_x_m != moveable->m_prev_pos_x_m || moveable->m_pos_y_m != moveable->m_prev_pos_y_m)
-				{
-					//update other stuff is the entity moved
-					if (gCoordinator.EntityHasComponent(moveable_id, ComponentTypeEnum::COLLISION))
-					{
-						auto collision_box = gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::COLLISION);
-						if (collision_box)
-						{
-							Collisionable* collision_box_ptr = static_cast<Collisionable*>(collision_box);
-							collision_box_ptr->collision_box_.x = int(round(moveable->m_pos_x_m));
-							collision_box_ptr->collision_box_.y = int(round(moveable->m_pos_y_m));
-							collision_box_ptr->resolved_ = false;
-
-							gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_id);
-						}
-					}
-				}
-				gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_id);
-			}
-		}
-
-		
+		double new_x = moveable->m_pos_x_m + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
+		double new_y = moveable->m_pos_y_m + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
+		gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_id);
+		ECS_Utils::ChangeEntityPosition(moveable_id, new_x, new_y, false);
+		gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::MOVEABLE);
 
 	}
 	case  MoveableType::FORCE:

@@ -48,6 +48,15 @@ public:
 
 	}
 
+	bool EntityLiving(Entity entity)
+	{
+		if (entity > MAX_ENTITIES || entity < 0)
+		{
+			return false;
+		}
+		return livingEntities[entity];
+	}
+
 	void SetSignature(Entity entity, Signature signature)
 	{
 		assert(entity < MAX_ENTITIES && "Entity out of range.");

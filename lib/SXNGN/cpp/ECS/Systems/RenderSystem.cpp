@@ -4,6 +4,8 @@
 #include <fstream>
 #include <Database.h>
 #include <gameutils.h>
+#include <ECS/Utilities/ECS_Utils.hpp>
+#include <array>
 
 #include <Collision.h>
 
@@ -197,7 +199,16 @@ namespace SXNGN::ECS::A {
 	void Renderer_System::Update(float dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
-		ECS_Camera camera = *ECS_Camera::get_instance();
+		std::shared_ptr<ECS_Camera> camera_ptr = ECS_Camera::get_instance();
+		Entity camera_target = camera_ptr->get_target();
+		auto camera_target_position = ECS_Utils::GetEntityPosition(camera_target);
+		if(camera_target_position)
+		{
+			camera_ptr->set_position_actual(*camera_target_position);
+		}
+
+		auto camera = *camera_ptr;
+
 		//if (camera = nullptr)
 		//{
 		//	return;
