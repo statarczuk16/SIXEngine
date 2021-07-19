@@ -63,7 +63,9 @@ namespace SXNGN::ECS::A {
 			gCoordinator->AddComponent(map_tile_entity, collisionable);
 			Tile* tile = new Tile(game_map_tiles.at(i));
 			gCoordinator->AddComponent(map_tile_entity, tile);
-
+			User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
+			input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::CLICKABLE);
+			gCoordinator->AddComponent(map_tile_entity, input_tags_comp);
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}
 

@@ -1,4 +1,5 @@
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
+#include <ECS/Utilities/ECS_Utils.hpp>
 
 
 namespace SXNGN {
@@ -41,7 +42,7 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, pre_renderable);
 
 
-				SXNGN::ECS::A::Moveable* moveable = Create_Moveable(x_pixels, y_pixels, 50, A::MoveableType::VELOCITY);
+				SXNGN::ECS::A::Moveable* moveable = Create_Moveable(x_pixels, y_pixels, 15, A::MoveableType::VELOCITY);
 				coordinator.AddComponent(person_entity, moveable);
 
 				SDL_Rect collision_box;
@@ -79,24 +80,26 @@ namespace SXNGN {
 				return event_entity;
 			}
 
-			Entity Entity_Builder_Utils::Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, Click click)
+			Entity Entity_Builder_Utils::Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, Click click, bool shift_click, bool alt_click, bool ctrl_click)
 			{
 				auto event_entity = coordinator.CreateEntity();
-
+				std::shared_ptr<ECS_Camera> camera_ptr = ECS_Camera::get_instance();
 				Event_Component* event_component = new Event_Component();
 				SXNGN_MouseEvent mouse_event;
 				mouse_event.click = click;
+				mouse_event.alt_click = alt_click;
+				mouse_event.shift_click = shift_click;
+				mouse_event.ctrl_click = ctrl_click;
 				event_component->e.common.type = EventType::MOUSE;
 				event_component->e.mouse_event = mouse_event;
 				event_component->e.mouse_event.type = MouseEventType::CLICK;
 
 				Collisionable* collisionable = new Collisionable();
-				SDL_Rect click_box;
-				click_box.h = 1;
-				click_box.w = 1;
-				click_box.x = mouse_event.click.x / Database::get_scale();
-				click_box.y = mouse_event.click.y / Database::get_scale();
-				collisionable->collision_box_ = click_box;
+
+				//mouse events take place in the game world. If a mouse click were to hit the main UI, it would not have produced a mouse event, rather been handled in the UserInputSystem
+				SDL_Rect mouse_click_world_position = ECS_Utils::convert_screen_position_to_world_position(camera_ptr, mouse_event.click.x, mouse_event.click.y);
+				
+				collisionable->collision_box_ = mouse_click_world_position;
 				collisionable->collision_tag_ = CollisionTag::EVENT;
 				collisionable->collision_type_ = CollisionType::IMMOVEABLE;
 				collisionable->buffer_pixels = 0;
@@ -106,7 +109,7 @@ namespace SXNGN {
 				return event_entity;
 			}
 
-			Entity Entity_Builder_Utils::Create_Selection_Event(Coordinator coordinator, ComponentTypeEnum game_state, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed )
+			Entity Entity_Builder_Utils::Create_Selection_Event(Coordinator coordinator, ComponentTypeEnum game_state, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed, bool additive, bool subtractive, bool enqueue)
 			{
 				auto select_entity = coordinator.CreateEntity();
 
@@ -115,6 +118,9 @@ namespace SXNGN {
 				selection.clicked_entities = clicked;
 				selection.double_click_entities = dclicked;
 				selection.boxed_entities = boxed;
+				selection.additive = additive;
+				selection.subtractive = subtractive;
+				selection.enqueue = enqueue;
 				event_component->e.common.type = EventType::SELECTION;
 				event_component->e.select_event = selection;
 				coordinator.AddComponent(select_entity, event_component);

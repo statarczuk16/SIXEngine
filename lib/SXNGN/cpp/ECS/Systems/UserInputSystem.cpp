@@ -304,10 +304,42 @@ namespace SXNGN::ECS::A {
 		auto cached_mouse_state = User_Input_State::get_instance();
 		MouseState current_mouse_state;
 		current_mouse_state = cached_mouse_state->mouse_state;
+
+		//first check for modifying key strokes for shift+click etc
+		for (auto e : mouse_events)
+		{
+			if (e.type == SDL_KEYDOWN)
+			{
+				//mouse events interested in these modify types
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_LSHIFT: cached_mouse_state->shift_down = true; break;
+				case SDLK_LALT: cached_mouse_state->alt_down = true; break;
+				case SDLK_LCTRL:cached_mouse_state->ctrl_down = true; break;
+				}
+			}
+			else if (e.type == SDL_KEYUP)
+			{
+				//mouse events interested in these modify types
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_LSHIFT: cached_mouse_state->shift_down = false; break;
+				case SDLK_LALT: cached_mouse_state->alt_down = false; break;
+				case SDLK_LCTRL:cached_mouse_state->ctrl_down = false; break;
+				}
+			}
+		}
+
+		bool shift_down = cached_mouse_state->shift_down;
+		bool alt_down = cached_mouse_state->alt_down;
+		bool ctrl_down = cached_mouse_state->ctrl_down;
+
 		for (auto e : mouse_events)
 		{
 			switch (e.type)
 			{
+			case SDL_KEYDOWN: break;
+			case SDL_KEYUP: break;
 			case SDL_MOUSEBUTTONDOWN:
 			{
 				switch (e.button.button)
@@ -375,14 +407,14 @@ namespace SXNGN::ECS::A {
 						cached_mouse_state->last_right_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
 						//todo launc double click event
 						right_click.double_click = true;
-						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, right_click);
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, right_click, shift_down, alt_down, ctrl_down);
 					}
 					else
 					{
 						//printf("right click %zd\n", click_gap);
 						//todo launch single click event
 						right_click.double_click = false;
-						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, right_click);
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, right_click, shift_down, alt_down, ctrl_down);
 					}
 					//clear out the state after recording a click
 					current_mouse_state.right_button.timestamp_up = 0;
@@ -408,7 +440,7 @@ namespace SXNGN::ECS::A {
 						cached_mouse_state->last_left_click.time_stamp = 0; //reset after double click to three quick clicks != 2 double clicks
 						//todo launch double click event
 						left_click.double_click = true;
-						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, left_click);
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, left_click, shift_down, alt_down, ctrl_down);
 
 					}
 					else
@@ -417,7 +449,7 @@ namespace SXNGN::ECS::A {
 						// 
 						//todo launch single click event
 						left_click.double_click = false;
-						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, left_click);
+						Entity_Builder_Utils::Create_Mouse_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, left_click, shift_down, alt_down, ctrl_down);
 					}
 
 				}

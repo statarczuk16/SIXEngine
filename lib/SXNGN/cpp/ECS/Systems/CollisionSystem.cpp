@@ -184,10 +184,10 @@ namespace SXNGN::ECS::A {
 					}
 					else if (collisionable_2->collision_tag_ == CollisionTag::OBJECT)
 					{
-						collision_result = HandleCollisionPersonObject(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
+					collision_result = HandleCollisionPersonObject(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
 					}
 				}
-				
+
 
 				//check the data back in
 				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, c_collision.first);
@@ -205,7 +205,7 @@ namespace SXNGN::ECS::A {
 					collisonables_to_delete.push_back(c_collision.first);
 					collisonables_to_delete.push_back(c_collision.second);
 				}
-				
+
 
 			}//if both collisionables exist
 
@@ -227,31 +227,33 @@ namespace SXNGN::ECS::A {
 		{
 
 			const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
-			//if the event is a mouse click
-			if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(event_entity, ComponentTypeEnum::INPUT_TAGS))
+			//if the event is a mouse click and the other entity has input tags
+			if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::INPUT_TAGS))
 			{
 				//see how second collisionable reacts to mouse input
-				auto input_data = gCoordinator.GetComponentReadOnly(event_entity, ComponentTypeEnum::INPUT_TAGS);
+				auto input_data = gCoordinator.GetComponentReadOnly(other_entity, ComponentTypeEnum::INPUT_TAGS);
 
 				const User_Input_Tags_Collection* input_tags_ptr = static_cast<const User_Input_Tags_Collection*>(input_data);
 				//if it is clickable
 				std::vector<Entity> clicked;
 				std::vector<Entity> double_click_entities;
 				std::vector<Entity> boxed_entities;
-				if (input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
+				if (input_tags_ptr && input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
 				{
 					switch (event_ptr->e.mouse_event.type)
 					{
 						//if it's a click
 					case MouseEventType::CLICK:
 					{
-						SDL_LogDebug(1, "Entity %d Clicked\n", event_entity);
+
 						if (event_ptr->e.mouse_event.click.double_click)
 						{
+							SDL_LogDebug(1, "Entity %d Double Clicked\n", other_entity);
 							double_click_entities.push_back(other_entity);
 						}
 						else
 						{
+							SDL_LogDebug(1, "Entity %d Clicked\n", other_entity);
 							clicked.push_back(other_entity);
 						}
 
@@ -260,6 +262,7 @@ namespace SXNGN::ECS::A {
 					//or selection box
 					case MouseEventType::BOX:
 					{
+						SDL_LogDebug(1, "Entity %d Mouse Boxed\n", other_entity);
 						boxed_entities.push_back(other_entity);
 						break;
 					}
@@ -270,8 +273,25 @@ namespace SXNGN::ECS::A {
 					}
 					}//switch mouse event type
 
+					bool additive = false;
+					bool subtractive = false;
+					bool enqueue = false;
+					//priority of modified mouse clicks in this order
+					if (event_ptr->e.mouse_event.shift_click)
+					{
+						enqueue = true;
+					}
+					else if (event_ptr->e.mouse_event.ctrl_click)
+					{
+						additive = true;
+					}
+					else if(event_ptr->e.mouse_event.alt_click)
+					{
+						subtractive = true;
+					}	
+
 					//create event for user input system - tell it what entities were selected by a mouse event
-					Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities);
+					Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
 					event->resolved_ = true;
 				}//if clickable
 			}//if mouse event type
@@ -358,15 +378,18 @@ namespace SXNGN::ECS::A {
 		return 0;
 	}
 
+	//catch all, inefficient, method to handle collisions between types that don't categorize into other methods
+	//simple for now. Only handles when one moving object hits an immoveable object and calculates where to stop the moveable object
 	int Collision_System::HandleCollisionGeneric(Collisionable* first, Entity first_entity, Collisionable* second, Entity second_entity, Coordinator gCoordinator)
 	{
-		//todo 
+		//for next frame, mark that the collisionson these objects have been handled (will be true at end of this function)
 		first->resolved_ = true;
 		second->resolved_ = true;
 		Collisionable* immoveable_obj = nullptr;
 		Collisionable* moveable_obj = nullptr;
 		Entity immoveable_entity;
 		Entity moveable_entity;
+		//one of the collisionables is going to be treated as immoveable. not supporting stuff bouncing off each other yet
 		if (first->collision_type_ == CollisionType::IMMOVEABLE)
 		{
 			immoveable_entity = first_entity;
@@ -377,8 +400,10 @@ namespace SXNGN::ECS::A {
 			immoveable_entity = second_entity;
 			immoveable_obj = second;
 		}
+		//if one of the objects is immoveable
 		if (immoveable_obj)
 		{
+			//determine which object is the moveable one 
 			if (first->collision_type_ != CollisionType::IMMOVEABLE && first->collision_type_ != CollisionType::NONE)
 			{
 				moveable_entity = first_entity;
@@ -394,29 +419,20 @@ namespace SXNGN::ECS::A {
 			{
 				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_entity);
 				//ECS_Utils::ChangeEntityPositionLastGood(moveable_entity);
-				SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, moveable_obj->collision_box_);
+				auto prev_moveable_data = gCoordinator.GetComponentReadOnly(moveable_entity, ComponentTypeEnum::MOVEABLE);
+				const Moveable* prev_moveable = static_cast<const Moveable*>(prev_moveable_data);
+				SDL_Rect prev_moveable_box;
+				prev_moveable_box.x = prev_moveable->m_prev_pos_x_m;
+				prev_moveable_box.y = prev_moveable->m_prev_pos_y_m;
+				prev_moveable_box.w = moveable_obj->collision_box_.w;
+				prev_moveable_box.h = moveable_obj->collision_box_.h;
+				//get where the moveable was last frame, where it wants to be this frame, and combine with immoveable obj location to find where it should smack into a wall and stop
+				SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, moveable_obj->collision_box_, prev_moveable_box);
+				//move the moveable entity to where it should smack into a wall
 				ECS_Utils::ChangeEntityPosition(moveable_entity, new_moveable_pos.x, new_moveable_pos.y, true);
+				//calling function expects to need to check moveable_entity back in, but ChangeEntityPosition also does that. So re-check it out here.
 				auto dummy = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::COLLISION);
 				
-					/**auto moveable_data = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::MOVEABLE);
-				if (moveable_data)
-				{
-					Moveable* moveable = static_cast<Moveable*>(moveable_data);
-					moveable->m_pos_x_m = moveable->m_prev_pos_x_m;
-					moveable->m_pos_y_m = moveable->m_prev_pos_y_m;
-					if (gCoordinator.EntityHasComponent(moveable_entity, ComponentTypeEnum::RENDERABLE))
-					{
-						auto moveable_renderbox = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::RENDERABLE);
-						if (moveable_renderbox)
-						{
-							Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
-							render_ptr->x_ = int(round(moveable->m_pos_x_m));
-							render_ptr->y_ = int(round(moveable->m_pos_y_m));
-							gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, moveable_entity);
-						}
-					}
-					gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_entity);
-				}**/
 			}
 		}
 		return 0;

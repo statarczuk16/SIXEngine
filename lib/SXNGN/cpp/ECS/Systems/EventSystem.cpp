@@ -58,11 +58,52 @@ namespace SXNGN::ECS::A {
 				}
 				case EventType::MOUSE:
 				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Mouse Event");
 					break;
 				}
 				case EventType::SELECTION:
 				{
+					//todo max number of selected entities
+					SDL_LogInfo(1, "Event_System::Update:: Got Selection Event");
+					auto user_input_state = User_Input_State::get_instance();
+					if (event_ptr->e.select_event.additive)
+					{
+						for (auto entity : event_ptr->e.select_event.clicked_entities)
+						{
+							user_input_state->selected_entities[entity] = true;
+						}
+					}
+					else if (event_ptr->e.select_event.subtractive)
+					{
+						for (auto entity : event_ptr->e.select_event.clicked_entities)
+						{
+							user_input_state->selected_entities[entity] = false;
+						}
+					}
+					else if (event_ptr->e.select_event.enqueue)
+					{
+						//todo job queueing system
+					}
+					else
+					{
+						std::array<bool, MAX_ENTITIES> selected_entities{ false };
+						user_input_state->selected_entities = selected_entities;
+						for (auto entity : event_ptr->e.select_event.clicked_entities)
+						{
+							user_input_state->selected_entities[entity] = true;
+						}
+					}
 
+					//list all the entities that are now selected
+					SDL_LogInfo(1, "Event_System::Update::Selection --- selected entity list:");
+					for (int i = 0; i < user_input_state->selected_entities.size(); i++)
+					{
+						if (user_input_state->selected_entities[i])
+						{
+							SDL_LogInfo(1, "%d", i);
+						}
+					}
+					
 					break;
 				}
 				default:

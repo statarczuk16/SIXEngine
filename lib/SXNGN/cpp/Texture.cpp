@@ -159,7 +159,7 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 	
 }
 
-void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle, SDL_Point* center, SDL_RendererFlip flip)
+void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle, SDL_Point* center, SDL_RendererFlip flip, bool outline)
 {
 	//Set rendering space and render to screen
 	SDL_Rect renderQuad = bounding_box;
@@ -184,6 +184,13 @@ void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle,
 		SDL_SetRenderDrawColor(renderer_, 0xFF, 0xCC, 0xCC, 0xFF);
 		SDL_RenderFillRect(renderer_, &renderQuad);
 	}
+	if (outline)
+	{
+		//Render red filled quad
+		SDL_SetRenderDrawColor(renderer_, 0xAD, 0xD8, 0xE6, 0xFF);
+		SDL_RenderDrawRect(renderer_, &renderQuad);
+	}
+
 
 }
 

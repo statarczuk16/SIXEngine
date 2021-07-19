@@ -38,6 +38,9 @@ namespace SXNGN::ECS::A {
 		std::vector<Entity> clicked_entities;
 		std::vector<Entity> boxed_entities;
 		std::vector<Entity> double_click_entities;
+		bool additive = false; //new selection or adding to current selection (left click vs ctrl + left click etc)
+		bool subtractive = false;//alt click
+		bool enqueue = false;//shift click
 	};
 
 	struct SXNGN_LoadEvent
@@ -62,6 +65,9 @@ namespace SXNGN::ECS::A {
 	{
 		MouseEventType type;
 		Click click;
+		bool shift_click;
+		bool alt_click;
+		bool ctrl_click;
 	};
 	
 	struct SXNGN_Event

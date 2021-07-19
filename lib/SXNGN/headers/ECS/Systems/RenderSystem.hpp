@@ -28,11 +28,7 @@ namespace SXNGN::ECS::A {
 
 	private:
 
-		bool object_in_view(std::shared_ptr<ECS_Camera> camera, SDL_Rect object);
-
-		SDL_Rect determine_camera_lens_scaled(std::shared_ptr<ECS_Camera> camera);
-
-		SDL_Rect determine_camera_lens_unscaled(std::shared_ptr<ECS_Camera> camera);
+		
 
 		void Render(const Renderable* renderable, std::shared_ptr<ECS_Camera> camera);
 

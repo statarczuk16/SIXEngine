@@ -19,7 +19,7 @@ namespace SXNGN {
 		//Use buffer
 		static bool checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer);
 
-		static SDL_Rect getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable);
+		static SDL_Rect getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable_now, SDL_Rect moveable_previous);
 
 		//Checks collision box against set of tiles
 		static bool touchesWall(SDL_Rect box, Tile* tiles[]);

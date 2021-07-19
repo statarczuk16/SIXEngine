@@ -100,6 +100,13 @@ namespace SXNGN::ECS::A {
 			else if (e.type == SDL_KEYDOWN || e.type == SDL_KEYUP)
 			{
 				keyboard_events.push_back(e);
+				//mouse events interested in these modify types
+				switch (e.key.keysym.sym)
+				{
+				case SDLK_LSHIFT: mouse_events.push_back(e); break;
+				case SDLK_LALT: mouse_events.push_back(e); break;
+				case SDLK_LCTRL: mouse_events.push_back(e); break;
+				}
 			}
 			else if(e.type == SDL_MOUSEWHEEL)
 			{

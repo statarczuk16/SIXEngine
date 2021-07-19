@@ -161,14 +161,14 @@ int init_menus()
 	start_button_c->triggered_events.push_back(new_game_event);
 	mmw_c->child_components_.push_back(start_button_c);
 
-	auto load_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "New Game", 2);
+	auto load_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Load Game", 2);
 	Event_Component load_game_event;
 	load_game_event.e.common.type = EventType::LOAD;
 	load_game_event.e.load.filePath = "No File Path";
 	load_button_c->triggered_events.push_back(load_game_event);
 	mmw_c->child_components_.push_back(load_button_c);
 
-	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings Game", 3);
+	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings", 3);
 	Event_Component settings_state_event;
 	settings_state_event.e.common.type = EventType::STATE_CHANGE;
 	settings_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
@@ -299,6 +299,7 @@ int main(int argc, char* args[])
 	camera_position.w = 0;
 	camera_position.h = 0;
 
+	//singleton, used by world creation utility to lock camera onto main character
 	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
 
 	gCoordinator.AddEventListener(FUNCTION_LISTENER(Events::Window::QUIT, QuitHandler));

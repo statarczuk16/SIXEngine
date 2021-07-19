@@ -65,6 +65,7 @@ namespace SXNGN::ECS::A {
 		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
 		std::string sprite_factory_name_;//path to the sprite sheet to create from
 		std::string sprite_factory_sprite_type_;//name of the sprite to use
+		bool outline = false;
 	};
 
 	//note: saving as a pre-renderable. Can't convert the texture pointer to JSON, so it will have to go back through the factory pre-render -> render to get back to its state

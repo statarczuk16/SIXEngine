@@ -123,82 +123,7 @@ namespace SXNGN::ECS::A {
 
 	}
 
-	bool Renderer_System::object_in_view(std::shared_ptr<ECS_Camera> camera, SDL_Rect object_bounds)
-	{
-		//Have to scale up object to compare to the camera
-		object_bounds.x *= SXNGN::Database::get_scale();
-		object_bounds.y *= SXNGN::Database::get_scale();
-		object_bounds.w *= SXNGN::Database::get_scale();
-		object_bounds.h *= SXNGN::Database::get_scale();
-		SDL_Rect scaled_camera_lens = determine_camera_lens_scaled(camera);
-
-		//Note object_bounds.w * 2 -- extra buffer so objects a bit out of camera range are still rendered
-		//dont want stuff to disappear//appear while the player can still see them
-		if (SXNGN::CollisionChecks::checkCollisionBuffer(scaled_camera_lens, object_bounds, object_bounds.w * 2))
-		{
-			return true;
-		}
-		return false;
-	}
-
-	SDL_Rect Renderer_System::determine_camera_lens_scaled(std::shared_ptr<ECS_Camera> camera)
-	{
-		SDL_Rect return_view;
-		SDL_Rect position_actual = camera->position_actual_;
-		SDL_Rect position_scaled; 
-		position_scaled.x = position_actual.x * SXNGN::Database::get_scale();
-		position_scaled.y = position_actual.y * SXNGN::Database::get_scale();
-		camera->position_scaled_ = position_scaled;
-		SDL_Rect screen_bounds = camera->screen_bounds_;
-		SDL_Rect lens = camera->lens_;
-
-		//bounding box centers are at the top left of the box.
-		//If the camera is tracking a target at (10,10), then the top left of the camera vision square should not be the target
-		//instead the top left vision square of the camera should be some ways left and some ways above the tracked target
-		//such that a tracked target is in the center of the view (rather than being at the top left)
-		return_view.x = position_scaled.x - (lens.w / 2);
-		return_view.y = position_scaled.y - (lens.h / 2);
-		return_view.w = lens.w;
-		return_view.h = lens.h;
-
-		SDL_Rect screen_bounds_scaled = screen_bounds;
-
-		screen_bounds_scaled.x *= SXNGN::Database::get_scale();
-		screen_bounds_scaled.y *= SXNGN::Database::get_scale();
-		screen_bounds_scaled.w *= SXNGN::Database::get_scale();
-		screen_bounds_scaled.h *= SXNGN::Database::get_scale();
-
-
-		//don't allow camera top-right view square point to leave screen
-		if (return_view.x < screen_bounds_scaled.x)
-		{
-			return_view.x = screen_bounds_scaled.x;
-		}
-		if (return_view.x > (screen_bounds_scaled.x + screen_bounds_scaled.w))
-		{
-			return_view.x = screen_bounds_scaled.x + screen_bounds_scaled.w;
-		}
-
-		if (return_view.y < screen_bounds_scaled.y)
-		{
-			return_view.y = screen_bounds_scaled.y;
-		}
-		if (return_view.y > (screen_bounds_scaled.y + screen_bounds_scaled.h))
-		{
-			return_view.y = screen_bounds_scaled.y + screen_bounds_scaled.h;
-		}
-
-		return return_view;
-	}
-
-	SDL_Rect Renderer_System::determine_camera_lens_unscaled(std::shared_ptr<ECS_Camera> camera)
-	{
-		SDL_Rect current_view = determine_camera_lens_scaled(camera);
-		current_view.x /= SXNGN::Database::get_scale();
-		current_view.y /= SXNGN::Database::get_scale();
-		return current_view;
-	}
-
+	
 
 	void Renderer_System::Update(float dt)
 	{
@@ -206,7 +131,8 @@ namespace SXNGN::ECS::A {
 		std::shared_ptr<ECS_Camera> camera_ptr = ECS_Camera::get_instance();
 		Entity camera_target = camera_ptr->get_target();
 		auto camera_target_position = ECS_Utils::GetEntityPosition(camera_target);
-		if(camera_target_position)
+		auto user_input_state = User_Input_State::get_instance();
+		if (camera_target_position)
 		{
 			camera_ptr->set_position_actual(*camera_target_position);
 		}
@@ -223,9 +149,18 @@ namespace SXNGN::ECS::A {
 		{
 			auto const& entity = *it;
 			it++;
-			//Search for Pre-Renderables
-			const ECS_Component* data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::RENDERABLE);
-			const Renderable* renderable_ptr = static_cast<const Renderable*>(data);
+			//Get renderable
+			ECS_Component* data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
+			Renderable* renderable_ptr = static_cast<Renderable*>(data);
+			bool draw_outline = user_input_state->selected_entities[entity] == true;
+			if (draw_outline)
+			{
+				renderable_ptr->outline = true;
+			}
+			else
+			{
+				renderable_ptr->outline = false;
+			}
 
 			switch (renderable_ptr->render_layer_)
 			{
@@ -239,29 +174,30 @@ namespace SXNGN::ECS::A {
 				abort();
 			}
 			}
+			gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
 		}
 
-		//Order of these matters. UI should appear over ground, etc
-		for (auto renderable : renderables_ground_layer)
-		{
-			Render(renderable, camera_ptr);
-		}
-		for (auto renderable : renderables_object_layer)
-		{
-			Render(renderable, camera_ptr);
-		}
-		for (auto renderable : renderables_air_layer)
-		{
-			Render(renderable, camera_ptr);
-		}
-		for (auto renderable : renderables_ui_layer)
-		{
-			Render(renderable, camera_ptr);
-		}
-		//This draws the UI components in the UI Singleton, main menu buttons, etc. Precedence over renderable_ui_layer, which might be context menus in the gameplay window 
-		//whereas the singleton holds "constant" stuff corresponding to the game state
-		Draw_GUI();
+			//Order of these matters. UI should appear over ground, etc
+			for (auto renderable : renderables_ground_layer)
+			{
+				Render(renderable, camera_ptr);
+			}
 
+			for (auto renderable : renderables_object_layer)
+			{
+				Render(renderable, camera_ptr);
+			}
+			for (auto renderable : renderables_air_layer)
+			{
+				Render(renderable, camera_ptr);
+			}
+			for (auto renderable : renderables_ui_layer)
+			{
+				Render(renderable, camera_ptr);
+			}
+			//This draws the UI components in the UI Singleton, main menu buttons, etc. Precedence over renderable_ui_layer, which might be context menus in the gameplay window 
+			//whereas the singleton holds "constant" stuff corresponding to the game state
+			Draw_GUI();
 	}
 
 	void Renderer_System::Render(const Renderable* renderable, std::shared_ptr<ECS_Camera> camera)
@@ -272,10 +208,10 @@ namespace SXNGN::ECS::A {
 		bounding_box.w = renderable->tile_map_snip_.w;
 		bounding_box.h = renderable->tile_map_snip_.h;
 		//If the renderable is on screen (within camera lens)
-		if (object_in_view(camera, bounding_box))
+		if (ECS_Utils::object_in_view(camera, bounding_box))
 		{
 
-			SDL_Rect camera_lens = determine_camera_lens_unscaled(camera);
+			SDL_Rect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
 			//get the position of this object with respect to the camera lens
 			int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
 			int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
@@ -286,11 +222,15 @@ namespace SXNGN::ECS::A {
 			render_quad.y = texture_pos_wrt_cam_y;
 			render_quad.w = bounding_box.w;
 			render_quad.h = bounding_box.h;
+			if (renderable->outline)
+			{
+				printf("outline draw");
+			}
 
 			if (renderable->sprite_map_texture_ != nullptr)
 			{
 				renderable->sprite_map_texture_
-					->render2(render_quad, renderable->tile_map_snip_);
+					->render2(render_quad, renderable->tile_map_snip_,0.0,nullptr, SDL_FLIP_NONE,renderable->outline);
 			}
 			else
 			{

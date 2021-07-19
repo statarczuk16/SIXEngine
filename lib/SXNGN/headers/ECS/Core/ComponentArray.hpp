@@ -90,7 +90,7 @@ public:
 
 	//Get a modifiable instance of the component for this entity
 	//Do not allow any changes to the component array until CheckInData() is called
-	//When checking out data, you take the with you by which the data can be accessed (unique_lock).
+	//Mutex corresponding to this data is locked until checked back in
 	//DO NOT DELETE any pointer returned from this
 	ECS_Component* CheckoutData(Entity entity)
 	{
