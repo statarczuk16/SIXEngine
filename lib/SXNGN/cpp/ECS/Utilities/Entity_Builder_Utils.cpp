@@ -128,6 +128,26 @@ namespace SXNGN {
 				return select_entity;
 			}
 
+			Entity Entity_Builder_Utils::Create_Order_Event(Coordinator coordinator, ComponentTypeEnum game_state, OrderType order_type, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed, bool additive, bool subtractive, bool enqueue)
+			{
+				auto order_event_entity = coordinator.CreateEntity();
+
+				Event_Component* event_component = new Event_Component();
+				SXNGN_Order order;
+				order.clicked_entities = clicked;
+				order.double_click_entities = dclicked;
+				order.boxed_entities = boxed;
+				order.additive = additive;
+				order.subtractive = subtractive;
+				order.enqueue = enqueue;
+				order.order_type = order_type;
+				event_component->e.common.type = EventType::ORDER;
+				event_component->e.order_event = order;
+				coordinator.AddComponent(order_event_entity, event_component);
+				coordinator.AddComponent(order_event_entity, Create_Gamestate_Component_from_Enum(game_state));
+				return order_event_entity;
+			}
+
 
 			/**
 			A::Pre_Renderable* Entity_Builder_Utils::Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer)

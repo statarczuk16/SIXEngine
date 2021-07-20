@@ -24,6 +24,7 @@
 #include <tuple>
 #include <ECS/Systems/EventSystem.hpp>
 #include <ECS/Systems/CollisionSystem.hpp>
+#include <ECS/Systems/TaskSchedulerSystem.hpp>
 
 
 SXNGN::ECS::A::Coordinator gCoordinator;
@@ -320,6 +321,8 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 
 
@@ -345,9 +348,6 @@ int main(int argc, char* args[])
 		Signature signature_of_interest;
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::SPRITE_FACTORY));
 		gCoordinator.SetSystemSignatureOfInterest<Sprite_Factory_System>(signature_of_interest);
-
-
-
 	}
 	sprite_factory_system->Init();
 
@@ -357,7 +357,6 @@ int main(int argc, char* args[])
 		Signature signature;
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::RENDERABLE));
 		gCoordinator.SetSystemSignatureActable<Renderer_System>(signature);
-
 	}
 	renderer_system->Init();
 
@@ -367,7 +366,6 @@ int main(int argc, char* args[])
 		Signature signature;
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
 		gCoordinator.SetSystemSignatureActable<Collision_System>(signature);
-
 	}
 	collision_system->Init();
 
@@ -407,6 +405,20 @@ int main(int argc, char* args[])
 		Signature signature;
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::EVENT));
 		gCoordinator.SetSystemSignatureActable<Event_System>(signature);
+	}
+	event_system->Init();
+
+	//Task Scheduler System assigns workers to tasks
+	auto task_scheduler_system = gCoordinator.RegisterSystem<Task_Scheduler_System>();
+	{
+		Signature signature;
+		//ACTS on Tasks
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::TASK));
+		gCoordinator.SetSystemSignatureActable<Event_System>(signature);
+		//INTERESTED in any entity that has TASK_WORKER
+		Signature signature_of_interest;
+		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::TASK_WORKER));
+		gCoordinator.SetSystemSignatureOfInterest<Movement_System>(signature_of_interest);
 	}
 	event_system->Init();
 
@@ -541,11 +553,11 @@ int main(int argc, char* args[])
 		dt = dt_timer.getTicks() / 1000.f;//
 		game_dt = dt;
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
+		task_scheduler_system->Update(dt);
+
 		movement_system->Update(dt);
 
 		collision_system->Update(dt);
-
-		
 
 		dt_timer.start(); //restart delta t for next frame
 		//Phys End

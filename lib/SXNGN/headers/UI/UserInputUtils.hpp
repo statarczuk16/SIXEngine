@@ -12,7 +12,7 @@ namespace SXNGN::ECS::A {
 
 
 	//clicking a button twice in one button = double cl ick
-	const Sint32 DOUBLE_CLICK_THRESH_MS = 500;
+	const Sint32 DOUBLE_CLICK_THRESH_MS = 300;
 	//mouse down then mouse up within X = single click
 	const Sint32 SINGLE_CLICK_THRESH_MS = 400;
 

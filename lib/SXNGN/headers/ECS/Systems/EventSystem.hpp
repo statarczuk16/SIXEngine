@@ -19,7 +19,7 @@ namespace SXNGN::ECS::A {
 
 		void Update(float dt);
 
-		void Handle_Event(Event_Component* ec);
+		void Handle_Order_Event(Event_Component* ec);
 
 	private:
 

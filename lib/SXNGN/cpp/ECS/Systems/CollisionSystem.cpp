@@ -285,13 +285,25 @@ namespace SXNGN::ECS::A {
 					{
 						additive = true;
 					}
-					else if(event_ptr->e.mouse_event.alt_click)
+					else if (event_ptr->e.mouse_event.alt_click)
 					{
 						subtractive = true;
-					}	
+					}
 
-					//create event for user input system - tell it what entities were selected by a mouse event
-					Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+					//dragged box or left click is selection
+					if (event_ptr->e.mouse_event.type == MouseEventType::BOX || event_ptr->e.mouse_event.click.button == MOUSE_BUTTON::LEFT)
+					{
+						//create event for user input system - tell it what entities were selected by a mouse event
+						Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+					}
+					//right click is an order 
+					else if (event_ptr->e.mouse_event.click.button == MOUSE_BUTTON::RIGHT)
+					{
+						//create event for user input system - tell it what the target of the order is 
+						//todo different types of orders besides MOVE
+						Entity_Builder_Utils::Create_Order_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, OrderType::MOVE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+					}
+					
 					event->resolved_ = true;
 				}//if clickable
 			}//if mouse event type

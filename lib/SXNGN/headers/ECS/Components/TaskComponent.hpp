@@ -1,0 +1,33 @@
+#pragma once
+
+#include <SDL.h>
+#include <ECS/Core/Component.hpp>
+#include <sole.hpp>
+
+
+namespace SXNGN::ECS::A {
+
+
+
+	/// <summary>
+	/// Contains all data needed to describe a task for a task_worker to work on
+	/// </summary>
+	struct Task_Component : ECS_Component
+	{
+		Task_Component()
+		{
+			id_ = sole::uuid1();
+		}
+
+		sole::uuid id_;//unique id
+		std::string name_ = "Uninit";//task name
+		std::vector<WorkChunk> tasks_;
+		std::vector<WorkChunk> tasks_done_;
+		std::vector<Entity> reserved_units_;//workers scheduled
+		std::vector<Entity> required_units_;//if task designed for specific units
+		bool interruptable_ = true;//is work interruptable
+		int priority_ = -1; //priority of task
+		bool scheduled_ = false;
+
+	};
+}

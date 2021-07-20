@@ -83,7 +83,17 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
 	)
 	
 message("JSON Sources: "  ${JSON_SOURCES}) 
-include_directories(${CMAKE_SOURCE_DIR}/lib/json/)	 
+include_directories(${CMAKE_SOURCE_DIR}/lib/json/)	
+
+  ######### UUID (UUID C++ Library)
+ file(GLOB_RECURSE UUID_SOURCES
+	${CMAKE_SOURCE_DIR}/lib/sole-master/*.hpp
+	)
+	
+message("UUID Sources: "  ${UUID_SOURCES}) 
+include_directories(${CMAKE_SOURCE_DIR}/lib/sole-master/)	 
+
+
  
   ######### Cereal (Serialization Library)
 # file(GLOB_RECURSE CEREAL_SOURCES
@@ -94,10 +104,10 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/json/)
 #include_directories(${CMAKE_SOURCE_DIR}/lib/cereal/)	
  
 #add an executable for anything that will turn into an exe or whatever other executable format
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  "lib/SXNGN/headers/ECS/Core/StateManager.hpp" "lib/SXNGN/headers/ECS/Systems/MovementSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/MovementSystem.cpp" "lib/SXNGN/headers/ECS/Components/Tile.hpp"  "lib/SXNGN/headers/ECS/Components/Renderable.hpp" "lib/SXNGN/cpp/ECS/Components/SpriteFactory.cpp" "lib/SXNGN/headers/ECS/Components/StateIndicatorComponent.hpp" "lib/SXNGN/headers/ECS/Components/UI.hpp" "lib/SXNGN/cpp/ECS/Components/UI.cpp" "lib/SXNGN/headers/ECS/Utilities/Map_Utils.hpp" "lib/SXNGN/cpp/ECS/Utilities/Map_Utils.cpp" "lib/SXNGN/headers/ECS/Systems/CollisionSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CollisionSystem.cpp" "lib/SXNGN/headers/ECS/Utilities/ECS_Utils.hpp" "lib/SXNGN/cpp/ECS/Utilities/ECS_Utils.cpp")
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp")
 target_link_libraries(HoplonSimulator SDL2::Main SDL2::Image SDL2::TTF)
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  "lib/SXNGN/headers/ECS/Core/StateManager.hpp" "lib/SXNGN/headers/ECS/Systems/MovementSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/MovementSystem.cpp" "lib/SXNGN/headers/ECS/Components/Tile.hpp"  "lib/SXNGN/headers/ECS/Components/Renderable.hpp" "lib/SXNGN/cpp/ECS/Components/SpriteFactory.cpp" "lib/SXNGN/headers/ECS/Components/StateIndicatorComponent.hpp" "lib/SXNGN/headers/ECS/Components/UI.hpp" "lib/SXNGN/cpp/ECS/Components/UI.cpp" "lib/SXNGN/headers/ECS/Utilities/Map_Utils.hpp" "lib/SXNGN/cpp/ECS/Utilities/Map_Utils.cpp" "lib/SXNGN/headers/ECS/Systems/CollisionSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/CollisionSystem.cpp" "lib/SXNGN/headers/ECS/Utilities/ECS_Utils.hpp" "lib/SXNGN/cpp/ECS/Utilities/ECS_Utils.cpp")
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp")
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

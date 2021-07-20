@@ -61,6 +61,12 @@ namespace SXNGN::ECS::A {
 					SDL_LogInfo(1, "Event_System::Update:: Got Mouse Event");
 					break;
 				}
+				case EventType::ORDER:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Order Event");
+					Handle_Order_Event(event_ptr);
+					break;
+				}
 				case EventType::SELECTION:
 				{
 					//todo max number of selected entities
@@ -70,14 +76,14 @@ namespace SXNGN::ECS::A {
 					{
 						for (auto entity : event_ptr->e.select_event.clicked_entities)
 						{
-							user_input_state->selected_entities[entity] = true;
+							user_input_state->selected_entities.insert(entity);
 						}
 					}
 					else if (event_ptr->e.select_event.subtractive)
 					{
 						for (auto entity : event_ptr->e.select_event.clicked_entities)
 						{
-							user_input_state->selected_entities[entity] = false;
+							user_input_state->selected_entities.erase(entity);
 						}
 					}
 					else if (event_ptr->e.select_event.enqueue)
@@ -86,22 +92,18 @@ namespace SXNGN::ECS::A {
 					}
 					else
 					{
-						std::array<bool, MAX_ENTITIES> selected_entities{ false };
-						user_input_state->selected_entities = selected_entities;
+						user_input_state->selected_entities.clear();
 						for (auto entity : event_ptr->e.select_event.clicked_entities)
 						{
-							user_input_state->selected_entities[entity] = true;
+							user_input_state->selected_entities.insert(entity);
 						}
 					}
 
 					//list all the entities that are now selected
 					SDL_LogInfo(1, "Event_System::Update::Selection --- selected entity list:");
-					for (int i = 0; i < user_input_state->selected_entities.size(); i++)
+					for (Entity entity : user_input_state->selected_entities)
 					{
-						if (user_input_state->selected_entities[i])
-						{
-							SDL_LogInfo(1, "%d", i);
-						}
+						SDL_LogDebug(1, "%d",entity);
 					}
 					
 					break;
@@ -126,9 +128,20 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	void Event_System::Handle_Event(Event_Component* ec)
+	void Event_System::Handle_Order_Event(Event_Component* ec)
 	{
-		
+		auto user_input_state = User_Input_State::get_instance();
+		if (ec->e.order_event.enqueue)
+		{
+			//todo job queueing system
+		}
+		else
+		{
+			for (auto entity : ec->e.order_event.clicked_entities)
+			{
+				
+			}
+		}
 
 	}
 

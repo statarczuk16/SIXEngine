@@ -12,3 +12,4 @@
 #include <ECS/Components/EventComponent.hpp>
 #include <ECS/Components/StateIndicatorComponent.hpp>
 #include <ECS/Components/UI.hpp>
+#include <ECS/Components/TaskComponent.hpp>

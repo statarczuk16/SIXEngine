@@ -18,7 +18,14 @@ namespace SXNGN::ECS::A {
 		STATE_CHANGE,
 		EXIT,
 		MOUSE,
-		SELECTION
+		SELECTION,
+		ORDER
+	};
+
+	enum class OrderType : Uint8
+	{
+		UNKNOWN,
+		MOVE
 	};
 
 
@@ -41,6 +48,17 @@ namespace SXNGN::ECS::A {
 		bool additive = false; //new selection or adding to current selection (left click vs ctrl + left click etc)
 		bool subtractive = false;//alt click
 		bool enqueue = false;//shift click
+	};
+
+	struct SXNGN_Order
+	{
+		std::vector<Entity> clicked_entities;
+		std::vector<Entity> boxed_entities;
+		std::vector<Entity> double_click_entities;
+		bool additive = false; //new selection or adding to current selection (left click vs ctrl + left click etc)
+		bool subtractive = false;//alt click
+		bool enqueue = false;//shift click
+		OrderType order_type = OrderType::UNKNOWN;
 	};
 
 	struct SXNGN_LoadEvent
@@ -78,6 +96,7 @@ namespace SXNGN::ECS::A {
 		SXNGN_StateChangeEvent state_change;
 		SXNGN_MouseEvent mouse_event;
 		SXNGN_Selection select_event;
+		SXNGN_Order order_event;
 	};
 
 	struct Event_Component : ECS_Component

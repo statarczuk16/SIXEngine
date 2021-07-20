@@ -68,6 +68,27 @@ namespace Events {
 
 namespace SXNGN::ECS::A {
 
+	struct Location {
+		Sint32 x = -1;
+		Sint32 y = -1;
+		
+	};
+
+	enum class TaskSkill : Uint8 {
+		UNKNOWN,
+		MINING,
+		BUILDING
+	};
+
+	struct WorkChunk {
+		TaskSkill skill_required_;//skill required at each location
+		Uint16 work_required_;//how much work needed to be done at each place
+		Uint16 work_completed_;//how much work already done at each place
+		Location location_;//places where work is to be done
+		Uint16 skill_level_required_;//skill level required at each location
+		std::function<void()> result_function_;//functions called when task completed
+		Event_Component result_event_; //events that fire when task completed
+	};
 	enum class MOUSE_BUTTON : Uint8 {
 		LEFT,
 		RIGHT,

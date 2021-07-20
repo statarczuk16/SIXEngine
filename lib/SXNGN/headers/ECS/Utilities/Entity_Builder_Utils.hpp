@@ -21,6 +21,7 @@ namespace SXNGN {
 
 				static Entity Create_Selection_Event(Coordinator coordinator, ComponentTypeEnum game_state, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed, bool additive, bool subtractive, bool enqueue);
 
+				static Entity Create_Order_Event(Coordinator coordinator, ComponentTypeEnum game_state, OrderType order_type, std::vector<Entity> clicked, std::vector<Entity> dclicked, std::vector<Entity> boxed, bool additive, bool subtractive, bool enqueue);
 
 				//static A::Pre_Renderable* Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer);
 

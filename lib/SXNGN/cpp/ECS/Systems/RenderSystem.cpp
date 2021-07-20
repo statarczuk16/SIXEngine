@@ -152,7 +152,7 @@ namespace SXNGN::ECS::A {
 			//Get renderable
 			ECS_Component* data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
 			Renderable* renderable_ptr = static_cast<Renderable*>(data);
-			bool draw_outline = user_input_state->selected_entities[entity] == true;
+			bool draw_outline = user_input_state->selected_entities.count(entity);
 			if (draw_outline)
 			{
 				renderable_ptr->outline = true;
@@ -222,10 +222,6 @@ namespace SXNGN::ECS::A {
 			render_quad.y = texture_pos_wrt_cam_y;
 			render_quad.w = bounding_box.w;
 			render_quad.h = bounding_box.h;
-			if (renderable->outline)
-			{
-				printf("outline draw");
-			}
 
 			if (renderable->sprite_map_texture_ != nullptr)
 			{

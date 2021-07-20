@@ -78,7 +78,7 @@ namespace SXNGN::ECS::A {
 		MouseState mouse_state;
 		Click last_right_click;
 		Click last_left_click;
-		std::array<bool, MAX_ENTITIES> selected_entities{ false };
+		std::unordered_set<Entity> selected_entities;
 		bool shift_down = false;
 		bool alt_down = false;
 		bool ctrl_down = false;
