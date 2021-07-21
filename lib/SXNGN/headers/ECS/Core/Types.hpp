@@ -3,6 +3,10 @@
 #include <bitset>
 #include <cstdint>
 #include <SDL.h>
+#include <memory>
+
+
+
 
 
 // Source: https://gist.github.com/Lee-R/3839813
@@ -19,7 +23,7 @@ constexpr std::uint32_t operator "" _hash(char const* s, std::size_t count)
 
 // ECS
 using Entity = std::uint32_t;
-const Entity MAX_ENTITIES = 10000;
+const Entity MAX_ENTITIES = 20000;
 using ComponentTypeHash = std::uint8_t;
 const ComponentTypeHash MAX_COMPONENTS = 32;
 using Signature = std::bitset<MAX_COMPONENTS>;
@@ -68,6 +72,8 @@ namespace Events {
 
 namespace SXNGN::ECS::A {
 
+	class Event_Component;
+	
 	struct Location {
 		Sint32 x = -1;
 		Sint32 y = -1;
@@ -86,9 +92,16 @@ namespace SXNGN::ECS::A {
 		Uint16 work_completed_;//how much work already done at each place
 		Location location_;//places where work is to be done
 		Uint16 skill_level_required_;//skill level required at each location
-		std::function<void()> result_function_;//functions called when task completed
-		Event_Component result_event_; //events that fire when task completed
+		//std::function<void()> result_function_;//functions called when task completed
+		std::shared_ptr<SXNGN::ECS::A::Event_Component> result_event_; //events that fire when task completed
 	};
+
+	enum class NAVIGATION_TYPE : Uint8 {
+		UNKNOWN,
+		A_STAR,
+		DEAD_RECKON
+	};
+
 	enum class MOUSE_BUTTON : Uint8 {
 		LEFT,
 		RIGHT,

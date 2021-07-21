@@ -56,7 +56,7 @@ namespace SXNGN {
 
 				coordinator.AddComponent(person_entity, collisionable);
 				SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
-				input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::CLICKABLE);
+				input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::MOUSE_CONTROL);
 				if (player_controlled)
 				{
 					

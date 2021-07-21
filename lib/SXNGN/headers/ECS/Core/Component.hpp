@@ -30,9 +30,9 @@ namespace SXNGN::ECS::A {
 	GAME_STATE_START_HERE, //only game state enums after this point
 	MAIN_MENU_STATE,
 	MAIN_GAME_STATE,
-	CORE_BG_GAME_STATE,
 	NEW_GAME_STATE,
-	MAIN_SETTINGS_STATE //don't forget to add to component_type_enum_to_string and reverse when adding a new enum
+	MAIN_SETTINGS_STATE,
+	CORE_BG_GAME_STATE//don't forget to add to component_type_enum_to_string and reverse when adding a new enum
 };
 
 

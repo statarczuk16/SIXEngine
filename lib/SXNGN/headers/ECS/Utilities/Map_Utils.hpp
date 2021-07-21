@@ -17,6 +17,8 @@ namespace SXNGN {
 				static void CreateNewWorld();
 
 				static void StartNewGame();
+
+				std::vector<Location> GetPath();
 				
 
 				

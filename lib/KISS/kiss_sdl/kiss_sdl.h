@@ -94,12 +94,12 @@ typedef enum v_alignment {
 	VA_ROW
 } v_alignment;
 
-
+// Scale ui element size to parent window 
 typedef enum scale_to_parent_width {
-	SP_NONE,
-	SP_FILL,
-	SP_FILL_WITH_BUFFER,
-	SP_HALF,
+	SP_NONE, //dont scale, use points
+	SP_FILL, //fill 
+	SP_FILL_WITH_BUFFER, //fill with gaps on either size
+	SP_HALF, //take up half with buffer
 	SP_THIRD,
 	SP_FOURTH
 } scale_to_parent_width;

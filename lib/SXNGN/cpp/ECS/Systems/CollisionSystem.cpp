@@ -106,7 +106,7 @@ namespace SXNGN::ECS::A {
 						//does obj a touch obj b
 						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
 						{
-							SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
+							//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
 
 							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
 
@@ -238,7 +238,7 @@ namespace SXNGN::ECS::A {
 				std::vector<Entity> clicked;
 				std::vector<Entity> double_click_entities;
 				std::vector<Entity> boxed_entities;
-				if (input_tags_ptr && input_tags_ptr->input_tags_.count(User_Input_Tags::CLICKABLE))
+				if (input_tags_ptr && input_tags_ptr->input_tags_.count(User_Input_Tags::MOUSE_CONTROL))
 				{
 					switch (event_ptr->e.mouse_event.type)
 					{

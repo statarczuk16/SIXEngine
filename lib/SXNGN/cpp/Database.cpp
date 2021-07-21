@@ -8,7 +8,7 @@ std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
 SXNGN::Database::Database()
 {
 	scale_ = 1;
-	max_fps_ = 30;
+	max_fps_ = 60;
 	ecs_coordinator_ = nullptr;
 
 }

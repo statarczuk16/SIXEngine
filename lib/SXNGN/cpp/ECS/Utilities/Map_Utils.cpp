@@ -59,12 +59,16 @@ namespace SXNGN::ECS::A {
 			auto map_tile_entity = gCoordinator->CreateEntity();
 			Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
 			gCoordinator->AddComponent(map_tile_entity, pre_render);
-			Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
-			gCoordinator->AddComponent(map_tile_entity, collisionable);
+			if (game_map_collisionables.at(i).collision_type_ != CollisionType::NONE)
+			{
+				Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
+				gCoordinator->AddComponent(map_tile_entity, collisionable);
+			}
+			
 			Tile* tile = new Tile(game_map_tiles.at(i));
 			gCoordinator->AddComponent(map_tile_entity, tile);
 			User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
-			input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::CLICKABLE);
+			input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::MOUSE_CONTROL);
 			gCoordinator->AddComponent(map_tile_entity, input_tags_comp);
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}

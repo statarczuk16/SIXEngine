@@ -21,8 +21,8 @@ namespace SXNGN::ECS::A {
 
 		sole::uuid id_;//unique id
 		std::string name_ = "Uninit";//task name
-		std::vector<WorkChunk> tasks_;
-		std::vector<WorkChunk> tasks_done_;
+		std::vector<WorkChunk> tasks_; //all the work to do
+		std::vector<WorkChunk> tasks_done_;//move tasks to here when completed
 		std::vector<Entity> reserved_units_;//workers scheduled
 		std::vector<Entity> required_units_;//if task designed for specific units
 		bool interruptable_ = true;//is work interruptable

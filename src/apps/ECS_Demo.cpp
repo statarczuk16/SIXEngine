@@ -27,6 +27,7 @@
 #include <ECS/Systems/TaskSchedulerSystem.hpp>
 
 
+
 SXNGN::ECS::A::Coordinator gCoordinator;
 
 
@@ -50,6 +51,25 @@ using entity_builder = SXNGN::ECS::A::Entity_Builder_Utils;
 using Movement_System = SXNGN::ECS::A::Movement_System;
 
 using namespace SXNGN::ECS::A;
+
+std::shared_ptr<UIContainerComponent> debug_fps_actual;
+ 
+std::shared_ptr<UIContainerComponent> input_system_ms;
+std::shared_ptr<UIContainerComponent> task_scheduler_ms;
+std::shared_ptr<UIContainerComponent> movement_system_ms;
+std::shared_ptr<UIContainerComponent> collision_system_ms;
+std::shared_ptr<UIContainerComponent> event_system_ms;
+std::shared_ptr<UIContainerComponent> render_system_ms;
+ 
+std::shared_ptr<UIContainerComponent> input_system_label;
+std::shared_ptr<UIContainerComponent> task_scheduler_label;
+std::shared_ptr<UIContainerComponent> movement_system_label;
+std::shared_ptr<UIContainerComponent> collision_system_label;
+std::shared_ptr<UIContainerComponent> event_system_label;
+std::shared_ptr<UIContainerComponent> render_system_label;
+
+
+
 
 void QuitHandler(Event& event)
 {
@@ -273,6 +293,63 @@ int init_menus()
 	back_from_bg_button_c->triggered_events.push_back(back_state_event_ng);
 	new_game_window_c->child_components_.push_back(back_from_bg_button_c);
 
+	//************************* In Game UI
+	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, 80, UILayer::BOTTOM);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
+
+	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0);
+	Event_Component go_to_menu_event;
+	go_to_menu_event.e.common.type = EventType::STATE_CHANGE;
+	go_to_menu_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	go_to_menu_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+	ig_go_to_menu_button->triggered_events.push_back(go_to_menu_event);
+	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
+
+	//offset the game world display below this menu strip at the top
+	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+	overworld_viewport->y = ig_ui_window_top_c->window_->rect.h + 20;
+	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
+
+
+	//************************* Debug Overlay
+	auto debug_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w-80, 0, 80, resolution.h, UILayer::MID);
+	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FPS", 0);
+	debug_window_c->child_components_.push_back(debug_fps_l);
+
+	debug_fps_actual = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 1);
+	debug_window_c->child_components_.push_back(debug_fps_actual);
+
+
+
+	input_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "INPUT", 2);
+	debug_window_c->child_components_.push_back(input_system_label);
+	task_scheduler_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "TASK", 4);
+	debug_window_c->child_components_.push_back(task_scheduler_label);
+	movement_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "MOVEMENT", 6);
+	debug_window_c->child_components_.push_back(movement_system_label);
+	collision_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "COLLISION", 8);
+	debug_window_c->child_components_.push_back(collision_system_label);
+	event_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "EVENT", 10);
+	debug_window_c->child_components_.push_back(event_system_label);
+	render_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "RENDER", 12);
+	debug_window_c->child_components_.push_back(render_system_label);
+
+	 input_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 1", 3);
+	 debug_window_c->child_components_.push_back(input_system_ms);
+	 task_scheduler_ms= UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 2", 5);
+	 debug_window_c->child_components_.push_back(task_scheduler_ms);
+	 movement_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A ", 7);
+	 debug_window_c->child_components_.push_back(movement_system_ms);
+	 collision_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 9);
+	 debug_window_c->child_components_.push_back(collision_system_ms);
+	 event_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 11);
+	 debug_window_c->child_components_.push_back(event_system_ms);
+	 render_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 13);
+	 debug_window_c->child_components_.push_back(render_system_ms);
+
+	 ui->add_ui_element(ComponentTypeEnum::CORE_BG_GAME_STATE, debug_window_c);
+
+
 
 	return 0;
 }
@@ -414,11 +491,11 @@ int main(int argc, char* args[])
 		Signature signature;
 		//ACTS on Tasks
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::TASK));
-		gCoordinator.SetSystemSignatureActable<Event_System>(signature);
+		gCoordinator.SetSystemSignatureActable<Task_Scheduler_System>(signature);
 		//INTERESTED in any entity that has TASK_WORKER
 		Signature signature_of_interest;
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::TASK_WORKER));
-		gCoordinator.SetSystemSignatureOfInterest<Movement_System>(signature_of_interest);
+		gCoordinator.SetSystemSignatureOfInterest<Task_Scheduler_System>(signature_of_interest);
 	}
 	event_system->Init();
 
@@ -512,7 +589,9 @@ int main(int argc, char* args[])
 	SXNGN::Timer dt_timer;//time passed during this frame "delta t"
 	SXNGN::Timer frame_timer;//use to calculate frame rate
 	SXNGN::Timer frame_cap_timer;//use to enforce frame cap
+	SXNGN::Timer system_timer;//use to time each system
 	frame_timer.start();
+	system_timer.start();
 
 	float fps_avg = 0.0;
 	float dt = 0.0;
@@ -534,9 +613,11 @@ int main(int argc, char* args[])
 			events_this_frame.push_back(e);
 			//queue up and add to event component type
 		}
+		system_timer.start();
 		//If any input occured, create an entity to carry them to the input_system
 		if (!events_this_frame.empty())
 		{
+
 			auto input_event = gCoordinator.CreateEntity();
 			SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
 			input_cache->events_ = events_this_frame;
@@ -545,7 +626,7 @@ int main(int argc, char* args[])
 			//update event handling system
 			input_system->Update(dt);
 		}
-
+		strcpy(input_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 		
 
 		/////////////////////////////////Physics/Movement
@@ -553,16 +634,23 @@ int main(int argc, char* args[])
 		dt = dt_timer.getTicks() / 1000.f;//
 		game_dt = dt;
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
+		system_timer.start();
 		task_scheduler_system->Update(dt);
+		strcpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
+		system_timer.start();
 		movement_system->Update(dt);
+		strcpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
+		system_timer.start();
 		collision_system->Update(dt);
-
-		dt_timer.start(); //restart delta t for next frame
+		strcpy(collision_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		
 		//Phys End
 		/////////////////////////////////Event System - respond to physics, input, etc
+		system_timer.start();
 		event_system->Update(dt);
+		strcpy(event_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 		/////////////////////////////////Rendering
 		//Render Setup
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -573,22 +661,27 @@ int main(int argc, char* args[])
 		//Render UI
 		//TODO add UI
 		//Render Game
+		system_timer.start();
 		renderer_system->Update(dt);
+		strcpy(render_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
 		auto stopTime = std::chrono::high_resolution_clock::now();
-
+		dt_timer.start(); //restart delta t for next frame
 		//Render End
 		SDL_RenderPresent(gRenderer);
+		
 		/////////////////////////////////Frame End
 		fps_avg = frame_count / (frame_timer.getTicks() / 1000.f);
 		if (fps_avg > 2000000)
 		{
 			fps_avg = 0;
 		}
+		strcpy(debug_fps_actual->label_->text, std::to_string(fps_avg).c_str());
 		if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())
 		{
 			SDL_Delay(SXNGN::Database::get_screen_ticks_per_frame() - frame_cap_timer.getTicks());
 		}
+		
 		++frame_count;
 
 	}

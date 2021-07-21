@@ -4,6 +4,7 @@
 #include <array>
 #include <cassert>
 #include <queue>
+#include <SDL.h>
 
 namespace SXNGN::ECS::A {
 
@@ -67,6 +68,41 @@ namespace SXNGN::ECS::A {
 			return &game_settings;
 		}
 
+		std::shared_ptr<SDL_Rect> getStateViewPort(ComponentTypeEnum game_state)
+		{
+			if (game_state <= ComponentTypeEnum::GAME_STATE_START_HERE)
+			{
+				SDL_LogError(1, "StateManager::getViewPort input is not a game state.");
+				return nullptr;
+			}
+			if (game_state_to_view_port_.count(game_state) != 0)
+			{
+				return game_state_to_view_port_[game_state];
+			}
+			else
+			{
+				SDL_LogDebug(1, "StateManager::getViewPort input has no view port. Creating one based on resolution.");
+				std::shared_ptr<SDL_Rect> new_game_state_viewport = std::make_shared<SDL_Rect>();
+				
+				new_game_state_viewport->x = 0;
+				new_game_state_viewport->y = 0;
+				new_game_state_viewport->w = this->game_settings.resolution.w;
+				new_game_state_viewport->y = this->game_settings.resolution.y;
+				game_state_to_view_port_[game_state] = new_game_state_viewport;
+				return game_state_to_view_port_[game_state];
+			}
+		}
+
+		void setStateViewPort(ComponentTypeEnum game_state, std::shared_ptr<SDL_Rect> game_state_rect)
+		{
+			if (game_state <= ComponentTypeEnum::GAME_STATE_START_HERE)
+			{
+				SDL_LogError(1, "StateManager::getViewPort input is not a game state.");
+				return;
+			}
+			game_state_to_view_port_[game_state] = game_state_rect;
+		}
+
 		
 
 		StateManager()
@@ -103,6 +139,7 @@ namespace SXNGN::ECS::A {
 		{
 			active_game_states_.clear();
 			active_game_states_ = active_game_states;
+			active_game_states_.sort();
 		}
 
 		std::forward_list<ComponentTypeEnum> getActiveGameStates()
@@ -137,6 +174,7 @@ namespace SXNGN::ECS::A {
 		std::unordered_map< std::string, std::mutex> spaceGuards;
 		std::forward_list<ComponentTypeEnum> active_game_states_;
 		GameSettings game_settings;
+		std::unordered_map<ComponentTypeEnum, std::shared_ptr<SDL_Rect>> game_state_to_view_port_;
 		
 	};
 }

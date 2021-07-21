@@ -177,6 +177,12 @@ namespace SXNGN::ECS::A {
 			gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
 		}
 
+			SDL_Rect belowUIViewPort;
+			belowUIViewPort.x = 0;
+			belowUIViewPort.y = 100;
+			belowUIViewPort.w = gCoordinator.get_state_manager()->getGameSettings()->resolution.w;
+			belowUIViewPort.h = gCoordinator.get_state_manager()->getGameSettings()->resolution.h;
+			SDL_RenderSetViewport(gCoordinator.Get_Renderer(), &belowUIViewPort);
 			//Order of these matters. UI should appear over ground, etc
 			for (auto renderable : renderables_ground_layer)
 			{
@@ -195,6 +201,12 @@ namespace SXNGN::ECS::A {
 			{
 				Render(renderable, camera_ptr);
 			}
+			SDL_Rect normalViewPort;
+			normalViewPort.x = 0;
+			normalViewPort.y = 0;
+			normalViewPort.w = gCoordinator.get_state_manager()->getGameSettings()->resolution.w;
+			normalViewPort.h = gCoordinator.get_state_manager()->getGameSettings()->resolution.h;
+			SDL_RenderSetViewport(gCoordinator.Get_Renderer(), &normalViewPort);
 			//This draws the UI components in the UI Singleton, main menu buttons, etc. Precedence over renderable_ui_layer, which might be context menus in the gameplay window 
 			//whereas the singleton holds "constant" stuff corresponding to the game state
 			Draw_GUI();

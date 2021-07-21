@@ -32,6 +32,8 @@ namespace SXNGN::ECS::A {
 
 		bool GUI_Handle_Event(std::shared_ptr<Coordinator> coordinator, SDL_Event* e, std::shared_ptr<UIContainerComponent> component_in_layer);
 
+		bool Hotkey_Handle_Events(std::shared_ptr<Coordinator> coordinator, std::vector<SDL_Event>& events);
+
 		void Update(float dt);
 
 		void Update_Mouse_State(std::vector<SDL_Event> mouse_events, float dt);

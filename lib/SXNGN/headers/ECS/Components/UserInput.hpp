@@ -11,10 +11,9 @@ namespace SXNGN::ECS::A {
 
 	enum class User_Input_Tags
 	{
-		CLICKABLE, //can be selected with mouse
+		MOUSE_CONTROL, //can be selected with mouse
 		WASD_CONTROL, //movement controlled by keyboard
 		PLAYER_CONTROL_MOVEMENT,
-		CURRENTLY_SELECTED
 	};
 
 

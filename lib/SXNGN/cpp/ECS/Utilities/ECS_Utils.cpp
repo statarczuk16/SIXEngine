@@ -179,14 +179,25 @@ namespace SXNGN {
 				return current_view;
 			}
 
-			SDL_Rect ECS_Utils::convert_screen_position_to_world_position(std::shared_ptr<ECS_Camera> camera, int screen_x, int screen_y)
+			SDL_Rect ECS_Utils::convert_screen_position_to_world_position(std::shared_ptr<ECS_Camera> camera, int screen_x, int screen_y, ComponentTypeEnum game_state)
 			{
-				SDL_Rect current_view = determine_camera_lens_unscaled(camera);
 				SDL_Rect world_position;
+				//account for camera offset
+				SDL_Rect current_view = determine_camera_lens_unscaled(camera);
 				world_position.x = current_view.x + screen_x;
 				world_position.y = current_view.y + screen_y;
 				world_position.w = 0;
 				world_position.h = 0;
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator->get_state_manager()->getStateViewPort(game_state);
+				if (overworld_viewport == nullptr)
+				{
+					return world_position;
+				}
+				//account for viewport offset
+				world_position.x -= overworld_viewport->x;
+				world_position.y -= overworld_viewport->y;
+				
 				return world_position;
 
 			}

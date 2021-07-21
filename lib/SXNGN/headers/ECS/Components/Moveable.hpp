@@ -26,11 +26,6 @@ namespace SXNGN::ECS::A {
 		Moveable()
 		{
 			component_type = ComponentTypeEnum::MOVEABLE;
-			//position_box_.x = 0;
-			//position_box_.y = 0;
-			//position_box_.w = 1;
-			//position_box_.h = 1;
-
 
 		}
 		//SDL_Rect position_box_;
