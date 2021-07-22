@@ -104,10 +104,10 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/sole-master/)
 #include_directories(${CMAKE_SOURCE_DIR}/lib/cereal/)	
  
 #add an executable for anything that will turn into an exe or whatever other executable format
-add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp")
+add_executable(HoplonSimulator "src/apps/HoplonSimulator.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp" "lib/SXNGN/headers/ECS/Components/Selectable.hpp")
 target_link_libraries(HoplonSimulator SDL2::Main SDL2::Image SDL2::TTF)
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp")
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp" "lib/SXNGN/headers/ECS/Components/Selectable.hpp")
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

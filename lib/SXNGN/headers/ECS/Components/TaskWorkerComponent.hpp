@@ -17,6 +17,7 @@ namespace SXNGN::ECS::A {
 		Task_Worker_Component()
 		{
 			id_ = sole::uuid1();
+			component_type = ComponentTypeEnum::TASK_WORKER;
 		}
 
 		sole::uuid id_;//unique id
@@ -25,5 +26,6 @@ namespace SXNGN::ECS::A {
 		Sint32 current_job_priority_ = -1;
 		Entity current_job_ = -1;
 		std::vector<Entity> job_queue_;
+		bool new_job = false; //flag when adding a new job
 	};
 }

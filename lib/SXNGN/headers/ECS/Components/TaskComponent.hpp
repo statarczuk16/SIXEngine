@@ -17,6 +17,7 @@ namespace SXNGN::ECS::A {
 		Task_Component()
 		{
 			id_ = sole::uuid1();
+			component_type = ComponentTypeEnum::TASK;
 		}
 
 		sole::uuid id_;//unique id

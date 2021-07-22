@@ -27,6 +27,7 @@ public:
 	{
 		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until array is safe to operate on 
 		array_wide_operation_in_progress.store(true);
+
 		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
 		{
 			SDL_LogError(1, "InsertData : Component added to same entity more than once: Type %d", component->get_component_type());
@@ -63,8 +64,9 @@ public:
 	const ECS_Component* GetDataReadOnly(Entity entity)
 	{
 		const ECS_Component* to_return = nullptr;
-		component_specific_operations_in_progress++;
+		
 		std::lock_guard<std::mutex> guard(master_component_array_guard);
+		component_specific_operations_in_progress++;
 		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
 		{
 			mComponentMutexes[entity].lock();//Wait until data is available (no other theadss have checked it out)
@@ -81,6 +83,14 @@ public:
 		}
 		return to_return;
 	} 
+
+	const std::array<ECS_Component*, MAX_ENTITIES> GetAllDataReadOnly()
+	{
+		
+		std::lock_guard<std::mutex> guard(master_component_array_guard);
+		return  mComponentArray;
+
+	}
 
 	//deprecated
 	const ECS_Component* TryGetDataReadOnly(Entity entity)

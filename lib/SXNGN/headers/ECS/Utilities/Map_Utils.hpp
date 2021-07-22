@@ -18,7 +18,9 @@ namespace SXNGN {
 
 				static void StartNewGame();
 
-				std::vector<Location> GetPath();
+				static Uint32 GetDistance(NAVIGATION_TYPE method, Location start, Location end);
+
+				static std::vector<Location> GetPath(NAVIGATION_TYPE method, Location start, Location end);
 				
 
 				

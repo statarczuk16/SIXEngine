@@ -59,17 +59,17 @@ namespace SXNGN::ECS::A {
 			auto map_tile_entity = gCoordinator->CreateEntity();
 			Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
 			gCoordinator->AddComponent(map_tile_entity, pre_render);
-			if (game_map_collisionables.at(i).collision_type_ != CollisionType::NONE)
-			{
+			//if (game_map_collisionables.at(i).collision_type_ != CollisionType::UNKNOWN)
+			//{
 				Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
 				gCoordinator->AddComponent(map_tile_entity, collisionable);
-			}
-			
+			//}
+				Selectable* selectable = new Selectable();
+				gCoordinator->AddComponent(map_tile_entity, selectable);
+
 			Tile* tile = new Tile(game_map_tiles.at(i));
 			gCoordinator->AddComponent(map_tile_entity, tile);
-			User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
-			input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::MOUSE_CONTROL);
-			gCoordinator->AddComponent(map_tile_entity, input_tags_comp);
+			
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}
 
@@ -94,6 +94,24 @@ namespace SXNGN::ECS::A {
 
 		CreateNewWorld();
 
+	}
+
+	Uint32 Map_Utils::GetDistance(NAVIGATION_TYPE method, Location start, Location end)
+	{
+		switch (method)
+		{
+		case NAVIGATION_TYPE::MANHATTAN:
+		{
+			return abs(start.x - end.x) + abs(start.y - end.y);
+			break;
+		}
+		default:
+		{
+			SDL_LogError(1, "GetDistance: Only Manhattan supported now.");
+			return -1;
+			break;
+		}
+		}
 	}
 
 }

@@ -25,6 +25,8 @@ namespace SXNGN::ECS::A {
 		OBJECT
 	};
 
+	
+
 
 	/// <summary>
 	/// Contains all data needed to handle a collision between two entities that both have collision
@@ -45,6 +47,7 @@ namespace SXNGN::ECS::A {
 		SDL_Rect collision_box_;
 		CollisionType collision_type_ = CollisionType::UNKNOWN;
 		CollisionTag collision_tag_ = CollisionTag::UNKNOWN;
+		bool selectable_ = false;
 		int buffer_pixels = 0;//"halo" around the collision box making it collide larger/smaller than it really is
 		bool resolved_ = false; //set to true whenever this object is checked by collision system. 
 		//std::vector<Entity> touching_; //list of entities we know object is touching - reset whenever resolved is changed (object moves)

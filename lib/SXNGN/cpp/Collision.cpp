@@ -175,7 +175,7 @@ namespace SXNGN {
 		 }
 
 
-		 printf("xon: %d yon: %d xop: %d yop: %d\n", xon, yon, xop, yop);
+		// printf("xon: %d yon: %d xop: %d yop: %d\n", xon, yon, xop, yop);
 		 return new_move_location;
 		
 		 

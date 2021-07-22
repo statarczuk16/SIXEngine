@@ -19,38 +19,25 @@ namespace SXNGN::ECS::A {
 	/// <param name="dt"></param>
 	void User_Input_System::Update(float dt)
 	{
-		std::cout << std::fixed << std::setprecision(9) << std::left;
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Stamp Start Function %d", std::chrono::high_resolution_clock::now());
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::vector<Entity> entities_to_cleanup;
 
 		//SDL_LogDebug(1, "User_Input_Begin ");
 		auto it_act = m_actable_entities.begin();
-		auto start = std::chrono::system_clock::now();
-		auto end = std::chrono::system_clock::now();
-		std::chrono::duration<double> diff = end - start;
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "GUI Input //////////////s");
 		//actable entities for user input system are UserInputCache (vector of sdl events)
 		auto total = m_actable_entities.size();
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
 			it_act++;
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "loop start" << diff.count() << " s\n";
 			auto user_input_ptr = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::INPUT_CACHE);
 			User_Input_Cache input_cache = *static_cast<const User_Input_Cache*>(user_input_ptr);
 
-			
-			
 			if (input_cache.events_.empty() == false)
 			{
 				//pass by ref
 				Handle_GUI_Input(input_cache.events_);
 			}
-
-
 
 			std::vector<std::vector<SDL_Event>> sorted_events = UserInputUtils::filter_sdl_events(input_cache.events_);
 			std::vector<SDL_Event> mouse_events = sorted_events.at(0);
@@ -65,18 +52,19 @@ namespace SXNGN::ECS::A {
 
 			auto it_inter = m_entities_of_interest.begin();
 			//Entities of interest are any entity that need user input
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "interest start" << diff.count() << " s\n";
-			std::vector< User_Input_Tags_Collection> arr;
+			
 			while (it_inter != m_entities_of_interest.end())
 			{
 				auto const& entity_interest = *it_inter;
 				it_inter++;
 
 				auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
+				if (!tags_ptr)
+				{
+					continue;
+				}
 				User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
-				arr.push_back(input_tags);
+				
 				if (input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL) && keyboard_events.empty() == false)
 				{
 
@@ -92,55 +80,8 @@ namespace SXNGN::ECS::A {
 						}
 					}
 				}
-				//std::cout << std::setw(9) << "interest processed" << diff.count() << " s\n";
 			}
-
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "process end" << diff.count() << " s\n";
-
-			it_inter = m_entities_of_interest.begin();
-			while (it_inter != m_entities_of_interest.end())
-			{
-				it_inter++;
-			}
-
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "iterate end" << diff.count() << " s\n";
-
-			it_inter = m_entities_of_interest.begin();
-			while (it_inter != m_entities_of_interest.end())
-			{
-				
-				auto const& entity_interest = *it_inter;
-				it_inter++;
-				auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
-				//User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
-			}
-
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "iterate checkout and cast end" << diff.count() << " s\n";
-
-
-			auto it_inter_2 = arr.begin();
-			while (it_inter_2 != arr.end())
-			{
-				it_inter_2++;
-			}
-
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "iterate array end" << diff.count() << " s\n";
-
-
-			
-
 			entities_to_cleanup.push_back(entity_actable);
-			end = std::chrono::system_clock::now();
-			diff = end - start;
-			std::cout << std::setw(9) << "process end" << diff.count() << " s" << "num of interest " << m_entities_of_interest.size() << "\n";
 		}
 		
 		for (Entity entity_to_clean : entities_to_cleanup)
@@ -148,9 +89,6 @@ namespace SXNGN::ECS::A {
 			gCoordinator.DestroyEntity(entity_to_clean);
 		}
 		
-		end = std::chrono::system_clock::now();
-		diff = end - start;
-		std::cout << std::setw(9) << "function end" << diff.count() << " s\n";
 	}
 
 	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt)

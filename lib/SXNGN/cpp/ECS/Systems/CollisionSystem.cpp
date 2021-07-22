@@ -27,7 +27,7 @@ namespace SXNGN::ECS::A {
 		std::deque <std::pair<Entity, const Collisionable*>> entity_to_collisionable_all;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions_2;
-		//actable entities for event system are entities with event component
+		//actable entities for collision system have collision and can move
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
@@ -227,18 +227,18 @@ namespace SXNGN::ECS::A {
 		{
 
 			const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
-			//if the event is a mouse click and the other entity has input tags
-			if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::INPUT_TAGS))
+			//if the event is a mouse click and the other is selectable
+			if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::SELECTABLE))
 			{
 				//see how second collisionable reacts to mouse input
-				auto input_data = gCoordinator.GetComponentReadOnly(other_entity, ComponentTypeEnum::INPUT_TAGS);
+				auto select_data = gCoordinator.GetComponentReadOnly(other_entity, ComponentTypeEnum::SELECTABLE);
 
-				const User_Input_Tags_Collection* input_tags_ptr = static_cast<const User_Input_Tags_Collection*>(input_data);
+				const Selectable* select_ptr = static_cast<const Selectable*>(select_data);
 				//if it is clickable
 				std::vector<Entity> clicked;
 				std::vector<Entity> double_click_entities;
 				std::vector<Entity> boxed_entities;
-				if (input_tags_ptr && input_tags_ptr->input_tags_.count(User_Input_Tags::MOUSE_CONTROL))
+				if (true)
 				{
 					switch (event_ptr->e.mouse_event.type)
 					{

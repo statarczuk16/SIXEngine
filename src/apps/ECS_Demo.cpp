@@ -401,6 +401,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::SELECTABLE);
 
 
 
@@ -440,9 +441,15 @@ int main(int argc, char* args[])
 	//Collision system handles collision between entities but also clicks and draggable boxes etc with things in game world
 	auto collision_system = gCoordinator.RegisterSystem<Collision_System>();
 	{
+		//actable - has collision and can move
 		Signature signature;
 		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
+		//signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::MOVEABLE));
 		gCoordinator.SetSystemSignatureActable<Collision_System>(signature);
+		//check against - anything that has collision
+		Signature signature_of_interest;
+		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::COLLISION));
+		gCoordinator.SetSystemSignatureOfInterest<Collision_System>(signature_of_interest);
 	}
 	collision_system->Init();
 
@@ -455,6 +462,7 @@ int main(int argc, char* args[])
 		gCoordinator.SetSystemSignatureActable<User_Input_System>(signature_actable);
 		//User_Input_System is INTERESTED in any entity that has INPUT_TAGS (It uses input_cache to apply input to entities according to their INPUT_TAGS)
 		Signature signature_of_interest;
+		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::INPUT_CACHE));
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::INPUT_TAGS));
 		gCoordinator.SetSystemSignatureOfInterest<User_Input_System>(signature_of_interest);
 
@@ -497,7 +505,7 @@ int main(int argc, char* args[])
 		signature_of_interest.set(gCoordinator.GetComponentType(ComponentTypeEnum::TASK_WORKER));
 		gCoordinator.SetSystemSignatureOfInterest<Task_Scheduler_System>(signature_of_interest);
 	}
-	event_system->Init();
+	task_scheduler_system->Init();
 
 
 
@@ -634,12 +642,11 @@ int main(int argc, char* args[])
 		dt = dt_timer.getTicks() / 1000.f;//
 		game_dt = dt;
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
-		system_timer.start();
-		task_scheduler_system->Update(dt);
-		strcpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		
 
 		system_timer.start();
 		movement_system->Update(dt);
+		dt_timer.start(); //restart delta t for next frame
 		strcpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
 		system_timer.start();
@@ -651,6 +658,10 @@ int main(int argc, char* args[])
 		system_timer.start();
 		event_system->Update(dt);
 		strcpy(event_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+
+		system_timer.start();
+		task_scheduler_system->Update(dt);
+		strcpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 		/////////////////////////////////Rendering
 		//Render Setup
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -666,7 +677,7 @@ int main(int argc, char* args[])
 		strcpy(render_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
 		auto stopTime = std::chrono::high_resolution_clock::now();
-		dt_timer.start(); //restart delta t for next frame
+		
 		//Render End
 		SDL_RenderPresent(gRenderer);
 		

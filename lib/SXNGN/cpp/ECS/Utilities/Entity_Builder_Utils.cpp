@@ -66,6 +66,9 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, input_tags_comp);
 				coordinator.AddComponent(person_entity, Create_Gamestate_Component_from_Enum(game_state));
 
+				Selectable* selectable = new Selectable();
+				coordinator.AddComponent(person_entity, selectable);
+
 				return person_entity;
 
 			}

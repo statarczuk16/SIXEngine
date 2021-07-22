@@ -130,18 +130,49 @@ namespace SXNGN::ECS::A {
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)
 	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto user_input_state = User_Input_State::get_instance();
-		if (ec->e.order_event.enqueue)
+		switch (ec->e.order_event.order_type)
 		{
-			//todo job queueing system
-		}
-		else
-		{
-			for (auto entity : ec->e.order_event.clicked_entities)
+			case OrderType::MOVE:
 			{
+				Task_Component* new_task = new Task_Component();
+				new_task->name_ = "MOVE TO";
+				new_task->interruptable_ = true;
+				new_task->priority_ = 1;
+				new_task->scheduled_ = false;
+				WorkChunk walk_chunk;
+				if (ec->e.order_event.clicked_entities.empty())
+				{
+					//didnt click on anything
+					return;
+				}
+				auto move_location = gCoordinator.GetComponentReadOnly(ec->e.order_event.clicked_entities.at(0), ComponentTypeEnum::COLLISION);
+				if (!move_location)
+				{
+					return;
+				}
+				const Collisionable* collisionable = static_cast<const Collisionable*>(move_location);
+				walk_chunk.location_.x = collisionable->collision_box_.x;
+				walk_chunk.location_.y = collisionable->collision_box_.y;
+				walk_chunk.skill_level_required_ = 0;
+				walk_chunk.skill_required_ = TaskSkill::WALKING;
+				walk_chunk.work_required_ = 1;
 				
+				new_task->tasks_.push_back(walk_chunk);
+				auto task_entity = gCoordinator.CreateEntity();
+				gCoordinator.AddComponent(task_entity, new_task, false);
+				gCoordinator.AddComponent(task_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
+
+				break;
+			}
+			default:
+			{
+				SDL_LogError(1, "Unknown Order Type");
+				break;
 			}
 		}
+		
 
 	}
 

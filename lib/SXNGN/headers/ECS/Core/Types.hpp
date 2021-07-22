@@ -83,7 +83,8 @@ namespace SXNGN::ECS::A {
 	enum class TaskSkill : Uint8 {
 		UNKNOWN,
 		MINING,
-		BUILDING
+		BUILDING,
+		WALKING
 	};
 
 	struct WorkChunk {
@@ -99,7 +100,7 @@ namespace SXNGN::ECS::A {
 	enum class NAVIGATION_TYPE : Uint8 {
 		UNKNOWN,
 		A_STAR,
-		DEAD_RECKON
+		MANHATTAN
 	};
 
 	enum class MOUSE_BUTTON : Uint8 {

@@ -175,6 +175,11 @@ namespace SXNGN {
 					return mComponentManager->CheckOutComponent(entity, component_type);
 				}
 
+				const std::array<ECS_Component*, MAX_ENTITIES> GetComponentArrayReadOnly(ComponentTypeEnum component_type)
+				{
+					return mComponentManager->GetComponentArrayReadOnly(component_type);
+				}
+
 				/// <summary>
 				/// Used by a thread to return checked-out data.
 				/// </summary>
