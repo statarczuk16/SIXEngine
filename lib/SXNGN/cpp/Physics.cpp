@@ -1,6 +1,8 @@
 #include "Physics.h"
 #include "Constants.h"
 #include "gameutils.h"
+#include <ECS/Utilities/Map_Utils.hpp>
+#include <ECS/Core/Types.hpp>
 
 
 SXNGN::Physics::FrictionType SXNGN::Physics::move_type_to_friction_type(MoveType move_type)
@@ -119,13 +121,5 @@ double SXNGN::Physics::get_total_acceleration(double f_app_acc_m_s_s, double fr_
 }
 **/
 
-double SXNGN::Physics::adjust_velocity_by_acc(double acc, double vel, double time_step, double max_val)
-{
-
-	double new_vel = time_step * acc;
-	//for now, an object can not go from positive to negative movement in one frame. It must stop first.
-	double return_vel = Gameutils::adjust_dbl_abs_value_within_range(vel, new_vel, max_val, -max_val);
 
 
-	return return_vel;
-}

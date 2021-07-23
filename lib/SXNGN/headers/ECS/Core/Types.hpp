@@ -45,30 +45,6 @@ enum class InputButtons
 using EventId = std::uint32_t;
 using ParamId = std::uint32_t;
 
-#define METHOD_LISTENER(EventType, Listener) EventType, std::bind(&Listener, this, std::placeholders::_1)
-#define FUNCTION_LISTENER(EventType, Listener) EventType, std::bind(&Listener, std::placeholders::_1)
-
-// TODO: Make these easier to define and use (macro?)
-// TODO: Add some kind of enforcement/automation that a SetParam type and a GetParam type match
-
-namespace Events {
-
-	namespace Window {
-		const EventId QUIT = "Events::Window::QUIT"_hash;
-		const EventId RESIZED = "Events::Window::RESIZED"_hash;
-		const EventId INPUT = "Events::Window::INPUT"_hash;
-
-
-		namespace Input {
-			const ParamId INPUT = "Events::Window::Input::INPUT"_hash;
-		}
-
-		namespace Resized {
-			const ParamId WIDTH = "Events::Window::Resized::WIDTH"_hash;
-			const ParamId HEIGHT = "Events::Window::Resized::HEIGHT"_hash;
-		}
-	}
-}
 
 namespace SXNGN::ECS::A {
 
@@ -80,11 +56,24 @@ namespace SXNGN::ECS::A {
 		
 	};
 
+	enum class OrderType : Uint8
+	{
+		UNKNOWN,
+		MOVE
+	};
+
 	enum class TaskSkill : Uint8 {
 		UNKNOWN,
 		MINING,
 		BUILDING,
 		WALKING
+	};
+
+	enum class SkillPriority : Uint8 {
+		LOW,
+		MEDIUM,
+		HIGH,
+		CRITICAL
 	};
 
 	struct WorkChunk {

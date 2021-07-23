@@ -67,9 +67,7 @@ namespace SXNGN {
 							moveable->m_prev_pos_y_m = moveable->m_pos_y_m;
 						}
 						
-						moveable->m_pos_x_m = x;
-						moveable->m_pos_y_m = y;
-
+						moveable->UpdatePosition(x, y);
 						gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
 					}
 				}

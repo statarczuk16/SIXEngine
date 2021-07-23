@@ -20,10 +20,9 @@ namespace SXNGN {
 
 				static Uint32 GetDistance(NAVIGATION_TYPE method, Location start, Location end);
 
-				static std::vector<Location> GetPath(NAVIGATION_TYPE method, Location start, Location end);
+				static std::queue<Location> GetPath(NAVIGATION_TYPE method, Location start, Location end);
 				
-
-				
+				static std::pair<int, int> GetVector(Location start, Location end);
 
 			};
 		}

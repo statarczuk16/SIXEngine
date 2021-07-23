@@ -64,6 +64,13 @@ namespace SXNGN {
 					input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
 				}
 				coordinator.AddComponent(person_entity, input_tags_comp);
+
+				Task_Worker_Component* worker = new Task_Worker_Component();
+				worker->skill_levels_[TaskSkill::WALKING] = 5;
+				worker->skill_enable_[TaskSkill::WALKING] = 3;
+				coordinator.AddComponent(person_entity, worker);
+
+
 				coordinator.AddComponent(person_entity, Create_Gamestate_Component_from_Enum(game_state));
 
 				Selectable* selectable = new Selectable();

@@ -40,6 +40,8 @@ namespace SXNGN::ECS::A {
 
 		void Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt);
 
+		void Translate_Waypoints_To_Movement(Moveable* moveable);
+
 
 	private:
 

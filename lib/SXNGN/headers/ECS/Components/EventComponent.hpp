@@ -22,11 +22,7 @@ namespace SXNGN::ECS::A {
 		ORDER
 	};
 
-	enum class OrderType : Uint8
-	{
-		UNKNOWN,
-		MOVE
-	};
+	
 
 
 	struct SXNGN_Common

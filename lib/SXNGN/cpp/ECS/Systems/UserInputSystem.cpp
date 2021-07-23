@@ -4,6 +4,7 @@
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
 #include <stack>
 #include <iostream>
+#include <Physics.h>
 
 
 namespace SXNGN::ECS::A {
@@ -76,6 +77,7 @@ namespace SXNGN::ECS::A {
 						{
 							Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
 							Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
+							Translate_Waypoints_To_Movement(moveable_ptr);
 							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
 						}
 					}
@@ -89,6 +91,38 @@ namespace SXNGN::ECS::A {
 			gCoordinator.DestroyEntity(entity_to_clean);
 		}
 		
+	}
+
+	void User_Input_System::Translate_Waypoints_To_Movement(Moveable* moveable)
+	{
+		if (moveable)
+		{
+			switch (moveable->moveable_type_)
+			{
+			case MoveableType::VELOCITY:
+			{
+				auto destination = moveable->GetCurrentWaypoint();
+				auto position = moveable->GetPosition();
+				std::pair<int, int> movement_vector = SXNGN::Physics::GetVector(position, destination);
+				int vel_x = movement_vector.first * moveable->m_speed_m_s;
+				int vel_y = movement_vector.first * moveable->m_speed_m_s;
+
+				moveable->m_vel_x_m_s = vel_x;
+				moveable->m_vel_y_m_s = vel_y;
+			}
+			break;
+			case MoveableType::FORCE:
+			{
+				printf("Physics movement not yet supported");
+			}
+			break;
+			default:
+			{
+				printf("Unsupported moveable type_ : %2d", moveable->moveable_type_);
+			}
+
+			}
+		}
 	}
 
 	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt)

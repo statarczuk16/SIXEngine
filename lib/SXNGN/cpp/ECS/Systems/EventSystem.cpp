@@ -141,6 +141,9 @@ namespace SXNGN::ECS::A {
 				new_task->interruptable_ = true;
 				new_task->priority_ = 1;
 				new_task->scheduled_ = false;
+
+				new_task->required_units_ = user_input_state->selected_entities;
+
 				WorkChunk walk_chunk;
 				if (ec->e.order_event.clicked_entities.empty())
 				{

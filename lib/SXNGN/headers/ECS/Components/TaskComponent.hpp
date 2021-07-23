@@ -24,10 +24,10 @@ namespace SXNGN::ECS::A {
 		std::string name_ = "Uninit";//task name
 		std::vector<WorkChunk> tasks_; //all the work to do
 		std::vector<WorkChunk> tasks_done_;//move tasks to here when completed
-		std::vector<Entity> reserved_units_;//workers scheduled
-		std::vector<Entity> required_units_;//if task designed for specific units
+		std::unordered_set<Entity> reserved_units_;//workers scheduled
+		std::unordered_set<Entity> required_units_;//if task designed for specific units
 		bool interruptable_ = true;//is work interruptable
-		int priority_ = -1; //priority of task
+		Uint8 priority_ = -1; //priority of task
 		bool scheduled_ = false;
 
 	};

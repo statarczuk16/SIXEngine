@@ -1,6 +1,11 @@
 #pragma once
 #include <climits>
 
+
+namespace SXNGN::ECS::A {
+	struct Location;
+}
+
 namespace SXNGN {
 	class Physics
 	{
@@ -28,6 +33,7 @@ namespace SXNGN {
 		//static double get_total_acceleration(double f_app_acc_m_s_s, double fr_acc_m_s_s);
 		static double adjust_velocity_by_acc(double acc, double vel, double time_step, double max_val = double(INT_MAX));
 		static FrictionType move_type_to_friction_type(MoveType move_type);
+		
 
 		
 	};

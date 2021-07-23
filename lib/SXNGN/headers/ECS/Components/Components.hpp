@@ -14,3 +14,4 @@
 #include <ECS/Components/Selectable.hpp>
 #include <ECS/Components/UI.hpp>
 #include <ECS/Components/TaskComponent.hpp>
+#include <ECS/Components/TaskWorkerComponent.hpp>

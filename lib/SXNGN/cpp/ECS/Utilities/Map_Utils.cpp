@@ -75,6 +75,8 @@ namespace SXNGN::ECS::A {
 
 		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_1", true);
 
+		Entity test_worker = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_2", false, "Worker");
+
 		auto camera = CameraComponent::get_instance();
 		camera->set_target(test_person);
 
@@ -112,6 +114,35 @@ namespace SXNGN::ECS::A {
 			break;
 		}
 		}
+	}
+
+	std::queue<Location> Map_Utils::GetPath(NAVIGATION_TYPE method, Location start, Location end)
+	{
+		std::queue<Location> q;
+		switch (method)
+		{
+		case NAVIGATION_TYPE::MANHATTAN:
+		{
+			
+			q.push(end);
+			return q;
+			break;
+		}
+		default:
+		{
+			SDL_LogError(1, "GetDistance: Only Manhattan supported now.");
+			return q;
+			break;
+		}
+		}
+	}
+
+	std::pair<int, int>  Map_Utils::GetVector(SXNGN::ECS::A::Location start, SXNGN::ECS::A::Location end)
+	{
+		auto distance = ECS::A::Map_Utils::GetDistance(ECS::A::NAVIGATION_TYPE::MANHATTAN, start, end);
+		int x = end.x - start.x;
+		int y = end.y - start.y;
+		std::pair<int, int> result = std::make_pair(x / distance, y / distance);
 	}
 
 }
