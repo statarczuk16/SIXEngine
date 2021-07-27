@@ -20,7 +20,7 @@ namespace SXNGN::ECS::A {
 			return (priority < str.priority);
 		}
 		Uint32 priority = 0;
-		Entity entity = -1;
+		Entity entity = MAX_ENTITIES;
 	};
 
 	/// <summary>
@@ -32,6 +32,10 @@ namespace SXNGN::ECS::A {
 		{
 			id_ = sole::uuid1();
 			component_type = ComponentTypeEnum::TASK_WORKER;
+			current_job_ = MAX_ENTITIES;
+			current_job_priority_ = 0;
+			new_job = false;
+			job_transition_ = false;
 		}
 
 		
@@ -40,7 +44,7 @@ namespace SXNGN::ECS::A {
 		std::map<TaskSkill, Sint32> skill_levels_;
 		std::map<TaskSkill, SkillPriority> skill_enable_;
 		Uint32 current_job_priority_ = 0;
-		Entity current_job_ = -1;
+		Entity current_job_ = MAX_ENTITIES;
 		std::map<SkillPriority, std::vector<TaskPair>> job_queue_;
 		bool new_job = false; //flag when adding a new job
 		bool job_transition_ = false; //flag when starting a new job

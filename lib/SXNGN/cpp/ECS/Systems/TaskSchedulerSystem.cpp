@@ -19,6 +19,7 @@ namespace SXNGN::ECS::A {
 	{
 
 		Schedule_Jobs();
+		Work_Workers(dt);
 
 
 	}
@@ -27,26 +28,30 @@ namespace SXNGN::ECS::A {
 	TaskPair Task_Scheduler_System::FindHighestPriorityJob(Task_Worker_Component*  worker, bool remove)
 	{
 		std::map<SkillPriority, std::vector<TaskPair>>::iterator it = worker->job_queue_.begin();
+		TaskPair highest = TaskPair(MAX_ENTITIES, 0);
 		//go from highest to lowest priority job queue
 		while (it != worker->job_queue_.end())
 		{
 			if (it->second.empty())
 			{
+				it++;
 				continue;
 			}
 			//sort from lowest to highest priority
 			std::sort(it->second.begin(), it->second.end());
 			//return highest priority job
-			TaskPair highest = it->second.at(it->second.size());
+			highest = it->second.back();
 			if (remove)
 			{
 				it->second.pop_back();
 			}
+			it++;
 			return highest;
 		}
+		return highest;
 	}
 
-	void Task_Scheduler_System::Work_Workers()
+	void Task_Scheduler_System::Work_Workers(float dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::vector<Entity> entities_to_cleanup;
@@ -58,29 +63,39 @@ namespace SXNGN::ECS::A {
 		{
 			auto const& worker_id = *worker_it;
 			worker_it++;
-
+			Task_Worker_Component* worker = nullptr;
 			ECS_Component* worker_ptr = nullptr;
-			if(worker_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::TASK_WORKER));
+			worker_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::TASK_WORKER);
+			if(worker_ptr);
 			{
 				//When no job, find the highest priority and start it
-				Task_Worker_Component* worker = static_cast<Task_Worker_Component*>(worker_ptr);
-				if (worker->current_job_ == -1)
+				worker = static_cast<Task_Worker_Component*>(worker_ptr);
+				if (worker->current_job_ == MAX_ENTITIES)
 				{
 					//pop highest priority job from worker queue
 					TaskPair tasked_job = FindHighestPriorityJob(worker, true);
+					if (tasked_job.entity == MAX_ENTITIES)
+					{
+						gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, worker_id);
+						continue;
+					}
 					worker->current_job_ = tasked_job.entity;
 					worker->current_job_priority_ = tasked_job.priority;
 					worker->job_transition_ = true;
 				}
+				Entity job_id = worker->current_job_;
 				ECS_Component* moveable_ptr = nullptr;
 				Moveable* moveable = nullptr;
-				const ECS_Component* task_ptr = nullptr;
-				const Task_Component* task = nullptr;
-				if (task_ptr = gCoordinator.GetComponentReadOnly(worker_id, ComponentTypeEnum::TASK))
+				ECS_Component* task_ptr = nullptr;
+				Task_Component* task = nullptr;
+				task_ptr = gCoordinator.CheckOutComponent(job_id, ComponentTypeEnum::TASK);
+				if (!task_ptr)
 				{
-					task = static_cast<const Task_Component*>(task_ptr);
-
+					gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, worker_id);
+					continue;
 				}
+				task = static_cast<Task_Component*>(task_ptr);
+
 				if (moveable_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::MOVEABLE));
 				{
 					moveable = static_cast<Moveable*>(moveable_ptr);
@@ -95,6 +110,18 @@ namespace SXNGN::ECS::A {
 						moveable->SolveDestination(moveable->navigation_type);
 					}
 				}
+				else
+				{
+					if (moveable->Check_At_Destination())
+					{
+						if (Worker_Can_Do_Work(worker, moveable, task))
+						{
+							Worker_Do_Work(worker, task, dt);
+						}
+					}
+				}
+
+
 
 				if (moveable)
 				{
@@ -102,14 +129,53 @@ namespace SXNGN::ECS::A {
 				}
 				if (worker)
 				{
-					gCoordinator.CheckInComponent(ComponentTypeEnum::TASK, worker_id);
+					gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, worker_id);
 				}
-
-				
-
-				
+				if (task)
+				{
+					gCoordinator.CheckInComponent(ComponentTypeEnum::TASK, job_id);
+				}
 			}
-			gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, worker_id);
+			
+		}
+	}
+
+	bool Task_Scheduler_System::Worker_Can_Do_Work(Task_Worker_Component* worker, Moveable* worker_mov, Task_Component* task)
+	{
+		if (task->tasks_.empty())
+		{
+			return false;
+		}
+		if (worker_mov)
+		{
+			auto distance = Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, worker_mov->position_, task->tasks_.at(0).location_);
+			if (distance >= AT_DESTINATION_THRESH)
+			{
+				return false;
+			}
+		}
+		if (worker->skill_levels_.count(task->tasks_.at(0).skill_required_) == 0)
+		{
+			return false;
+		}
+		if (worker->skill_levels_[task->tasks_.at(0).skill_required_] < task->tasks_.at(0).skill_level_required_)
+		{
+			return false;
+		}
+		return true;
+
+	}
+
+	void Task_Scheduler_System::Worker_Do_Work(Task_Worker_Component* worker, Task_Component* task, double dt)
+	{
+		double skill_multiplier = 0.2 * worker->skill_levels_.at(task->tasks_.at(0).skill_required_);
+		double work_complete = dt * skill_multiplier;
+		int work_tiks = (int) round(work_complete * 1000);
+		task->tasks_.at(0).work_completed_ += work_tiks;
+		if(task->tasks_.at(0).work_completed_ > task->tasks_.at(0).work_required_)
+		{
+			SDL_LogDebug(1, "Work completed");
+			worker->current_job_ = MAX_ENTITIES;
 		}
 	}
 
@@ -161,7 +227,7 @@ namespace SXNGN::ECS::A {
 								Task_Worker_Component* worker_ptr = static_cast<Task_Worker_Component*>(check_out_event);
 
 								//if worker has the skill required to do the work the task current needs
-								if (worker_ptr->skill_enable_[task_ptr->tasks_.at(0).skill_required_] == true)
+								if (worker_ptr->skill_enable_[task_ptr->tasks_.at(0).skill_required_] > SkillPriority::NONE)
 								{
 									worker_candidate_map_[entity_int] = -1;//is a candidate
 								}
@@ -224,8 +290,6 @@ namespace SXNGN::ECS::A {
 
 				//check data back in
 				gCoordinator.CheckInComponent(ComponentTypeEnum::TASK, task_id);
-
-				entities_to_cleanup.push_back(task_id);
 			}
 		}
 
@@ -243,7 +307,16 @@ namespace SXNGN::ECS::A {
 		
 		auto task_skill_priority = worker->skill_enable_.at(task->tasks_.at(0).skill_required_);
 		TaskPair new_task_pair = TaskPair(task_id, task->priority_);
-		worker->job_queue_.at(task_skill_priority).push_back(new_task_pair);
+		if (worker->job_queue_.count(task_skill_priority))
+		{
+			worker->job_queue_.at(task_skill_priority).push_back(new_task_pair);
+		}
+		else
+		{
+			std::vector<TaskPair> new_job_vector = { new_task_pair };
+			worker->job_queue_[task_skill_priority] = new_job_vector;
+		}
+		
 		worker->new_job = true;
 		task->reserved_units_.insert(worker_id);
 		task->scheduled_ = true;

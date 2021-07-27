@@ -47,7 +47,7 @@ namespace SXNGN {
 
 				SDL_Rect collision_box;
 				collision_box.x = int(round(moveable->m_pos_x_m));
-				collision_box.x = int(round(moveable->m_pos_y_m));
+				collision_box.y = int(round(moveable->m_pos_y_m));
 				collision_box.w = SXNGN::BASE_TILE_WIDTH;
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 
@@ -67,7 +67,7 @@ namespace SXNGN {
 
 				Task_Worker_Component* worker = new Task_Worker_Component();
 				worker->skill_levels_[TaskSkill::WALKING] = 5;
-				worker->skill_enable_[TaskSkill::WALKING] = 3;
+				worker->skill_enable_[TaskSkill::WALKING] = SkillPriority::MEDIUM;
 				coordinator.AddComponent(person_entity, worker);
 
 
@@ -175,8 +175,7 @@ namespace SXNGN {
 			A::Moveable* Entity_Builder_Utils::Create_Moveable(double pos_x_m, double pos_y_m, Sint32 speed_m_s, A::MoveableType movement_type)
 			{
 				SXNGN::ECS::A::Moveable* moveable = new A::Moveable();
-				moveable->m_pos_x_m = pos_x_m;
-				moveable->m_pos_y_m = pos_y_m;
+				moveable->UpdatePosition(pos_x_m, pos_y_m);
 				moveable->moveable_type_ = movement_type;
 				moveable->m_speed_m_s = speed_m_s;
 				return moveable;

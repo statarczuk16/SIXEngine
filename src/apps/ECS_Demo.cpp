@@ -380,9 +380,6 @@ int main(int argc, char* args[])
 	//singleton, used by world creation utility to lock camera onto main character
 	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
 
-	gCoordinator.AddEventListener(FUNCTION_LISTENER(Events::Window::QUIT, QuitHandler));
-
-
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_RENDERABLE);
@@ -594,7 +591,8 @@ int main(int argc, char* args[])
 
 
 
-	SXNGN::Timer dt_timer;//time passed during this frame "delta t"
+	SXNGN::Timer move_timer;//time passed between movement system calls
+
 	SXNGN::Timer frame_timer;//use to calculate frame rate
 	SXNGN::Timer frame_cap_timer;//use to enforce frame cap
 	SXNGN::Timer system_timer;//use to time each system
@@ -639,14 +637,15 @@ int main(int argc, char* args[])
 
 		/////////////////////////////////Physics/Movement
 		//Phys start
-		dt = dt_timer.getTicks() / 1000.f;//
+		dt = move_timer.getTicks() / 1000.f;//
 		game_dt = dt;
 		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
 		
 
 		system_timer.start();
 		movement_system->Update(dt);
-		dt_timer.start(); //restart delta t for next frame
+		task_scheduler_system->Update(dt);
+		move_timer.start(); //restart delta t for next frame
 		strcpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
 		system_timer.start();
@@ -660,7 +659,7 @@ int main(int argc, char* args[])
 		strcpy(event_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 
 		system_timer.start();
-		task_scheduler_system->Update(dt);
+		
 		strcpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
 		/////////////////////////////////Rendering
 		//Render Setup

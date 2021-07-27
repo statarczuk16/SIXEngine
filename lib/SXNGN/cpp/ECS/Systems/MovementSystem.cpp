@@ -4,6 +4,7 @@
 #include <Database.h>
 #include <ECS/Systems/MovementSystem.hpp>
 #include <ECS/Utilities/ECS_Utils.hpp>
+#include <ECS/Utilities/Map_Utils.hpp>
 
 namespace SXNGN::ECS::A {
 
@@ -53,11 +54,59 @@ void Movement_System::Update(float dt)
 	}
 }
 
+void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
+{
+	if (moveable)
+	{
+		switch (moveable->moveable_type_)
+		{
+		case MoveableType::VELOCITY:
+		{
+			if (moveable->Check_At_Destination())
+			{
+				moveable->m_vel_x_m_s = 0;
+				moveable->m_vel_y_m_s = 0;
+				return;
+			}
+			auto destination = moveable->GetCurrentWaypoint();
+			if (destination.x == -1 || destination.y == -1)
+			{
+				return;
+			}
+			auto position = moveable->GetPosition();
+			if (position.x == -1 || position.y == -1)
+			{
+				return;
+			}
+			std::pair<double, double> movement_vector = Map_Utils::GetVector(position, destination);
+			double vel_x = movement_vector.first * moveable->m_speed_m_s;
+			double vel_y = movement_vector.second * moveable->m_speed_m_s;
+
+			moveable->m_vel_x_m_s = (int)round(vel_x);
+			moveable->m_vel_y_m_s = (int)round(vel_y);
+		}
+		break;
+		case MoveableType::FORCE:
+		{
+			printf("Physics movement not yet supported");
+		}
+		break;
+		default:
+		{
+			printf("Unsupported moveable type_ : %2d", moveable->moveable_type_);
+		}
+
+		}
+	}
+}
+
 void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, float dt)
 {
 	//SDL_Rect prev_pos = moveable->position_box_;
 
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
+
+	Translate_Waypoints_To_Movement(moveable);
 
 	switch (moveable->moveable_type_)
 	{

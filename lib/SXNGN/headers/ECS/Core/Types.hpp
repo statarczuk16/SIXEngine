@@ -53,6 +53,18 @@ namespace SXNGN::ECS::A {
 	struct Location {
 		Sint32 x = -1;
 		Sint32 y = -1;
+
+		Location()
+		{
+			x = -1;
+			y = -1;
+		}
+
+		Location(Sint32 x_in, Sint32 y_in)
+		{
+			x = x_in;
+			y = y_in;
+		}
 		
 	};
 
@@ -70,6 +82,7 @@ namespace SXNGN::ECS::A {
 	};
 
 	enum class SkillPriority : Uint8 {
+		NONE,
 		LOW,
 		MEDIUM,
 		HIGH,

@@ -5,6 +5,17 @@
 #include <ECS/Core/Types.hpp>
 
 
+double SXNGN::Physics::adjust_velocity_by_acc(double acc, double vel, double time_step, double max_val)
+{
+
+	double new_vel = time_step * acc;
+	//for now, an object can not go from positive to negative movement in one frame. It must stop first.
+	double return_vel = Gameutils::adjust_dbl_abs_value_within_range(vel, new_vel, max_val, -max_val);
+
+
+	return return_vel;
+}
+
 SXNGN::Physics::FrictionType SXNGN::Physics::move_type_to_friction_type(MoveType move_type)
 {
 	switch (move_type)

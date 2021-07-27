@@ -2,6 +2,7 @@
 #include <UI/UserInputUtils.hpp>
 #include <ECS/Core/Coordinator.hpp>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
+
 #include <stack>
 #include <iostream>
 #include <Physics.h>
@@ -59,29 +60,28 @@ namespace SXNGN::ECS::A {
 				auto const& entity_interest = *it_inter;
 				it_inter++;
 
-				auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
-				if (!tags_ptr)
+				if (keyboard_events.empty() == false)
 				{
-					continue;
-				}
-				User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
-				
-				if (input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL) && keyboard_events.empty() == false)
-				{
-
-					if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
+					auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
+					if (tags_ptr)
 					{
-
-						auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
-						if (check_out_move)
+						User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
+						if (input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL))
 						{
-							Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
-							Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
-							Translate_Waypoints_To_Movement(moveable_ptr);
-							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
+							if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
+							{
+								auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
+								if (check_out_move)
+								{
+									Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
+									Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
+									gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
+								}
+							}
 						}
 					}
 				}
+				
 			}
 			entities_to_cleanup.push_back(entity_actable);
 		}
@@ -93,37 +93,7 @@ namespace SXNGN::ECS::A {
 		
 	}
 
-	void User_Input_System::Translate_Waypoints_To_Movement(Moveable* moveable)
-	{
-		if (moveable)
-		{
-			switch (moveable->moveable_type_)
-			{
-			case MoveableType::VELOCITY:
-			{
-				auto destination = moveable->GetCurrentWaypoint();
-				auto position = moveable->GetPosition();
-				std::pair<int, int> movement_vector = SXNGN::Physics::GetVector(position, destination);
-				int vel_x = movement_vector.first * moveable->m_speed_m_s;
-				int vel_y = movement_vector.first * moveable->m_speed_m_s;
-
-				moveable->m_vel_x_m_s = vel_x;
-				moveable->m_vel_y_m_s = vel_y;
-			}
-			break;
-			case MoveableType::FORCE:
-			{
-				printf("Physics movement not yet supported");
-			}
-			break;
-			default:
-			{
-				printf("Unsupported moveable type_ : %2d", moveable->moveable_type_);
-			}
-
-			}
-		}
-	}
+	
 
 	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt)
 	{

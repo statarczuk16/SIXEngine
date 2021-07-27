@@ -17,11 +17,15 @@ namespace SXNGN::ECS::A {
 
 		void Schedule_Jobs();
 
-		void Work_Workers();
+		void Work_Workers(float dt);
 
 		bool AssignJobToWorker(Entity worker_id, Task_Worker_Component* worker, Entity task_id, Task_Component* task);
 
 		TaskPair FindHighestPriorityJob(Task_Worker_Component* worker, bool remove);
+
+		bool Worker_Can_Do_Work(Task_Worker_Component* worker, Moveable* worker_mov, Task_Component* task);
+
+		void Worker_Do_Work(Task_Worker_Component * worker, Task_Component * task, double dt);
 
 	private:
 

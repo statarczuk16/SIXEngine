@@ -4,8 +4,9 @@
 #include <Sprite/Tile.h>
 #include <memory>
 #include <ECS/Core/Component.hpp>
-
+#include <ECS/Core/Types.hpp>
 #include <unordered_map>
+#include <queue>
 
 //using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
 

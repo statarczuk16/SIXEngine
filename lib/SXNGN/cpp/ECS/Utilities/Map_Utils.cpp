@@ -137,12 +137,13 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	std::pair<int, int>  Map_Utils::GetVector(SXNGN::ECS::A::Location start, SXNGN::ECS::A::Location end)
+	std::pair<double, double>  Map_Utils::GetVector(SXNGN::ECS::A::Location start, SXNGN::ECS::A::Location end)
 	{
-		auto distance = ECS::A::Map_Utils::GetDistance(ECS::A::NAVIGATION_TYPE::MANHATTAN, start, end);
+		double distance = ECS::A::Map_Utils::GetDistance(ECS::A::NAVIGATION_TYPE::MANHATTAN, start, end);
 		int x = end.x - start.x;
 		int y = end.y - start.y;
-		std::pair<int, int> result = std::make_pair(x / distance, y / distance);
+		std::pair<double, double> result = std::make_pair(x / distance, y / distance);
+		return result;
 	}
 
 }
