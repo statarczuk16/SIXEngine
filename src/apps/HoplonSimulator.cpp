@@ -431,7 +431,7 @@ int main(int argc, char* args[])
 			
 				
 				gunman_entity->move(g_current_state->get_room()->get_tiles_1D(), g_current_state->get_room()->get_room_bounds(), time_step_seconds);
-				main_cam_->move(time_step_seconds);
+				main_cam_->move();
 			}
 			
 			//barrel_object->setCamera(camera,g_level_bounds);

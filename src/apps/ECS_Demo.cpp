@@ -1,4 +1,4 @@
-#pragma warning(N:4596)
+//#pragma warning(N:4596)
 
 
 #include "ECS/Core/Coordinator.hpp"
@@ -189,7 +189,14 @@ int init_menus()
 	load_button_c->triggered_events.push_back(load_game_event);
 	mmw_c->child_components_.push_back(load_button_c);
 
-	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings", 3);
+	auto save_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Save Game", 3);
+	Event_Component save_game_event;
+	save_game_event.e.common.type = EventType::SAVE;
+	save_game_event.e.save.filePath = "No File Path";
+	save_button_c->triggered_events.push_back(save_game_event);
+	mmw_c->child_components_.push_back(save_button_c);
+
+	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings", 4);
 	Event_Component settings_state_event;
 	settings_state_event.e.common.type = EventType::STATE_CHANGE;
 	settings_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
@@ -198,7 +205,7 @@ int init_menus()
 	settings_button_c->triggered_events.push_back(settings_state_event);
 	mmw_c->child_components_.push_back(settings_button_c);
 
-	auto exit_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Exit", 4);
+	auto exit_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Exit", 5);
 	Event_Component exit_button_event;
 	exit_button_event.e.common.type = EventType::EXIT;
 	exit_button_c->triggered_events.push_back(exit_button_event);
@@ -258,7 +265,7 @@ int init_menus()
 	//Callback functions for level width/height 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_width = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
-		coordinator->get_state_manager()->setLevelWidthTiles(uicc->entry_->num_val);
+		coordinator->get_state_manager()->setLevelWidthTiles(Uint32(uicc->entry_->num_val));
 	};
 
 	std::function<void()> ng_update_width_b = std::bind(ng_update_width, lwe_c);
@@ -267,7 +274,7 @@ int init_menus()
 	//Callback functions for level width/height 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_height = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
-		coordinator->get_state_manager()->setLevelHeightTiles(uicc->entry_->num_val);
+		coordinator->get_state_manager()->setLevelHeightTiles(Uint32(uicc->entry_->num_val));
 	};
 
 	std::function<void()> ng_update_height_b = std::bind(ng_update_height, lhe_c);
@@ -632,7 +639,7 @@ int main(int argc, char* args[])
 			//update event handling system
 			input_system->Update(dt);
 		}
-		strcpy(input_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		strncpy_s(input_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 		
 
 		/////////////////////////////////Physics/Movement
@@ -646,21 +653,21 @@ int main(int argc, char* args[])
 		movement_system->Update(dt);
 		task_scheduler_system->Update(dt);
 		move_timer.start(); //restart delta t for next frame
-		strcpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		strncpy_s(movement_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 		system_timer.start();
 		collision_system->Update(dt);
-		strcpy(collision_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		strncpy_s(collision_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 		
 		//Phys End
 		/////////////////////////////////Event System - respond to physics, input, etc
 		system_timer.start();
 		event_system->Update(dt);
-		strcpy(event_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		strncpy_s(event_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 		system_timer.start();
 		
-		strcpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		strncpy_s(task_scheduler_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 		/////////////////////////////////Rendering
 		//Render Setup
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -673,7 +680,7 @@ int main(int argc, char* args[])
 		//Render Game
 		system_timer.start();
 		renderer_system->Update(dt);
-		strcpy(render_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str());
+		strncpy_s(render_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 		auto stopTime = std::chrono::high_resolution_clock::now();
 		
@@ -686,7 +693,7 @@ int main(int argc, char* args[])
 		{
 			fps_avg = 0;
 		}
-		strcpy(debug_fps_actual->label_->text, std::to_string(fps_avg).c_str());
+		strncpy_s(debug_fps_actual->label_->text, KISS_MAX_LENGTH, std::to_string(fps_avg).c_str(), KISS_MAX_LENGTH);
 		if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())
 		{
 			SDL_Delay(SXNGN::Database::get_screen_ticks_per_frame() - frame_cap_timer.getTicks());

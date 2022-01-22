@@ -65,7 +65,7 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 	case VA_CENTER:
 	{
 		//set y position to middle of parent window
-		*out_y = parent_rect->y + (parent_rect->h / 2) - (text_height / 1.5);
+		*out_y = (int)(round(parent_rect->y + (parent_rect->h / 2) - (text_height / 1.5)));
 		break;
 	}
 	default:
@@ -269,14 +269,14 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 		return 0;
 	}
 	y = label->r_rect.y + label->font.spacing / 2;
-	len = strlen(label->text);
+	len = (int)strlen(label->text);
 	if (len > KISS_MAX_LABEL - 2)
 	{
 		label->text[len - 1] = '\n';
 	}
 	else
 	{
-		strcat(label->text, "\n");
+		strncat_s(label->text, KISS_MAX_LENGTH, "\n", KISS_MAX_LENGTH);
 	}
 	for (p = label->text; *p; p = strchr(p, '\n') + 1)
 	{
@@ -904,11 +904,11 @@ int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 			
 				if (temp >= entry->upper_bound)
 				{
-					temp = entry->upper_bound;
+					temp = (int)round(entry->upper_bound);
 				}
 				else if (temp <= entry->lower_bound)
 				{
-					temp = entry->lower_bound;
+					temp = (int)round(entry->lower_bound);
 				}
 				entry->num_val = (int) temp;
 				snprintf(entry->text, KISS_MAX_LENGTH, "%d", (int)entry->num_val);
@@ -926,7 +926,7 @@ int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 			event->text.text) < entry->textwidth &&
 			strlen(entry->text) + strlen(event->text.text) <
 			KISS_MAX_LENGTH)
-			strcat(entry->text, event->text.text);
+			strncat_s(entry->text, KISS_MAX_LENGTH, event->text.text, KISS_MAX_LENGTH);
 		*draw = 1;
 		return 1;
 	} else if (event->type == SDL_TEXTEDITING && entry->active) {
@@ -940,13 +940,13 @@ int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 	} else if (event->type == SDL_KEYDOWN && entry->active &&
 		(event->key.keysym.mod & KMOD_CTRL) &&
 		event->key.keysym.scancode == SDL_SCANCODE_U) {
-		strcpy(entry->text, "");
+		strncpy_s(entry->text, KISS_MAX_LENGTH, "", KISS_MAX_LENGTH);
 		*draw = 1;
 		return 1;
 	} else if (event->type == SDL_MOUSEBUTTONDOWN && entry->active &&
 		kiss_pointinrect(event->button.x, event->button.y,
 		&entry->r_rect)) {
-		strcpy(entry->text, "");
+		strncpy_s(entry->text, KISS_MAX_LENGTH, "", KISS_MAX_LENGTH);
 		*draw = 1;
 		return 1;
 	}
@@ -1113,7 +1113,7 @@ int kiss_combobox_new(kiss_combobox *combobox, kiss_window *wdw,
 	if (combobox->combo.magic != KISS_MAGIC)
 		combobox->combo = kiss_combo;
 	kiss_entry_new(&combobox->entry, wdw, 1, text, x, y, w);
-	strcpy(combobox->text, combobox->entry.text);
+	strncpy_s(combobox->text, KISS_MAX_LENGTH, combobox->entry.text, KISS_MAX_LENGTH);
 	kiss_window_new(&combobox->window, NULL, 0, x,
 		y + combobox->entry.rect.h, w +
 		combobox->vscrollbar.up.w, h);
@@ -1166,7 +1166,7 @@ int kiss_combobox_event(kiss_combobox *combobox, SDL_Event *event, int *draw)
 	}
 	if (kiss_entry_event(&combobox->entry, event, draw)) {
 		combobox->window.visible = 0;
-		strcpy(combobox->text, combobox->entry.text);
+		strncpy_s(combobox->text, KISS_MAX_LENGTH, combobox->entry.text, KISS_MAX_LENGTH);
 		*draw = 1;
 		SDL_StopTextInput();
 		return 1;

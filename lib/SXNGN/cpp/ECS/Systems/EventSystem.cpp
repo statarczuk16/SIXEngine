@@ -67,6 +67,20 @@ namespace SXNGN::ECS::A {
 					Handle_Order_Event(event_ptr);
 					break;
 				}
+				case EventType::LOAD:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Load Event (Not Implemented)");
+					//Handle_Load_Event(event_ptr);
+					break;
+
+				}
+				case EventType::SAVE:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Save Event");
+					Handle_Save_Event(event_ptr);
+					break;
+
+				}
 				case EventType::SELECTION:
 				{
 					//todo max number of selected entities
@@ -125,6 +139,21 @@ namespace SXNGN::ECS::A {
 		for (Entity entity_to_clean : entities_to_cleanup)
 		{
 			gCoordinator.DestroyEntity(entity_to_clean);
+		}
+	}
+
+	void Event_System::Handle_Save_Event(Event_Component* ec)
+	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		auto user_input_state = User_Input_State::get_instance();
+		std::vector<std::pair<Entity, Signature>> all_entity_sigs = gCoordinator.Get_All_Entity_Signatures();
+		for (auto entity_sig : all_entity_sigs)
+		{
+			if (gCoordinator.EntityHasComponent(entity_sig.first, ComponentTypeEnum::TILE))
+			{
+				json world_tile_to_save = gCoordinator.Entity_To_JSON(entity_sig.first);
+				SDL_LogInfo(1, "%s", world_tile_to_save);
+			}
 		}
 	}
 

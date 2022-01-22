@@ -510,10 +510,10 @@ namespace SXNGN::ECS::A {
 						int y_grid = std::stoi(manifest_entry.at(2));
 						std::string tile_name = manifest_entry.at(3);
 						int int_to_name = std::stoi(manifest_entry.at(4));
-						entry->x = x_grid * tile_width;
-						entry->y = y_grid * tile_height;
-						entry->w = tile_width;
-						entry->h = tile_height;
+						entry->x = (int) (x_grid * tile_width);
+						entry->y = (int) (y_grid * tile_height);
+						entry->w = (int) tile_width;
+						entry->h = (int) tile_height;
 						tile_name_string_to_rect_map[tile_name] = entry;
 						tile_name_int_to_string_map[int_to_name] = tile_name;
 					}
@@ -531,10 +531,10 @@ namespace SXNGN::ECS::A {
 						int x_grid = std::stoi(manifest_entry.at(1));
 						int y_grid = std::stoi(manifest_entry.at(2));
 						std::string tile_name = manifest_entry.at(3);
-						entry->x = x_grid * tile_width;
-						entry->y = y_grid * tile_height;
-						entry->w = tile_width;
-						entry->h = tile_height;
+						entry->x = (int) (x_grid * tile_width);
+						entry->y = (int) (y_grid * tile_height);
+						entry->w = (int) tile_width;
+						entry->h = (int) tile_height;
 						tile_name_string_to_rect_map[tile_name] = entry;
 					}
 					else

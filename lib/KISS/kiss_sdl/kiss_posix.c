@@ -65,7 +65,7 @@ kiss_dir *kiss_opendir(char *name)
 	if (!name || strlen(name) > KISS_MAX_LENGTH - 2) return NULL;
 	dir = malloc(sizeof(kiss_dir));
 	dir->ent.d_name = NULL;
-	strcpy(dir->name, name);
+	strncpy_s(dir->name, KISS_MAX_LENGTH, name, KISS_MAX_LENGTH);
 	dir->fhandle = (ptrdiff_t) _findfirst(dir->name, &dir->fdata);
 	if ((int) dir->fhandle == -1) {
 		free (dir);

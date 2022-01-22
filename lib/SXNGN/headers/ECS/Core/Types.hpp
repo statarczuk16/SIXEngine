@@ -48,7 +48,7 @@ using ParamId = std::uint32_t;
 
 namespace SXNGN::ECS::A {
 
-	class Event_Component;
+	struct Event_Component;
 	
 	struct Location {
 		Sint32 x = -1;

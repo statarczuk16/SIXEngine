@@ -7,7 +7,7 @@ namespace SXNGN {
 	class Tile;
 
 	namespace ECS { namespace A {
-		class Collisionable;
+		struct Collisionable;
 	} } 
 	
 

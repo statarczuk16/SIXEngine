@@ -121,7 +121,7 @@ namespace SXNGN {
 		 int yon = std::max(0, std::min(bottomFix, bottomMoveNow) - std::max(topFix, topMoveNow)) > 0;
 		 bool x_overlap_now = xon > 0;
 		 bool y_overlap_now = yon > 0;
-		 if (!(x_overlap_now > 0 && y_overlap_now > 0))
+		 if ((x_overlap_now && y_overlap_now) == false)
 		 {
 			 //if no collision, stop
 			 new_move_location.x = moveable_now.x;

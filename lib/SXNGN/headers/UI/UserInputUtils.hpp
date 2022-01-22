@@ -16,7 +16,7 @@ namespace SXNGN::ECS::A {
 	//mouse down then mouse up within X = single click
 	const Sint32 SINGLE_CLICK_THRESH_MS = 400;
 
-	class UIContainerComponent;
+	struct UIContainerComponent;
 
 	class UserInputUtils
 	{

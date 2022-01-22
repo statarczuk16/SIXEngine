@@ -54,12 +54,13 @@ void SXNGN::Database::set_max_fps(Uint8 new_fps)
 
 Uint8  SXNGN::Database::get_screen_ticks_per_frame()
 {
+	
 	if (max_fps_ == 0)
 	{
 		printf("Error: Database: max_fps_ is 0");
 		return 60;
 	}
-	return 1000 / max_fps_;
+	return Uint8(1000 / max_fps_);
  }
 
 

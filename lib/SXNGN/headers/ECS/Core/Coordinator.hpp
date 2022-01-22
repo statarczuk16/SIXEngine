@@ -11,6 +11,7 @@
 #include <ECS/Utilities/JSON_Utils.hpp>
 #include <ECS/Core/StateManager.hpp>
 #include <ECS/Core/SystemManager.hpp>
+#include <iostream>
 
 
 
@@ -326,6 +327,15 @@ namespace SXNGN {
 					return mComponentManager->Get_All_Entity_Data_Read_Only(entity);
 				}
 
+				/// <summary>
+				/// Returns signatures of all living entities
+				/// </summary>
+				/// <returns></returns>
+				std::vector<std::pair<Entity, Signature>> Get_All_Entity_Signatures()
+				{
+					return mEntityManager->GetAllEntitySignatures();
+				}
+
 
 				/// <summary>
 				/// Copies all components related to an entity and outputs as JSON
@@ -340,6 +350,7 @@ namespace SXNGN {
 					{
 						json js = JSON_Utils::component_to_json(component_ptr);
 						json_components.push_back(js);
+						std::cout << js << std::endl;
 					}
 					A::ExternJSONEntity extern_entity(entity, json_components);
 					json ret = extern_entity;

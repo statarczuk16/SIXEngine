@@ -434,8 +434,8 @@ namespace SXNGN::ECS::A {
 				auto prev_moveable_data = gCoordinator.GetComponentReadOnly(moveable_entity, ComponentTypeEnum::MOVEABLE);
 				const Moveable* prev_moveable = static_cast<const Moveable*>(prev_moveable_data);
 				SDL_Rect prev_moveable_box;
-				prev_moveable_box.x = prev_moveable->m_prev_pos_x_m;
-				prev_moveable_box.y = prev_moveable->m_prev_pos_y_m;
+				prev_moveable_box.x = (int) round(prev_moveable->m_prev_pos_x_m);
+				prev_moveable_box.y = (int) round(prev_moveable->m_prev_pos_y_m);
 				prev_moveable_box.w = moveable_obj->collision_box_.w;
 				prev_moveable_box.h = moveable_obj->collision_box_.h;
 				//get where the moveable was last frame, where it wants to be this frame, and combine with immoveable obj location to find where it should smack into a wall and stop

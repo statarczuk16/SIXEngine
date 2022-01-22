@@ -351,7 +351,7 @@ namespace SXNGN::ECS::A {
 			{
 				switch (e.button.button)
 				{
-					bool left;
+					
 				case SDL_BUTTON_LEFT:
 				{
 					current_mouse_state.left_button.down = true;

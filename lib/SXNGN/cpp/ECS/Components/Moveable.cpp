@@ -47,6 +47,10 @@ namespace SXNGN::ECS::A {
 			waypoints.pop();
 			return true;
 		}
+		else
+		{
+			return false;
+		}
 	}
 
 	void Moveable::SolveDestination(NAVIGATION_TYPE method)

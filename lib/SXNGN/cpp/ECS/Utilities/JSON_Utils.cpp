@@ -124,6 +124,11 @@ namespace SXNGN {
 						return component_ptr;
 						break;
 					}
+					default:
+					{
+						SDL_LogWarn(1, "JSON_Utils::json_to_component: type: %s is not implemented.", find_type);
+						return nullptr;
+					}
 				}
 			}
 		}

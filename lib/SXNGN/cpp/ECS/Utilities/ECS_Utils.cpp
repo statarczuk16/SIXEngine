@@ -16,8 +16,8 @@ namespace SXNGN {
 					{
 						const Moveable* moveable = static_cast<const Moveable*>(moveable_data);
 						std::shared_ptr<SDL_Rect> pos = std::make_shared<SDL_Rect>();
-						pos->x = moveable->m_pos_x_m;
-						pos->y = moveable->m_pos_y_m;
+						pos->x = (int) round(moveable->m_pos_x_m);
+						pos->y = (int) round(moveable->m_pos_y_m);
 						return pos;
 
 					}

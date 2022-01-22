@@ -15,7 +15,7 @@ namespace SXNGN {
 		void lock_on(std::shared_ptr<SXNGN::Tile> target);
 
 		//Moves the dot and check collision against tiles
-		void move(float time_step = 1);
+		void move();
 		bool object_in_view(SDL_Rect obj_bounds);
 		SDL_Rect get_lens_rect_scaled();
 		SDL_Rect get_lens_rect_actual();

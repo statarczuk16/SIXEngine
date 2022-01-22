@@ -66,7 +66,7 @@ namespace SXNGN::ECS::A {
 			Task_Worker_Component* worker = nullptr;
 			ECS_Component* worker_ptr = nullptr;
 			worker_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::TASK_WORKER);
-			if(worker_ptr);
+			if(worker_ptr)
 			{
 				//When no job, find the highest priority and start it
 				worker = static_cast<Task_Worker_Component*>(worker_ptr);
@@ -96,7 +96,7 @@ namespace SXNGN::ECS::A {
 				}
 				task = static_cast<Task_Component*>(task_ptr);
 
-				if (moveable_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::MOVEABLE));
+				if (moveable_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::MOVEABLE))
 				{
 					moveable = static_cast<Moveable*>(moveable_ptr);
 				}

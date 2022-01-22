@@ -21,7 +21,7 @@ void SXNGN::Camera::lock_on(std::shared_ptr<SXNGN::Tile> target)
 	}
 }
 
-void SXNGN::Camera::move(float time_step)
+void SXNGN::Camera::move()
 {
 	if (target_ != nullptr)
 	{

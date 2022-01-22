@@ -120,8 +120,8 @@ namespace SXNGN::ECS::A {
 
 	std::pair<Sint32, Sint32> UserInputUtils::wasd_to_x_y(std::vector<SDL_Event> events)
 	{
-		Sint32 x = 0.0;
-		Sint32 y = 0.0;
+		Sint32 x = 0;
+		Sint32 y = 0;
 		Sint32 add_amount = 1;
 		for (auto event : events)
 		{

@@ -8,12 +8,16 @@ project(RiskTheSix)
 
 set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 
+
 #The findsdl module needs a starting path to look for SDL2
 #Try to determine the right path based on mingw/visual and 32/64bit
 if(MSVC)
 	set(SDL_HINT_END "include/")
 	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)
+	#add_compile_options(/WX)
+    #add_link_options(/WX)
 elseif (MINGW)
+	#add_compile_options(-Wall -Wextra -pedantic -Werror -Wl,--fatal-warnings)
 	set(SDL_HINT_END "include/SDL2")
 	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8) #64 bit systems have length 8 words
 		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/x86_64-w64-mingw32/)
