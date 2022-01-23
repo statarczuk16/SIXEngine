@@ -76,6 +76,7 @@ namespace SXNGN {
 					return entity_signature[component_type_hash];
 				}
 
+
 				// Component methods
 
 				void RegisterComponent(ComponentTypeEnum component_type)
@@ -271,12 +272,33 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity"></param>
 				/// <returns></returns>
-				std::shared_ptr<A::ExternEntity> Extract_Entity_From_ECS(Entity entity)
+				std::shared_ptr<ExternEntity> Extract_Entity_From_ECS(Entity entity)
 				{
 
 					auto extracted_components = Extract_Entity_Components_From_ECS(entity);
-					auto extracted_entity = std::make_shared<A::ExternEntity>(entity, extracted_components);
+					auto extracted_entity = std::make_shared<ExternEntity>(entity, extracted_components);
 					return extracted_entity;
+				}
+
+				/// <summary>
+				/// Remove all entities with input ComponentTypeEnum from ECS and return
+				/// </summary>
+				/// <param name="component_type"></param>
+				std::vector<std::shared_ptr<ExternEntity>> ExtractEntitiesWithMatchingComponent(ComponentTypeEnum component_type)
+				{
+					std::vector<std::shared_ptr<ExternEntity>> ret;
+					std::vector<std::pair<Entity, Signature>> living_entity_sigs = mEntityManager->GetAllEntitySignatures();
+					for (auto entity_sig : living_entity_sigs)
+					{
+						auto component_type_hash = mComponentManager->GetComponentType(component_type);
+						if (entity_sig.second[component_type_hash])
+						{
+							auto extracted_entity = Extract_Entity_From_ECS(entity_sig.first);
+							ret.push_back(extracted_entity);
+						}
+					}
+
+					return ret;
 				}
 
 				/// <summary>
@@ -297,7 +319,7 @@ namespace SXNGN {
 				/// <param name="destroy_each"></param>
 				void Dump_Space_To_ECS(std::string state_to_dump_from = "Temp", bool destroy_after = false)
 				{
-					std::vector< std::shared_ptr<A::ExternEntity>> entity_array = mStateManager->retrieveSpaceEntities(state_to_dump_from, destroy_after);
+					std::vector< std::shared_ptr<ExternEntity>> entity_array = mStateManager->retrieveSpaceEntities(state_to_dump_from, destroy_after);
 					for (auto entity : entity_array)
 					{
 						Dump_Spaced_Entity_To_ECS(entity);
@@ -308,7 +330,7 @@ namespace SXNGN {
 				/// Add an ExternEntity back into the system
 				/// </summary>
 				/// <param name="entity_to_dump"></param>
-				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<A::ExternEntity> entity_to_dump)
+				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<ExternEntity> entity_to_dump)
 				{
 					Entity new_id = mEntityManager->CreateEntity();
 					for (auto component : entity_to_dump->entity_components_)
@@ -351,12 +373,12 @@ namespace SXNGN {
 						json js = JSON_Utils::component_to_json(component_ptr);
 						json_components.push_back(js);
 					}
-					A::ExternJSONEntity extern_entity(entity, json_components);
+					ExternJSONEntity extern_entity(entity, json_components);
 					json ret = extern_entity;
 					return ret;
 				}
 
-				json JSON_To_Entity(json j)
+				std::shared_ptr<ExternEntity> JSON_To_Entity(json j)
 				{
 					std::vector<json> json_components;
 					auto component_type = j.find("component_type");
@@ -370,6 +392,7 @@ namespace SXNGN {
 					{
 						return nullptr;
 					}
+					//for now only read things marked as JSON_ENTITY, which include a list of components
 					ComponentTypeEnum component_type_enum = find_type->second;
 					if (component_type_enum != ComponentTypeEnum::JSON_ENTITY)
 					{
@@ -377,17 +400,28 @@ namespace SXNGN {
 						std::cout << j.dump(4) << std::endl;
 						return nullptr;
 					}
+					//find the list of components
 					auto list_of_components = j.find("entity_components_");
 					if (list_of_components == j.end())
 					{
 						return nullptr;
 					}
+					std::shared_ptr<ExternEntity> extern_entity = std::make_shared<ExternEntity>();
+					//convert each one to a C++ object 
 					for (auto component_pair : *list_of_components)
 					{
-						std::cout << component_pair.dump(4) << std::endl;//fixme almost done
+						try
+						{
+							auto component = JSON_Utils::json_to_component(component_pair);
+							extern_entity->entity_components_.push_back(component);
+						}
+						catch (const std::exception& exc)
+						{
+							std::cerr << "Error converting JSON to Object: " << component_pair.dump(4) << std::endl;
+							std::cerr << exc.what();
+						}
 					}
-
-					
+					return extern_entity;	
 				}
 
 			private:

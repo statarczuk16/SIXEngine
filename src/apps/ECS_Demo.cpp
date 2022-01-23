@@ -305,17 +305,30 @@ int init_menus()
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
 
 	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0);
-	Event_Component go_to_menu_event;
-	go_to_menu_event.e.common.type = EventType::STATE_CHANGE;
-	go_to_menu_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	go_to_menu_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
-	ig_go_to_menu_button->triggered_events.push_back(go_to_menu_event);
+	//Event_Component go_to_menu_event;
+	//go_to_menu_event.e.common.type = EventType::STATE_CHANGE;
+	//go_to_menu_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	//go_to_menu_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+	//ig_go_to_menu_button->triggered_events.push_back(go_to_menu_event);
 	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
 
 	//offset the game world display below this menu strip at the top
 	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 	overworld_viewport->y = ig_ui_window_top_c->window_->rect.h + 20;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
+
+	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, resolution.w/2 - 240/2, 85, 240, resolution.h - 240, UILayer::TOP);
+	ig_ui_window_pop_up_c->window_->visible = false;
+	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
+
+	//Callback functions for level width/height 
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_menu = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->window_->visible = !uicc->window_->visible;
+	};
+
+	std::function<void()> mg_toggle_menu_visible = std::bind(toggle_menu, ig_ui_window_pop_up_c);
+	ig_go_to_menu_button->callback_functions_.push_back(mg_toggle_menu_visible);
 
 
 	//************************* Debug Overlay

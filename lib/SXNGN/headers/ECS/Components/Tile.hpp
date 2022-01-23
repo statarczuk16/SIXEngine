@@ -22,6 +22,13 @@ namespace SXNGN::ECS::A {
 			component_type = ComponentTypeEnum::TILE;
 
 		}
+
+		Tile()
+		{
+			grid_y_ = 0;
+			grid_x_ = 0;
+			component_type = ComponentTypeEnum::TILE;
+		}
 		Sint32  grid_x_;
 		Sint32  grid_y_;
 	};
@@ -37,7 +44,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Tile& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		j.at("component_type").get_to(component_type_enum);
+		p.component_type = component_type_enum;
 		j.at("grid_x_").get_to(p.grid_x_);
 		j.at("grid_y_").get_to(p.grid_y_);
 

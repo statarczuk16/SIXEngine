@@ -72,7 +72,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Collisionable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		j.at("component_type").get_to(component_type_enum);
+		p.component_type = component_type_enum;
 		j.at("collision_box_.x").get_to(p.collision_box_.x);
 		j.at("collision_box_.y").get_to(p.collision_box_.y);
 		j.at("collision_box_.w").get_to(p.collision_box_.w);

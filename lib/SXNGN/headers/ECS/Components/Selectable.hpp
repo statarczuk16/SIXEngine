@@ -31,7 +31,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Selectable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		j.at("component_type").get_to(component_type_enum);
+		p.component_type = component_type_enum;
 		j.at("selection_text_").get_to(p.selection_text_);
 	}
 }

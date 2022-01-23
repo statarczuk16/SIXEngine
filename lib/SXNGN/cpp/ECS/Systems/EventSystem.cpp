@@ -5,6 +5,7 @@
 #include <ECS/Systems/EventSystem.hpp>
 #include <ECS/Components/EventComponent.hpp>
 #include <fstream>
+#include <ECS/Utilities/Entity_Builder_Utils.hpp>
 
 namespace SXNGN::ECS::A {
 
@@ -171,17 +172,20 @@ namespace SXNGN::ECS::A {
 		{
 			while (i >> j)
 			{
-				std::cout << j.dump(4) << std::endl;
-				auto json_to_entity_test = gCoordinator.JSON_To_Entity(j);
+				//std::cout << j.dump(4) << std::endl;
+				auto extern_entity = gCoordinator.JSON_To_Entity(j);
+				gCoordinator.Dump_Spaced_Entity_To_ECS(extern_entity);
 			}
 		}
-		catch (std::exception e)
+		catch (const std::exception& exc)
 		{
-			
+			std::cerr << exc.what();
 		}
-		
-		
-		
+		Event_Component load_game_state_change;
+		load_game_state_change.e.common.type = EventType::STATE_CHANGE;
+		load_game_state_change.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+		load_game_state_change.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+		Entity event_entity = Entity_Builder_Utils::Create_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, load_game_state_change, "Load Game State Change");
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)

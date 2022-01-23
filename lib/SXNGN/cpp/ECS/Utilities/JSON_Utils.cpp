@@ -137,6 +137,11 @@ namespace SXNGN {
 					 return nullptr;
 				 }
 				ComponentTypeEnum component_type_enum = find_type->second;
+				if (component_type_enum > ComponentTypeEnum::GAME_STATE_START_HERE)
+				{
+					ECS_Component* component = Create_Gamestate_Component_from_Enum(component_type_enum);
+					return component;
+				}
 				switch (component_type_enum)
 				{
 					case ComponentTypeEnum::JSON_ENTITY:
@@ -150,6 +155,27 @@ namespace SXNGN {
 					{
 						auto component_inst = j.get<Pre_Renderable>();
 						ECS_Component* component_ptr = new Pre_Renderable(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::COLLISION:
+					{
+						auto component_inst = j.get<Collisionable>();
+						ECS_Component* component_ptr = new Collisionable(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::TILE:
+					{
+						auto component_inst = j.get<Tile>();
+						ECS_Component* component_ptr = new Tile(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::SELECTABLE:
+					{
+						auto component_inst = j.get<Selectable>();
+						ECS_Component* component_ptr = new Selectable(component_inst);
 						return component_ptr;
 						break;
 					}

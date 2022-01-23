@@ -83,7 +83,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Renderable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		j.at("component_type").get_to(component_type_enum);
+		p.component_type = component_type_enum;
 		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
 		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
 		j.at("name_").get_to(p.renderable_name_);
@@ -128,7 +128,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Pre_Renderable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		j.at("component_type").get_to(component_type_enum);
+		p.component_type = component_type_enum;
 		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
 		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
 		j.at("name_").get_to(p.name_);
