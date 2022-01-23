@@ -4,6 +4,9 @@
 #include <SDL.h>
 #include <unordered_map>
 #include <mutex>
+#include <nlohmann/json.hpp>
+using nlohmann::json;
+
 namespace SXNGN::ECS::A {
 
 	enum class ComponentTypeEnum : Uint8
@@ -118,5 +121,17 @@ namespace SXNGN::ECS::A {
 
 		ComponentTypeEnum component_type;
 	};
+
+	inline void to_json(json& j, const ECS_Component& p) {
+		j = json{
+			{"component_type",component_type_enum_to_string()[p.component_type]},
+
+		};
+	}
+
+	inline void from_json(const json& j, ECS_Component& p) {
+		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
+		j.at("component_type").get_to(component_type_enum);
+	}
 
 }

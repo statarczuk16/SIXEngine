@@ -69,8 +69,16 @@ namespace SXNGN::ECS::A {
 	};
 
 	//note: saving as a pre-renderable. Can't convert the texture pointer to JSON, so it will have to go back through the factory pre-render -> render to get back to its state
-	inline void to_json(json& j, const Renderable& p) {
-		j = json{ {"component_type",component_type_enum_to_string()[ComponentTypeEnum::PRE_RENDERABLE]}, {"x", p.x_}, {"y", p.y_}, {"sprite_factory_name_", p.sprite_factory_name_}, {"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},  {"name_", p.renderable_name_},  {"render_layer_", p.render_layer_} };
+	inline void to_json(json& j, const Renderable& p) {		
+		j = json{ 
+			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::PRE_RENDERABLE]},
+			{"x", p.x_}, {"y", p.y_},
+			{"sprite_factory_name_", p.sprite_factory_name_},
+			{"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},
+			{"name_", p.renderable_name_},
+			{"render_layer_", p.render_layer_}
+		};
+		
 	}
 
 	inline void from_json(const json& j, Renderable& p) {
@@ -82,7 +90,6 @@ namespace SXNGN::ECS::A {
 		j.at("x").get_to(p.x_);
 		j.at("y").get_to(p.y_);
 		j.at("render_layer_").get_to(p.render_layer_);
-
 	}
 
 	/// <summary>

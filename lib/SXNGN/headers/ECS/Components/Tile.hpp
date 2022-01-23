@@ -2,7 +2,8 @@
 
 #include <SDL.h>
 #include <ECS/Core/Component.hpp>
-
+#include <nlohmann/json.hpp>
+using nlohmann::json;
 
 using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
 
@@ -24,6 +25,23 @@ namespace SXNGN::ECS::A {
 		Sint32  grid_x_;
 		Sint32  grid_y_;
 	};
+
+	inline void to_json(json& j, const Tile& p) {
+		j = json{
+			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::TILE]},
+			{"grid_x_", p.grid_x_},
+			{"grid_y_", p.grid_y_},
+		};
+
+	}
+
+	inline void from_json(const json& j, Tile& p) {
+		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
+		j.at("component_type").get_to(component_type_enum);
+		j.at("grid_x_").get_to(p.grid_x_);
+		j.at("grid_y_").get_to(p.grid_y_);
+
+	}
 
 
 }

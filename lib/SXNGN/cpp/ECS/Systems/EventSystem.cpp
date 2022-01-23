@@ -4,6 +4,7 @@
 #include <Database.h>
 #include <ECS/Systems/EventSystem.hpp>
 #include <ECS/Components/EventComponent.hpp>
+#include <fstream>
 
 namespace SXNGN::ECS::A {
 
@@ -69,8 +70,8 @@ namespace SXNGN::ECS::A {
 				}
 				case EventType::LOAD:
 				{
-					SDL_LogInfo(1, "Event_System::Update:: Got Load Event (Not Implemented)");
-					//Handle_Load_Event(event_ptr);
+					SDL_LogInfo(1, "Event_System::Update:: Got Load Event");
+					Handle_Load_Event(event_ptr);
 					break;
 
 				}
@@ -147,14 +148,40 @@ namespace SXNGN::ECS::A {
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto user_input_state = User_Input_State::get_instance();
 		std::vector<std::pair<Entity, Signature>> all_entity_sigs = gCoordinator.Get_All_Entity_Signatures();
+		std::ofstream save_stream("world.json");
+		
 		for (auto entity_sig : all_entity_sigs)
 		{
 			if (gCoordinator.EntityHasComponent(entity_sig.first, ComponentTypeEnum::TILE))
 			{
 				json world_tile_to_save = gCoordinator.Entity_To_JSON(entity_sig.first);
-				SDL_LogInfo(1, "%s", world_tile_to_save);
+				save_stream << std::setw(4) << world_tile_to_save << std::endl;
+				//std::cout << world_tile_to_save.dump(4) << std::endl;
 			}
 		}
+	}
+
+	void Event_System::Handle_Load_Event(Event_Component* ec)
+	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		auto user_input_state = User_Input_State::get_instance();
+		std::ifstream i("world.json");
+		json j;
+		try 
+		{
+			while (i >> j)
+			{
+				std::cout << j.dump(4) << std::endl;
+				auto json_to_entity_test = gCoordinator.JSON_To_Entity(j);
+			}
+		}
+		catch (std::exception e)
+		{
+			
+		}
+		
+		
+		
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)

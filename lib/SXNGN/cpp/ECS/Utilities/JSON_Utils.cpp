@@ -63,6 +63,14 @@ namespace SXNGN {
 			nlohmann::json JSON_Utils::component_to_json(const ECS_Component* component_ptr)
 			{
 				json js;
+
+				if (component_ptr->component_type > ComponentTypeEnum::GAME_STATE_START_HERE)
+				{
+					ECS_Component component = *static_cast<const ECS_Component*>(component_ptr);
+					js = component;
+					return js;
+				}
+
 				switch (component_ptr->component_type)
 				{
 				case ComponentTypeEnum::RENDERABLE :
@@ -75,6 +83,27 @@ namespace SXNGN {
 				case ComponentTypeEnum::PRE_RENDERABLE:
 				{
 					Pre_Renderable component = *static_cast<const Pre_Renderable*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::COLLISION:
+				{
+					Collisionable component = *static_cast<const Collisionable*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::TILE:
+				{
+					Tile component = *static_cast<const Tile*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::SELECTABLE:
+				{
+					Selectable component = *static_cast<const Selectable*>(component_ptr);
 					js = component;
 					return js;
 					break;
@@ -94,10 +123,10 @@ namespace SXNGN {
 				}
 			}
 
-			ECS_Component* JSON_Utils::json_to_component(nlohmann::json json)
+			ECS_Component* JSON_Utils::json_to_component(nlohmann::json j)
 			{
-				auto component_type = json.find("component_type");
-				if (component_type == json.end())
+				auto component_type = j.find("component_type");
+				if (component_type == j.end())
 				{
 					return nullptr;
 				}
@@ -112,14 +141,14 @@ namespace SXNGN {
 				{
 					case ComponentTypeEnum::JSON_ENTITY:
 					{
-						auto component_inst = json.get<ExternJSONEntity>();
+						auto component_inst = j.get<ExternJSONEntity>();
 						ECS_Component* component_ptr = new ExternJSONEntity(component_inst);
 						return component_ptr;
 						break;
 					}
 					case ComponentTypeEnum::PRE_RENDERABLE:
 					{
-						auto component_inst = json.get<Pre_Renderable>();
+						auto component_inst = j.get<Pre_Renderable>();
 						ECS_Component* component_ptr = new Pre_Renderable(component_inst);
 						return component_ptr;
 						break;

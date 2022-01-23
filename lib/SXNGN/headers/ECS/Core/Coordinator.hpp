@@ -350,11 +350,44 @@ namespace SXNGN {
 					{
 						json js = JSON_Utils::component_to_json(component_ptr);
 						json_components.push_back(js);
-						std::cout << js << std::endl;
 					}
 					A::ExternJSONEntity extern_entity(entity, json_components);
 					json ret = extern_entity;
 					return ret;
+				}
+
+				json JSON_To_Entity(json j)
+				{
+					std::vector<json> json_components;
+					auto component_type = j.find("component_type");
+					if (component_type == j.end())
+					{
+						return nullptr;
+					}
+					std::string component_type_str = *component_type;
+					auto find_type = ECS::A::component_type_string_to_enum().find(component_type_str);
+					if (find_type == ECS::A::component_type_string_to_enum().end())
+					{
+						return nullptr;
+					}
+					ComponentTypeEnum component_type_enum = find_type->second;
+					if (component_type_enum != ComponentTypeEnum::JSON_ENTITY)
+					{
+						SDL_LogError(1, "Cannot Read Incoming JSON because is not JSON_ENTITY: ");
+						std::cout << j.dump(4) << std::endl;
+						return nullptr;
+					}
+					auto list_of_components = j.find("entity_components_");
+					if (list_of_components == j.end())
+					{
+						return nullptr;
+					}
+					for (auto component_pair : *list_of_components)
+					{
+						std::cout << component_pair.dump(4) << std::endl;//fixme almost done
+					}
+
+					
 				}
 
 			private:
