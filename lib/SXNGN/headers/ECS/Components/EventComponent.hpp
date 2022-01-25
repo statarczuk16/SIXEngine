@@ -64,7 +64,7 @@ namespace SXNGN::ECS::A {
 
 	struct SXNGN_StateChangeEvent
 	{
-
+		bool hard_remove = false; //if true, purge entities in the state to remove.
 		std::forward_list<ComponentTypeEnum> new_states;
 		std::forward_list<ComponentTypeEnum> states_to_remove;
 	};

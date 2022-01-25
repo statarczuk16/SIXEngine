@@ -43,6 +43,10 @@ namespace SXNGN::ECS::A {
 					auto active_states = gCoordinator.GetActiveGameStates();
 					for (auto rs : event_ptr->e.state_change.states_to_remove)
 					{
+						if (event_ptr->e.state_change.hard_remove)
+						{
+							gCoordinator.ExtractEntitiesWithMatchingComponent(rs);
+						}
 						active_states.remove(rs);
 					}
 					for (auto as : event_ptr->e.state_change.new_states)

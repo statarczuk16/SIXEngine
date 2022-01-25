@@ -76,6 +76,11 @@ namespace SXNGN {
 					return entity_signature[component_type_hash];
 				}
 
+				uint32_t GetLivingEntityCount()
+				{
+					return mEntityManager->GetLivingEntityCount();
+				}
+
 
 				// Component methods
 

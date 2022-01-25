@@ -88,6 +88,11 @@ public:
 		return ret;
 	}
 
+	uint32_t GetLivingEntityCount()
+	{
+		return mLivingEntityCount;
+	}
+
 private:
 	std::queue<Entity> mAvailableEntities{};
 	std::array<Signature, MAX_ENTITIES> mSignatures{};

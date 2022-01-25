@@ -90,14 +90,14 @@ char *kiss_string_copy(char *dest, size_t size, char *str1, char *str2)
 	char *p;
 
 	if (!dest) return NULL;
-	strncpy_s(dest, KISS_MAX_LENGTH, "", KISS_MAX_LENGTH);
+	strncpy(dest, "", KISS_MAX_LENGTH);
 	if (size < 2) return dest;
-	if (str1) strncpy_s(dest, KISS_MAX_LENGTH, str1, size);
+	if (str1) strncpy(dest, str1, size);
 	dest[size - 1] = 0;
 	len = strnlen(dest, KISS_MAX_LENGTH);
 	if (!str2 || size - 1 <= len) return dest;
 	p = dest;
-	strncpy_s(p + len, KISS_MAX_LENGTH, str2, size - len);
+	strncpy(p + len, str2, size - len);
 	dest[size - 1] = 0;
 	kiss_utf8fix(dest);
 	return dest;

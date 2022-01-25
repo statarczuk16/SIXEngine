@@ -60,6 +60,7 @@ std::shared_ptr<UIContainerComponent> movement_system_ms;
 std::shared_ptr<UIContainerComponent> collision_system_ms;
 std::shared_ptr<UIContainerComponent> event_system_ms;
 std::shared_ptr<UIContainerComponent> render_system_ms;
+std::shared_ptr<UIContainerComponent> ecs_stats_num_entities;
  
 std::shared_ptr<UIContainerComponent> input_system_label;
 std::shared_ptr<UIContainerComponent> task_scheduler_label;
@@ -67,6 +68,7 @@ std::shared_ptr<UIContainerComponent> movement_system_label;
 std::shared_ptr<UIContainerComponent> collision_system_label;
 std::shared_ptr<UIContainerComponent> event_system_label;
 std::shared_ptr<UIContainerComponent> render_system_label;
+std::shared_ptr<UIContainerComponent> ecs_stats_label;
 
 
 
@@ -189,12 +191,7 @@ int init_menus()
 	load_button_c->triggered_events.push_back(load_game_event);
 	mmw_c->child_components_.push_back(load_button_c);
 
-	auto save_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Save Game", 3);
-	Event_Component save_game_event;
-	save_game_event.e.common.type = EventType::SAVE;
-	save_game_event.e.save.filePath = "No File Path";
-	save_button_c->triggered_events.push_back(save_game_event);
-	mmw_c->child_components_.push_back(save_button_c);
+	
 
 	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings", 4);
 	Event_Component settings_state_event;
@@ -301,34 +298,68 @@ int init_menus()
 	new_game_window_c->child_components_.push_back(back_from_bg_button_c);
 
 	//************************* In Game UI
+
+	// Window
 	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, 80, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
-
-	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0);
-	//Event_Component go_to_menu_event;
-	//go_to_menu_event.e.common.type = EventType::STATE_CHANGE;
-	//go_to_menu_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	//go_to_menu_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
-	//ig_go_to_menu_button->triggered_events.push_back(go_to_menu_event);
-	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
-
 	//offset the game world display below this menu strip at the top
 	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 	overworld_viewport->y = ig_ui_window_top_c->window_->rect.h + 20;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
-	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, resolution.w/2 - 240/2, 85, 240, resolution.h - 240, UILayer::TOP);
+	//Open Menu Button
+	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0);
+	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
+
+	//************************* Pop Up Game Menu
+	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, resolution.w/2 - 240/2, 85, 240, resolution.h - 240, UILayer::MID);
 	ig_ui_window_pop_up_c->window_->visible = false;
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
-
-	//Callback functions for level width/height 
+	//Callback function to toggle menu visiblility 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_menu = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
 		uicc->window_->visible = !uicc->window_->visible;
 	};
-
 	std::function<void()> mg_toggle_menu_visible = std::bind(toggle_menu, ig_ui_window_pop_up_c);
+
+	//References In Game Menu
 	ig_go_to_menu_button->callback_functions_.push_back(mg_toggle_menu_visible);
+
+	//Exit to Desktop
+	auto pop_up_menu_exit_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Exit To Desktop", 3);
+	pop_up_menu_exit_button_c->triggered_events.push_back(exit_button_event);
+	ig_ui_window_pop_up_c->child_components_.push_back(pop_up_menu_exit_button_c);
+
+	//Exit to Main Menu
+	auto pop_up_menu_exit_to_main_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Exit To Menu", 2);
+	pop_up_menu_exit_to_main_button_c->callback_functions_.push_back(mg_toggle_menu_visible);
+	ig_ui_window_pop_up_c->child_components_.push_back(pop_up_menu_exit_to_main_button_c);
+
+	Event_Component main_menu_exit_event;
+	main_menu_exit_event.e.common.type = EventType::STATE_CHANGE;
+	main_menu_exit_event.e.state_change.hard_remove = true;
+	main_menu_exit_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
+	main_menu_exit_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+	pop_up_menu_exit_to_main_button_c->triggered_events.push_back(main_menu_exit_event);
+
+
+	//Close Menu
+	auto pop_up_menu_close_menu_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Resume", 0);
+	pop_up_menu_close_menu_button_c->callback_functions_.push_back(mg_toggle_menu_visible);
+	ig_ui_window_pop_up_c->child_components_.push_back(pop_up_menu_close_menu_button_c);
+
+
+	//Save Button
+	auto save_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Save", 1);
+	Event_Component save_game_event;
+	save_game_event.e.common.type = EventType::SAVE;
+	save_game_event.e.save.filePath = "No File Path";
+	save_button_c->triggered_events.push_back(save_game_event);
+	ig_ui_window_pop_up_c->child_components_.push_back(save_button_c);
+
+
+
+
 
 
 	//************************* Debug Overlay
@@ -353,6 +384,8 @@ int init_menus()
 	debug_window_c->child_components_.push_back(event_system_label);
 	render_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "RENDER", 12);
 	debug_window_c->child_components_.push_back(render_system_label);
+	ecs_stats_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "ENTITIES", 14);
+	debug_window_c->child_components_.push_back(ecs_stats_label);
 
 	 input_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 1", 3);
 	 debug_window_c->child_components_.push_back(input_system_ms);
@@ -366,6 +399,8 @@ int init_menus()
 	 debug_window_c->child_components_.push_back(event_system_ms);
 	 render_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 13);
 	 debug_window_c->child_components_.push_back(render_system_ms);
+	 ecs_stats_num_entities = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 15);
+	 debug_window_c->child_components_.push_back(ecs_stats_num_entities);
 
 	 ui->add_ui_element(ComponentTypeEnum::CORE_BG_GAME_STATE, debug_window_c);
 
@@ -694,6 +729,8 @@ int main(int argc, char* args[])
 		system_timer.start();
 		renderer_system->Update(dt);
 		strncpy_s(render_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+		strncpy_s(ecs_stats_num_entities->label_->text, KISS_MAX_LENGTH, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(), KISS_MAX_LENGTH);
 
 		auto stopTime = std::chrono::high_resolution_clock::now();
 		
