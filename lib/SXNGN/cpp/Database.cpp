@@ -3,6 +3,7 @@
 
 Uint8 SXNGN::Database::scale_;
 Uint8 SXNGN::Database::max_fps_;
+Uint8 SXNGN::Database::collision_budget_ms_;
 std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
 
 SXNGN::Database::Database()
@@ -10,6 +11,7 @@ SXNGN::Database::Database()
 	scale_ = 1;
 	max_fps_ = 60;
 	ecs_coordinator_ = nullptr;
+	collision_budget_ms_ = 2;
 
 }
 
@@ -63,6 +65,10 @@ Uint8  SXNGN::Database::get_screen_ticks_per_frame()
 	return Uint8(1000 / max_fps_);
  }
 
+Uint8 SXNGN::Database::get_collision_budget_ms()
+{
+	return collision_budget_ms_;
+}
 
 std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::get_coordinator()
 {

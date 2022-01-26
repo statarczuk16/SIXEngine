@@ -19,7 +19,9 @@ namespace SXNGN::ECS::A {
 	{
 
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		auto collision_budget_ms_ = SXNGN::Database::get_collision_budget_ms();
 		std::vector<Entity> entities_to_cleanup;
+		std::vector<Entity> entities_to_resolve;
 
 		//Iterate through entities this system manipulates/converts
 		auto it_act = m_actable_entities.begin();
@@ -63,6 +65,7 @@ namespace SXNGN::ECS::A {
 				start = std::chrono::high_resolution_clock::now();
 				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_all.begin(); it_coll_a != entity_to_collisionable_all.end() - 1; ++it_coll_a)
 				{
+					bool outer_collided_with_something = false;
 					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = it_coll_a + 1; it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
 					{
 						if ((*it_coll_a).second->resolved_ == true && (*it_coll_b).second->resolved_ == true)
@@ -74,9 +77,14 @@ namespace SXNGN::ECS::A {
 						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
 						{
 							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+							outer_collided_with_something = true;
 
 						}
 						check_num++;
+					}
+					if (!outer_collided_with_something && (*it_coll_a).second->resolved_ == false)
+					{
+						entities_to_resolve.push_back((*it_coll_a).first); //if outer didn't collide with anything, it is resolved.
 					}
 				}
 				stop = std::chrono::high_resolution_clock::now();
@@ -96,6 +104,7 @@ namespace SXNGN::ECS::A {
 				start = std::chrono::high_resolution_clock::now();
 				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_unresolved.begin(); it_coll_a != entity_to_collisionable_unresolved.end(); ++it_coll_a)
 				{
+					bool outer_collided_with_something = false;
 					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = entity_to_collisionable_all.begin(); it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
 					{
 						if ((*it_coll_a).first == (*it_coll_b).first) //don't check collision against self
@@ -109,9 +118,20 @@ namespace SXNGN::ECS::A {
 							//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
 
 							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+							outer_collided_with_something = true;
 
 						}
 						check_num++;
+					}
+					if (!outer_collided_with_something && (*it_coll_a).second->resolved_ == false)
+					{
+						entities_to_resolve.push_back((*it_coll_a).first); //if outer didn't collide with anything, it is resolved.
+					}
+					auto now = std::chrono::high_resolution_clock::now();
+					auto collision_time = std::chrono::duration_cast<std::chrono::milliseconds> (now - start);
+					if (collision_time.count() > collision_budget_ms_)
+					{
+						break; //budget for time exceeded
 					}
 				}
 				stop = std::chrono::high_resolution_clock::now();
@@ -123,6 +143,13 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
+		for (auto entity_to_resolve : entities_to_resolve)
+		{
+			auto data1 = gCoordinator.CheckOutComponent(entity_to_resolve, ComponentTypeEnum::COLLISION);
+			Collisionable* collisionable_1 = static_cast<Collisionable*>(data1);
+			collisionable_1->resolved_ = true;
+			gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity_to_resolve);
+		}
 		std::vector<Entity> collisonables_to_delete;
 		for (auto c_collision : confirmed_collisions)
 		{

@@ -19,6 +19,11 @@ namespace SXNGN {
         static Uint8 get_max_fps();
         static void set_max_fps(Uint8 new_fps);
 
+        static Uint8 collision_budget_ms_;
+        static Uint8 get_collision_budget_ms();
+
+
+
         static Uint8 get_screen_ticks_per_frame();
 
         
