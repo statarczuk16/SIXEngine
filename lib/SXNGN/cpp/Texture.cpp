@@ -144,7 +144,8 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 		renderQuad.w *= SXNGN::Database::get_scale();
 		renderQuad.h *= SXNGN::Database::get_scale();
 	}
-
+	SDL_RenderSetIntegerScale(renderer_, SDL_TRUE);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
 	//Render to screen
 	if (mTexture_)
 	{
@@ -171,8 +172,8 @@ void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle,
 	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
 	renderQuad.x *= SXNGN::Database::get_scale();
 	renderQuad.y *= SXNGN::Database::get_scale();
-	renderQuad.w *= SXNGN::Database::get_scale();
-	renderQuad.h *= SXNGN::Database::get_scale();
+	renderQuad.w *= (SXNGN::Database::get_scale());
+	renderQuad.h *= (SXNGN::Database::get_scale());
 	//Render to screen
 	if (mTexture_)
 	{

@@ -46,10 +46,10 @@ namespace SXNGN::ECS::A {
 			std::vector<SDL_Event> keyboard_events = sorted_events.at(1);
 			std::vector<SDL_Event> mouse_wheel_events = sorted_events.at(2);
 
-			if (mouse_events.empty() == false)
+			if (mouse_events.empty() == false || mouse_wheel_events.empty() == false)
 			{
 				//Pass mouse events by reference - this function can remove events from the vector 
-				Update_Mouse_State(mouse_events, dt);
+				Update_Mouse_State(mouse_events, mouse_wheel_events, dt);
 			}
 
 			auto it_inter = m_entities_of_interest.begin();
@@ -304,7 +304,7 @@ namespace SXNGN::ECS::A {
 
 
 
-	void User_Input_System::Update_Mouse_State(std::vector<SDL_Event> mouse_events, float dt)
+	void User_Input_System::Update_Mouse_State(std::vector<SDL_Event> mouse_events, std::vector<SDL_Event> mouse_wheel_events, float dt)
 	{
 		auto gCoordinator = Database::get_coordinator();
 		//mutex controlled singleton
@@ -474,10 +474,30 @@ namespace SXNGN::ECS::A {
 				cached_mouse_state->mouse_state = current_mouse_state;
 				break;
 			}
+
 			default:
 			{
 				printf("Error: Update_Mouse_State got unrecognized SDL Event. Check UserInputUtils filter events and UserInputSystem Update_Mouse_State\n");
 				abort();
+			}
+
+			}
+		}
+		for (auto e : mouse_wheel_events)
+		{
+			switch (e.type)
+			{
+			case SDL_MOUSEWHEEL:
+			{
+				int x = e.wheel.x;
+				int y = e.wheel.y;
+				if (e.wheel.direction == SDL_MOUSEWHEEL_FLIPPED)
+				{
+					x *= -1;
+					y *= -1;
+				}
+				
+				Entity_Builder_Utils::Create_Mouse_Wheel_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, x, y);
 			}
 			}
 		}

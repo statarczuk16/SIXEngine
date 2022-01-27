@@ -158,7 +158,7 @@ bool init()
 		//}
 	}
 
-	SXNGN::Database::set_scale(1);// SXNGN::TILE_WIDTH_SCALE);
+	SXNGN::Database::set_scale(SXNGN::TILE_WIDTH_SCALE);
 
 	return success;
 }
@@ -417,6 +417,8 @@ int main(int argc, char* args[])
 		return 0;
 	}
 	gCoordinator.Init(gRenderer);
+	
+	
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
 
 	auto settings = gCoordinator.get_state_manager()->getGameSettings();

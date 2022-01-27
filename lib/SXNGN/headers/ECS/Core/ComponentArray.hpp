@@ -92,6 +92,17 @@ public:
 
 	}
 
+	std::array<ECS_Component*, MAX_ENTITIES> CheckOutAllData()
+	{
+		master_component_array_guard.lock();
+		return  mComponentArray;
+	}
+
+	void CheckInAllData()
+	{
+		master_component_array_guard.unlock();
+	}
+
 	//deprecated
 	const ECS_Component* TryGetDataReadOnly(Entity entity)
 	{
@@ -139,7 +150,6 @@ public:
 			abort();
 		}
 		component_specific_operations_in_progress--;
-		//use returned key to unlock the data
 		mComponentInUse[entity] = false;
 		mComponentMutexes[entity].unlock();
 	}
@@ -212,6 +222,6 @@ private:
 	std::array<bool, MAX_ENTITIES> mComponentInUse{};//locks for each individual component
 	//std::array<std::unique_lock<std::mutex>, MAX_ENTITIES> mComponentUniqueLocks{};//locks for each individual component
 	std::atomic<bool> array_wide_operation_in_progress = false; //flag that an array-wide operation is ongoing, ie, something that will affect mEntityToIndexMap. Not safe for any thread to access data in the array in any way until this is complete.
-	std::atomic<Uint8> component_specific_operations_in_progress = 0; //flag that any thread has data checked out
+	std::atomic<int> component_specific_operations_in_progress = 0; //flag that any thread has data checked out
 
 };

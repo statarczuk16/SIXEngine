@@ -1,28 +1,41 @@
 #include <Database.h>
 #include <stdio.h>
 
-Uint8 SXNGN::Database::scale_;
+float SXNGN::Database::scale_;
 Uint8 SXNGN::Database::max_fps_;
 Uint8 SXNGN::Database::collision_budget_ms_;
 std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
 
 SXNGN::Database::Database()
 {
-	scale_ = 1;
-	max_fps_ = 60;
+	scale_ = 3;
+	max_fps_ = 120;
 	ecs_coordinator_ = nullptr;
-	collision_budget_ms_ = 2;
+	collision_budget_ms_ = 1000;
 
 }
 
-Uint8 SXNGN::Database::get_scale()
+float SXNGN::Database::get_scale()
 {
 	return scale_;
 }
 
-void SXNGN::Database::set_scale(Uint8 new_scale)
+void SXNGN::Database::set_scale(float new_scale)
 {
 	scale_ = new_scale;
+}
+
+void SXNGN::Database::modify_scale(int scale_mod)
+{
+	scale_ += scale_mod;
+	if (scale_ < 1)
+	{
+		scale_ = 1;
+	}
+	if (scale_ > 6)
+	{
+		scale_ = 6;
+	}
 }
 
 void SXNGN::Database::reduce_scale()

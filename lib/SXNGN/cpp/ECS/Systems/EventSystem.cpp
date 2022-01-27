@@ -67,6 +67,12 @@ namespace SXNGN::ECS::A {
 					SDL_LogInfo(1, "Event_System::Update:: Got Mouse Event");
 					break;
 				}
+				case EventType::MOUSE_WHEEL:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Mouse Wheel Event");
+					Handle_Mouse_Wheel_Event(event_ptr);
+					break;
+				}
 				case EventType::ORDER:
 				{
 					SDL_LogInfo(1, "Event_System::Update:: Got Order Event");
@@ -190,6 +196,16 @@ namespace SXNGN::ECS::A {
 		load_game_state_change.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
 		load_game_state_change.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
 		Entity event_entity = Entity_Builder_Utils::Create_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, load_game_state_change, "Load Game State Change");
+	}
+
+	void Event_System::Handle_Mouse_Wheel_Event(Event_Component* ec)
+	{
+		auto cached_input_state = User_Input_State::get_instance();
+		if (cached_input_state->selected_entities.size() == 0)
+		{
+			SXNGN::Database::modify_scale(ec->e.mouse_wheel_event.y_);
+			std::cout << "Scale now: " << SXNGN::Database::get_scale() << std::endl;
+		}
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)

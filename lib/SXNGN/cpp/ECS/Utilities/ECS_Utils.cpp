@@ -124,6 +124,7 @@ namespace SXNGN {
 				SDL_Rect return_view;
 				SDL_Rect position_actual = camera->position_actual_;
 				SDL_Rect position_scaled;
+				auto scale_ = SXNGN::Database::get_scale();
 				position_scaled.x = position_actual.x * SXNGN::Database::get_scale();
 				position_scaled.y = position_actual.y * SXNGN::Database::get_scale();
 				camera->position_scaled_ = position_scaled;
@@ -181,7 +182,7 @@ namespace SXNGN {
 			{
 				SDL_Rect world_position;
 				//account for camera offset
-				SDL_Rect current_view = determine_camera_lens_unscaled(camera);
+				SDL_Rect current_view = determine_camera_lens_scaled(camera);
 				world_position.x = current_view.x + screen_x;
 				world_position.y = current_view.y + screen_y;
 				world_position.w = 0;
@@ -193,8 +194,14 @@ namespace SXNGN {
 					return world_position;
 				}
 				//account for viewport offset
+				
 				world_position.x -= overworld_viewport->x;
 				world_position.y -= overworld_viewport->y;
+				int temp_x = (int)round(world_position.x / SXNGN::Database::get_scale());
+				int temp_y = (int)round(world_position.y / SXNGN::Database::get_scale());
+				world_position.x = temp_x;
+				world_position.y = temp_y;
+				
 				
 				return world_position;
 

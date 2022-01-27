@@ -23,133 +23,94 @@ namespace SXNGN::ECS::A {
 		std::vector<Entity> entities_to_cleanup;
 		std::vector<Entity> entities_to_resolve;
 
+		
+
 		//Iterate through entities this system manipulates/converts
-		auto it_act = m_actable_entities.begin();
-		std::deque <std::pair<Entity, const Collisionable*>> entity_to_collisionable_unresolved;
-		std::deque <std::pair<Entity, const Collisionable*>> entity_to_collisionable_all;
+		
+		std::deque <std::pair<Entity,  Collisionable*>> entity_to_collisionable_unresolved;
+		std::deque <std::pair<Entity,  Collisionable*>> entity_to_collisionable_all;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions;
-		std::deque<std::pair<Entity, Entity>> confirmed_collisions_2;
-		//actable entities for collision system have collision and can move
+		
+		auto it_act = m_actable_entities.begin();
+		//First sweep check out all data needed
 		while (it_act != m_actable_entities.end())
 		{
-			auto const& entity_actable = *it_act;
+			auto const& entity = *it_act;
 			it_act++;
-
-
-			//draw distinction between resolved and unresolved collisionables. We don't need to check collision of resolved collisions - ones that we have already detected collision between and they have not moved (become "unresolved") since the check
-			auto data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::COLLISION);
-			const Collisionable* collisionable_ptr = static_cast<const Collisionable*>(data);
+			auto data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::COLLISION);
+			Collisionable* collisionable_ptr = static_cast<Collisionable*>(data);
 			if (collisionable_ptr->resolved_ == false)
 			{
-				entity_to_collisionable_unresolved.push_back(std::make_pair(entity_actable, collisionable_ptr));
+				entity_to_collisionable_unresolved.push_back(std::make_pair(entity, collisionable_ptr));
 			}
-			entity_to_collisionable_all.push_back(std::make_pair(entity_actable, collisionable_ptr));
-
+			entity_to_collisionable_all.push_back(std::make_pair(entity, collisionable_ptr));
 		}
+		
+		int resolved_collisions = 0;
+		//actable entities for collision system have collision and can move
+		//auto last = m_actable_entities.empty() ? m_actable_entities.end() : std::prev(m_actable_entities.end()); // in case s is empty
+		auto start = std::chrono::high_resolution_clock::now();
+		//auto stop = std::chrono::high_resolution_clock::now();
+		//auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+		auto it_unresolved = entity_to_collisionable_unresolved.begin();
 
-
-		if (!entity_to_collisionable_unresolved.empty())
+		
+		while (it_unresolved != entity_to_collisionable_unresolved.end())
 		{
-			int check_num = 0;
-			auto start = std::chrono::high_resolution_clock::now();
-			auto stop = std::chrono::high_resolution_clock::now();
-			auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
-			if (entity_to_collisionable_unresolved.size() > 500)
-			{
-				//method 1: iterate through all collisionables, but only do the check if one is unresolved.
-				//Advantage: since inner and outer loop use the same index, can place inner loop iterator at out loop iterator + 1 and cut out all redundant checks
-				// (if A hitting B, don't need to check B hitting A)
-				//Disadvantage: Have to at least *iterate* through a lot of resolved collisions, possibly, even if we don't have to check the collision.
-				//Should work better when there are many unresolved (moving) objects
-				check_num = 0;
-				start = std::chrono::high_resolution_clock::now();
-				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_all.begin(); it_coll_a != entity_to_collisionable_all.end() - 1; ++it_coll_a)
-				{
-					bool outer_collided_with_something = false;
-					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = it_coll_a + 1; it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
-					{
-						if ((*it_coll_a).second->resolved_ == true && (*it_coll_b).second->resolved_ == true)
-						{
-							continue;
-						}
-						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
-						//does obj a touch obj b
-						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
-						{
-							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
-							outer_collided_with_something = true;
+			bool outer_collided_with_something = false;
+			Entity entity_outer = it_unresolved->first;
+			Collisionable* collisionable_outer = it_unresolved->second;
 
-						}
-						check_num++;
-					}
-					if (!outer_collided_with_something && (*it_coll_a).second->resolved_ == false)
-					{
-						entities_to_resolve.push_back((*it_coll_a).first); //if outer didn't collide with anything, it is resolved.
-					}
-				}
-				stop = std::chrono::high_resolution_clock::now();
-				if (true)//(!quiet)
+			it_unresolved++;
+			auto it_all = entity_to_collisionable_all.begin();
+			
+			while (it_all != entity_to_collisionable_all.end())
+			{
+				Entity entity_inner = it_all->first;
+				Collisionable* collisionable_inner = it_all->second;
+				it_all++;
+				if (entity_inner == entity_outer)
 				{
-					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
-					//SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 1: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions.size(), duration);
+					continue;
+				}
+					
+				Uint8 collision_buffer_pixels = collisionable_outer->buffer_pixels + collisionable_inner->buffer_pixels;
+				//does obj a touch obj b
+				if (CollisionChecks::checkCollisionBuffer(collisionable_outer->collision_box_, collisionable_inner->collision_box_, collision_buffer_pixels))
+				{
+					confirmed_collisions.push_back(std::make_pair(entity_inner, entity_outer));
+					resolved_collisions++;
+					//int collision_result = HandleCollisionGeneric(collisionable_outer, entity_actable_outer, collisionable_inner, entity_actable_inner, gCoordinator);
+					outer_collided_with_something = true;
+
+				}
+				
+					
+				if (!outer_collided_with_something)
+				{
+					resolved_collisions++;
+					collisionable_outer->resolved_ = true;
 				}
 			}
-			else
+			auto now = std::chrono::high_resolution_clock::now();
+			auto collision_time = std::chrono::duration_cast<std::chrono::milliseconds> (now - start);
+			if (collision_time.count() > collision_budget_ms_)
 			{
-				//method 2: only iterate through unresolved collisionables, though check them for collision against ALL collisionables
-				//Advantage: Small outer loop to iterate through (only unresolved collisions)
-				//Disadvantage: Does not cut out redundant checks because indexes aren't the same (see advantage for above method)
-				//Should work better when there are not many unresolved collisions (moving objects)
-				check_num = 0;
-				start = std::chrono::high_resolution_clock::now();
-				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_unresolved.begin(); it_coll_a != entity_to_collisionable_unresolved.end(); ++it_coll_a)
-				{
-					bool outer_collided_with_something = false;
-					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = entity_to_collisionable_all.begin(); it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
-					{
-						if ((*it_coll_a).first == (*it_coll_b).first) //don't check collision against self
-						{
-							continue;
-						}
-						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
-						//does obj a touch obj b
-						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
-						{
-							//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
-
-							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
-							outer_collided_with_something = true;
-
-						}
-						check_num++;
-					}
-					if (!outer_collided_with_something && (*it_coll_a).second->resolved_ == false)
-					{
-						entities_to_resolve.push_back((*it_coll_a).first); //if outer didn't collide with anything, it is resolved.
-					}
-					auto now = std::chrono::high_resolution_clock::now();
-					auto collision_time = std::chrono::duration_cast<std::chrono::milliseconds> (now - start);
-					if (collision_time.count() > collision_budget_ms_)
-					{
-						break; //budget for time exceeded
-					}
-				}
-				stop = std::chrono::high_resolution_clock::now();
-				if (true)//(!quiet)
-				{
-					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
-					//SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions_2.size(), duration);
-				}
+				it_unresolved = entity_to_collisionable_unresolved.end();
 			}
 		}
 
-		for (auto entity_to_resolve : entities_to_resolve)
+		auto check_in_it = entity_to_collisionable_all.begin();
+		//First sweep check out all data needed
+		while (check_in_it != entity_to_collisionable_all.end())
 		{
-			auto data1 = gCoordinator.CheckOutComponent(entity_to_resolve, ComponentTypeEnum::COLLISION);
-			Collisionable* collisionable_1 = static_cast<Collisionable*>(data1);
-			collisionable_1->resolved_ = true;
-			gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity_to_resolve);
+			auto const& entity = check_in_it->first;
+			check_in_it++;
+			gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION,entity);
 		}
+
+		//stop = std::chrono::high_resolution_clock::now();
+		//duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
 		std::vector<Entity> collisonables_to_delete;
 		for (auto c_collision : confirmed_collisions)
 		{
@@ -477,3 +438,171 @@ namespace SXNGN::ECS::A {
 		return 0;
 	}
 }
+
+
+/** Scrap
+
+auto data2 = gCoordinator.CheckOutComponent(c_collision.second, ComponentTypeEnum::COLLISION);
+
+//draw distinction between resolved and unresolved collisionables. We don't need to check collision of resolved collisions - ones that we have already detected collision between and they have not moved (become "unresolved") since the check
+auto data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::COLLISION);
+const Collisionable* collisionable_ptr = static_cast<const Collisionable*>(data);
+if (collisionable_ptr->resolved_ == false)
+{
+	entity_to_collisionable_unresolved.push_back(std::make_pair(entity_actable, collisionable_ptr));
+}
+entity_to_collisionable_all.push_back(std::make_pair(entity_actable, collisionable_ptr));
+
+
+
+		}
+
+
+		if (!entity_to_collisionable_unresolved.empty())
+		{
+			int check_num = 0;
+			auto start = std::chrono::high_resolution_clock::now();
+			auto stop = std::chrono::high_resolution_clock::now();
+			auto duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+			if (entity_to_collisionable_unresolved.size() > 500)
+			{
+				//method 1: iterate through all collisionables, but only do the check if one is unresolved.
+				//Advantage: since inner and outer loop use the same index, can place inner loop iterator at out loop iterator + 1 and cut out all redundant checks
+				// (if A hitting B, don't need to check B hitting A)
+				//Disadvantage: Have to at least *iterate* through a lot of resolved collisions, possibly, even if we don't have to check the collision.
+				//Should work better when there are many unresolved (moving) objects
+				check_num = 0;
+				start = std::chrono::high_resolution_clock::now();
+				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_all.begin(); it_coll_a != entity_to_collisionable_all.end() - 1; ++it_coll_a)
+				{
+					bool outer_collided_with_something = false;
+					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = it_coll_a + 1; it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
+					{
+						if ((*it_coll_a).second->resolved_ == true && (*it_coll_b).second->resolved_ == true)
+						{
+							continue;
+						}
+						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
+						//does obj a touch obj b
+						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
+						{
+							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+							outer_collided_with_something = true;
+
+						}
+						check_num++;
+					}
+					if (!outer_collided_with_something && (*it_coll_a).second->resolved_ == false)
+					{
+						entities_to_resolve.push_back((*it_coll_a).first); //if outer didn't collide with anything, it is resolved.
+					}
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				if (true)//(!quiet)
+				{
+					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+					//SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 1: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions.size(), duration);
+				}
+			}
+			else
+			{
+				//method 2: only iterate through unresolved collisionables, though check them for collision against ALL collisionables
+				//Advantage: Small outer loop to iterate through (only unresolved collisions)
+				//Disadvantage: Does not cut out redundant checks because indexes aren't the same (see advantage for above method)
+				//Should work better when there are not many unresolved collisions (moving objects)
+				check_num = 0;
+				start = std::chrono::high_resolution_clock::now();
+				for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_a = entity_to_collisionable_unresolved.begin(); it_coll_a != entity_to_collisionable_unresolved.end(); ++it_coll_a)
+				{
+					bool outer_collided_with_something = false;
+					for (std::deque <std::pair<Entity, const Collisionable*>>::const_iterator it_coll_b = entity_to_collisionable_all.begin(); it_coll_b != entity_to_collisionable_all.end(); ++it_coll_b)
+					{
+						if ((*it_coll_a).first == (*it_coll_b).first) //don't check collision against self
+						{
+							continue;
+						}
+						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
+						//does obj a touch obj b
+						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
+						{
+							//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
+
+							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
+							outer_collided_with_something = true;
+
+						}
+						check_num++;
+					}
+					if (!outer_collided_with_something && (*it_coll_a).second->resolved_ == false)
+					{
+						entities_to_resolve.push_back((*it_coll_a).first); //if outer didn't collide with anything, it is resolved.
+					}
+					auto now = std::chrono::high_resolution_clock::now();
+					auto collision_time = std::chrono::duration_cast<std::chrono::milliseconds> (now - start);
+					if (collision_time.count() > collision_budget_ms_)
+					{
+						break; //budget for time exceeded
+					}
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				if (true)//(!quiet)
+				{
+					duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+					//SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Checked %d Unresolved Collisionables in %d checks and found %d collisions in %d ms", entity_to_collisionable_unresolved.size(), check_num, confirmed_collisions_2.size(), duration);
+				}
+			}
+		}
+
+		for (auto entity_to_resolve : entities_to_resolve)
+		{
+			auto data1 = gCoordinator.CheckOutComponent(entity_to_resolve, ComponentTypeEnum::COLLISION);
+			Collisionable* collisionable_1 = static_cast<Collisionable*>(data1);
+			collisionable_1->resolved_ = true;
+			gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity_to_resolve);
+		}
+
+		**/
+
+
+
+
+
+
+
+
+
+		/** ////// test
+				start = std::chrono::high_resolution_clock::now();
+				it_act_outer = m_actable_entities.begin();
+				while (it_act_outer != last)
+				{
+					it_act_outer++;
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+
+				start = std::chrono::high_resolution_clock::now();
+				it_act_outer = m_actable_entities.begin();
+				while (it_act_outer != last)
+				{
+					auto const& entity_actable_outer = *it_act_outer;
+					it_act_outer++;
+					auto data_outer = gCoordinator.CheckOutComponent(entity_actable_outer, ComponentTypeEnum::COLLISION);
+					Collisionable* collisionable_outer = static_cast<Collisionable*>(data_outer);
+					gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity_actable_outer);
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+
+				start = std::chrono::high_resolution_clock::now();
+				it_act_outer = m_actable_entities.begin();
+				while (it_act_outer != last)
+				{
+					auto const& entity_actable_outer = *it_act_outer;
+					it_act_outer++;
+					auto data = gCoordinator.GetComponentReadOnly(entity_actable_outer, ComponentTypeEnum::COLLISION);
+					const Collisionable* collisionable_ptr = static_cast<const Collisionable*>(data);
+				}
+				stop = std::chrono::high_resolution_clock::now();
+				duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
+				**/

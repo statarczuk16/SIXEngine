@@ -77,6 +77,15 @@ public:
 		return GetComponentArray(component_type)->GetAllDataReadOnly();
 	}
 
+	std::array<ECS_Component*, MAX_ENTITIES> CheckOutAllData(ComponentTypeEnum component_type)
+	{
+		return GetComponentArray(component_type)->CheckOutAllData();
+	}
+
+	void CheckInAllData(ComponentTypeEnum component_type)
+	{
+		GetComponentArray(component_type)->CheckInAllData();
+	}
 
 	ECS_Component* CheckOutComponent(Entity entity, ComponentTypeEnum component_type)
 	{

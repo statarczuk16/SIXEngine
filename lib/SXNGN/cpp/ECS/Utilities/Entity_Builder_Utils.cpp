@@ -90,6 +90,21 @@ namespace SXNGN {
 				return event_entity;
 			}
 
+			Entity Entity_Builder_Utils::Create_Mouse_Wheel_Event(Coordinator coordinator, ComponentTypeEnum game_state, int x, int y)
+			{
+				auto event_entity = coordinator.CreateEntity();
+				Event_Component* event_component = new Event_Component();
+				SXNGN_MouseWheelEvent mouse_wheel_event;
+				mouse_wheel_event.x_ = x;
+				mouse_wheel_event.y_ = y;
+				event_component->e.common.type = EventType::MOUSE_WHEEL;
+				event_component->e.mouse_wheel_event = mouse_wheel_event;
+
+				coordinator.AddComponent(event_entity, event_component);
+				coordinator.AddComponent(event_entity, Create_Gamestate_Component_from_Enum(game_state));
+				return event_entity;
+			}
+
 			Entity Entity_Builder_Utils::Create_Mouse_Event(Coordinator coordinator, ComponentTypeEnum game_state, Click click, bool shift_click, bool alt_click, bool ctrl_click)
 			{
 				auto event_entity = coordinator.CreateEntity();

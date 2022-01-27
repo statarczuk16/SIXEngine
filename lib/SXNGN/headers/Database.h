@@ -9,11 +9,13 @@ namespace SXNGN {
     class Database {
     public:
         Database();
-        static Uint8 scale_;
-        static Uint8 get_scale();
-        static void set_scale(Uint8 new_scale);
+        static float scale_;
+        static float get_scale();
+        static void set_scale(float new_scale);
         static void reduce_scale();
         static void increase_scale();
+        static void modify_scale(int scale_mod);
+       
 
         static Uint8 max_fps_;
         static Uint8 get_max_fps();

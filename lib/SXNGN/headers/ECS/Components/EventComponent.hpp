@@ -18,6 +18,7 @@ namespace SXNGN::ECS::A {
 		STATE_CHANGE,
 		EXIT,
 		MOUSE,
+		MOUSE_WHEEL,
 		SELECTION,
 		ORDER
 	};
@@ -83,6 +84,12 @@ namespace SXNGN::ECS::A {
 		bool alt_click;
 		bool ctrl_click;
 	};
+
+	struct SXNGN_MouseWheelEvent
+	{
+		int x_ = 0;
+		int y_ = 0;
+	};
 	
 	struct SXNGN_Event
 	{
@@ -91,6 +98,7 @@ namespace SXNGN::ECS::A {
 		SXNGN_LoadEvent load;
 		SXNGN_StateChangeEvent state_change;
 		SXNGN_MouseEvent mouse_event;
+		SXNGN_MouseWheelEvent mouse_wheel_event;
 		SXNGN_Selection select_event;
 		SXNGN_Order order_event;
 	};

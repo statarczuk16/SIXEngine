@@ -21,6 +21,8 @@ namespace SXNGN::ECS::A {
 
 		void Handle_Order_Event(Event_Component* ec);
 
+		void Handle_Mouse_Wheel_Event(Event_Component* ec);
+
 		void Handle_Save_Event(Event_Component* ec);
 
 		void Handle_Load_Event(Event_Component* ec);
