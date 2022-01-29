@@ -36,7 +36,8 @@ namespace SXNGN::ECS::A {
 	MAIN_GAME_STATE,
 	NEW_GAME_STATE,
 	MAIN_SETTINGS_STATE,
-	CORE_BG_GAME_STATE//don't forget to add to component_type_enum_to_string and reverse when adding a new enum
+	CORE_BG_GAME_STATE,//don't forget to add to component_type_enum_to_string and reverse when adding a new enum
+	NUM_COMPONENT_TYPES
 };
 
 

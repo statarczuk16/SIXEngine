@@ -31,13 +31,15 @@ namespace SXNGN::ECS::A {
 		std::deque <std::pair<Entity,  Collisionable*>> entity_to_collisionable_all;
 		std::deque<std::pair<Entity, Entity>> confirmed_collisions;
 		
+
+		std::array<ECS_Component*, MAX_ENTITIES>& all_collisionables = gCoordinator.CheckOutAllData(ComponentTypeEnum::COLLISION);
 		auto it_act = m_actable_entities.begin();
 		//First sweep check out all data needed
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity = *it_act;
 			it_act++;
-			auto data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::COLLISION);
+			auto data = all_collisionables[entity];
 			Collisionable* collisionable_ptr = static_cast<Collisionable*>(data);
 			if (collisionable_ptr->resolved_ == false)
 			{
@@ -45,7 +47,7 @@ namespace SXNGN::ECS::A {
 			}
 			entity_to_collisionable_all.push_back(std::make_pair(entity, collisionable_ptr));
 		}
-		
+
 		int resolved_collisions = 0;
 		//actable entities for collision system have collision and can move
 		//auto last = m_actable_entities.empty() ? m_actable_entities.end() : std::prev(m_actable_entities.end()); // in case s is empty
@@ -99,15 +101,16 @@ namespace SXNGN::ECS::A {
 				it_unresolved = entity_to_collisionable_unresolved.end();
 			}
 		}
-
-		auto check_in_it = entity_to_collisionable_all.begin();
+		
+		gCoordinator.CheckInAllData(ComponentTypeEnum::COLLISION);
+		//auto check_in_it = entity_to_collisionable_all.begin();
 		//First sweep check out all data needed
-		while (check_in_it != entity_to_collisionable_all.end())
-		{
-			auto const& entity = check_in_it->first;
-			check_in_it++;
-			gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION,entity);
-		}
+		//while (check_in_it != entity_to_collisionable_all.end())
+		//{
+		//	auto const& entity = check_in_it->first;
+		//	check_in_it++;
+		//	gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION,entity);
+		//}
 
 		//stop = std::chrono::high_resolution_clock::now();
 		//duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);

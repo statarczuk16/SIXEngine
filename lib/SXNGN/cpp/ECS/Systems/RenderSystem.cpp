@@ -132,6 +132,7 @@ namespace SXNGN::ECS::A {
 		Entity camera_target = camera_ptr->get_target();
 		auto camera_target_position = ECS_Utils::GetEntityPosition(camera_target);
 		auto user_input_state = User_Input_State::get_instance();
+		
 		if (camera_target_position)
 		{
 			camera_ptr->set_position_actual(*camera_target_position);
@@ -144,13 +145,14 @@ namespace SXNGN::ECS::A {
 		std::vector<const Renderable*> renderables_object_layer;
 		std::vector<const Renderable*> renderables_air_layer;
 		std::vector<const Renderable*> renderables_ui_layer;
+		std::array<ECS_Component*, MAX_ENTITIES>& all_renderables = gCoordinator.CheckOutAllData(ComponentTypeEnum::RENDERABLE);
 		//for (auto const& entity : m_actable_entities)
 		while (it != m_actable_entities.end())
 		{
 			auto const& entity = *it;
 			it++;
 			//Get renderable
-			ECS_Component* data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
+			ECS_Component* data = all_renderables[entity];//gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
 			Renderable* renderable_ptr = static_cast<Renderable*>(data);
 			bool draw_outline = user_input_state->selected_entities.count(entity);
 			if (draw_outline)
@@ -174,8 +176,9 @@ namespace SXNGN::ECS::A {
 				abort();
 			}
 			}
-			gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
+			//gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
 		}
+		gCoordinator.CheckInAllData(ComponentTypeEnum::RENDERABLE);
 
 		auto view_port = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 		//SDL_Rect belowUIViewPort;
@@ -381,6 +384,7 @@ namespace SXNGN::ECS::A {
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto it = m_actable_entities.begin();
+		
 		//for (auto const& entity : m_actable_entities)
 		while (it != m_actable_entities.end())
 		{

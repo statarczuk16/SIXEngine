@@ -187,7 +187,7 @@ namespace SXNGN {
 					return mComponentManager->GetComponentArrayReadOnly(component_type);
 				}
 
-				std::array<ECS_Component*, MAX_ENTITIES> CheckOutAllData(ComponentTypeEnum component_type)
+				std::array<ECS_Component*, MAX_ENTITIES>& CheckOutAllData(ComponentTypeEnum component_type)
 				{
 					return mComponentManager->CheckOutAllData(component_type);
 				}

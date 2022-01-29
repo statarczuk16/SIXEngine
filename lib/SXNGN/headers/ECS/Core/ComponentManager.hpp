@@ -18,7 +18,8 @@ public:
 		assert(mComponentTypes.find(component_type) == mComponentTypes.end() && "Registering component type_ more than once.");
 
 		mComponentTypes.insert({ component_type, mNextComponentType});
-		mComponentArrays.insert({ component_type, std::make_shared<ComponentArray>() });
+		//mComponentArrays.insert({ component_type, std::make_shared<ComponentArray>() });
+		mComponentArrays[(int) component_type] = std::make_shared<ComponentArray>();
 
 		++mNextComponentType;
 	}
@@ -77,7 +78,7 @@ public:
 		return GetComponentArray(component_type)->GetAllDataReadOnly();
 	}
 
-	std::array<ECS_Component*, MAX_ENTITIES> CheckOutAllData(ComponentTypeEnum component_type)
+	std::array<ECS_Component*, MAX_ENTITIES>& CheckOutAllData(ComponentTypeEnum component_type)
 	{
 		return GetComponentArray(component_type)->CheckOutAllData();
 	}
@@ -107,9 +108,12 @@ public:
 	{
 		for (auto const& pair : mComponentArrays)
 		{
-			auto const& component = pair.second;
-
-			component->EntityDestroyed(entity);
+			//auto const& component = pair.second;
+			if (pair)
+			{
+				pair->EntityDestroyed(entity);
+			}
+			
 		}
 	}
 
@@ -119,7 +123,7 @@ public:
 		for (auto component_type : mComponentTypes)
 		{
 			ComponentTypeEnum component_type_enum = component_type.first;
-			auto comp_arr = (mComponentArrays[component_type_enum]);
+			auto comp_arr = (mComponentArrays[(int) component_type_enum]);
 			auto component = comp_arr->TryGetDataReadOnly(entity);
 			if (component)
 			{
@@ -141,7 +145,7 @@ public:
 		for (auto component_type : mComponentTypes)
 		{
 			ComponentTypeEnum component_type_enum = component_type.first;
-			auto comp_arr = (mComponentArrays[component_type_enum]);
+			auto comp_arr = (mComponentArrays[(int) component_type_enum]);
 			auto component = comp_arr->ExtractData(entity);
 			if (component)
 			{
@@ -157,7 +161,8 @@ public:
 private:
 
 	std::unordered_map<ComponentTypeEnum, ComponentTypeHash> mComponentTypes{};
-	std::unordered_map<ComponentTypeEnum, std::shared_ptr<ComponentArray>> mComponentArrays{};
+	//std::unordered_map<ComponentTypeEnum, std::shared_ptr<ComponentArray>> mComponentArrays{};
+	std::array<std::shared_ptr<ComponentArray>, (size_t)ComponentTypeEnum::NUM_COMPONENT_TYPES> mComponentArrays;
 	ComponentTypeHash mNextComponentType{};
 
 	std::shared_ptr<ComponentArray> GetComponentArray(ComponentTypeEnum component_type)
@@ -165,6 +170,6 @@ private:
 
 		assert(mComponentTypes.find(component_type) != mComponentTypes.end() && "Component not registered before use.");
 
-		return (mComponentArrays[component_type]);
+		return (mComponentArrays[(int) component_type]);
 	}
 };

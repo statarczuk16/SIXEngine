@@ -29,25 +29,28 @@ public:
 		std::lock_guard<std::mutex> guard(master_component_array_guard);//Wait until array is safe to operate on 
 		array_wide_operation_in_progress.store(true);
 
-		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
+		if (mComponentArray[entity])
 		{
 			SDL_LogError(1, "InsertData : Component added to same entity more than once: Type %d", component->get_component_type());
-			return;
 		}
-		// Put new entry at end
-		size_t newIndex = mSize;
-		mEntityToIndexMap[entity] = newIndex;
-		mIndexToEntityMap[newIndex] = entity;
-		mComponentArray[newIndex] = component;
-
-		++mSize;
+		else
+		{
+			mComponentArray[entity] = component;
+			++mSize;
+		}
 		array_wide_operation_in_progress.store(false);
 	}
 
-	void RemoveData(Entity entity)
+	void RemoveData(Entity entity, bool have_lock = false)
 	{
-		ECS_Component* to_remove = ExtractComponent(entity);
+		ECS_Component* to_remove = ExtractComponent(entity, have_lock);
+		--mSize;
 		delete to_remove;
+	}
+
+	void EntityDestroyed(Entity entity, bool have_lock = false)
+	{
+		RemoveData(entity, have_lock = false);
 	}
 
 	/// <summary>
@@ -55,9 +58,9 @@ public:
 	/// </summary>
 	/// <param name="entity"></param>
 	/// <returns></returns>
-	ECS_Component* ExtractData(Entity entity)
+	ECS_Component* ExtractData(Entity entity, bool have_lock = false)
 	{
-		ECS_Component* to_extract = ExtractComponent(entity);
+		ECS_Component* to_extract = ExtractComponent(entity, have_lock);
 		return to_extract;
 	}
 
@@ -67,21 +70,13 @@ public:
 		const ECS_Component* to_return = nullptr;
 		
 		std::lock_guard<std::mutex> guard(master_component_array_guard);
-		component_specific_operations_in_progress++;
-		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
+		mComponentMutexes[entity].lock();//Wait until data is available (no other theadss have checked it out)
+		if (mComponentArray[entity])
 		{
-			mComponentMutexes[entity].lock();//Wait until data is available (no other theadss have checked it out)
-			mComponentInUse[entity] = true;
-			auto component_ref = mComponentArray[mEntityToIndexMap[entity]];
-			//printf("Entity locked: %d: type: %d\n", entity, component_ref->get_component_type());
+			auto component_ref = mComponentArray[entity];
 			to_return = (const ECS_Component*)(component_ref); //make a read-only copy of the data to return
-			component_specific_operations_in_progress--;
-			mComponentInUse[entity] = false;
-			mComponentMutexes[entity].unlock();
-			
-			//printf("Entity unlocked: %d: type: %d\n", entity, to_return->component_type);
-			
 		}
+		mComponentMutexes[entity].unlock();
 		return to_return;
 	} 
 
@@ -93,7 +88,7 @@ public:
 
 	}
 
-	std::array<ECS_Component*, MAX_ENTITIES> CheckOutAllData()
+	std::array<ECS_Component*, MAX_ENTITIES>& CheckOutAllData()
 	{
 		master_component_array_guard.lock();
 		return  mComponentArray;
@@ -122,15 +117,19 @@ public:
 		std::lock_guard<std::mutex> guard(master_component_array_guard);
 
 		ECS_Component* to_return = nullptr;
-		if (mEntityToIndexMap.find(entity) != mEntityToIndexMap.end())
+		
+		mComponentMutexes[entity].lock();//Wait until data is available (no other theadss have checked it out)
+		if (mComponentArray[entity])
 		{
-			mComponentMutexes[entity].lock();//Wait until data is available (no other theadss have checked it out)
 			mComponentInUse[entity] = true;
 			component_specific_operations_in_progress++;
-			//make a pointer to the lock so it can be returned to user
-			to_return = mComponentArray[mEntityToIndexMap[entity]];
+			to_return = mComponentArray[entity];
 		}
-		//mComponentMutexes[entity].unlock(); DO NOT UNLOCK - CheckInData will do this - should remain locked until then
+		else
+		{
+			mComponentMutexes[entity].unlock();
+		}		
+		 //DO NOT UNLOCK - CheckInData will do this - should remain locked until then
 		return to_return;
 	} 
 
@@ -140,11 +139,11 @@ public:
 		//Lock the array until the data is checked back in (under "authority" of master_component_array_guard)
 		//(Thread entering this function will block here until it can get the lock)
 		std::lock_guard<std::mutex> guard(master_component_array_guard);
-		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
-		{
-			SDL_LogCritical(1, "CheckInData: Entity %d not checked out or does not exist\n", entity);
-			abort();
-		}
+		//if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		//{
+		//	SDL_LogCritical(1, "CheckInData: Entity %d not checked out or does not exist\n", entity);
+		//	abort();
+		//}
 		if (component_specific_operations_in_progress.load() <= 0)
 		{
 			SDL_LogCritical(1, "CheckInData: component_specific_operations_in_progress <= 0");
@@ -155,21 +154,22 @@ public:
 		mComponentMutexes[entity].unlock();
 	}
 
-	void EntityDestroyed(Entity entity)
-	{
-		RemoveData(entity);
-	}
+
 
 private:
 
-	ECS_Component* ExtractComponent(Entity entity)
+	ECS_Component* ExtractComponent(Entity entity, bool have_lock = false)
 	{
 		//lock the master lock. Checking in/out components will wait until this is free.
-		std::lock_guard<std::mutex> guard(master_component_array_guard);
-		if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		if (!have_lock)
 		{
-			return nullptr;
+			std::lock_guard<std::mutex> guard(master_component_array_guard);
 		}
+		
+		//if (mEntityToIndexMap.find(entity) == mEntityToIndexMap.end())
+		//{
+		//	return nullptr;
+		//}
 		while (component_specific_operations_in_progress.load() > 0 && array_wide_operation_in_progress.load() == true)
 		{
 			//waiting
@@ -189,24 +189,24 @@ private:
 		}
 		
 		
-		size_t indexOfRemovedEntity = mEntityToIndexMap[entity];
-		size_t indexOfLastElement = mSize - 1;
+		//size_t indexOfRemovedEntity = mEntityToIndexMap[entity];
+		//size_t indexOfLastElement = mSize - 1;
 		ECS_Component* component_to_extract = nullptr;
-		if (mComponentArray[indexOfRemovedEntity])
+		if (mComponentArray[entity])
 		{
-			component_to_extract = mComponentArray[indexOfRemovedEntity];
-			mComponentArray[indexOfRemovedEntity] = nullptr;
+			component_to_extract = mComponentArray[entity];
+			mComponentArray[entity] = nullptr;
 		}
 		// Copy element at end into deleted element's place to maintain density
-		mComponentArray[indexOfRemovedEntity] = mComponentArray[indexOfLastElement];
+		//mComponentArray[indexOfRemovedEntity] = mComponentArray[indexOfLastElement];
 
 		// Update map to point to moved spot
-		Entity entityOfLastElement = mIndexToEntityMap[indexOfLastElement];
-		mEntityToIndexMap[entityOfLastElement] = indexOfRemovedEntity;
-		mIndexToEntityMap[indexOfRemovedEntity] = entityOfLastElement;
+		// !Entity entityOfLastElement = mIndexToEntityMap[indexOfLastElement];
+		// !mEntityToIndexMap[entityOfLastElement] = indexOfRemovedEntity;
+		// !mIndexToEntityMap[indexOfRemovedEntity] = entityOfLastElement;
 
-		mEntityToIndexMap.erase(entity);
-		mIndexToEntityMap.erase(indexOfLastElement);
+		// !mEntityToIndexMap.erase(entity);
+		// !mIndexToEntityMap.erase(indexOfLastElement);
 
 		--mSize;
 		mComponentMutexes[entity].unlock();
@@ -215,8 +215,8 @@ private:
 	}
 
 	std::array<ECS_Component*, MAX_ENTITIES> mComponentArray{};
-	std::unordered_map<Entity, size_t> mEntityToIndexMap{};
-	std::unordered_map<size_t, Entity> mIndexToEntityMap{};
+	//std::unordered_map<Entity, size_t> mEntityToIndexMap{};
+	//std::unordered_map<size_t, Entity> mIndexToEntityMap{};
 	size_t mSize{};
 	std::mutex master_component_array_guard;//mutex used to guard this CompnentArray's data
 	std::array<std::mutex, MAX_ENTITIES> mComponentMutexes{};//locks for each individual component
