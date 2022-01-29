@@ -28,12 +28,11 @@ C++ 17 (G++ version 9.3 or above for use with std::filesystem)
 * Open top level folder with CMakeLists.txt
 * Build as normal
 ## Windows
-* Downlaod SDL2 development libraries from http://libsdl.org/download-2.0.php.
+* Download SDL2 development libraries from http://libsdl.org/download-2.0.php.
 * SDL2, SDL2_image, and SDL2_ttf.
 * Place the folders in the SIXEngine/vclib/[compiler] folder
 * Example, SIXEngine/vclib/mingw/SDL2-2.0.14 (and image, and ttf)
 ### Visual C++	
-* 
 * Make sure cmake plugin is installed
 * Open the top level folder with the CMakeLists.txt
 * Build as normal
