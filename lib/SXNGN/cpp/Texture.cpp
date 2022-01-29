@@ -144,8 +144,7 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 		renderQuad.w *= SXNGN::Database::get_scale();
 		renderQuad.h *= SXNGN::Database::get_scale();
 	}
-	SDL_RenderSetIntegerScale(renderer_, SDL_TRUE);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, 0);
+
 	//Render to screen
 	if (mTexture_)
 	{
@@ -168,12 +167,21 @@ void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle,
 	//Set clip rendering dimensions
 	//renderQuad.w = clip->w;
 	//renderQuad.h = clip->h;
+	clip.x += 1;
+	clip.y += 1;
+	clip.w -= 2;
+	clip.h -= 2;
 
 	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
 	renderQuad.x *= SXNGN::Database::get_scale();
 	renderQuad.y *= SXNGN::Database::get_scale();
 	renderQuad.w *= (SXNGN::Database::get_scale());
 	renderQuad.h *= (SXNGN::Database::get_scale());
+
+	//SDL_RenderSetScale(renderer_, SXNGN::Database::get_scale(), SXNGN::Database::get_scale());
+	//SDL_RenderSetLogicalSize(renderer_, 1920, 1080);
+	//SDL_RenderSetIntegerScale(renderer_, SDL_TRUE);
+	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	//Render to screen
 	if (mTexture_)
 	{

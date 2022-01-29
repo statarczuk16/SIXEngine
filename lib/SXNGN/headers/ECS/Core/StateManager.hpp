@@ -87,7 +87,7 @@ namespace SXNGN::ECS::A {
 				new_game_state_viewport->x = 0;
 				new_game_state_viewport->y = 0;
 				new_game_state_viewport->w = this->game_settings.resolution.w;
-				new_game_state_viewport->y = this->game_settings.resolution.y;
+				new_game_state_viewport->h = this->game_settings.resolution.h;
 				game_state_to_view_port_[game_state] = new_game_state_viewport;
 				return game_state_to_view_port_[game_state];
 			}

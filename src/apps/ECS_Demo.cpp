@@ -299,12 +299,13 @@ int init_menus()
 
 	//************************* In Game UI
 
+	const int MAIN_GAME_STATE_MENU_WIDTH = 80;
 	// Window
-	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, 80, UILayer::BOTTOM);
+	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, MAIN_GAME_STATE_MENU_WIDTH, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
 	//offset the game world display below this menu strip at the top
 	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-	overworld_viewport->y = ig_ui_window_top_c->window_->rect.h + 20;
+	overworld_viewport->y = MAIN_GAME_STATE_MENU_WIDTH;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
 	//Open Menu Button
