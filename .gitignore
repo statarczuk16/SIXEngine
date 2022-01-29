@@ -1,6 +1,9 @@
 /out/
 /build/
 .vs/
+/cmake-build*/
+/vclib/
+/.idea/
 
 # Prerequisites
 *.d

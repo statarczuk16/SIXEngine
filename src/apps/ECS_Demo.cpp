@@ -25,6 +25,7 @@
 #include <ECS/Systems/EventSystem.hpp>
 #include <ECS/Systems/CollisionSystem.hpp>
 #include <ECS/Systems/TaskSchedulerSystem.hpp>
+#include <string.h>
 
 
 
@@ -690,7 +691,7 @@ int main(int argc, char* args[])
 			//update event handling system
 			input_system->Update(dt);
 		}
-		strncpy_s(input_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+		strncpy(input_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
 		
 
 		/////////////////////////////////Physics/Movement
@@ -704,21 +705,21 @@ int main(int argc, char* args[])
 		movement_system->Update(dt);
 		task_scheduler_system->Update(dt);
 		move_timer.start(); //restart delta t for next frame
-		strncpy_s(movement_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+		strncpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
 
 		system_timer.start();
 		collision_system->Update(dt);
-		strncpy_s(collision_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+		strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
 		
 		//Phys End
 		/////////////////////////////////Event System - respond to physics, input, etc
 		system_timer.start();
 		event_system->Update(dt);
-		strncpy_s(event_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+		strncpy(event_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
 
 		system_timer.start();
 		
-		strncpy_s(task_scheduler_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+		strncpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
 		/////////////////////////////////Rendering
 		//Render Setup
 		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
@@ -731,9 +732,9 @@ int main(int argc, char* args[])
 		//Render Game
 		system_timer.start();
 		renderer_system->Update(dt);
-		strncpy_s(render_system_ms->label_->text, KISS_MAX_LENGTH, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
+		strncpy(render_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
 
-		strncpy_s(ecs_stats_num_entities->label_->text, KISS_MAX_LENGTH, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(), KISS_MAX_LENGTH);
+		strncpy(ecs_stats_num_entities->label_->text, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(),KISS_MAX_LENGTH);
 
 		auto stopTime = std::chrono::high_resolution_clock::now();
 		
@@ -746,7 +747,7 @@ int main(int argc, char* args[])
 		{
 			fps_avg = 0;
 		}
-		strncpy_s(debug_fps_actual->label_->text, KISS_MAX_LENGTH, std::to_string(fps_avg).c_str(), KISS_MAX_LENGTH);
+		strncpy(debug_fps_actual->label_->text, std::to_string(fps_avg).c_str(),KISS_MAX_LENGTH);
 		if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())
 		{
 			SDL_Delay(SXNGN::Database::get_screen_ticks_per_frame() - frame_cap_timer.getTicks());

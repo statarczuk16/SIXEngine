@@ -14,65 +14,50 @@ Dependencies:
 SDL2
 SDL2_TTF
 SDL2_Image
-kiss_sdl (https://github.com/actsl/kiss_sdl) (Modified for this project, version included must be used)
-C++ 17
+C++ 17 (G++ version 9.3 or above for use with std::filesystem)
 
-These dependencies are all included in the repo. You will have better luck using these ones then whatever is
-installed on your system. 
 
-The vclib.../bin folder corresponding to your compiler/architecture must be added to the path
-else you will get "no such sdl.dll" type errors.
-
-<pre>
-└── README.md (you are here)
-│ 
-└── SRC
-│   │   
-│      
-└───vclib
-    │   
-	└──	visual 
-		└── SDL2_image-2.0.5 
-		└── SDL2_ttf-2.0.15
-		└── SDL2_2.0.14
-	
-	└──	mingw 
-		└── SDL2_image-2.0.5
-		└── SDL2_ttf-2.0.15
-		└── SDL2_2.0.14
-
-</pre>
-
-## Visual Studio	
-* Simply download the repo and open the parent folder (the one with this readme) with "open folder". 
-* Provided you have the cmake plugin, you should just have to build as normal.
-* All the SDL DLLs must be on your path or copy/pasted to the generated exe's location
-## Clion
-* Same as above, though I have not tested it.
-## Codeblocks/Other MinGW/GCC IDE
-* You must have a C++17 mingw install. You can likely find a guide online for getting Codeblocks set up for C++17 mingw.
-** Make sure the C++17 compiler flags are set. std::filesystem is the main C++17 dependency in this project.
-* Download Cmake gui
-* Point Cmake gui to this folder as the source
-* Create a build folder in this folder and point Cmake to it as the build destination
-* Click "Configure" 
-* When Cmake asks for compiler information, tell it to use Mingw Makefiles or Codeblocks Mingw Makefiles
-** Not sure if there's a difference between the two
-* Cmake should find sdl, sdl-image, and sdl-ttf in the vclib directory. 
-** If you have sdl2 in your mingw directory already, it may find it there instead.
-*** This may introduce "SDL.h" vs "SDL2/SDL.h" C++ include errors. 
-*** You can solve this by removing your mingw SDL2 folder so cmake is forced to use the SDL2 in vclib
-*** Or you can hard-code SDL2_PATH in cmakelists.txt to the bin,include,lib, etc area of the SDL2 area in vclib.
-* Click "Generate" -> will generate makefiles and a codeblocks project (CBP)
-* Open Codeblocks and open the CPB
-* Build/run as normal
-* All the SDL DLLs must be on your path or copy/pasted to the generated exe's location
-## MINGW/Visual Terminal
+## Linux 
+* Install the SDL2 development libraries with your package manager
+	* sudo yum install SDL2-devel
+	* sudo yum install SDL2_image-devel
+	* sudo yum install SDL2_ttf-devel
+* Included CmakeLists.txt should be able to find them after that.
+### Clion
+* Ensure Clion settings are pointed at C++ compiler
+* Open top level folder with CMakeLists.txt
+* Build as normal
+## Windows
+* Downlaod SDL2 development libraries from http://libsdl.org/download-2.0.php.
+* SDL2, SDL2_image, and SDL2_ttf.
+* Place the folders in the SIXEngine/vclib/[compiler] folder
+* Example, SIXEngine/vclib/mingw/SDL2-2.0.14 (and image, and ttf)
+### Visual C++	
+* 
+* Make sure cmake plugin is installed
+* Open the top level folder with the CMakeLists.txt
+* Build as normal
+### MINGW/Visual Terminal
 * To build in terminal, create a "build" directory at the same level as this readme.
 * "cd build"
 * "cmake .."
 * "make" 
 * Run the resulting application
+### Codeblocks/Other MinGW/GCC IDE
+* You must have a C++17 mingw installed and set up with CodeBlocks.
+** Make sure the C++17 compiler flags are set. std::filesystem is the main C++17 dependency in this project.
+* Download cmake gui
+* Point cmake gui to this folder as the source
+* Create a build folder in this folder and point cmake to it as the build destination
+* Click "Configure" 
+* When cmake asks for compiler information, tell it to use Mingw Makefiles or Codeblocks Mingw Makefiles
+* Click "Generate" -> will generate makefiles and a codeblocks project (CBP)
+* Open Codeblocks and open the CPB
+* Build/run as normal
+* All the SDL DLLs must be on your path or copy/pasted to the generated exe's location
+
+
+
 
 # Code a new application
 

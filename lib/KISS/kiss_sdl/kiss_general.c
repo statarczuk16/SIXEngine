@@ -113,7 +113,7 @@ char *kiss_backspace(char *str)
 	size_t len;
 
 	if (!str) return NULL;
-	if (!(len = strnlen_s(str, KISS_MAX_LENGTH))) return NULL;
+	if (!(len = strnlen(str, KISS_MAX_LENGTH))) return NULL;
 	str[len - 1] = 0;
 	kiss_utf8fix(str);
 	return str; 

@@ -1,5 +1,5 @@
-#include "..\..\headers\State\BaseGameState.h"
 
+#include <State/BaseGameState.h>
 const std::shared_ptr<SXNGN::Room>  SXNGN::BaseGameState::get_room()
 {
 	return room_;

@@ -32,10 +32,9 @@
 #  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 #  OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-#[=======================================================================[.rst:
-FindSDL2
---------
+#[=======================================================================[
 
+--------
 Locate SDL2 library
 
 This module defines the following 'IMPORTED' targets:
@@ -146,7 +145,8 @@ because not all systems place things in SDL/ (see FreeBSD).
 #]=======================================================================]
 
 # Define options for searching SDL2 Library in a custom path
-set(SDL2_PATH "" CACHE STRING "Custom SDL2 Library path")
+#message("SDL PATH HINT: " ${SDL_HINT_START})
+#set(SDL2_PATH "" CACHE STRING "${SDL_HINT_START}")
 set(_SDL2_NO_DEFAULT_PATH OFF)
 if(SDL2_PATH)
   set(_SDL2_NO_DEFAULT_PATH ON)

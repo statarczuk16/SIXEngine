@@ -1,22 +1,26 @@
-cmake_minimum_required(VERSION 3.7)
+cmake_minimum_required(VERSION 3.8)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 project(RiskTheSix)
-
+set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 
 
 set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
+#put external libraries on path
+list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
+#put the cmake sdl tools on the path
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
-
-#The findsdl module needs a starting path to look for SDL2
-#Try to determine the right path based on mingw/visual and 32/64bit
+#To help find_package find SDL2 when on Windows and libraries are in vclib folder.
 if(MSVC)
+	message("Setting hints for MSVC")
 	set(SDL_HINT_END "include/")
 	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)
 	#add_compile_options(/WX)
     #add_link_options(/WX)
 elseif (MINGW)
+	message("Setting hints for MINGW")
 	#add_compile_options(-Wall -Wextra -pedantic -Werror -Wl,--fatal-warnings)
 	set(SDL_HINT_END "include/SDL2")
 	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8) #64 bit systems have length 8 words
@@ -24,42 +28,38 @@ elseif (MINGW)
 	else()
 		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/)
 	endif()
+else()
+	message("Linux")
 endif()
- 
-#put external libraries on path
-list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
-#put the cmake sdl tools on the path
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
+if(MSVC OR MINGW)
+	message("Setting hints for Windows")
+	message("Hint Start:" ${SDL_HINT_START}) 
+	message("Hint End:" ${SDL_HINT_END})
+	#Goal: SDL2_PATH should land in the folder with bin,include,etc. regardless of version.
+	# eg SIXEngine/vclib/visual/SDL2-2.0.14 or SIXEngine/vclib/mingw/SDL2-2.0.14/x86_64-w64-mingw32
+	# if have a path called this/is/VERSION1.2/path/to/stuff.dll
+	# find_path(NEW_PATH, NAMES, path/to/stuff.dll, PATHS, this/is/*/)
+	# will return this/is/VERSION1.2 or this/is/VERSION1.3 etc. (accounts for differing versions)
+	find_path(SDL2_PATH_ NAMES ${SDL_HINT_END}/SDL.h PATHS ${SDL_HINT_START})
+	message("SDL2_PATH_:"  ${SDL2_PATH_})
+	set(SDL2_PATH ${SDL2_PATH_} CACHE BOOL "" FORCE) #Override the cache variable SDL2_PATH which affects operation of find_package(SDL2)
+	message("SDL2_PATH: " ${SDL2_PATH})
 
-#message("Hint Start:" ${SDL_HINT_START}) 
-#message("Hint End:" ${SDL_HINT_END})
+	find_path(SDL2_IMAGE_PATH_ NAMES ${SDL_HINT_END}/SDL_image.h PATHS ${SDL_HINT_START})
+	message("SDL2_IMAGE_PATH_: " ${SDL2_IMAGE_PATH_})
+	set(SDL2_IMAGE_PATH  ${SDL2_IMAGE_PATH_} CACHE BOOL "" FORCE)
+	message("SDL2_IMAGE_PATH: " ${SDL2_IMAGE_PATH})
 
-#Goal: SDL2_PATH should land in the folder with bin,include,etc. regardless of version.
-# eg SIXEngine/vclib/visual/SDL2-2.0.14 or SIXEngine/vclib/mingw/SDL2-2.0.14/x86_64-w64-mingw32
-# if have a path called this/is/VERSION1.2/path/to/stuff.dll
-# find_path(NEW_PATH, NAMES, path/to/stuff.dll, PATHS, this/is/*/)
-# will return this/is/VERSION1.2 or this/is/VERSION1.3 etc. (accounts for differing versions)
-find_path(SDL2_PATH_ NAMES ${SDL_HINT_END}/SDL.h PATHS ${SDL_HINT_START})
+	find_path(SDL2_TTF_PATH_ NAMES ${SDL_HINT_END}/SDL_ttf.h PATHS ${SDL_HINT_START})
+	message("SDL2_TTF_PATH_: " ${SDL2_TTF_PATH_})
+	set(SDL2_TTF_PATH  ${SDL2_TTF_PATH_} CACHE BOOL "" FORCE)
+	message("SDL2_TTF_PATH: " ${SDL2_TTF_PATH})
+endif()
 
-message("SDL2_PATH_:"  ${SDL2_PATH_})
-set(SDL2_PATH ${SDL2_PATH_} CACHE BOOL "" FORCE) #Override the cache variable SDL2_PATH which affects operation of find_package(SDL2)
-message("SDL2_PATH: " ${SDL2_PATH})
 find_package(SDL2 REQUIRED)
-
-find_path(SDL2_IMAGE_PATH_ NAMES ${SDL_HINT_END}/SDL_Image.h PATHS ${SDL_HINT_START})
-message("SDL2_IMAGE_PATH_: " ${SDL2_IMAGE_PATH_})
-set(SDL2_IMAGE_PATH  ${SDL2_IMAGE_PATH_} CACHE BOOL "" FORCE)
-message("SDL2_IMAGE_PATH: " ${SDL2_IMAGE_PATH})
-find_package(SDL2_image REQUIRED)  
-
-find_path(SDL2_TTF_PATH_ NAMES ${SDL_HINT_END}/SDL_TTF.h PATHS ${SDL_HINT_START})
-message("SDL2_TTF_PATH_: " ${SDL2_TTF_PATH_})
-set(SDL2_TTF_PATH  ${SDL2_TTF_PATH_} CACHE BOOL "" FORCE)
-message("SDL2_TTF_PATH: " ${SDL2_TTF_PATH})
+find_package(SDL2_image REQUIRED) 
 find_package(SDL2_ttf REQUIRED) 
-
- 
  ######### SXNGN
 #include the SXNGN Sources (game engine)
 file(GLOB_RECURSE SXNGN_SOURCES
@@ -83,7 +83,7 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/KISS/kiss_sdl/)
   
   ######### NLOHMANN JSON (JSON C++ Library)
  file(GLOB_RECURSE JSON_SOURCES
-	${CMAKE_SOURCE_DIR}/lib/json/nlohmann/*.hpp
+	${CMAKE_SOURCE_DIR}/lib/json/nlohmann/*.hpp 
 	)
 	
 message("JSON Sources: "  ${JSON_SOURCES}) 
@@ -95,23 +95,14 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/json/)
 	)
 	
 message("UUID Sources: "  ${UUID_SOURCES}) 
-include_directories(${CMAKE_SOURCE_DIR}/lib/sole-master/)	 
+include_directories(${CMAKE_SOURCE_DIR}/lib/sole-master/)	  
 
-
- 
-  ######### Cereal (Serialization Library)
-# file(GLOB_RECURSE CEREAL_SOURCES
-#	${CMAKE_SOURCE_DIR}/lib/cereal/*.hpp
-#	)
-#	
-#message("Cereal Sources: "  ${CEREAL_SOURCES}) 
-#include_directories(${CMAKE_SOURCE_DIR}/lib/cereal/)	
  
 #add an executable for anything that will turn into an exe or whatever other executable format  
 add_executable(json_tests "src/tests/json_tests.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  ${UUID_SOURCES})
 target_link_libraries(json_tests SDL2::Main SDL2::Image SDL2::TTF)
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} "lib/SXNGN/headers/ECS/Systems/TaskSchedulerSystem.hpp" "lib/SXNGN/cpp/ECS/Systems/TaskSchedulerSystem.cpp" "lib/SXNGN/headers/ECS/Components/TaskWorkerComponent.hpp" "lib/SXNGN/headers/ECS/Components/Selectable.hpp" "lib/SXNGN/cpp/ECS/Components/Moveable.cpp")
+add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES})
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

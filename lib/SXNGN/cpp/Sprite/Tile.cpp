@@ -2,6 +2,7 @@
 #include <Texture.h>
 #include <gameutils.h>
 #include <fstream>
+#include <cmath>
 
 
 
@@ -26,8 +27,8 @@ void SXNGN::MultiSprite::update_tiles(std::vector<std::vector<std::shared_ptr<SX
 	bounding_box.x = 0;
 	bounding_box.y = 0;
 	//tile_matrix must be rectangular
-	bounding_box.w = (int)round(tile_matrix.at(0).size() * SXNGN::BASE_TILE_WIDTH);
-	bounding_box.h = (int)round(tile_matrix.size() * SXNGN::BASE_TILE_HEIGHT);
+	bounding_box.w = (int) round(tile_matrix.at(0).size() * SXNGN::BASE_TILE_WIDTH);
+	bounding_box.h = (int) round(tile_matrix.size() * SXNGN::BASE_TILE_HEIGHT);
 	bounding_box_ = std::make_shared<SDL_Rect>(bounding_box);
 }
 
