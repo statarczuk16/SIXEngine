@@ -4,6 +4,11 @@
 #include <array>
 #include <cassert>
 #include <queue>
+#include <Constants.h>
+#include <sole.hpp>
+#include <Constants.h>
+
+
 
 
 class EntityManager
@@ -17,7 +22,7 @@ public:
 		}
 	}
 
-	Entity CreateEntity(bool quiet = false)
+	Entity CreateEntity(sole::uuid uuid_in = SXNGN::BAD_UUID, bool quiet = false)
 	{
 		assert(mLivingEntityCount < MAX_ENTITIES && "Too many entities in existence.");
 
@@ -29,6 +34,12 @@ public:
 		Entity id = mAvailableEntities.front();
 		mAvailableEntities.pop();
 		livingEntities[id] = true;
+		if (uuid_in == SXNGN::BAD_UUID)
+		{
+			uuid_in = sole::uuid1();
+		}
+		mUUIDToEntityMap[uuid_in] = id;
+		mEntityToUUIDMap[id] = uuid_in;
 		++mLivingEntityCount;
 
 		return id;
@@ -43,9 +54,36 @@ public:
 		{
 			livingEntities[entity] = false;
 			--mLivingEntityCount;
+			sole::uuid uuid_to_delete = mEntityToUUIDMap[entity];
+			mUUIDToEntityMap.erase(uuid_to_delete);
+			mEntityToUUIDMap.erase(entity);
 			mAvailableEntities.push(entity);
 		}
 
+	}
+
+	Entity GetEntityFromUUID(sole::uuid uuid)
+	{
+		if (mUUIDToEntityMap.count(uuid) > 0)
+		{
+			return mUUIDToEntityMap[uuid];
+		}
+		else
+		{
+			return -1;
+		}
+	}
+
+	sole::uuid GetUUIDFromEntity(Entity entity)
+	{
+		if (mEntityToUUIDMap.count(entity) > 0)
+		{
+			return mEntityToUUIDMap[entity];
+		}
+		else
+		{
+			return SXNGN::BAD_UUID;
+		}
 	}
 
 	bool EntityLiving(Entity entity)
@@ -98,4 +136,6 @@ private:
 	std::array<Signature, MAX_ENTITIES> mSignatures{};
 	uint32_t mLivingEntityCount{};
 	std::array<bool, MAX_ENTITIES> livingEntities{false};
+	std::unordered_map<sole::uuid, Entity> mUUIDToEntityMap;
+	std::unordered_map<Entity, sole::uuid> mEntityToUUIDMap;
 };

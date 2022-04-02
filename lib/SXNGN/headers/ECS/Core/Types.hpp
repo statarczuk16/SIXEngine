@@ -4,6 +4,7 @@
 #include <cstdint>
 #include <SDL.h>
 #include <memory>
+#include <sole.hpp>
 
 
 
@@ -23,7 +24,7 @@ constexpr std::uint32_t operator "" _hash(char const* s, std::size_t count)
 
 // ECS
 using Entity = std::uint32_t;
-const Entity MAX_ENTITIES = 20000;
+const Uint32 MAX_ENTITIES = 20000;
 using ComponentTypeHash = std::uint8_t;
 const ComponentTypeHash MAX_COMPONENTS = 32;
 using Signature = std::bitset<MAX_COMPONENTS>;

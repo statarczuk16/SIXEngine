@@ -117,8 +117,8 @@ namespace SXNGN {
 		 bottomMoveNow = moveable_now.y + moveable_now.h;
 
 		 //determine if object is now colliding with static object
-		 int xon = std::max(0, std::min(rightFix, rightMoveNow) - std::max(leftFix, leftMoveNow)) > 0;
-		 int yon = std::max(0, std::min(bottomFix, bottomMoveNow) - std::max(topFix, topMoveNow)) > 0;
+		 int xon = (std::max)(0, (std::min)(rightFix, rightMoveNow) - (std::max)(leftFix, leftMoveNow)) > 0;
+		 int yon = (std::max)(0, (std::min)(bottomFix, bottomMoveNow) - (std::max)(topFix, topMoveNow)) > 0;
 		 bool x_overlap_now = xon > 0;
 		 bool y_overlap_now = yon > 0;
 		 if ((x_overlap_now && y_overlap_now) == false)
@@ -136,8 +136,8 @@ namespace SXNGN {
 		 bottomMovePrev = moveable_prev.y + moveable_prev.h;
 
 		 //determine if object WAS colliding before now
-		 int xop = std::max(0, std::min(rightFix, rightMovePrev) - std::max(leftFix, leftMovePrev)) > 0;
-		 int yop = std::max(0, std::min(bottomFix, bottomMovePrev) - std::max(topFix, topMovePrev)) > 0;
+		 int xop = (std::max)(0, (std::min)(rightFix, rightMovePrev) - (std::max)(leftFix, leftMovePrev)) > 0;
+		 int yop = (std::max)(0, (std::min)(bottomFix, bottomMovePrev) - (std::max)(topFix, topMovePrev)) > 0;
 		 bool x_overlap_prev = xop > 0;
 		 bool y_overlap_prev = yop > 0;
 

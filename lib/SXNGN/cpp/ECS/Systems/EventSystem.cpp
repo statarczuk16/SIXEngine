@@ -165,7 +165,14 @@ namespace SXNGN::ECS::A {
 		{
 			if (gCoordinator.EntityHasComponent(entity_sig.first, ComponentTypeEnum::TILE))
 			{
-				json world_tile_to_save = gCoordinator.Entity_To_JSON(entity_sig.first);
+				sole::uuid uuid = gCoordinator.GetUUIDFromEntity(entity_sig.first);
+				if (uuid == BAD_UUID)
+				{
+					SDL_LogError(1, "Entity has no UUID");
+					abort();
+				}
+
+				json world_tile_to_save = gCoordinator.Entity_To_JSON(entity_sig.first, uuid);
 				save_stream << std::setw(4) << world_tile_to_save << std::endl;
 				//std::cout << world_tile_to_save.dump(4) << std::endl;
 			}

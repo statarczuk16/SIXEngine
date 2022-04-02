@@ -51,12 +51,14 @@
 #include <sys/types.h> // for uint32_t; should be stdint.h instead; however, GCC 5 on OSX fails when compiling it (See issue #11)
 #include <functional>
 #include <string>
+#include <nlohmann/json.hpp>
 
 // public API
 
 #define SOLE_VERSION "1.0.2" /* (2021/03/16): Merge speed improvements by @vihangm
 #define SOLE_VERSION "1.0.1" // (2017/05/16): Improve UUID4 and base62 performance; fix warnings
 #define SOLE_VERSION "1.0.0" // (2016/02/03): Initial semver adherence; Switch to header-only; Remove warnings */
+using nlohmann::json;
 
 namespace sole
 {
@@ -82,6 +84,8 @@ namespace sole
         }
     };
 
+    
+
     // Generators
     uuid uuid0(); // UUID v0, pro: unique; cons: MAC revealed, pid revealed, predictable.
     uuid uuid1(); // UUID v1, pro: unique; cons: MAC revealed, predictable.
@@ -90,6 +94,16 @@ namespace sole
     // Rebuilders
     uuid rebuild( uint64_t ab, uint64_t cd );
     uuid rebuild( const std::string &uustr );
+
+    inline void to_json(json& j, const uuid& p) {
+        j = json(p.str());
+    }
+
+    inline void from_json(const json& j, uuid& p) {
+        sole::uuid input = sole::rebuild(j);
+        j.at("ab").get_to(p.ab);
+        j.at("cd").get_to(p.cd);
+    }
 }
 
 #ifdef _MSC_VER

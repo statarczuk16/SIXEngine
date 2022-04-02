@@ -40,9 +40,19 @@ namespace SXNGN {
 
 
 				// Entity methods
-				Entity CreateEntity(bool quiet = false)
+				Entity CreateEntity(sole::uuid uuid = SXNGN::BAD_UUID, bool quiet = false)
 				{
-					return mEntityManager->CreateEntity(quiet);
+					return mEntityManager->CreateEntity(uuid, quiet);
+				}
+
+				Entity GetEntityFromUUID(sole::uuid uuid)
+				{
+					return mEntityManager->GetEntityFromUUID(uuid);
+				}
+
+				sole::uuid GetUUIDFromEntity(Entity entity)
+				{
+					return mEntityManager->GetUUIDFromEntity(entity);
 				}
 
 				void DestroyEntity(Entity entity)
@@ -128,6 +138,7 @@ namespace SXNGN {
 				{
 					printf("Changing game state\n");
 					mStateManager->gameStateChanged(active_game_states);
+					active_game_states = mStateManager->getActiveGameStates();
 					Signature game_state_signature;
 					for (auto state : active_game_states)
 					{
@@ -294,9 +305,14 @@ namespace SXNGN {
 				/// <returns></returns>
 				std::shared_ptr<ExternEntity> Extract_Entity_From_ECS(Entity entity)
 				{
-
+					sole::uuid uuid = GetUUIDFromEntity(entity);
+					if (uuid == BAD_UUID)
+					{
+						SDL_LogError(1, "Entity has no UUID");
+						abort();
+					}
 					auto extracted_components = Extract_Entity_Components_From_ECS(entity);
-					auto extracted_entity = std::make_shared<ExternEntity>(entity, extracted_components);
+					auto extracted_entity = std::make_shared<ExternEntity>(entity, uuid, extracted_components);
 					return extracted_entity;
 				}
 
@@ -352,7 +368,7 @@ namespace SXNGN {
 				/// <param name="entity_to_dump"></param>
 				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<ExternEntity> entity_to_dump)
 				{
-					Entity new_id = mEntityManager->CreateEntity();
+					Entity new_id = mEntityManager->CreateEntity(entity_to_dump->uuid_);
 					for (auto component : entity_to_dump->entity_components_)
 					{
 						AddComponent(new_id, component);
@@ -384,7 +400,7 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity"></param>
 				/// <returns></returns>
-				json Entity_To_JSON(Entity entity)
+				json Entity_To_JSON(Entity entity, sole::uuid uuid)
 				{
 					std::vector<json> json_components;
 					std::vector<const ECS_Component*> components = Get_All_Entity_Data_Read_Only(entity);
@@ -393,7 +409,7 @@ namespace SXNGN {
 						json js = JSON_Utils::component_to_json(component_ptr);
 						json_components.push_back(js);
 					}
-					ExternJSONEntity extern_entity(entity, json_components);
+					ExternJSONEntity extern_entity(entity, json_components, uuid);
 					json ret = extern_entity;
 					return ret;
 				}
@@ -441,6 +457,19 @@ namespace SXNGN {
 							std::cerr << exc.what();
 						}
 					}
+					auto uuid_it = j.find("uuid_");
+					if (uuid_it != j.end())
+					{
+						std::string uuid_string = *uuid_it;
+						sole::uuid uuid = sole::rebuild(uuid_string);
+						extern_entity->uuid_ = uuid;
+					}
+					else
+					{
+						std::cout << "Incoming JSON Entity had no UUID" << std::endl;
+						abort();
+					}
+					
 					return extern_entity;	
 				}
 
