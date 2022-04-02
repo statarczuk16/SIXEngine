@@ -12,6 +12,7 @@
 #include <Object/Entity.h>
 #include <Object/MouseObj.h>
 #include <Camera.h>
+#include "ECS/Core/Coordinator.hpp"
 
 	//Screen dimension constants
 	const int SCREEN_WIDTH = 640*2;

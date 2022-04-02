@@ -118,15 +118,23 @@ namespace SXNGN::ECS::A {
 
 	std::queue<Location> Map_Utils::GetPath(NAVIGATION_TYPE method, Location start, Location end)
 	{
+		
 		std::queue<Location> q;
 		switch (method)
 		{
 		case NAVIGATION_TYPE::MANHATTAN:
 		{
-			
 			q.push(end);
 			return q;
 			break;
+		}
+		case NAVIGATION_TYPE::A_STAR:
+		{
+			auto gCoordinator = *SXNGN::Database::get_coordinator();
+			auto entity_map_map = gCoordinator.getSpaceToTileMap();
+			auto entity_map = entity_map_map.at(SXNGN::DEFAULT_SPACE);
+
+
 		}
 		default:
 		{

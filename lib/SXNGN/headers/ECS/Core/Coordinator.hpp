@@ -113,6 +113,16 @@ namespace SXNGN {
 					mEntityManager->SetSignature(entity, signature);
 
 					mSystemManager->EntitySignatureChanged(entity, signature, quiet);
+
+					if (component->get_component_type() == ComponentTypeEnum::COLLISION)
+					{
+						Collisionable* collionable_ptr = static_cast<Collisionable*>(component);
+						int grid_x = collionable_ptr->collision_box_.x / BASE_TILE_WIDTH;
+						int grid_y = collionable_ptr->collision_box_.y / BASE_TILE_HEIGHT;
+						sole::uuid uuid = mEntityManager->GetUUIDFromEntity(entity);
+						mStateManager->addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
+						
+					}
 				}
 
 				
@@ -155,17 +165,22 @@ namespace SXNGN {
 					return mStateManager->getActiveGameStates();
 				}
 
-				/**
-				ECS_Component* GetComponent(Entity entity, ComponentTypeEnum component_type)
+				void addUUIDToLocationMap(int grid_x, int grid_y, sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
 				{
-					return mComponentManager->GetComponent(entity, component_type);
+					mStateManager->addUUIDToLocationMap(grid_x, grid_y, uuid, space);
 				}
 
-				ECS_Component* TryGetComponent(Entity entity, ComponentTypeEnum component_type)
+				int removeUUIDFromLocationMap(sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
 				{
-					return mComponentManager->TryGetComponent(entity, component_type);
+					return mStateManager->removeUUIDFromLocationMap(uuid, space);
 				}
-				**/
+
+				std::unordered_map < std::string, std::vector<std::vector<sole::uuid>>>& getSpaceToTileMap()
+				{
+					return mStateManager->getSpaceToTileMap();
+				}
+
+
 
 				/// <summary>
 				/// Thread safe - thread waits until data is available, then returns with a COPY of it.

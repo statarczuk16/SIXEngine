@@ -29,4 +29,6 @@ namespace SXNGN {
 
 	const sole::uuid BAD_UUID = sole::rebuild("00000000-0000-0000-0000-000000000000");
 
+	const std::string DEFAULT_SPACE = "DEFAULT_SPACE";
+
 }

@@ -104,6 +104,9 @@ target_link_libraries(json_tests SDL2::Main SDL2::Image SDL2::TTF)
 
 add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES})
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
+
+add_executable(system_tests "src/tests/system_tests.cpp" ${SXNGN_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES})
+target_link_libraries(system_tests SDL2::Main SDL2::Image SDL2::TTF)
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
