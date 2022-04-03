@@ -133,6 +133,11 @@ namespace SXNGN::ECS::A {
 			auto gCoordinator = *SXNGN::Database::get_coordinator();
 			auto entity_map_map = gCoordinator.getSpaceToTileMap();
 			auto entity_map = entity_map_map.at(SXNGN::DEFAULT_SPACE);
+			auto collisonables = gCoordinator.CheckOutAllData(ComponentTypeEnum::COLLISION);
+			std::vector<std::vector<A_Star_Node> > a_star_map(
+				entity_map.size(),
+				std::vector<A_Star_Node>(entity_map[0].size(), A_Star_Node()));
+
 
 
 		}
