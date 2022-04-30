@@ -15,19 +15,23 @@ namespace SXNGN {
 			{
 				A_Star_Node()
 				{
-					cost_ = INT_MAX;
+					cost_to_this_node_ = INT_MAX;
 					manhattan_cost_ = INT_MAX;
+					estimated_total_cost_ = INT_MAX;
 					expanded_ = false;
 					grid_x_ = -1;
 					grid_y_ = -1;
 				}
 				A_Star_Node* parent_;
-				int cost_;
-				int manhattan_cost;
+				int cost_to_this_node_; //total cost of from start to this node
+				int manhattan_cost_; //estimated cost from this node to destination
+				int estimated_total_cost_; //estimated cost from start, through this node, to end (real_cost_ + manhattan_cost_)
 				bool expanded_;
 				int grid_x_;
 				int grid_y_;
-				Entity 
+				Entity mapped_entity;
+
+
 			};
 
 			class Map_Utils

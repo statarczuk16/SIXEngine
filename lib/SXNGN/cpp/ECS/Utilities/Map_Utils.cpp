@@ -137,6 +137,9 @@ namespace SXNGN::ECS::A {
 			std::vector<std::vector<A_Star_Node> > a_star_map(
 				entity_map.size(),
 				std::vector<A_Star_Node>(entity_map[0].size(), A_Star_Node()));
+			size_t start_grid_x = start.x / SXNGN::BASE_TILE_WIDTH;
+			size_t start_grid_y = start.y / SXNGN::BASE_TILE_HEIGHT;
+			sole::uuid start_uuid = entity_map[start_grid_x][start_grid_y];
 
 
 
