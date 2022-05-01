@@ -4,6 +4,7 @@
 #include <SDL_image.h>
 #include <string>
 #include <memory>
+#include <SDL_FontCache.h>
 
 namespace SXNGN {
 	//Texture wrapper class
@@ -20,8 +21,7 @@ namespace SXNGN {
 		bool loadFromFile(std::string path);
 
 #if defined(SDL_TTF_MAJOR_VERSION)
-		//Creates image from font string
-		bool loadFromRenderedText(std::string textureText, SDL_Color textColor);
+		
 #endif
 
 		//Deallocates texture
@@ -40,6 +40,8 @@ namespace SXNGN {
 		void render(int x, int y, SDL_Rect* clip = NULL, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE);
 
 		void render2(SDL_Rect bounding_box, SDL_Rect clip, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE, bool outline = false);
+
+		void render_text(int x, int y, FC_Font* font, std::string string);
 		//Gets image dimensions
 		int getWidth();
 		int getHeight();

@@ -239,6 +239,8 @@ namespace SXNGN::ECS::A {
 			render_quad.w = bounding_box.w;
 			render_quad.h = bounding_box.h;
 
+			
+
 			if (renderable->sprite_map_texture_ != nullptr)
 			{
 				renderable->sprite_map_texture_
@@ -248,6 +250,15 @@ namespace SXNGN::ECS::A {
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable->renderable_name_);
 				abort();
+			}
+
+			if (renderable->draw_debug_ && renderable->display_string_debug_ != "")
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
+				int x = render_quad.x;
+				int y = render_quad.y;
+				renderable->sprite_map_texture_->render_text(x, y, debug_font, renderable->display_string_debug_);
 			}
 		}
 	}
@@ -293,29 +304,7 @@ namespace SXNGN::ECS::A {
 			std::shared_ptr<Sprite_Factory> sprite_factory_component;
 			
 			
-			//Entities of interest should include the Sprite_Factories
-			/**
-			* bool found_sprite_factory = false;
-			for (auto const& entity : m_entities_of_interest)
-			{
-				const ECS_Component* data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::SPRITE_FACTORY);
-				const Sprite_Factory* factory;
-				if (data)
-				{
-					factory = static_cast<const Sprite_Factory*>(data);
-					if (factory->sprite_factory_name_ == factory_name)
-					{
-						found_sprite_factory = true;
-						sprite_factory_component = *factory;
-						break;
-					}
-				}
-				else
-				{
-					continue;
-				}
-			}
-			**/
+	
 			auto sprite_factory_holder = SpriteFactoryHolder::get_instance();
 			auto sprite_factory_it = sprite_factory_holder->sprite_factories_.find(factory_name);
 			if (sprite_factory_it != sprite_factory_holder->sprite_factories_.end())

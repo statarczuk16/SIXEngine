@@ -7,6 +7,8 @@
 #include <unordered_map>
 #include <SDL.h>
 #include <Texture.h>
+#include <SDL_FontCache.h>
+#include <gameutils.h>
 
 
 class TextureManager
@@ -16,6 +18,16 @@ public:
 	TextureManager(SDL_Renderer* renderer)
 	{
 		renderer_ = renderer;
+		debug_font_ = FC_CreateFont();
+		
+		std::string  media_folder = SXNGN::Gameutils::find_folder_in_project_string("media");
+		if (media_folder == SXNGN::BAD_STRING_RETURN)
+		{
+			std::cout << "Fatal: TextureManager: " << " Could not find media folder" << std::endl;
+			abort();
+		}
+		std::string debug_font_path = media_folder + "/fonts/debug_font.ttf";
+		FC_LoadFont(debug_font_, renderer_, debug_font_path.c_str(), 20, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
 	}
 
 	std::shared_ptr<SXNGN::Texture> get_texture(std::string texture_name)
@@ -68,10 +80,16 @@ public:
 	{
 		return renderer_;
 	}
+	
+	FC_Font* get_debug_font()
+	{
+		return debug_font_;
+	}
 
 private:
 	//Entities must have ALL components in signature to be added to entities_actable list of system
 	std::unordered_map < std::string, std::shared_ptr<SXNGN::Texture> > m_string_to_texture_map_;
 	SDL_Renderer* renderer_;
+	FC_Font* debug_font_;
 
 };

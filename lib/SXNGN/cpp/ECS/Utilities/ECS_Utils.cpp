@@ -93,8 +93,19 @@ namespace SXNGN {
 						collision_ptr->collision_box_.x = int(round(x));
 						collision_ptr->collision_box_.y = int(round(y));
 						collision_ptr->resolved_ = false;
+
+						int grid_x = collision_ptr->collision_box_.x / BASE_TILE_WIDTH;
+						int grid_y = collision_ptr->collision_box_.y / BASE_TILE_HEIGHT;
+						sole::uuid uuid = gCoordinator.GetUUIDFromEntity(entity);
+
+						gCoordinator.removeUUIDFromLocationMap(uuid, SXNGN::DEFAULT_SPACE);
+						gCoordinator.addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
 						gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity);
+						gCoordinator.updateCollisionMap(uuid, SXNGN::DEFAULT_SPACE);
+
+
 					}
+					
 				}
 
 				

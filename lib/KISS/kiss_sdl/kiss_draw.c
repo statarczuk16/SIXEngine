@@ -24,6 +24,7 @@
 
 #include "kiss_sdl.h"
 
+
 kiss_font kiss_textfont, kiss_buttonfont;
 kiss_image kiss_normal, kiss_prelight, kiss_active, kiss_bar,
 	kiss_up, kiss_down, kiss_left, kiss_right, kiss_vslider,
@@ -45,6 +46,7 @@ SDL_Color kiss_lightblue = {200, 225, 255, 255};
 SDL_Color kiss_ivory = { 255,255,240 };
 SDL_Color kiss_sand = { 203, 193, 172 };
 SDL_Color kiss_sand_dark = { 134, 117, 83 };
+FC_Font* fc_font;
 
 unsigned int kiss_getticks(void)
 {
@@ -97,20 +99,24 @@ int kiss_renderimage(SDL_Renderer *renderer, kiss_image image,
 int kiss_rendertext(SDL_Renderer *renderer, char *text, int x, int y,
 	kiss_font font, SDL_Color color)
 {
-	SDL_Surface *surface;
-	kiss_image image;
+	//SDL_Surface *surface;
+	//kiss_image image;
 
 	if (!text || !renderer || !font.font) return -1;
 	if (strnlen(text, 2) == 0)
 	{
 		return 0;
 	}
+	/**
 	surface = TTF_RenderUTF8_Blended(font.font, text, color);
 	image.image = SDL_CreateTextureFromSurface(renderer, surface);
 	SDL_QueryTexture(image.image, NULL, NULL, &image.w, &image.h);
 	if (surface) SDL_FreeSurface(surface);
 	kiss_renderimage(renderer, image, x, y, NULL);
 	SDL_DestroyTexture(image.image);
+	**/
+	
+	FC_Draw(fc_font, renderer, x, y, text);
 	return 0;
 }
 
@@ -251,6 +257,7 @@ SDL_Renderer* kiss_init(char* title, kiss_array *a, int w, int h, const char * r
 	}
 	kiss_screen_width = w;
 	kiss_screen_height = h;
+	
 	IMG_Init(IMG_INIT_PNG);
 	TTF_Init();
 	kiss_array_new(a);
@@ -280,6 +287,9 @@ SDL_Renderer* kiss_init(char* title, kiss_array *a, int w, int h, const char * r
 		kiss_clean(a);
 		return NULL;
 	}
+	fc_font = FC_CreateFont();
+	FC_LoadFont(fc_font, renderer, kiss_font_path, kiss_textfont_size, FC_MakeColor(0, 0, 0, 255), TTF_STYLE_NORMAL);
+	
 	return renderer;	
 }
 

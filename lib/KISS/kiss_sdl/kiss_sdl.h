@@ -50,6 +50,8 @@
 #include <sys/stat.h>
 #include <string.h>
 #include <stdio.h>
+#include <SDL_FontCache.h>
+
 
 #define KISS_MAX_LENGTH 260
 #define KISS_MIN_LENGTH 10
@@ -327,6 +329,7 @@ extern int kiss_click_interval, kiss_progress_interval;
 extern int kiss_slider_padding;
 extern int kiss_border, kiss_edge;
 extern int kiss_screen_width, kiss_screen_height;
+extern FC_Font* fc_font;
 
 #ifdef __cplusplus
 extern "C" {

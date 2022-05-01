@@ -113,7 +113,6 @@ public:
 			{
 				pair->EntityDestroyed(entity);
 			}
-			
 		}
 	}
 

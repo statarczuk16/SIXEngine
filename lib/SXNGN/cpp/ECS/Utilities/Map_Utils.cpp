@@ -1,4 +1,5 @@
 #include <ECS/Utilities/Map_Utils.hpp>
+#include <queue>
 
 namespace SXNGN::ECS::A {
 	std::tuple<std::vector<Pre_Renderable>, std::vector<Collisionable>, std::vector<Tile>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
@@ -130,8 +131,12 @@ namespace SXNGN::ECS::A {
 		}
 		case NAVIGATION_TYPE::A_STAR:
 		{
+			//mind priority queue
+
+			/**
+			std::priority_queue<A_Star_Node, std::vector<A_Star_Node>, std::greater<A_Star_Node>> open_nodes;
 			auto gCoordinator = *SXNGN::Database::get_coordinator();
-			auto entity_map_map = gCoordinator.getSpaceToTileMap();
+			auto entity_map_map = gCoordinator.getSpaceToEntityMap();
 			auto entity_map = entity_map_map.at(SXNGN::DEFAULT_SPACE);
 			auto collisonables = gCoordinator.CheckOutAllData(ComponentTypeEnum::COLLISION);
 			std::vector<std::vector<A_Star_Node> > a_star_map(
@@ -139,9 +144,73 @@ namespace SXNGN::ECS::A {
 				std::vector<A_Star_Node>(entity_map[0].size(), A_Star_Node()));
 			size_t start_grid_x = start.x / SXNGN::BASE_TILE_WIDTH;
 			size_t start_grid_y = start.y / SXNGN::BASE_TILE_HEIGHT;
+			size_t end_grid_x = end.x / SXNGN::BASE_TILE_WIDTH;
+			size_t end_grid_y = end.y / SXNGN::BASE_TILE_HEIGHT;
 			sole::uuid start_uuid = entity_map[start_grid_x][start_grid_y];
+			Entity start_entity = gCoordinator.GetEntityFromUUID(start_uuid);
+			auto start_collision = collisonables[start_entity];
+			auto collision_ptr = static_cast<const Collisionable*>(start_collision);
+			A_Star_Node start_node = A_Star_Node();
+			collision_ptr->
+			start_node.init_pixel(collision_ptr->collision_box_.x, collision_ptr->collision_box_.y, end_grid_x, end_grid_y,)
+			A_Star_Node final_node = A_Star_Node(-1, -1);
+			start_node.fx_estimated_total_cost_ = 0;
+			start_node.gx_cost_to_this_node_ = 0;
+			start_node.hx_manhattan_cost_ = 0;
+			start_node.initialized = true;
+			a_star_map[start_node.grid_x_][start_node.grid_y_] = start_node;
+			open_nodes.push(start_node);
+			int return_code = 2;
+			std::vector<int> visit_x_vals = { -1, 0, 1 };
+			std::vector<int> visit_y_vals = { -1, 0, 1 };
 
 
+			while (!open_nodes.empty())
+			{
+				auto visiting_node = open_nodes.top();
+
+				if (visiting_node.grid_x_ == end_grid_x && visiting_node.grid_y_ == end_grid_y)
+				{
+					final_node = visiting_node;
+					return_code = 0;
+					break;
+				}
+				//visit each neighbor of node
+				for (const int visit_x : visit_x_vals)
+				{
+					for (const int visit_y : visit_y_vals)
+					{
+						if (visit_x == 0 && visit_y == 0)
+						{
+							continue;
+						}
+						int node_to_visit_x = visiting_node.grid_x_ + visit_x;
+						int node_to_visit_y = visiting_node.grid_y_ + visit_y;
+						//check neighbor is in bounds of grid
+						if (node_to_visit_x >= 0 && node_to_visit_x < a_star_map.size()
+							&& node_to_visit_y >= 0 && node_to_visit_y < a_star_map[node_to_visit_x].size())
+						{
+							auto node_to_visit = a_star_map[node_to_visit_x][node_to_visit_y];
+							if (node_to_visit.initialized == false)
+							{
+								sole::uuid to_visit_uuid = entity_map[node_to_visit_x][node_to_visit_y];
+								Entity entity_to_visit = gCoordinator.GetEntityFromUUID(to_visit_uuid);
+								auto collisionable_to_visit = collisonables[entity_to_visit];
+								auto collision_to_visit_ptr = static_cast<const Collisionable*>(collisionable_to_visit);
+								A_Star_Node node_to_visit = 
+									A_Star_Node(collision_to_visit_ptr->collision_box_.x, collision_to_visit_ptr->collision_box_.y);
+
+							}
+						}
+
+
+					}
+				}
+
+
+			}
+
+			**/
 
 		}
 		default:

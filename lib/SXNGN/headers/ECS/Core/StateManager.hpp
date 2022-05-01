@@ -169,9 +169,39 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
-		std::unordered_map < std::string, std::vector<std::vector<sole::uuid>>>& getSpaceToTileMap()
+		const std::unordered_map < std::string, std::vector < std::vector < std::set < sole::uuid > > > >& getSpaceToEntityMap()
 		{
 			return space_to_entity_location_map_;
+		}
+
+		std::pair<int, int> getLocationOfUUID(sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
+		{
+			if (space_to_entity_location_map_reverse_.count(SXNGN::DEFAULT_SPACE) < 1)
+			{
+				return std::make_pair<int,int>(-1,-1);
+			}
+			if (space_to_entity_location_map_reverse_.at(DEFAULT_SPACE).count(uuid) < 1)
+			{
+				return std::make_pair<int, int>(-1, -1);
+			}
+			auto x_y = space_to_entity_location_map_reverse_[DEFAULT_SPACE].at(uuid);
+			return x_y;
+		}
+
+		std::set<sole::uuid> getUUIDSAtLocation(int grid_x, int grid_y, std::string space = SXNGN::DEFAULT_SPACE)
+		{
+			if (space_to_entity_location_map_.count(SXNGN::DEFAULT_SPACE) < 1)
+			{
+				std::vector<std::vector<std::set<sole::uuid> > > entity_map;
+				for (int i = 0; i < getGameSettings()->level_settings.level_width_tiles; i++)
+				{
+					entity_map[i] = std::vector<std::set<sole::uuid> >();
+				}
+
+				space_to_entity_location_map_[SXNGN::DEFAULT_SPACE] = entity_map;
+			}
+			auto uuids_at_x_y = space_to_entity_location_map_[space].at(grid_x).at(grid_y);
+			return uuids_at_x_y;
 		}
 
 		void addUUIDToLocationMap(int grid_x, int grid_y, sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
@@ -179,12 +209,25 @@ namespace SXNGN::ECS::A {
 			
 			if (space_to_entity_location_map_.count(SXNGN::DEFAULT_SPACE) < 1)
 			{
-				std::vector<std::vector<sole::uuid> > entity_map(
-					getGameSettings()->level_settings.level_width_tiles,
-					std::vector<sole::uuid>(getGameSettings()->level_settings.level_height_tiles, SXNGN::BAD_UUID));
+				std::vector<std::vector<std::set<sole::uuid> > > entity_map;
+				for (Uint32 i = 0; i < getGameSettings()->level_settings.level_width_tiles; i++)
+				{
+					entity_map.push_back(std::vector<std::set<sole::uuid> >());
+					for (Uint32 j = 0; j < getGameSettings()->level_settings.level_height_tiles; j++)
+					{
+						entity_map[i].push_back(std::set<sole::uuid>());
+					}
+				}
+					
 				space_to_entity_location_map_[SXNGN::DEFAULT_SPACE] = entity_map;
 			}
-			space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].at(grid_x).at(grid_y) = uuid;
+			if (grid_x > space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].size() || grid_y > space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].at(grid_x).size())
+			{
+				SDL_LogError(1, "addUUIDToLocationMap bad index");
+				return;
+			}
+
+			space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].at(grid_x).at(grid_y).insert(uuid);
 
 
 			if (space_to_entity_location_map_reverse_.count(SXNGN::DEFAULT_SPACE) < 1)
@@ -193,6 +236,7 @@ namespace SXNGN::ECS::A {
 				space_to_entity_location_map_reverse_[SXNGN::DEFAULT_SPACE] = new_map;
 			}
 			space_to_entity_location_map_reverse_[SXNGN::DEFAULT_SPACE][uuid] = std::make_pair(grid_x, grid_y);
+
 		}
 
 		int removeUUIDFromLocationMap(sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
@@ -214,22 +258,32 @@ namespace SXNGN::ECS::A {
 				return -1;
 			}
 
-			if (space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(x_y.first).at(x_y.second) == SXNGN::BAD_UUID)
+			if (space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(x_y.first).at(x_y.second).count(uuid) == 0)
 			{
 				return -1;
 			}
 
-			space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(x_y.first).at(x_y.second) = SXNGN::BAD_UUID;
+			space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(x_y.first).at(x_y.second).erase(uuid);
+
+
 
 			return 0;
 
 		}
 
+	public:
+		//map of string to 2D Grid where cell represents traversal cost for A* usage
+		std::unordered_map < std::string, std::vector < std::vector < int > > > space_to_collision_map_;
+
 	private:
 		std::unordered_map< std::string, Space> spaces;
 		std::unordered_map< std::string, std::mutex> spaceGuards;
-		std::unordered_map < std::string, std::vector<std::vector<sole::uuid>>> space_to_entity_location_map_;
+		//map of string to 2D Grid where each cell contains a set of UUIDs
+		std::unordered_map < std::string, std::vector < std::vector < std::set < sole::uuid > > > > space_to_entity_location_map_;
+		//map of string to mapping of UUID to x,y coordinates where UUID is stored in above map
 		std::unordered_map < std::string, std::unordered_map<sole::uuid, std::pair<int,int>>> space_to_entity_location_map_reverse_;
+		
+
 		std::forward_list<ComponentTypeEnum> active_game_states_;
 		GameSettings game_settings;
 		std::unordered_map<ComponentTypeEnum, std::shared_ptr<SDL_Rect>> game_state_to_view_port_;

@@ -41,6 +41,10 @@ namespace SXNGN::ECS::A {
 			render_layer_ = render_layer;
 			sprite_factory_name_ = sprite_factory_name;
 			sprite_factory_sprite_type_ = sprite_factory_sprite_type;
+			display_string_ = "";
+			display_string_debug_ = "D";
+			draw_name_ = false;
+			draw_debug_ = true;
 		}
 
 		Renderable()
@@ -66,6 +70,10 @@ namespace SXNGN::ECS::A {
 		std::string sprite_factory_name_;//path to the sprite sheet to create from
 		std::string sprite_factory_sprite_type_;//name of the sprite to use
 		bool outline = false;
+		std::string display_string_;
+		std::string display_string_debug_;
+		bool draw_name_;
+		bool draw_debug_;
 	};
 
 	//note: saving as a pre-renderable. Can't convert the texture pointer to JSON, so it will have to go back through the factory pre-render -> render to get back to its state

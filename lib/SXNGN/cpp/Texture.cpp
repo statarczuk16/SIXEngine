@@ -61,40 +61,7 @@ bool SXNGN::Texture::loadFromFile(std::string path)
 }
 
 #if defined(SDL_TTF_MAJOR_VERSION)
-bool SXNGN::Texture::loadFromRenderedText(std::string textureText, SDL_Color textColor)
-{
-	//Get rid of preexisting texture
-	free();
 
-	//Render text surface
-	SDL_Surface* textSurface = TTF_RenderText_Solid(gFont, textureText.c_str(), textColor);
-	if (textSurface != NULL)
-	{
-		//Create texture from surface pixels
-		mTexture = SDL_CreateTextureFromSurface(gRenderer, textSurface);
-		if (mTexture == NULL)
-		{
-			printf("Unable to create texture from rendered text! SDL Error: %s\n", SDL_GetError());
-		}
-		else
-		{
-			//Get image dimensions
-			mWidth = textSurface->w;
-			mHeight = textSurface->h;
-		}
-
-		//Get rid of old surface
-		SDL_FreeSurface(textSurface);
-	}
-	else
-	{
-		printf("Unable to render text surface! SDL_ttf Error: %s\n", TTF_GetError());
-	}
-
-
-	//Return success
-	return mTexture != NULL;
-}
 #endif
 
 void SXNGN::Texture::free()
@@ -157,6 +124,13 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 		SDL_RenderFillRect(renderer_, &renderQuad);
 	}
 	
+}
+
+void SXNGN::Texture::render_text(int x, int y, FC_Font* font, std::string string)
+{
+	x *= SXNGN::Database::get_scale();
+	y *= SXNGN::Database::get_scale();
+	FC_Draw(font, renderer_, x, y, string.c_str());
 }
 
 void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle, SDL_Point* center, SDL_RendererFlip flip, bool outline)

@@ -224,7 +224,7 @@ namespace SXNGN::ECS::A {
 							auto check_out_worker = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::TASK_WORKER);
 							if (check_out_worker)
 							{
-								Task_Worker_Component* worker_ptr = static_cast<Task_Worker_Component*>(check_out_event);
+								Task_Worker_Component* worker_ptr = static_cast<Task_Worker_Component*>(check_out_worker);
 
 								//if worker has the skill required to do the work the task current needs
 								if (worker_ptr->skill_enable_[task_ptr->tasks_.at(0).skill_required_] > SkillPriority::NONE)

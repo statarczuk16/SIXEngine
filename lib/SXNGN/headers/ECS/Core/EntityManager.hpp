@@ -66,7 +66,8 @@ public:
 	{
 		if (mUUIDToEntityMap.count(uuid) > 0)
 		{
-			return mUUIDToEntityMap[uuid];
+			Entity entity = mUUIDToEntityMap[uuid];
+			return entity;
 		}
 		else
 		{

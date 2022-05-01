@@ -5,7 +5,7 @@
 #include <fstream>
 
 using nlohmann::json;
-int main(int argc, char* argv[])
+int main(int argc, char* args[])
 {
 	SDL_LogSetAllPriority(SDL_LOG_PRIORITY_DEBUG);
 	std::cout << "///////////////////// Test 1" << std::endl;
@@ -40,12 +40,6 @@ int main(int argc, char* argv[])
 		
 	}
 	
-
-
-
-
-
-
 
 	return 0;
 }
