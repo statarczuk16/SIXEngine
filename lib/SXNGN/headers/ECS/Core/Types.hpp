@@ -69,6 +69,20 @@ namespace SXNGN::ECS::A {
 		
 	};
 
+
+	//todo enum to string for collision_tag
+	inline void to_json(json& j, const Location& p) {
+		j = json{
+			{"x", p.x},
+			{"y", p.y},
+		};
+	}
+
+	inline void from_json(const json& j, Location& p) {
+		j.at("x").get_to(p.x);
+		j.at("y").get_to(p.y);
+	}
+
 	enum class OrderType : Uint8
 	{
 		UNKNOWN,
@@ -97,8 +111,28 @@ namespace SXNGN::ECS::A {
 		Location location_;//places where work is to be done
 		Uint16 skill_level_required_;//skill level required at each location
 		//std::function<void()> result_function_;//functions called when task completed
-		std::shared_ptr<SXNGN::ECS::A::Event_Component> result_event_; //events that fire when task completed
+		//std::shared_ptr<SXNGN::ECS::A::Event_Component> result_event_; //events that fire when task completed
 	};
+
+
+	//todo enum to string for collision_tag
+	inline void to_json(json& j, const WorkChunk& p) {
+		j = json{
+			{"skill_required_", p.skill_required_},
+			{"work_required_", p.work_required_},
+			{"work_completed_", p.work_completed_},
+			{"location_", p.location_},
+			{"skill_level_required_", p.skill_level_required_},
+		};
+	}
+
+	inline void from_json(const json& j, WorkChunk& p) {
+		j.at("skill_required_").get_to(p.skill_required_);
+		j.at("work_required_").get_to(p.work_required_);
+		j.at("work_completed_").get_to(p.work_completed_);
+		j.at("location_").get_to(p.location_);
+		j.at("skill_level_required_").get_to(p.skill_level_required_);
+	}
 
 	enum class NAVIGATION_TYPE : Uint8 {
 		UNKNOWN,

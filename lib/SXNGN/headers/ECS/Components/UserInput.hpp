@@ -29,6 +29,20 @@ namespace SXNGN::ECS::A {
 		std::unordered_set<User_Input_Tags> input_tags_;
 	};
 
+	
+	inline void to_json(json& j, const User_Input_Tags_Collection& p) {
+		j = json{
+			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::INPUT_TAGS]},
+			{"input_tags_", p.input_tags_},
+		};
+	}
+
+	inline void from_json(const json& j, User_Input_Tags_Collection& p) {
+		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
+		p.component_type = component_type_enum;
+		j.at("input_tags_").get_to(p.input_tags_);
+	}
+
 	/// <summary>
 	/// Contains all sdl events (user inputs) entered during a frame
 	/// </summary>

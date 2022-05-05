@@ -52,6 +52,7 @@ namespace SXNGN {
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 
 				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, CollisionType::ELASTIC, CollisionTag::PERSON);
+				collisionable->buffer_pixels = 0;
 
 
 				coordinator.AddComponent(person_entity, collisionable);

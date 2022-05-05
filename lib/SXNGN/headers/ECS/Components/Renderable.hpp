@@ -42,7 +42,7 @@ namespace SXNGN::ECS::A {
 			sprite_factory_name_ = sprite_factory_name;
 			sprite_factory_sprite_type_ = sprite_factory_sprite_type;
 			display_string_ = "";
-			display_string_debug_ = "D";
+			display_string_debug_ = "";
 			draw_name_ = false;
 			draw_debug_ = true;
 		}

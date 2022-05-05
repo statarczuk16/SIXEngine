@@ -163,7 +163,7 @@ namespace SXNGN::ECS::A {
 		
 		for (auto entity_sig : all_entity_sigs)
 		{
-			if (gCoordinator.EntityHasComponent(entity_sig.first, ComponentTypeEnum::TILE))
+			if (!(gCoordinator.EntityHasComponent(entity_sig.first, ComponentTypeEnum::EVENT)))
 			{
 				sole::uuid uuid = gCoordinator.GetUUIDFromEntity(entity_sig.first);
 				if (uuid == BAD_UUID)

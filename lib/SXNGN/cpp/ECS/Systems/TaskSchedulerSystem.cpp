@@ -107,7 +107,13 @@ namespace SXNGN::ECS::A {
 					if (moveable)
 					{
 						moveable->Update_Destination(task->tasks_.at(0).location_);
-						moveable->SolveDestination(moveable->navigation_type);
+						bool path_to_dest_exists = moveable->SolveDestination(moveable->navigation_type_);
+						if (path_to_dest_exists == false)
+						{
+							SDL_LogDebug(1, "Worker %d Canceled Job %d : Can't Reach", worker_id, job_id);
+							task->canceled_ = true;
+							worker->current_job_ = MAX_ENTITIES;
+						}
 					}
 				}
 				else
@@ -171,10 +177,11 @@ namespace SXNGN::ECS::A {
 		double skill_multiplier = 0.2 * worker->skill_levels_.at(task->tasks_.at(0).skill_required_);
 		double work_complete = dt * skill_multiplier;
 		int work_tiks = (int) round(work_complete * 1000);
+		//TODO use more than first index
 		task->tasks_.at(0).work_completed_ += work_tiks;
 		if(task->tasks_.at(0).work_completed_ > task->tasks_.at(0).work_required_)
 		{
-			SDL_LogDebug(1, "Work completed");
+			SDL_LogDebug(1, "Work completed on %s", task->name_);
 			worker->current_job_ = MAX_ENTITIES;
 		}
 	}
@@ -201,12 +208,18 @@ namespace SXNGN::ECS::A {
 				//if the task has already had all its work completed, its done
 				if (task_ptr->tasks_.empty())
 				{
-					SDL_LogDebug(1, "Tasks completed: Entity: %d : UUID %s", task_id, task_ptr->id_.base62().c_str());
+					SDL_LogDebug(1, "Tasks completed: Entity: %d : %s", task_id, task_ptr->name_);
 					entities_to_cleanup.push_back(task_id);
-					continue;
+					
+				}
+				else if (task_ptr->canceled_)
+				{
+					SDL_LogDebug(1, "Task canceled: Entity: %d : %s", task_id, task_ptr->name_);
+					entities_to_cleanup.push_back(task_id);
+					
 				}
 				//else, schedule the job
-				if (task_ptr && !task_ptr->scheduled_)
+				else if (task_ptr && !task_ptr->scheduled_)
 				{
 
 					//go through all workers and find the best worker for the job

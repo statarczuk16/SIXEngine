@@ -13,16 +13,20 @@ namespace SXNGN {
 
 			struct A_Star_Node
 			{
-				A_Star_Node()
+				A_Star_Node(int grid_x, int grid_y, int dest_grid_x, int dest_grid_y, int cost)
 				{
 					gx_cost_to_this_node_ = INT_MAX;
-					hx_manhattan_cost_ = INT_MAX;
 					fx_estimated_total_cost_ = INT_MAX;
+					grid_x_ = grid_x;// x / SXNGN::BASE_TILE_WIDTH;
+					grid_y_ = grid_y;// y / SXNGN::BASE_TILE_HEIGHT;
+					hx_manhattan_cost_ = abs(grid_x_ - dest_grid_x) + abs(grid_y_ - dest_grid_y);
 					expanded_ = false;
-					grid_x_ = -1;// x / SXNGN::BASE_TILE_WIDTH;
-					grid_y_ = -1;// y / SXNGN::BASE_TILE_HEIGHT;
-					initialized = false;
-					traversal_cost = 0;
+					
+					
+					traversal_cost = cost;
+					visited_ = false;
+					parent_ = nullptr;
+					is_solution_node_ = false;
 				}
 				A_Star_Node* parent_;
 				int gx_cost_to_this_node_; //total cost of from start to this node
@@ -31,20 +35,26 @@ namespace SXNGN {
 				bool expanded_;
 				int grid_x_;
 				int grid_y_;
-				Entity mapped_entity;
-				bool initialized;
+				bool visited_;
 				int traversal_cost;
+				bool is_solution_node_;
 
-				const bool operator < (const A_Star_Node& r) const {
-					return (fx_estimated_total_cost_ < r.fx_estimated_total_cost_);
+				const bool operator < (A_Star_Node* r) const {
+					return (fx_estimated_total_cost_ < r->fx_estimated_total_cost_);
 				}
 
+				const bool operator > (A_Star_Node* r) const {
+					return (fx_estimated_total_cost_ > r->fx_estimated_total_cost_);
+				}
+
+				/**
 				void init_grid(int grid_x, int grid_y, int dest_grid_x, int dest_grid_y, int cost)
 				{
 					grid_x_ = grid_x;
 					grid_y_ = grid_y;
 					traversal_cost = cost;
-					hx_manhattan_cost_ = abs(grid_x_ - dest_grid_x) + abs(grid_y_ - dest_grid_y);
+					
+					initialized = true;
 				}
 
 				void init_pixel(int pixel_x, int pixel_y, int dest_grid_x, int dest_grid_y, int cost)
@@ -52,15 +62,37 @@ namespace SXNGN {
 					init_grid(pixel_x / SXNGN::BASE_TILE_WIDTH, pixel_y / SXNGN::BASE_TILE_HEIGHT,
 						dest_grid_x, dest_grid_y, cost);
 				}
+				**/
 
-				bool visit(const A_Star_Node& visiting_node)
+				bool check_if_better_path(const A_Star_Node* visiting_node)
 				{
-					int old_gx = this->gx_cost_to_this_node_;
-					gx_cost_to_this_node_ = visiting_node.gx_cost_to_this_node_ + traversal_cost;
-					
+					visited_ = true;
+					//if node is not traversible
+					if (traversal_cost == 0)
+					{
+						return false;
+					}
+					int old_gx = gx_cost_to_this_node_;
+					gx_cost_to_this_node_ = visiting_node->gx_cost_to_this_node_ + traversal_cost;
+					fx_estimated_total_cost_ = gx_cost_to_this_node_ + hx_manhattan_cost_;
+					if (old_gx > gx_cost_to_this_node_)
+					{
+						return true;
+					}
+					gx_cost_to_this_node_ = old_gx;
+					return false;
 				}
 
 
+			};
+
+			class AStarNodeGreaterThan
+			{
+			public:
+				int operator() (const A_Star_Node* p1, const A_Star_Node* p2)
+				{
+					return p1->fx_estimated_total_cost_ > p2->fx_estimated_total_cost_;
+				}
 			};
 
 			class Map_Utils

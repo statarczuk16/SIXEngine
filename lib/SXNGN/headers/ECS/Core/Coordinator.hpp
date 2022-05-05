@@ -217,6 +217,7 @@ namespace SXNGN {
 					//get the collision map for this space
 					auto collision_map = mStateManager->space_to_collision_map_.at(SXNGN::DEFAULT_SPACE);
 					//get all the collisonable objects
+					auto renderables = CheckOutAllData(ComponentTypeEnum::RENDERABLE);
 					auto collisionables = CheckOutAllData(ComponentTypeEnum::COLLISION);
 					int sum_traversal_cost = 1;
 					//go through all the uuids at this x,y and determine the sum collision value
@@ -238,8 +239,14 @@ namespace SXNGN {
 						if (collision_ptr->collision_type_ == CollisionType::IMMOVEABLE)
 						{
 							sum_traversal_cost = 0;
-							break;
 						}
+						if (renderables[entity] != nullptr)
+						{
+							auto renderable = renderables[entity];
+							auto renderable_ptr = static_cast<Renderable*>(renderable);
+							renderable_ptr->display_string_debug_ = std::to_string(sum_traversal_cost);
+						}
+						
 					}
 					//update and store the collision map in the state manager
 					if (collision_map.size() < grid_x)
@@ -253,6 +260,7 @@ namespace SXNGN {
 					collision_map[grid_x][grid_y] = sum_traversal_cost;
 					mStateManager->space_to_collision_map_[SXNGN::DEFAULT_SPACE] = collision_map;
 					CheckInAllData(ComponentTypeEnum::COLLISION);
+					CheckInAllData(ComponentTypeEnum::RENDERABLE);
 					return 0;
 				}
 
@@ -265,6 +273,11 @@ namespace SXNGN {
 						return -1;
 					}
 					return updateCollisionMap(x_y.first, x_y.second, space);
+				}
+
+				std::unordered_map < std::string, std::vector < std::vector < int > > > getCollisionMap()
+				{
+					return mStateManager->space_to_collision_map_;
 				}
 
 				const std::unordered_map < std::string, std::vector < std::vector < std::set < sole::uuid > > > >& getSpaceToEntityMap()

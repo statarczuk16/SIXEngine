@@ -66,7 +66,8 @@ namespace SXNGN::ECS::A {
 			{"collision_type_", p.collision_type_},
 			{"collision_tag_", p.collision_tag_},
 			{"selectable_", p.selectable_},
-			{"buffer_pixels", p.buffer_pixels}
+			{"buffer_pixels", p.buffer_pixels},
+			{"resolved_", p.resolved_}
 		};
 	}
 
@@ -81,5 +82,6 @@ namespace SXNGN::ECS::A {
 		j.at("collision_tag_").get_to(p.collision_tag_);
 		j.at("selectable_").get_to(p.selectable_);
 		j.at("buffer_pixels").get_to(p.buffer_pixels);
+		j.at("resolved_").get_to(p.resolved_);
 	}
 }

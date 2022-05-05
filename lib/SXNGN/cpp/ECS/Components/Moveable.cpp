@@ -12,10 +12,10 @@ namespace SXNGN::ECS::A {
 	void Moveable::Update_Destination(Location new_destination)
 	{
 		destination_ = new_destination;
-		at_destination = false;
-		while (waypoints.size())
+		at_destination_ = false;
+		while (waypoints_.size())
 		{
-			waypoints.pop();
+			waypoints_.pop();
 		}
 		new_destination_ = true;
 
@@ -26,25 +26,25 @@ namespace SXNGN::ECS::A {
 
 		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, destination_) < 5)
 		{
-			at_destination = true;
+			at_destination_ = true;
 		}
 		else
 		{
-			at_destination = false;
+			at_destination_ = false;
 		}
-		return at_destination;
+		return at_destination_;
 	}
 
 	bool Moveable::Check_At_Waypoint()
 	{
-		if (waypoints.empty())
+		if (waypoints_.empty())
 		{
 			return false;
 		}
 
-		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, waypoints.front()) < 5)
+		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, waypoints_.front()) <= 5)
 		{
-			waypoints.pop();
+			waypoints_.pop();
 			return true;
 		}
 		else
@@ -53,10 +53,16 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	void Moveable::SolveDestination(NAVIGATION_TYPE method)
+	bool Moveable::SolveDestination(NAVIGATION_TYPE method)
 	{
-		waypoints = Map_Utils::GetPath(method, position_, destination_);
 		new_destination_ = false;
+		auto new_waypoints = Map_Utils::GetPath(method, position_, destination_);
+		if (new_waypoints.empty())
+		{
+			return false;
+		}
+		waypoints_ = new_waypoints;
+		return true;
 	}
 
 	void Moveable::UpdatePosition(double new_x, double new_y)
@@ -71,12 +77,12 @@ namespace SXNGN::ECS::A {
 
 	Location Moveable::GetCurrentWaypoint()
 	{
-		if (waypoints.empty())
+		if (waypoints_.empty())
 		{
 			//return -1,-1 location if no waypoints
 			return Location();
 		}
-		return waypoints.front();
+		return waypoints_.front();
 	}
 
 	Location Moveable::GetPosition()

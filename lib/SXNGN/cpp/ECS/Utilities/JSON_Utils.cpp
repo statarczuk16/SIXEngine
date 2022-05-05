@@ -108,6 +108,34 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				case ComponentTypeEnum::INPUT_TAGS:
+				{
+					User_Input_Tags_Collection component = *static_cast<const User_Input_Tags_Collection*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::MOVEABLE:
+				{
+					Moveable component = *static_cast<const Moveable*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::TASK_WORKER:
+				{
+					Task_Worker_Component component = *static_cast<const Task_Worker_Component*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::TASK:
+				{
+					Task_Component component = *static_cast<const Task_Component*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
 				default :
 				{
 					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
@@ -176,6 +204,34 @@ namespace SXNGN {
 					{
 						auto component_inst = j.get<Selectable>();
 						ECS_Component* component_ptr = new Selectable(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::INPUT_TAGS:
+					{
+						auto component_inst = j.get<User_Input_Tags_Collection>();
+						ECS_Component* component_ptr = new User_Input_Tags_Collection(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::MOVEABLE:
+					{
+						auto component_inst = j.get<Moveable>();
+						ECS_Component* component_ptr = new Moveable(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::TASK_WORKER:
+					{
+						auto component_inst = j.get<Task_Worker_Component>();
+						ECS_Component* component_ptr = new Task_Worker_Component(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::TASK:
+					{
+						auto component_inst = j.get<Task_Component>();
+						ECS_Component* component_ptr = new Task_Component(component_inst);
 						return component_ptr;
 						break;
 					}
