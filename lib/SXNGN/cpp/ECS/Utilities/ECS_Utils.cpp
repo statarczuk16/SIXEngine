@@ -16,8 +16,8 @@ namespace SXNGN {
 					{
 						const Moveable* moveable = static_cast<const Moveable*>(moveable_data);
 						std::shared_ptr<SDL_Rect> pos = std::make_shared<SDL_Rect>();
-						pos->x = (int) round(moveable->m_pos_x_m);
-						pos->y = (int) round(moveable->m_pos_y_m);
+						pos->x = (int) round(moveable->get_pos_x());
+						pos->y = (int) round(moveable->get_pos_y());
 						return pos;
 
 					}
@@ -56,15 +56,15 @@ namespace SXNGN {
 					if (moveable_data)
 					{
 						Moveable* moveable = static_cast<Moveable*>(moveable_data);
-						if (moveable->m_pos_x_m == x && moveable->m_pos_y_m == y)
+						if (moveable->get_pos_x() == x && moveable->get_pos_y() == y)
 						{
 							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
 							return;
 						}
 						if (!confident)
 						{
-							moveable->m_prev_pos_x_m = moveable->m_pos_x_m;
-							moveable->m_prev_pos_y_m = moveable->m_pos_y_m;
+							moveable->m_prev_pos_x_m = moveable->get_pos_x();
+							moveable->m_prev_pos_y_m = moveable->get_pos_y();
 						}
 						
 						moveable->UpdatePosition(x, y);

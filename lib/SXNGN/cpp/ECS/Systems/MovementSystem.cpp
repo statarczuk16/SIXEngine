@@ -68,6 +68,7 @@ void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
 				moveable->m_vel_y_m_s = 0;
 				return;
 			}
+			moveable->Check_At_Waypoint();
 			auto destination = moveable->GetCurrentWaypoint();
 			if (destination.x == -1 || destination.y == -1)
 			{
@@ -81,9 +82,12 @@ void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
 			std::pair<double, double> movement_vector = Map_Utils::GetVector(position, destination);
 			double vel_x = movement_vector.first * moveable->m_speed_m_s;
 			double vel_y = movement_vector.second * moveable->m_speed_m_s;
+			
 
 			moveable->m_vel_x_m_s = (int)round(vel_x);
 			moveable->m_vel_y_m_s = (int)round(vel_y);
+			
+			
 		}
 		break;
 		case MoveableType::FORCE:
@@ -112,8 +116,8 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 	{
 	case  MoveableType::VELOCITY:
 	{
-		double new_x = moveable->m_pos_x_m + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
-		double new_y = moveable->m_pos_y_m + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
+		double new_x = moveable->get_pos_x() + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
+		double new_y = moveable->get_pos_y() + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
 		gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_id);
 		ECS_Utils::ChangeEntityPosition(moveable_id, new_x, new_y, false);
 		gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::MOVEABLE);

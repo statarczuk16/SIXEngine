@@ -46,8 +46,8 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, moveable);
 
 				SDL_Rect collision_box;
-				collision_box.x = int(round(moveable->m_pos_x_m));
-				collision_box.y = int(round(moveable->m_pos_y_m));
+				collision_box.x = int(round(moveable->get_pos_x()));
+				collision_box.y = int(round(moveable->get_pos_y()));
 				collision_box.w = SXNGN::BASE_TILE_WIDTH;
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 

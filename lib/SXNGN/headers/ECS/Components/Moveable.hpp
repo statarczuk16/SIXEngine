@@ -25,44 +25,54 @@ namespace SXNGN::ECS::A {
 	/// </summary>
 	struct Moveable : ECS_Component
 	{
+		private:
+			double m_pos_x_m = 0;//current speed
+			double m_pos_y_m = 0;//current speed
 		//SDL_Rect position_box_;
-		double m_pos_x_m = 0;//current speed
-		double m_pos_y_m = 0;//current speed
-		double m_prev_pos_x_m = 0;//current speed
-		double m_prev_pos_y_m = 0;//current speed
-		Sint32 m_vel_x_m_s = 0;//current speed
-		Sint32 m_vel_y_m_s = 0;
-		Sint32 m_speed_m_s = 0;//velocity added/removed per event
-		MoveableType moveable_type_ = MoveableType::VELOCITY;
-		NAVIGATION_TYPE navigation_type_ = NAVIGATION_TYPE::A_STAR;
+		public:
+			double m_prev_pos_x_m = 0;//current speed
+			double m_prev_pos_y_m = 0;//current speed
+			double m_vel_x_m_s = 0;//current speed
+			double m_vel_y_m_s = 0;
+			Sint32 m_speed_m_s = 0;//velocity added/removed per event
+			MoveableType moveable_type_ = MoveableType::VELOCITY;
+			NAVIGATION_TYPE navigation_type_ = NAVIGATION_TYPE::A_STAR;
 
-		Location destination_;
-		Location position_;
-		bool new_destination_ = false;
-		bool at_destination_ = false;
-		std::queue<Location> waypoints_;
+			Location destination_;
+			Location position_;
+			bool new_destination_ = false;
+			bool at_destination_ = false;
+			std::queue<Location> waypoints_;
 
-		Moveable();
+			Moveable();
 
-		void Update_Destination(Location new_location);
+			void Update_Destination(Location new_location);
 		
 
-		bool Check_At_Destination();
+			bool Check_At_Destination();
 		
 
-		bool Check_At_Waypoint();
+			bool Check_At_Waypoint();
 		
 
-		bool SolveDestination(NAVIGATION_TYPE method);
+			bool SolveDestination(NAVIGATION_TYPE method);
 		
 
-		void UpdatePosition(double new_x, double new_y);
+			void UpdatePosition(double new_x, double new_y);
 		
 
-		Location GetCurrentWaypoint();
+			Location GetCurrentWaypoint();
 		
 
-		Location GetPosition();
+			Location GetPosition();
+
+			void set_pos_x(double x);
+
+			void set_pos_y(double y);
+
+			double get_pos_x() const;
+
+			double get_pos_y() const;
 		
 	};
 
@@ -70,8 +80,8 @@ namespace SXNGN::ECS::A {
 	inline void to_json(json& j, const Moveable& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::MOVEABLE]},
-			{"m_pos_x_m", p.m_pos_x_m},
-			{"m_pos_y_m", p.m_pos_y_m},
+			{"m_pos_x_m", p.get_pos_x()},
+			{"m_pos_y_m", p.get_pos_y()},
 			{"m_prev_pos_x_m", p.m_prev_pos_x_m},
 			{"m_prev_pos_y_m", p.m_prev_pos_y_m},
 			{"m_vel_x_m_s", p.m_vel_x_m_s},
@@ -89,9 +99,13 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Moveable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
+		double m_pos_x;
+		double m_pos_y;
 		p.component_type = component_type_enum;
-		j.at("m_pos_x_m").get_to(p.m_pos_x_m);
-		j.at("m_pos_y_m").get_to(p.m_pos_y_m);
+		j.at("m_pos_x_m").get_to(m_pos_x);
+		p.set_pos_x(m_pos_x);
+		j.at("m_pos_y_m").get_to(m_pos_y);
+		p.set_pos_y(m_pos_y);
 		j.at("m_prev_pos_x_m").get_to(p.m_prev_pos_x_m);
 		j.at("m_prev_pos_y_m").get_to(p.m_prev_pos_y_m);
 		j.at("m_vel_x_m_s").get_to(p.m_vel_x_m_s);

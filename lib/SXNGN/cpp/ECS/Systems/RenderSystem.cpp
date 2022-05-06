@@ -260,6 +260,11 @@ namespace SXNGN::ECS::A {
 				int y = render_quad.y;
 				renderable->sprite_map_texture_->render_text(x, y, debug_font, renderable->display_string_debug_);
 			}
+			auto gCoordinator = SXNGN::Database::get_coordinator();
+			FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
+			int x = render_quad.x;
+			int y = render_quad.y;
+			renderable->sprite_map_texture_->render_text(x, y, debug_font, "x");
 		}
 	}
 

@@ -24,8 +24,9 @@ namespace SXNGN::ECS::A {
 	bool Moveable::Check_At_Destination()
 	{
 
-		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, destination_) < 5)
+		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, destination_) < 10)
 		{
+			//SDL_LogDebug(1, "Destination Reached: %d, %d", destination_.x, destination_.y);
 			at_destination_ = true;
 		}
 		else
@@ -42,8 +43,9 @@ namespace SXNGN::ECS::A {
 			return false;
 		}
 
-		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, waypoints_.front()) <= 5)
+		if (Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, position_, waypoints_.front()) <= 10)
 		{
+			SDL_LogDebug(1, "Waypoint Reached: %d, %d", waypoints_.front().x, waypoints_.front().y);
 			waypoints_.pop();
 			return true;
 		}
@@ -88,5 +90,25 @@ namespace SXNGN::ECS::A {
 	Location Moveable::GetPosition()
 	{
 		return position_;
+	}
+
+	void Moveable::set_pos_x(double x)
+	{
+		m_pos_x_m = x;
+	}
+
+	void Moveable::set_pos_y(double y)
+	{
+		m_pos_y_m = y;
+	}
+
+	double Moveable::get_pos_x() const
+	{
+		return m_pos_x_m;
+	}
+
+	double Moveable::get_pos_y() const
+	{
+		return m_pos_y_m;
 	}
 }

@@ -194,11 +194,13 @@ namespace SXNGN::ECS::A {
 					return_code = 0;
 					break;
 				}
+				/**
 				std::cout << " --- Visiting Node " << visiting_node->grid_x_ << " , " << visiting_node->grid_y_
 					<< " FX: " << visiting_node->fx_estimated_total_cost_
 					<< " GX: " << visiting_node->gx_cost_to_this_node_
 					<< " HX: " << visiting_node->hx_manhattan_cost_
 					<< std::endl;
+					**/
 				//visit each neighbor of node
 				for (const int visit_x : visit_x_vals)
 				{
@@ -246,13 +248,13 @@ namespace SXNGN::ECS::A {
 								open_nodes.push(node_to_visit);
 							}
 
-							
+							/**
 							std::cout << " ------ Visiting " << node_to_visit_x << " , " << node_to_visit_y
 								<< " FX: " << node_to_visit->fx_estimated_total_cost_
 								<< " GX: " << node_to_visit->gx_cost_to_this_node_
 								<< " HX: " << node_to_visit->hx_manhattan_cost_
 								<< " better path? " << found_better_path << std::endl;
-
+							**/
 							if (found_better_path)
 							{
 								node_to_visit->parent_ = (a_star_map[visiting_node->grid_x_][visiting_node->grid_y_]);
@@ -295,6 +297,7 @@ namespace SXNGN::ECS::A {
 				}
 				for (int i = temp_queue.size() - 1; i >= 0; i--)
 				{
+					SDL_LogDebug(1, "Waypoint Generated: %d, %d", temp_queue[i].x, temp_queue[i].y);
 					q.push(temp_queue[i]);
 				}
 			}
@@ -329,6 +332,10 @@ namespace SXNGN::ECS::A {
 	std::pair<double, double>  Map_Utils::GetVector(SXNGN::ECS::A::Location start, SXNGN::ECS::A::Location end)
 	{
 		double distance = ECS::A::Map_Utils::GetDistance(ECS::A::NAVIGATION_TYPE::MANHATTAN, start, end);
+		if (distance == 0)
+		{
+			return std::make_pair(0, 0);
+		}
 		int x = end.x - start.x;
 		int y = end.y - start.y;
 		std::pair<double, double> result = std::make_pair(x / distance, y / distance);

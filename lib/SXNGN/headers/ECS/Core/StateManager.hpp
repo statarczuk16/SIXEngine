@@ -223,7 +223,7 @@ namespace SXNGN::ECS::A {
 			}
 			if (grid_x > space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].size() || grid_y > space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].at(grid_x).size())
 			{
-				SDL_LogError(1, "addUUIDToLocationMap bad index");
+				SDL_LogError(1, "addUUIDToLocationMap Bad Index: %d, %d ", grid_x, grid_y);
 				return;
 			}
 

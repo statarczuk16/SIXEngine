@@ -178,10 +178,11 @@ namespace SXNGN::ECS::A {
 		double work_complete = dt * skill_multiplier;
 		int work_tiks = (int) round(work_complete * 1000);
 		//TODO use more than first index
-		task->tasks_.at(0).work_completed_ += work_tiks;
-		if(task->tasks_.at(0).work_completed_ > task->tasks_.at(0).work_required_)
+		task->tasks_.front().work_completed_ += work_tiks;
+		if(task->tasks_.front().work_completed_ > task->tasks_.at(0).work_required_)
 		{
 			SDL_LogDebug(1, "Work completed on %s", task->name_);
+			task->tasks_.erase(task->tasks_.begin());
 			worker->current_job_ = MAX_ENTITIES;
 		}
 	}
@@ -251,8 +252,8 @@ namespace SXNGN::ECS::A {
 								{
 									moveable_ptr = static_cast<const Moveable*>(moveable_check_out);
 									Location start;
-									start.x = (int)(round(moveable_ptr->m_pos_x_m));
-									start.y = (int)(round(moveable_ptr->m_pos_y_m));
+									start.x = (int)(round(moveable_ptr->get_pos_x()));
+									start.y = (int)(round(moveable_ptr->get_pos_y()));
 
 									Location end = task_ptr->tasks_.at(0).location_;
 
