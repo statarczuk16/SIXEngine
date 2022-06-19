@@ -313,6 +313,10 @@ int init_menus()
 	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0);
 	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
 
+	auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0);
+
+	ig_ui_window_top_c->child_components_.push_back(ig_debug_toggle_1);
+
 	//************************* Pop Up Game Menu
 	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, resolution.w/2 - 240/2, 85, 240, resolution.h - 240, UILayer::MID);
 	ig_ui_window_pop_up_c->window_->visible = false;

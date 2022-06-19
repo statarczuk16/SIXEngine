@@ -93,6 +93,13 @@ namespace SXNGN::ECS::A {
 					break;
 
 				}
+				case EventType::SPAWN:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Spawn Event");
+					Handle_Spawn_Event(event_ptr);
+					break;
+
+				}
 				case EventType::SELECTION:
 				{
 					//todo max number of selected entities
@@ -183,7 +190,7 @@ namespace SXNGN::ECS::A {
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto user_input_state = User_Input_State::get_instance();
-		std::ifstream i("world.json");
+		std::ifstream i("world.json"); //FIX ME
 		json j;
 		try 
 		{
@@ -213,6 +220,12 @@ namespace SXNGN::ECS::A {
 			SXNGN::Database::modify_scale(ec->e.mouse_wheel_event.y_);
 			std::cout << "Scale now: " << SXNGN::Database::get_scale() << std::endl;
 		}
+	}
+
+	void Event_System::Handle_Spawn_Event(Event_Component* ec)
+	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::IMMOVEABLE, "spawned_block");
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)

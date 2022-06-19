@@ -21,6 +21,22 @@ namespace SXNGN::ECS::A {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_select_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
+	{
+		kiss_selectbutton* new_kiss_toggle = new kiss_selectbutton();
+		kiss_selectbutton_new_uc(new_kiss_toggle, parent_window.get(), 40, 0, 150, 50);
+		new_kiss_toggle->h_align = h_align;
+		new_kiss_toggle->v_align = v_align;
+		new_kiss_toggle->row = row;
+		new_kiss_toggle->column = column;
+		new_kiss_toggle->parent_scale = parent_scale;
+		new_kiss_toggle->parameter = name;
+		UIContainerComponent new_ui_container(parent_window, layer, UIType::SELECT_BUTTON);
+		new_ui_container.selectbutton_ = new_kiss_toggle;
+		//Event_Component back_state_event_ng;
+		return std::make_shared<UIContainerComponent>(new_ui_container);
+	}
+
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_window_raw(std::shared_ptr<kiss_window> parent_window, int x, int y, int w, int h, UILayer layer)
 	{
 		std::shared_ptr<kiss_window> new_kiss_window = std::make_shared<kiss_window>();

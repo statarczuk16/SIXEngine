@@ -20,6 +20,7 @@ namespace SXNGN::ECS::A {
 	struct GameSettings {
 		SDL_Rect resolution;
 		LevelGenerationSettings level_settings;
+		std::map < std::string, unsigned int > settings_map;
 	};
 
 	class StateManager
@@ -265,8 +266,6 @@ namespace SXNGN::ECS::A {
 
 			space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(x_y.first).at(x_y.second).erase(uuid);
 
-
-
 			return 0;
 
 		}
@@ -274,6 +273,7 @@ namespace SXNGN::ECS::A {
 	public:
 		//map of string to 2D Grid where cell represents traversal cost for A* usage
 		std::unordered_map < std::string, std::vector < std::vector < int > > > space_to_collision_map_;
+		GameSettings game_settings;
 
 	private:
 		std::unordered_map< std::string, Space> spaces;
@@ -285,7 +285,7 @@ namespace SXNGN::ECS::A {
 		
 
 		std::forward_list<ComponentTypeEnum> active_game_states_;
-		GameSettings game_settings;
+		
 		std::unordered_map<ComponentTypeEnum, std::shared_ptr<SDL_Rect>> game_state_to_view_port_;
 		
 	};

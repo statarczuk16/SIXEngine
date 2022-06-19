@@ -315,8 +315,8 @@ int kiss_button_new(kiss_button *button, kiss_window *wdw, char *text,
 	button->visible = 0;
 	button->focus = 0;
 	button->wdw = wdw;
-	button->v_align = HA_NONE;
-	button->h_align = VA_NONE;
+	button->v_align = VA_NONE;
+	button->h_align = HA_NONE;
 	button->parent_scale = SP_NONE;
 	return 0;
 }
@@ -349,8 +349,8 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 	button->visible = 0;
 	button->focus = 0;
 	button->wdw = wdw;
-	button->v_align = HA_NONE;
-	button->h_align = VA_NONE;
+	button->v_align = VA_NONE;
+	button->h_align = HA_NONE;
 	button->parent_scale = SP_NONE;
 	button->row = 0;
 	button->column = 0;
@@ -408,8 +408,6 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 		(void) determine_render_position(&button->rect, &button->wdw->rect, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
 		//pass by ref - sets textx and texty
 		(void) determine_text_render_position(&button->r_rect, button->txt_h_align, button->txt_v_align, &button->textx, &button->texty, button->text_width, button->font.fontheight);
-
-
 	}
 	if (!button || !button->visible || !renderer)
 	{
@@ -451,6 +449,35 @@ int kiss_selectbutton_new(kiss_selectbutton *selectbutton, kiss_window *wdw,
 	selectbutton->selected = 0;
 	selectbutton->focus = 0;
 	selectbutton->wdw = wdw;
+	selectbutton->v_align = VA_NONE;
+	selectbutton->h_align = HA_NONE;
+	selectbutton->parent_scale = SP_NONE;
+	selectbutton->row = 0;
+	selectbutton->column = 0;
+	selectbutton->txt_v_align = VA_CENTER;
+	selectbutton->txt_h_align = HA_CENTER;
+	return 0;
+}
+
+int kiss_selectbutton_new_uc(kiss_selectbutton* selectbutton, kiss_window* wdw,
+	int x, int y, int w, int h)
+{
+	if (!selectbutton) return -1;
+	if (selectbutton->selectedimg.magic != KISS_MAGIC)
+		selectbutton->selectedimg = kiss_selected;
+	if (selectbutton->unselectedimg.magic != KISS_MAGIC)
+		selectbutton->unselectedimg = kiss_unselected;
+	kiss_makerect(&selectbutton->rect, x, y, w, h);
+	selectbutton->selected = 0;
+	selectbutton->focus = 0;
+	selectbutton->wdw = wdw;
+	selectbutton->v_align = VA_NONE;
+	selectbutton->h_align = HA_NONE;
+	selectbutton->parent_scale = SP_NONE;
+	selectbutton->row = 0;
+	selectbutton->column = 0;
+	selectbutton->txt_v_align = VA_CENTER;
+	selectbutton->txt_h_align = HA_CENTER;
 	return 0;
 }
 
@@ -474,18 +501,28 @@ int kiss_selectbutton_event(kiss_selectbutton *selectbutton,
 	return 0;
 }
 
-int kiss_selectbutton_draw(kiss_selectbutton *selectbutton,
-	SDL_Renderer *renderer)
+int kiss_selectbutton_draw(kiss_selectbutton *selectbutton,	SDL_Renderer *renderer)
 {
 	if (selectbutton && selectbutton->wdw)
+	{
 		selectbutton->visible = selectbutton->wdw->visible;
-	if (!selectbutton || !selectbutton->visible || !renderer) return 0;
+		//pass by ref - sets button->r_rect
+		(void)determine_render_position(&selectbutton->rect, &selectbutton->wdw->rect, &selectbutton->r_rect, selectbutton->h_align, selectbutton->v_align, selectbutton->parent_scale, selectbutton->column, selectbutton->row);
+		//pass by ref - sets textx and texty
+		//(void)determine_text_render_position(&selectbutton->r_rect, selectbutton->txt_h_align, selectbutton->txt_v_align, &selectbutton->textx, &selectbutton->texty, selectbutton->text_width, selectbutton->font.fontheight);
+	}
+	if (!selectbutton || !selectbutton->visible || !renderer)
+	{
+		return 0;
+	}
 	if (selectbutton->selected)
-		kiss_renderimage(renderer, selectbutton->selectedimg,
-			selectbutton->rect.x, selectbutton->rect.y, NULL);
+	{
+		kiss_renderimage(renderer, selectbutton->selectedimg, selectbutton->rect.x, selectbutton->r_rect.y, NULL);
+	}
 	else
-		kiss_renderimage(renderer, selectbutton->unselectedimg,
-			selectbutton->rect.x, selectbutton->rect.y, NULL);
+	{
+		kiss_renderimage(renderer, selectbutton->unselectedimg, selectbutton->rect.x, selectbutton->r_rect.y, NULL);
+	}
 	return 1;
 }
 

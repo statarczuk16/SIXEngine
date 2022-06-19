@@ -285,6 +285,10 @@ namespace SXNGN::ECS::A {
 					//dragged box or left click is selection
 					if (event_ptr->e.mouse_event.type == MouseEventType::BOX || event_ptr->e.mouse_event.click.button == MOUSE_BUTTON::LEFT)
 					{
+						if (gCoordinator.getSetting("Debug_Spawn_Block").first == 1)
+						{
+							Entity_Builder_Utils::Create_Spawn_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, other->collision_box_.x, other->collision_box_.y);
+						}
 						//create event for user input system - tell it what entities were selected by a mouse event
 						Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
 					}
@@ -431,11 +435,13 @@ namespace SXNGN::ECS::A {
 				prev_moveable_box.w = moveable_obj->collision_box_.w;
 				prev_moveable_box.h = moveable_obj->collision_box_.h;
 				//get where the moveable was last frame, where it wants to be this frame, and combine with immoveable obj location to find where it should smack into a wall and stop
-				//SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, moveable_obj->collision_box_, prev_moveable_box);
+				SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, moveable_obj->collision_box_, prev_moveable_box);
+				
+				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_entity);
 				//move the moveable entity to where it should smack into a wall
-				//ECS_Utils::ChangeEntityPosition(moveable_entity, new_moveable_pos.x, new_moveable_pos.y, true);
+				ECS_Utils::ChangeEntityPosition(moveable_entity, new_moveable_pos.x, new_moveable_pos.y, true);
 				//calling function expects to need to check moveable_entity back in, but ChangeEntityPosition also does that. So re-check it out here.
-				//auto dummy = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::COLLISION);
+				auto dummy = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::COLLISION);
 				
 			}
 		}

@@ -196,10 +196,23 @@ typedef struct kiss_selectbutton {
 	int visible;
 	int focus;
 	SDL_Rect rect;
+	SDL_Rect r_rect; //where to actually draw (rect + parent_window)
+	int textx;
+	int texty;
 	int selected;
 	kiss_image selectedimg;
 	kiss_image unselectedimg;
 	kiss_window *wdw;
+	h_alignment h_align;
+	v_alignment v_align;
+	h_alignment txt_h_align;
+	v_alignment txt_v_align;
+	scale_to_parent_width parent_scale;
+	int row;
+	int column;
+	int text_width;
+	char* parameter;
+
 } kiss_selectbutton;
 
 typedef struct kiss_vscrollbar {
@@ -393,6 +406,8 @@ int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw);
 int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer);
 int kiss_selectbutton_new(kiss_selectbutton *selectbutton, kiss_window *wdw,
 	int x, int y);
+int kiss_selectbutton_new_uc(kiss_selectbutton* selectbutton, kiss_window* wdw,
+	int x, int y, int w, int h);
 int kiss_selectbutton_event(kiss_selectbutton *selectbutton,
 	SDL_Event *event, int *draw);
 int kiss_selectbutton_draw(kiss_selectbutton *selectbutton,

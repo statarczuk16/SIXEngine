@@ -194,6 +194,22 @@ namespace SXNGN {
 					return mStateManager->removeUUIDFromLocationMap(uuid, space);
 				}
 
+				std::pair<int, bool> getSetting(std::string setting)
+				{
+					if (mStateManager->game_settings.settings_map.count(setting) == 0)
+					{
+						return std::make_pair(0, false);
+					}
+					else
+					{
+						return std::make_pair(mStateManager->game_settings.settings_map.at(setting), true);
+					}
+				}
+				void setSetting(std::string setting, unsigned int value)
+				{
+					mStateManager->game_settings.settings_map[setting] = value;
+				}
+
 				int updateCollisionMap(int grid_x, int grid_y, std::string space = SXNGN::DEFAULT_SPACE)
 				{
 					//get all the other uuids at this location

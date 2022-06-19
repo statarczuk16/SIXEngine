@@ -275,6 +275,22 @@ namespace SXNGN::ECS::A {
 			}
 			case UIType::SELECT_BUTTON:
 			{
+				if (kiss_selectbutton_event(component_in_layer->selectbutton_, e, &draw_ui))
+				{
+					//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "GUI_HandleEvents: Button: %s activated", component_in_layer->name_.c_str());
+					for (Event_Component triggered_event : component_in_layer->triggered_events)
+					{
+						Entity event_entity = Entity_Builder_Utils::Create_Event(*coordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, triggered_event, "Select Event");
+					}
+					for (auto func : component_in_layer->callback_functions_)
+					{
+						func();
+					}
+					coordinator->setSetting(component_in_layer->selectbutton_->parameter, component_in_layer->selectbutton_->selected);
+					SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "GUI_HandleEvents: SelectButton: %s toggled to %d", component_in_layer->selectbutton_->parameter, component_in_layer->selectbutton_->selected);
+
+					event_handled = true;
+				}
 				break;
 			}
 			case UIType::TEXTBOX:

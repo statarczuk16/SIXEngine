@@ -10,7 +10,7 @@ namespace SXNGN {
 			{
 				auto tile_entity = coordinator.CreateEntity();
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
-				Sint32 y_pixels = x_grid * SXNGN::BASE_TILE_HEIGHT;
+				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
 				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(x_pixels, y_pixels, sprite_sheet, sprite_name, A::RenderLayer::GROUND_LAYER, name);
 				coordinator.AddComponent(tile_entity, pre_renderable);
 
@@ -46,10 +46,10 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, moveable);
 
 				SDL_Rect collision_box;
-				collision_box.x = int(round(moveable->get_pos_x()));
-				collision_box.y = int(round(moveable->get_pos_y()));
-				collision_box.w = SXNGN::BASE_TILE_WIDTH;
-				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
+				collision_box.x = int(round(moveable->get_pos_x() + SXNGN::BASE_TILE_WIDTH / 2));
+				collision_box.y = int(round(moveable->get_pos_y() + SXNGN::BASE_TILE_HEIGHT / 2));
+				collision_box.w = SXNGN::BASE_TILE_WIDTH / 2;
+				collision_box.h = SXNGN::BASE_TILE_HEIGHT / 2;
 
 				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, CollisionType::ELASTIC, CollisionTag::PERSON);
 				collisionable->buffer_pixels = 0;
@@ -172,6 +172,21 @@ namespace SXNGN {
 				coordinator.AddComponent(order_event_entity, event_component);
 				coordinator.AddComponent(order_event_entity, Create_Gamestate_Component_from_Enum(game_state));
 				return order_event_entity;
+			}
+
+			Entity Entity_Builder_Utils::Create_Spawn_Event(Coordinator coordinator, ComponentTypeEnum game_state, int pixel_x, int pixel_y)
+			{
+				auto spawn_event_entity = coordinator.CreateEntity();
+
+				Event_Component* event_component = new Event_Component();
+				SXNGN_SpawnEvent spawn;
+				spawn.x_ = pixel_x;
+				spawn.y_ = pixel_y;
+				event_component->e.common.type = EventType::SPAWN;
+				event_component->e.spawn_event = spawn;
+				coordinator.AddComponent(spawn_event_entity, event_component);
+				coordinator.AddComponent(spawn_event_entity, Create_Gamestate_Component_from_Enum(game_state));
+				return spawn_event_entity;
 			}
 
 

@@ -20,7 +20,8 @@ namespace SXNGN::ECS::A {
 		MOUSE,
 		MOUSE_WHEEL,
 		SELECTION,
-		ORDER
+		ORDER,
+		SPAWN
 	};
 
 	
@@ -90,6 +91,13 @@ namespace SXNGN::ECS::A {
 		int x_ = 0;
 		int y_ = 0;
 	};
+
+	struct SXNGN_SpawnEvent
+	{
+		int x_ = 0;
+		int y_ = 0;
+		bool spawn_1_despawn_0;
+	};
 	
 	struct SXNGN_Event
 	{
@@ -101,6 +109,7 @@ namespace SXNGN::ECS::A {
 		SXNGN_MouseWheelEvent mouse_wheel_event;
 		SXNGN_Selection select_event;
 		SXNGN_Order order_event;
+		SXNGN_SpawnEvent spawn_event;
 	};
 
 	struct Event_Component : ECS_Component

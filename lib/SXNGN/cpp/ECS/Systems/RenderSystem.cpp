@@ -89,6 +89,7 @@ namespace SXNGN::ECS::A {
 			}
 			case UIType::SELECT_BUTTON:
 			{
+				kiss_selectbutton_draw(component_in_layer->selectbutton_, gRenderer);
 				break;
 			}
 			case UIType::TEXTBOX:

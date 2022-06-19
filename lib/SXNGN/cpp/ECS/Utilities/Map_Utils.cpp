@@ -220,6 +220,7 @@ namespace SXNGN::ECS::A {
 						{
 
 							A_Star_Node* node_to_visit = a_star_map[node_to_visit_x][node_to_visit_y];
+							//if node we want to visit hasn't been initialized, grab its data and make an a* compatible node
 							if (node_to_visit == nullptr)
 							{
 								node_to_visit = new A_Star_Node(
@@ -232,22 +233,18 @@ namespace SXNGN::ECS::A {
 
 							}
 
+							//if the node to visit has already been expanded (has been the visiting node), no better bath will be found through it.
 							if (node_to_visit->expanded_ == true)
 							{
 								continue;
 							}
 							bool found_better_path = false;
 
-							if (node_to_visit->visited_ == true)
+							if (node_to_visit->visited_ == false)
 							{
-								found_better_path = node_to_visit->check_if_better_path(visiting_node);
+								open_nodes.push(node_to_visit);	
 							}
-							else
-							{
-								found_better_path = node_to_visit->check_if_better_path(visiting_node);
-								open_nodes.push(node_to_visit);
-							}
-
+							found_better_path = node_to_visit->check_if_better_path(visiting_node);
 							/**
 							std::cout << " ------ Visiting " << node_to_visit_x << " , " << node_to_visit_y
 								<< " FX: " << node_to_visit->fx_estimated_total_cost_
