@@ -220,7 +220,7 @@ namespace SXNGN::ECS::A {
 
 			const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
 			//if the event is a mouse click and the other is selectable
-			if (event_ptr->e.common.type == EventType::MOUSE && gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::SELECTABLE))
+			if (event_ptr->e.common.type == EventType::MOUSE )//&& gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::SELECTABLE))
 			{
 				//see how second collisionable reacts to mouse input
 				auto select_data = gCoordinator.GetComponentReadOnly(other_entity, ComponentTypeEnum::SELECTABLE);
@@ -289,8 +289,12 @@ namespace SXNGN::ECS::A {
 						{
 							Entity_Builder_Utils::Create_Spawn_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, other->collision_box_.x, other->collision_box_.y);
 						}
-						//create event for user input system - tell it what entities were selected by a mouse event
-						Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+						else
+						{
+							//create event for user input system - tell it what entities were selected by a mouse event
+							Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+						}
+						
 					}
 					//right click is an order 
 					else if (event_ptr->e.mouse_event.click.button == MOUSE_BUTTON::RIGHT)

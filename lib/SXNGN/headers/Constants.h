@@ -21,7 +21,7 @@ namespace SXNGN {
 	const size_t TILE_WIDTH_SCALE = 3;
 	const size_t TILE_HEIGHT_SCALE = 3;
 
-	const size_t AT_DESTINATION_THRESH = 10;
+	const size_t AT_DESTINATION_THRESH = 0;
 
 	const size_t TILES_TO_CHUNK_EDGE = 16;
 

@@ -62,8 +62,9 @@ namespace SXNGN::ECS::A {
 		
 
 			Location GetCurrentWaypoint();
-		
 
+			unsigned int GetNumWaypoints();
+		
 			Location GetPosition();
 
 			void set_pos_x(double x);

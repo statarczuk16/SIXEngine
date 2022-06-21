@@ -109,14 +109,22 @@ namespace SXNGN::ECS::A {
 					{
 						for (auto entity : event_ptr->e.select_event.clicked_entities)
 						{
-							user_input_state->selected_entities.insert(entity);
+							if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::SELECTABLE))
+							{
+								user_input_state->selected_entities.insert(entity);
+							}
+							
 						}
 					}
 					else if (event_ptr->e.select_event.subtractive)
 					{
 						for (auto entity : event_ptr->e.select_event.clicked_entities)
 						{
-							user_input_state->selected_entities.erase(entity);
+							if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::SELECTABLE))
+							{
+								user_input_state->selected_entities.erase(entity);
+							}
+							
 						}
 					}
 					else if (event_ptr->e.select_event.enqueue)
@@ -128,7 +136,11 @@ namespace SXNGN::ECS::A {
 						user_input_state->selected_entities.clear();
 						for (auto entity : event_ptr->e.select_event.clicked_entities)
 						{
-							user_input_state->selected_entities.insert(entity);
+							if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::SELECTABLE))
+							{
+								user_input_state->selected_entities.insert(entity);
+							}
+							
 						}
 					}
 

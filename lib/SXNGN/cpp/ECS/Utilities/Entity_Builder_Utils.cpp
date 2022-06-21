@@ -46,10 +46,15 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, moveable);
 
 				SDL_Rect collision_box;
-				collision_box.x = int(round(moveable->get_pos_x() + SXNGN::BASE_TILE_WIDTH / 2));
-				collision_box.y = int(round(moveable->get_pos_y() + SXNGN::BASE_TILE_HEIGHT / 2));
-				collision_box.w = SXNGN::BASE_TILE_WIDTH / 2;
-				collision_box.h = SXNGN::BASE_TILE_HEIGHT / 2;
+				//collision_box.x = int(round(moveable->get_pos_x() + SXNGN::BASE_TILE_WIDTH / 2));
+				//collision_box.y = int(round(moveable->get_pos_y() + SXNGN::BASE_TILE_HEIGHT / 2));
+				//collision_box.w = SXNGN::BASE_TILE_WIDTH / 2;
+				//collision_box.h = SXNGN::BASE_TILE_HEIGHT / 2;
+
+				collision_box.x = int(round(moveable->get_pos_x()  ));
+				collision_box.y = int(round(moveable->get_pos_y()  ));
+				collision_box.w = SXNGN::BASE_TILE_WIDTH ;
+				collision_box.h = SXNGN::BASE_TILE_HEIGHT ;
 
 				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, CollisionType::ELASTIC, CollisionTag::PERSON);
 				collisionable->buffer_pixels = 0;

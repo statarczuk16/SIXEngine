@@ -116,8 +116,25 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 	{
 	case  MoveableType::VELOCITY:
 	{
+		if (moveable->m_vel_x_m_s == 0.0 && moveable->m_vel_y_m_s == 0.0)
+		{
+			return;
+		}
 		double new_x = moveable->get_pos_x() + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
 		double new_y = moveable->get_pos_y() + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
+		if (moveable->GetNumWaypoints() > 0)
+		{
+			if ((moveable->m_vel_x_m_s >= 0 && new_x >= moveable->GetCurrentWaypoint().x) || (moveable->m_vel_x_m_s < 0 && new_x < moveable->GetCurrentWaypoint().x))
+			{
+				new_x = moveable->GetCurrentWaypoint().x;
+			}
+			if ((moveable->m_vel_y_m_s >= 0 && new_y >= moveable->GetCurrentWaypoint().y) || (moveable->m_vel_y_m_s < 0 && new_y < moveable->GetCurrentWaypoint().y))
+			{
+				new_y = moveable->GetCurrentWaypoint().y;
+			}
+		}
+		
+		
 		gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_id);
 		ECS_Utils::ChangeEntityPosition(moveable_id, new_x, new_y, false);
 		gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::MOVEABLE);

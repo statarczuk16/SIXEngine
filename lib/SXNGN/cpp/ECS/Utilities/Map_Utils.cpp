@@ -65,8 +65,8 @@ namespace SXNGN::ECS::A {
 				Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
 				gCoordinator->AddComponent(map_tile_entity, collisionable);
 			//}
-				Selectable* selectable = new Selectable();
-				gCoordinator->AddComponent(map_tile_entity, selectable);
+				//Selectable* selectable = new Selectable();
+				//gCoordinator->AddComponent(map_tile_entity, selectable);
 
 			Tile* tile = new Tile(game_map_tiles.at(i));
 			gCoordinator->AddComponent(map_tile_entity, tile);
@@ -74,7 +74,7 @@ namespace SXNGN::ECS::A {
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}
 
-		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_1", true);
+		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 8, "APOCALYPSE_MAP", "GUNMAN_1", true);
 
 		Entity test_worker = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_2", false, "Worker");
 
@@ -294,7 +294,7 @@ namespace SXNGN::ECS::A {
 				}
 				for (int i = temp_queue.size() - 1; i >= 0; i--)
 				{
-					SDL_LogDebug(1, "Waypoint Generated: %d, %d", temp_queue[i].x, temp_queue[i].y);
+					SDL_LogDebug(1, "Waypoint Generated: %d, %d", temp_queue[i].x / SXNGN::BASE_TILE_WIDTH, temp_queue[i].y / SXNGN::BASE_TILE_HEIGHT);
 					q.push(temp_queue[i]);
 				}
 			}

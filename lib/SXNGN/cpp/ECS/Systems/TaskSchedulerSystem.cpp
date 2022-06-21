@@ -124,6 +124,13 @@ namespace SXNGN::ECS::A {
 						{
 							Worker_Do_Work(worker, task, dt);
 						}
+						else
+						{
+							SDL_LogDebug(1, "Worker %d Canceled Job %d  at %d, %d: Can't Do Work", worker_id, job_id, task->tasks_.at(0).location_.x / SXNGN::BASE_TILE_WIDTH, task->tasks_.at(0).location_.y / SXNGN::BASE_TILE_HEIGHT);
+
+							task->canceled_ = true;
+							worker->current_job_ = MAX_ENTITIES;
+						}
 					}
 				}
 
