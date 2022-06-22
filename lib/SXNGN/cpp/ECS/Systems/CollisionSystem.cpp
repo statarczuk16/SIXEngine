@@ -219,13 +219,13 @@ namespace SXNGN::ECS::A {
 		{
 
 			const Event_Component* event_ptr = static_cast<const Event_Component*>(event_data);
-			//if the event is a mouse click and the other is selectable
-			if (event_ptr->e.common.type == EventType::MOUSE )//&& gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::SELECTABLE))
+			//if the event is a mouse click 
+			if (event_ptr->e.common.type == EventType::MOUSE )
 			{
 				//see how second collisionable reacts to mouse input
-				auto select_data = gCoordinator.GetComponentReadOnly(other_entity, ComponentTypeEnum::SELECTABLE);
+				//auto select_data = gCoordinator.GetComponentReadOnly(other_entity, ComponentTypeEnum::SELECTABLE);
 
-				const Selectable* select_ptr = static_cast<const Selectable*>(select_data);
+				//const Selectable* select_ptr = static_cast<const Selectable*>(select_data);
 				//if it is clickable
 				std::vector<Entity> clicked;
 				std::vector<Entity> double_click_entities;
@@ -291,8 +291,12 @@ namespace SXNGN::ECS::A {
 						}
 						else
 						{
-							//create event for user input system - tell it what entities were selected by a mouse event
-							Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+							if(gCoordinator.EntityHasComponent(other_entity, ComponentTypeEnum::SELECTABLE))
+							{
+								//create event for user input system - tell it what entities were selected by a mouse event
+								Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, clicked, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+							}
+							
 						}
 						
 					}

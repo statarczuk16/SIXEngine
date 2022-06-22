@@ -175,6 +175,7 @@ namespace SXNGN::ECS::A {
 
 			start_node->fx_estimated_total_cost_ = 0;
 			start_node->gx_cost_to_this_node_ = 0;
+			start_node->hx_manhattan_cost_ = 0;
 
 
 			a_star_map[start_node->grid_x_][start_node->grid_y_] = start_node;
@@ -194,22 +195,27 @@ namespace SXNGN::ECS::A {
 					return_code = 0;
 					break;
 				}
-				/**
+				
 				std::cout << " --- Visiting Node " << visiting_node->grid_x_ << " , " << visiting_node->grid_y_
 					<< " FX: " << visiting_node->fx_estimated_total_cost_
 					<< " GX: " << visiting_node->gx_cost_to_this_node_
 					<< " HX: " << visiting_node->hx_manhattan_cost_
 					<< std::endl;
-					**/
+					
 				//visit each neighbor of node
 				for (const int visit_x : visit_x_vals)
 				{
 					for (const int visit_y : visit_y_vals)
 					{
 						//dont visit yourself (0,0) or any diagonal moves (1,1) (-1,1) (1,-1) (-1,-1) because cannot move diagonally through a solid block
-						if (abs(visit_x) == abs(visit_y))
+						//if (abs(visit_x) == abs(visit_y))
+						//{
+						//	continue;
+						//}
+
+						if (visit_x == 0 && visit_y == 0)
 						{
-							continue;
+							continue; //don't visit self
 						}
 
 						int node_to_visit_x = visiting_node->grid_x_ + visit_x;
@@ -240,11 +246,16 @@ namespace SXNGN::ECS::A {
 							}
 							bool found_better_path = false;
 
-							if (node_to_visit->visited_ == false)
+							if (node_to_visit->visited_ == true)
 							{
-								open_nodes.push(node_to_visit);	
+								found_better_path = node_to_visit->check_if_better_path(visiting_node);
 							}
-							found_better_path = node_to_visit->check_if_better_path(visiting_node);
+							else
+							{
+								found_better_path = node_to_visit->check_if_better_path(visiting_node);
+								open_nodes.push(node_to_visit);
+							}
+							
 							/**
 							std::cout << " ------ Visiting " << node_to_visit_x << " , " << node_to_visit_y
 								<< " FX: " << node_to_visit->fx_estimated_total_cost_
