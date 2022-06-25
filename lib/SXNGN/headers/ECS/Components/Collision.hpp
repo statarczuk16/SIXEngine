@@ -45,6 +45,7 @@ namespace SXNGN::ECS::A {
 			collision_box_.h = 0;
 			buffer_pixels = 0;
 			resolved_ = false;
+			radius_ = 0;
 		}
 		SDL_Rect collision_box_;
 		CollisionType collision_type_ = CollisionType::UNKNOWN;
@@ -52,7 +53,7 @@ namespace SXNGN::ECS::A {
 		bool selectable_ = false;
 		int buffer_pixels = 0;//"halo" around the collision box making it collide larger/smaller than it really is
 		bool resolved_ = false; //set to true whenever this object is checked by collision system. 
-		//std::vector<Entity> touching_; //list of entities we know object is touching - reset whenever resolved is changed (object moves)
+		unsigned int radius_ = 0;
 	};
 
 	//todo enum to string for collision_tag
@@ -67,7 +68,8 @@ namespace SXNGN::ECS::A {
 			{"collision_tag_", p.collision_tag_},
 			{"selectable_", p.selectable_},
 			{"buffer_pixels", p.buffer_pixels},
-			{"resolved_", p.resolved_}
+			{"resolved_", p.resolved_},
+			{"radius_", p.radius_}
 		};
 	}
 
@@ -83,5 +85,6 @@ namespace SXNGN::ECS::A {
 		j.at("selectable_").get_to(p.selectable_);
 		j.at("buffer_pixels").get_to(p.buffer_pixels);
 		j.at("resolved_").get_to(p.resolved_);
+		j.at("radius_").get_to(p.radius_);
 	}
 }
