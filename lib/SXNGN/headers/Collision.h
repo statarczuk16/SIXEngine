@@ -36,7 +36,7 @@ namespace SXNGN {
 		/// <param name="box"></param>
 		/// <param name=""></param>
 		/// <returns></returns>
-		static std::vector<std::vector<const SXNGN::ECS::A::Collisionable*>>  determineCollisions(SDL_Rect box, std::vector<const SXNGN::ECS::A::Collisionable*>, int buffer);
+		
 
 		//static std::vector<std::vector<Collisionable>> determineCollisions(SDL_Rect box, std::vector<Collisionable> collision_components, int buffer);
 	};

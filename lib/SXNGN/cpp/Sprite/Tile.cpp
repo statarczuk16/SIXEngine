@@ -34,7 +34,7 @@ void SXNGN::MultiSprite::update_tiles(std::vector<std::vector<std::shared_ptr<SX
 
 void SXNGN::MultiSprite::render(std::shared_ptr<SXNGN::Camera> camera, int x, int y)
 {
-	//Location information should note be stored in the sprite, but just in case...
+	//Coordinate information should note be stored in the sprite, but just in case...
 	if (x == -1)
 	{
 		x = bounding_box_->x;

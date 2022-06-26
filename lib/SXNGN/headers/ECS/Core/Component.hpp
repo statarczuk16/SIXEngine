@@ -12,6 +12,7 @@ namespace SXNGN::ECS::A {
 	enum class ComponentTypeEnum : Uint8
 {
 	UNKNOWN,
+	LOCATION,
 	RENDERABLE,
 	RENDERABLE_BATCH,
 	PRE_RENDERABLE,
@@ -32,7 +33,7 @@ namespace SXNGN::ECS::A {
 	EVENT,
 	TASK,
 	TASK_WORKER,
-	GAME_STATE_START_HERE, //only game state enums after this point
+	GAME_STATE_START_HERE, //!!!! only game state enums after this point !!!!
 	MAIN_MENU_STATE,
 	MAIN_GAME_STATE,
 	NEW_GAME_STATE,
@@ -48,6 +49,7 @@ namespace SXNGN::ECS::A {
 		static std::unordered_map<ComponentTypeEnum, std::string> component_type_enum_to_string =
 		{
 			{ComponentTypeEnum::UNKNOWN,"UNKNOWN"},
+			{ComponentTypeEnum::LOCATION,"LOCATION"},
 			{ComponentTypeEnum::RENDERABLE,"RENDERABLE"},
 			{ComponentTypeEnum::RENDERABLE_BATCH,"RENDERABLE_BATCH"},
 			{ComponentTypeEnum::PRE_RENDERABLE,"PRE_RENDERABLE"},
@@ -81,6 +83,7 @@ namespace SXNGN::ECS::A {
 		static std::unordered_map<std::string, ComponentTypeEnum> component_type_string_to_enum =
 		{
 			{"UNKNOWN",ComponentTypeEnum::UNKNOWN},
+			{"LOCATION",ComponentTypeEnum::LOCATION},
 			{"RENDERABLE",ComponentTypeEnum::RENDERABLE},
 			{"RENDERABLE_BATCH",ComponentTypeEnum::RENDERABLE_BATCH},
 			{"PRE_RENDERABLE",ComponentTypeEnum::PRE_RENDERABLE},

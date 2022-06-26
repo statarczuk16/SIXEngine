@@ -237,7 +237,7 @@ namespace SXNGN::ECS::A {
 	void Event_System::Handle_Spawn_Event(Event_Component* ec)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
-		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::IMMOVEABLE, "spawned_block");
+		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::STATIC, "spawned_block");
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)

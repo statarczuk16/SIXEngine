@@ -9,10 +9,10 @@ namespace SXNGN {
 			std::shared_ptr<SDL_Rect> ECS_Utils::GetEntityPosition(Entity entity)
 			{
 				auto gCoordinator = *SXNGN::Database::get_coordinator();
-				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::MOVEABLE))
+				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::LOCATION))
 				{
-					auto moveable_data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::MOVEABLE);
-					if (moveable_data)
+					auto location_data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::LOCATION);
+					if (location_data)
 					{
 						const Moveable* moveable = static_cast<const Moveable*>(moveable_data);
 						std::shared_ptr<SDL_Rect> pos = std::make_shared<SDL_Rect>();
@@ -25,90 +25,7 @@ namespace SXNGN {
 				return nullptr;
 			 }
 
-			/**
-			void ECS_Utils::ChangeEntityPositionLastGood(Entity entity)
-			{
-				auto gCoordinator = *SXNGN::Database::get_coordinator();
-
-				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::MOVEABLE))
-				{
-					auto moveable_data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::MOVEABLE);
-					if (moveable_data)
-					{
-						Moveable* moveable = static_cast<Moveable*>(moveable_data);
-						auto last_x = moveable->m_prev_pos_x_m;
-						auto last_y = moveable->m_prev_pos_y_m;
-
-						gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
-
-						ChangeEntityPosition(entity, last_x, last_y, true);
-					}
-				}
-			}
-			**/
-
-			void ECS_Utils::ChangeEntityPosition(Entity entity, double x, double y)
-			{
-				
-				auto gCoordinator = *SXNGN::Database::get_coordinator();
-
-				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::MOVEABLE))
-				{
-					auto moveable_data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::MOVEABLE);
-					if (moveable_data)
-					{
-						Moveable* moveable = static_cast<Moveable*>(moveable_data);
-						if (moveable->get_pos_x() == x && moveable->get_pos_y() == y)
-						{
-							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
-							return;
-						}
-						
-						
-						moveable->UpdatePosition(x, y);
-						gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
-					}
-				}
-
-				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::RENDERABLE))
-				{
-					auto moveable_renderbox = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
-					if (moveable_renderbox)
-					{
-						Renderable* render_ptr = static_cast<Renderable*>(moveable_renderbox);
-						render_ptr->x_ = int(round(x));
-						render_ptr->y_ = int(round(y));
-						gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
-					}
-				}
-
-				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::COLLISION))
-				{
-					auto collisionable_data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::COLLISION);
-					if (collisionable_data)
-					{
-						Collisionable* collision_ptr = static_cast<Collisionable*>(collisionable_data);
-						collision_ptr->collision_box_.x = int(round(x));
-						collision_ptr->collision_box_.y = int(round(y));
-						collision_ptr->resolved_ = false;
-
-						int grid_x = collision_ptr->collision_box_.x / BASE_TILE_WIDTH;
-						int grid_y = collision_ptr->collision_box_.y / BASE_TILE_HEIGHT;
-						sole::uuid uuid = gCoordinator.GetUUIDFromEntity(entity);
-
-						gCoordinator.removeUUIDFromLocationMap(uuid, SXNGN::DEFAULT_SPACE);
-						gCoordinator.addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
-						gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, entity);
-						gCoordinator.updateCollisionMap(uuid, SXNGN::DEFAULT_SPACE);
-
-
-					}
-					
-				}
-
-				
-
-			}
+			
 
 			bool ECS_Utils::object_in_view(std::shared_ptr<ECS_Camera> camera, SDL_Rect object_bounds)
 			{

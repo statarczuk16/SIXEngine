@@ -39,22 +39,24 @@ void Movement_System::Update(float dt)
 
 		//thread safe checkout of data
 		auto check_out_move = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::MOVEABLE);
-		if (check_out_move)
+		auto check_out_location = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::LOCATION);
+		if (check_out_move && check_out_location)
 		{
-
-
 			//If no Collision, Update_Position_Without_Collision
 			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
+
+			Location* location_ptr = static_cast<Location*>(check_out_move);
 			//update position
-			Update_Position(moveable_ptr, entity_actable, dt);
+			Update_Position(moveable_ptr, location_ptr, entity_actable, dt);
 			//check data back in
 			gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_actable);
+			gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, entity_actable);
 		}
 
 	}
 }
 
-void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
+void Movement_System::Translate_Waypoints_To_Movement(Location* location, Moveable* moveable)
 {
 	if (moveable)
 	{
@@ -68,7 +70,7 @@ void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
 			{
 				return;
 			}
-			auto position = moveable->GetPosition();
+			auto position = location->GetGridCoordinate();
 			if (position.x == -1 || position.y == -1)
 			{
 				return;
@@ -98,27 +100,38 @@ void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
 	}
 }
 
-void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, float dt)
+void Movement_System::Update_Position(Moveable * moveable, Location* location, Entity moveable_id, float dt)
 {
 	//First update moveable and linked components (collison box, renderable) to the potential position.
+	//intended delta is set at the bottom of this function, and then verified by collision system, such that whatever intended_delta is present at the start of this function is considered confirmed delta.
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
-	double confirmed_x = moveable->get_pos_x() + moveable->m_intended_delta_x_m;
-	double confirmed_y = moveable->get_pos_y() + moveable->m_intended_delta_y_m;
+	double confirmed_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
+	double confirmed_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
+	location->m_pos_x_m_ = confirmed_x;
+	location->m_pos_y_m_ = confirmed_y;
+	int grid_x = (int)round(confirmed_x);
+	int grid_y = (int)round(confirmed_y);
+	sole::uuid uuid = gCoordinator.GetUUIDFromEntity(moveable_id);
+	gCoordinator.removeUUIDFromLocationMap(uuid, SXNGN::DEFAULT_SPACE);
+	gCoordinator.addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
+	gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_id);
+	gCoordinator.updateCollisionMap(uuid, SXNGN::DEFAULT_SPACE);
+
 	moveable->m_intended_delta_x_m = 0;
 	moveable->m_intended_delta_y_m = 0;
-	gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_id);
+	
 	ECS_Utils::ChangeEntityPosition(moveable_id, confirmed_x, confirmed_y);
-	gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::MOVEABLE);
+	
 
-	if (moveable->Check_At_Destination())
+	if (moveable->Check_At_Destination(confirmed_x, confirmed_y))
 	{
 		moveable->m_vel_x_m_s = 0;
 		moveable->m_vel_y_m_s = 0;
 		return;
 	}
-	bool at_waypoint = moveable->Check_At_Waypoint();
+	bool at_waypoint = moveable->Check_At_Waypoint(confirmed_x, confirmed_y);
 
-	Translate_Waypoints_To_Movement(moveable);
+	Translate_Waypoints_To_Movement(location, moveable); //sets the velocity vals of the moveable component
 
 	switch (moveable->moveable_type_)
 	{
@@ -126,10 +139,14 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 		{
 			if (moveable->m_vel_x_m_s == 0.0 && moveable->m_vel_y_m_s == 0.0)
 			{
-				return;
+				
 			}
-			moveable->m_intended_delta_x_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
-			moveable->m_intended_delta_y_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);		
+			else
+			{
+				moveable->m_intended_delta_x_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
+				moveable->m_intended_delta_y_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
+			}
+					
 		}
 		case  MoveableType::FORCE:
 		{
@@ -141,8 +158,8 @@ void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, f
 	//adjust delta x or delta y to snap to waypoint is would have overshot it
 	if (moveable->GetNumWaypoints() > 0)
 	{
-		double waypoint_snap_pos_x = moveable->get_pos_x() + moveable->m_intended_delta_x_m;
-		double waypoint_snap_pos_y = moveable->get_pos_y() + moveable->m_intended_delta_y_m;
+		double waypoint_snap_pos_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
+		double waypoint_snap_pos_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
 		double intended_pos_y = waypoint_snap_pos_y;
 		double intended_pos_x = waypoint_snap_pos_x;
 		double waypoint_snap_delta_x = std::abs(intended_pos_x - moveable->GetCurrentWaypoint().x);

@@ -51,34 +51,40 @@ namespace SXNGN::ECS::A {
 
 	struct Event_Component;
 	
-	struct Location {
+	struct Coordinate {
 		Sint32 x = -1;
 		Sint32 y = -1;
 
-		Location()
+		Coordinate()
 		{
 			x = -1;
 			y = -1;
 		}
 
-		Location(Sint32 x_in, Sint32 y_in)
+		Coordinate(int x_in, int y_in)
 		{
 			x = x_in;
 			y = y_in;
+		}
+
+		Coordinate(double x_in, double y_in)
+		{
+			x = (int)round(x_in);
+			y = (int)round(y_in);
 		}
 		
 	};
 
 
 	//todo enum to string for collision_tag
-	inline void to_json(json& j, const Location& p) {
+	inline void to_json(json& j, const Coordinate& p) {
 		j = json{
 			{"x", p.x},
 			{"y", p.y},
 		};
 	}
 
-	inline void from_json(const json& j, Location& p) {
+	inline void from_json(const json& j, Coordinate& p) {
 		j.at("x").get_to(p.x);
 		j.at("y").get_to(p.y);
 	}
@@ -108,7 +114,7 @@ namespace SXNGN::ECS::A {
 		TaskSkill skill_required_;//skill required at each location
 		Uint16 work_required_;//how much work needed to be done at each place
 		Uint16 work_completed_;//how much work already done at each place
-		Location location_;//places where work is to be done
+		Coordinate location_;//places where work is to be done
 		Uint16 skill_level_required_;//skill level required at each location
 		//std::function<void()> result_function_;//functions called when task completed
 		//std::shared_ptr<SXNGN::ECS::A::Event_Component> result_event_; //events that fire when task completed

@@ -121,7 +121,7 @@ add_executable(json_tests "src/tests/json_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOUR
 target_link_libraries(json_tests SDL2::Main SDL2::Image SDL2::TTF)  
 
 add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
-target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
+target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF) 
 
 add_executable(system_tests "src/tests/system_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
 target_link_libraries(system_tests SDL2::Main SDL2::Image SDL2::TTF)

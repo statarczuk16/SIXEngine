@@ -106,11 +106,11 @@ namespace SXNGN {
 
 				static void StartNewGame();
 
-				static Uint32 GetDistance(NAVIGATION_TYPE method, Location start, Location end);
+				static Uint32 GetDistance(NAVIGATION_TYPE method, Coordinate start, Coordinate end);
 
-				static std::queue<Location> GetPath(NAVIGATION_TYPE method, Location start, Location end);
+				static std::queue<Coordinate> GetPath(NAVIGATION_TYPE method, Coordinate start, Coordinate end);
 				
-				static std::pair<double, double> GetVector(Location start, Location end);
+				static std::pair<double, double> GetVector(Coordinate start, Coordinate end);
 
 			};
 		}

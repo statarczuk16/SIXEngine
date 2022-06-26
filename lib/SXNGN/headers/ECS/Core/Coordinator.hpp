@@ -252,7 +252,7 @@ namespace SXNGN {
 						}
 						auto collisionable = collisionables[entity];
 						auto collision_ptr = static_cast<const Collisionable*>(collisionable);
-						if (collision_ptr->collision_type_ == CollisionType::IMMOVEABLE)
+						if (collision_ptr->collision_type_ == CollisionType::STATIC)
 						{
 							sum_traversal_cost = 0;
 						}

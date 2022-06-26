@@ -64,11 +64,15 @@ namespace SXNGN::ECS::A {
 			auto const& worker_id = *worker_it;
 			worker_it++;
 			Task_Worker_Component* worker = nullptr;
+			Location* location_ptr = nullptr;
+			ECS_Component* location_data = nullptr;
 			ECS_Component* worker_ptr = nullptr;
 			worker_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::TASK_WORKER);
+			location_data = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::LOCATION);
 			if(worker_ptr)
 			{
 				//When no job, find the highest priority and start it
+				worker = static_cast<Task_Worker_Component*>(worker_ptr);
 				worker = static_cast<Task_Worker_Component*>(worker_ptr);
 				if (worker->current_job_ == MAX_ENTITIES)
 				{
@@ -258,11 +262,11 @@ namespace SXNGN::ECS::A {
 								if (moveable_check_out)
 								{
 									moveable_ptr = static_cast<const Moveable*>(moveable_check_out);
-									Location start;
+									Coordinate start;
 									start.x = (int)(round(moveable_ptr->get_pos_x()));
 									start.y = (int)(round(moveable_ptr->get_pos_y()));
 
-									Location end = task_ptr->tasks_.at(0).location_;
+									Coordinate end = task_ptr->tasks_.at(0).location_;
 
 									auto distance_cost = Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, start, end);
 									if (distance_cost < lowest_cost)

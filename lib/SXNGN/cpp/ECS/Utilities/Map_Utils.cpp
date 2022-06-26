@@ -7,6 +7,7 @@ namespace SXNGN::ECS::A {
 		std::vector<Pre_Renderable> pre_renders;
 		std::vector<Collisionable> collisionables;
 		std::vector<Tile> tiles;
+		std::vector<Coordinate> locations;
 		int tiles_high = tile_chunks_height * TILES_TO_CHUNK_EDGE;
 		int tiles_wide = tile_chunks_width * TILES_TO_CHUNK_EDGE;
 		for (int h = 0; h < tiles_high; h++)
@@ -23,17 +24,22 @@ namespace SXNGN::ECS::A {
 				Pre_Renderable* pre_render;
 				Collisionable* collision;
 				Tile* tile;
+				Location* location;
 				if (h == 0 || h == tiles_high - 1 || w == 0 || w == tiles_wide - 1)
 				{
-					pre_render = new Pre_Renderable(x_pixels, y_pixels, tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER);
-					collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::IMMOVEABLE);
-					tile = Entity_Builder_Utils::Create_Tile(w, h);
+					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER);
+					collision = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT);
+					location = new Location(x_pixels, y_pixels);
+					tile = new Tile();
+					//tile = Entity_Builder_Utils::Create_Tile(w, h);
 				}
 				else
 				{
-					pre_render = new Pre_Renderable(x_pixels, y_pixels, tileset, base_tile, A::RenderLayer::GROUND_LAYER);
-					collision = Entity_Builder_Utils::Create_Collisionable(collision_box, A::CollisionType::NONE);
-					tile = Entity_Builder_Utils::Create_Tile(w, h);
+					pre_render = new Pre_Renderable(tileset, base_tile, A::RenderLayer::GROUND_LAYER);
+					tile = new Tile();
+					location = new Location(x_pixels, y_pixels);
+					//collision = Entity_Builder_Utils::Create_Collisionable(collision_box,  CollisionType::NONE);
+					//tile = Entity_Builder_Utils::Create_Tile(w, h);
 				}
 				
 				pre_renders.push_back(*pre_render);
@@ -58,23 +64,19 @@ namespace SXNGN::ECS::A {
 		for (int i = 0; i < game_map_pre_renders.size(); i++)
 		{
 			auto map_tile_entity = gCoordinator->CreateEntity();
-			Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
+			Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i)); //fixme why the copy constructor???
 			gCoordinator->AddComponent(map_tile_entity, pre_render);
-			//if (game_map_collisionables.at(i).collision_type_ != CollisionType::UNKNOWN)
-			//{
-				Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
-				gCoordinator->AddComponent(map_tile_entity, collisionable);
-			//}
-				//Selectable* selectable = new Selectable();
-				//gCoordinator->AddComponent(map_tile_entity, selectable);
-
+			
+			Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
+			gCoordinator->AddComponent(map_tile_entity, collisionable);
+			
 			Tile* tile = new Tile(game_map_tiles.at(i));
 			gCoordinator->AddComponent(map_tile_entity, tile);
 			
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}
 
-		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 8, "APOCALYPSE_MAP", "GUNMAN_1", true);
+		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 8, "APOCALYPSE_MAP", "GUNMAN_1", true, "Player");
 
 		Entity test_worker = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_2", false, "Worker");
 
@@ -99,7 +101,7 @@ namespace SXNGN::ECS::A {
 
 	}
 
-	Uint32 Map_Utils::GetDistance(NAVIGATION_TYPE method, Location start, Location end)
+	Uint32 Map_Utils::GetDistance(NAVIGATION_TYPE method, Coordinate start, Coordinate end)
 	{
 		switch (method)
 		{
@@ -117,10 +119,10 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	std::queue<Location> Map_Utils::GetPath(NAVIGATION_TYPE method, Location start, Location end)
+	std::queue<Coordinate> Map_Utils::GetPath(NAVIGATION_TYPE method, Coordinate start, Coordinate end)
 	{
 		
-		std::queue<Location> q;
+		std::queue<Coordinate> q;
 		switch (method)
 		{
 		case NAVIGATION_TYPE::MANHATTAN:
@@ -285,21 +287,21 @@ namespace SXNGN::ECS::A {
 			}
 			else
 			{
-				std::vector<Location> temp_queue;
+				std::vector<Coordinate> temp_queue;
 				A_Star_Node* parent = final_node;
 				int iter = 0;
 				size_t size_map = a_star_map[0].size() * a_star_map.size();
 				while (parent != nullptr && iter < size_map)
 				{
 					parent->is_solution_node_ = true;
-					temp_queue.push_back(Location(parent->grid_x_ * SXNGN::BASE_TILE_WIDTH, parent->grid_y_ * SXNGN::BASE_TILE_HEIGHT));
+					temp_queue.push_back(Coordinate(parent->grid_x_ * SXNGN::BASE_TILE_WIDTH, parent->grid_y_ * SXNGN::BASE_TILE_HEIGHT));
 					parent = parent->parent_;
 					iter += 1;
 				}
 				if (iter > size_map - 1)
 				{
 					SDL_LogError(1, "A* Path Navigation Failed resolve path within iteration limit");
-					q = std::queue<Location>();
+					q = std::queue<Coordinate>();
 					
 
 				}
@@ -337,7 +339,7 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	std::pair<double, double>  Map_Utils::GetVector(SXNGN::ECS::A::Location start, SXNGN::ECS::A::Location end)
+	std::pair<double, double>  Map_Utils::GetVector(SXNGN::ECS::A::Coordinate start, SXNGN::ECS::A::Coordinate end)
 	{
 		double distance = ECS::A::Map_Utils::GetDistance(ECS::A::NAVIGATION_TYPE::MANHATTAN, start, end);
 		if (distance == 0)

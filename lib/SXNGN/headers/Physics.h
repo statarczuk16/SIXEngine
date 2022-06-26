@@ -3,7 +3,7 @@
 
 
 namespace SXNGN::ECS::A {
-	struct Location;
+	struct Coordinate;
 }
 
 namespace SXNGN {

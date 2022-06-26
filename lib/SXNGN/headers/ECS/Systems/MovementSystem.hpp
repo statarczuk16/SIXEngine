@@ -14,9 +14,9 @@ namespace SXNGN::ECS::A {
 
 		void Update(float dt);
 
-		void Update_Position(Moveable* moveable, Entity moveable_id, float dt);
+		void Update_Position(Moveable* moveable, Location* location, Entity moveable_id, float dt);
 
-		void Translate_Waypoints_To_Movement(Moveable* moveable);
+		void Translate_Waypoints_To_Movement(Location* location, Moveable* moveable);
 
 		//std::pair< std::vector<const Collisionable*>, std::vector<Entity>> Load_Collision_Data(std::set<Entity> entities_with_collision);
 

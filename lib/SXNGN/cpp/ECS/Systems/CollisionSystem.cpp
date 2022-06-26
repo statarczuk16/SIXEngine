@@ -343,7 +343,7 @@ namespace SXNGN::ECS::A {
 		//todo 
 		person->resolved_ = true;
 		other->resolved_ = true;
-		if (other->collision_type_ == CollisionType::IMMOVEABLE)
+		if (other->collision_type_ == CollisionType::STATIC)
 		{
 			auto person_moveable = gCoordinator.CheckOutComponent(person_entity, ComponentTypeEnum::MOVEABLE);
 			if (person_moveable)
@@ -374,7 +374,7 @@ namespace SXNGN::ECS::A {
 		//todo 
 		person->resolved_ = true;
 		other->resolved_ = true;
-		if (other->collision_type_ == CollisionType::IMMOVEABLE)
+		if (other->collision_type_ == CollisionType::STATIC)
 		{
 			auto person_moveable = gCoordinator.CheckOutComponent(person_entity, ComponentTypeEnum::MOVEABLE);
 			if (person_moveable)
@@ -412,12 +412,12 @@ namespace SXNGN::ECS::A {
 		Entity immoveable_entity;
 		Entity moveable_entity;
 		//one of the collisionables is going to be treated as immoveable. not supporting stuff bouncing off each other yet
-		if (first->collision_type_ == CollisionType::IMMOVEABLE)
+		if (first->collision_type_ == CollisionType::STATIC)
 		{
 			immoveable_entity = first_entity;
 			immoveable_obj = first;
 		}
-		else if (second->collision_type_ == CollisionType::IMMOVEABLE)
+		else if (second->collision_type_ == CollisionType::STATIC)
 		{
 			immoveable_entity = second_entity;
 			immoveable_obj = second;
@@ -426,12 +426,12 @@ namespace SXNGN::ECS::A {
 		if (immoveable_obj)
 		{
 			//determine which object is the moveable one 
-			if (first->collision_type_ != CollisionType::IMMOVEABLE && first->collision_type_ != CollisionType::NONE)
+			if (first->collision_type_ != CollisionType::STATIC && first->collision_type_ != CollisionType::NONE)
 			{
 				moveable_entity = first_entity;
 				moveable_obj = first;
 			}
-			else if (second->collision_type_ != CollisionType::IMMOVEABLE && second->collision_type_ != CollisionType::NONE)
+			else if (second->collision_type_ != CollisionType::STATIC && second->collision_type_ != CollisionType::NONE)
 			{
 				moveable_entity = second_entity;
 				moveable_obj = second;
