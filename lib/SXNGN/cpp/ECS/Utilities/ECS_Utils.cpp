@@ -25,6 +25,7 @@ namespace SXNGN {
 				return nullptr;
 			 }
 
+			/**
 			void ECS_Utils::ChangeEntityPositionLastGood(Entity entity)
 			{
 				auto gCoordinator = *SXNGN::Database::get_coordinator();
@@ -44,8 +45,9 @@ namespace SXNGN {
 					}
 				}
 			}
+			**/
 
-			void ECS_Utils::ChangeEntityPosition(Entity entity, double x, double y, bool confident)
+			void ECS_Utils::ChangeEntityPosition(Entity entity, double x, double y)
 			{
 				
 				auto gCoordinator = *SXNGN::Database::get_coordinator();
@@ -61,11 +63,7 @@ namespace SXNGN {
 							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);
 							return;
 						}
-						if (!confident)
-						{
-							moveable->m_prev_pos_x_m = moveable->get_pos_x();
-							moveable->m_prev_pos_y_m = moveable->get_pos_y();
-						}
+						
 						
 						moveable->UpdatePosition(x, y);
 						gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity);

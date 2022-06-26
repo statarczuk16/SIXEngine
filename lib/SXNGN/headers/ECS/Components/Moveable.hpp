@@ -26,12 +26,12 @@ namespace SXNGN::ECS::A {
 	struct Moveable : ECS_Component
 	{
 		private:
-			double m_pos_x_m = 0;//current speed
-			double m_pos_y_m = 0;//current speed
+			double m_pos_x_m = 0;//current position x
+			double m_pos_y_m = 0;//current position y
 		//SDL_Rect position_box_;
 		public:
-			double m_prev_pos_x_m = 0;//current speed
-			double m_prev_pos_y_m = 0;//current speed
+			double m_intended_delta_x_m = 0;//the potential position - will be taken up if not corrected by collision system this frame
+			double m_intended_delta_y_m = 0;
 			double m_vel_x_m_s = 0;//current speed
 			double m_vel_y_m_s = 0;
 			Sint32 m_speed_m_s = 0;//velocity added/removed per event
@@ -83,8 +83,8 @@ namespace SXNGN::ECS::A {
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::MOVEABLE]},
 			{"m_pos_x_m", p.get_pos_x()},
 			{"m_pos_y_m", p.get_pos_y()},
-			{"m_prev_pos_x_m", p.m_prev_pos_x_m},
-			{"m_prev_pos_y_m", p.m_prev_pos_y_m},
+			{"m_intended_delta_x_m", p.m_intended_delta_x_m},
+			{"m_intended_delta_y_m", p.m_intended_delta_y_m},
 			{"m_vel_x_m_s", p.m_vel_x_m_s},
 			{"m_vel_y_m_s", p.m_vel_y_m_s},
 			{"m_speed_m_s", p.m_speed_m_s},
@@ -107,8 +107,8 @@ namespace SXNGN::ECS::A {
 		p.set_pos_x(m_pos_x);
 		j.at("m_pos_y_m").get_to(m_pos_y);
 		p.set_pos_y(m_pos_y);
-		j.at("m_prev_pos_x_m").get_to(p.m_prev_pos_x_m);
-		j.at("m_prev_pos_y_m").get_to(p.m_prev_pos_y_m);
+		j.at("m_intended_delta_x_m").get_to(p.m_intended_delta_x_m);
+		j.at("m_intended_delta_y_m").get_to(p.m_intended_delta_y_m);
 		j.at("m_vel_x_m_s").get_to(p.m_vel_x_m_s);
 		j.at("m_vel_y_m_s").get_to(p.m_vel_y_m_s);
 		j.at("m_speed_m_s").get_to(p.m_speed_m_s);

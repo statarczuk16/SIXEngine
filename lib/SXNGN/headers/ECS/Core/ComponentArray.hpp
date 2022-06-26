@@ -117,6 +117,12 @@ public:
 		std::lock_guard<std::mutex> guard(master_component_array_guard);
 
 		ECS_Component* to_return = nullptr;
+
+		if (mComponentInUse[entity] == true)
+		{
+			SDL_LogCritical(1, "CheckoutData: Component of entity %d already in use!", entity);
+			abort();
+		}
 		
 		mComponentMutexes[entity].lock();//Wait until data is available (no other theadss have checked it out)
 		if (mComponentArray[entity])

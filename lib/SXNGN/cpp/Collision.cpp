@@ -5,6 +5,9 @@
 
 namespace SXNGN {
 
+	
+
+
 	bool SXNGN::CollisionChecks::checkCollision(SDL_Rect a, SDL_Rect b)
 	{
 		//The sides of the rectangles
@@ -93,6 +96,83 @@ namespace SXNGN {
 
 		//If none of the sides from A are outside B
 		return true;
+	}
+
+	SDL_Rect SXNGN::CollisionChecks::getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable)
+	{
+		SDL_Rect new_move_location;
+		//The sides of the rectangles
+		int leftFix, leftMoveNow, leftMovePrev;
+		int rightFix, rightMoveNow, rightMovePrev;
+		int topFix, topMoveNow, topMovePrev;
+		int bottomFix, bottomMoveNow, bottomMovePrev;
+
+		//Calculate the sides of rect A
+		leftFix = fixed.x;
+		rightFix = fixed.x + fixed.w;
+		topFix = fixed.y;
+		bottomFix = fixed.y + fixed.h;
+
+		//Calculate the sides of rect B now
+		leftMoveNow = moveable.x;
+		rightMoveNow = moveable.x + moveable.w;
+		topMoveNow = moveable.y;
+		bottomMoveNow = moveable.y + moveable.h;
+
+		//determine if object is now colliding with static object
+		int xon = (std::max)(0, (std::min)(rightFix, rightMoveNow) - (std::max)(leftFix, leftMoveNow)) > 0;
+		int yon = (std::max)(0, (std::min)(bottomFix, bottomMoveNow) - (std::max)(topFix, topMoveNow)) > 0;
+		bool x_overlap_now = xon > 0;
+		bool y_overlap_now = yon > 0;
+		if ((x_overlap_now && y_overlap_now) == false)
+		{
+			//if no collision, stop
+			new_move_location.x = moveable.x;
+			new_move_location.y = moveable.y;
+			return new_move_location;
+		}
+
+		//collision hitting the side of the static - resolve to left or right side of fixed 
+		if (x_overlap_now)
+		{
+			//if overlappying position is closer to left side
+			if (moveable.x < (fixed.x + (fixed.w / 2)))
+			{
+				new_move_location.x = leftFix - moveable.w;
+			}
+			else
+			{
+				new_move_location.x = rightFix;
+			}
+			return new_move_location;
+		}
+		else
+		{
+			new_move_location.x = moveable.x;
+		}
+		//collision hitting top or bottom of static - resolve to top or bottom of fixed
+		if (y_overlap_now)
+		{
+			if (moveable.y < (fixed.y + (fixed.h / 2)))
+			{
+				new_move_location.y = topFix - moveable.h;
+			}
+			else
+			{
+				new_move_location.y = bottomFix;
+			}
+			return new_move_location;
+		}
+		else
+		{
+			new_move_location.y = moveable.y;
+		}
+
+
+		// printf("xon: %d yon: %d xop: %d yop: %d\n", xon, yon, xop, yop);
+		return new_move_location;
+
+
 	}
 
 	 SDL_Rect SXNGN::CollisionChecks::getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable_now, SDL_Rect moveable_prev)

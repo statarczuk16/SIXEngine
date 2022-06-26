@@ -13,10 +13,10 @@ namespace SXNGN {
 			class ECS_Utils
 			{
 			public:
-				//change entity position to input. if confident, will update the prev or "last known good" position.
-				static void ChangeEntityPosition(Entity entity, double x, double y, bool confident);
+				
+				static void ChangeEntityPosition(Entity entity, double x, double y);
 
-				static void ChangeEntityPositionLastGood(Entity entity);
+				//static void ChangeEntityPositionLastGood(Entity entity);
 
 				static std::shared_ptr<SDL_Rect> GetEntityPosition(Entity entity);
 

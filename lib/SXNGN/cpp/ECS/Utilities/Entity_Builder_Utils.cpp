@@ -212,6 +212,8 @@ namespace SXNGN {
 			{
 				SXNGN::ECS::A::Moveable* moveable = new A::Moveable();
 				moveable->UpdatePosition(pos_x_m, pos_y_m);
+				moveable->m_intended_delta_x_m = 0;
+				moveable->m_intended_delta_y_m = 0;
 				moveable->moveable_type_ = movement_type;
 				moveable->m_speed_m_s = speed_m_s;
 				return moveable;

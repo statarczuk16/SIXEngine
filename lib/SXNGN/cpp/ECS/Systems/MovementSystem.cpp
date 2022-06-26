@@ -62,13 +62,7 @@ void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
 		{
 		case MoveableType::VELOCITY:
 		{
-			if (moveable->Check_At_Destination())
-			{
-				moveable->m_vel_x_m_s = 0;
-				moveable->m_vel_y_m_s = 0;
-				return;
-			}
-			moveable->Check_At_Waypoint();
+			
 			auto destination = moveable->GetCurrentWaypoint();
 			if (destination.x == -1 || destination.y == -1)
 			{
@@ -106,45 +100,71 @@ void Movement_System::Translate_Waypoints_To_Movement(Moveable* moveable)
 
 void Movement_System::Update_Position(Moveable * moveable, Entity moveable_id, float dt)
 {
-	//SDL_Rect prev_pos = moveable->position_box_;
-
+	//First update moveable and linked components (collison box, renderable) to the potential position.
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
+	double confirmed_x = moveable->get_pos_x() + moveable->m_intended_delta_x_m;
+	double confirmed_y = moveable->get_pos_y() + moveable->m_intended_delta_y_m;
+	moveable->m_intended_delta_x_m = 0;
+	moveable->m_intended_delta_y_m = 0;
+	gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_id);
+	ECS_Utils::ChangeEntityPosition(moveable_id, confirmed_x, confirmed_y);
+	gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::MOVEABLE);
+
+	if (moveable->Check_At_Destination())
+	{
+		moveable->m_vel_x_m_s = 0;
+		moveable->m_vel_y_m_s = 0;
+		return;
+	}
+	bool at_waypoint = moveable->Check_At_Waypoint();
 
 	Translate_Waypoints_To_Movement(moveable);
 
 	switch (moveable->moveable_type_)
 	{
-	case  MoveableType::VELOCITY:
-	{
-		if (moveable->m_vel_x_m_s == 0.0 && moveable->m_vel_y_m_s == 0.0)
+		case  MoveableType::VELOCITY:
 		{
-			return;
+			if (moveable->m_vel_x_m_s == 0.0 && moveable->m_vel_y_m_s == 0.0)
+			{
+				return;
+			}
+			moveable->m_intended_delta_x_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
+			moveable->m_intended_delta_y_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);		
 		}
-		double new_x = moveable->get_pos_x() + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
-		double new_y = moveable->get_pos_y() + SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
-		if (moveable->GetNumWaypoints() > 0)
+		case  MoveableType::FORCE:
 		{
-			if ((moveable->m_vel_x_m_s >= 0 && new_x >= moveable->GetCurrentWaypoint().x) || (moveable->m_vel_x_m_s < 0 && new_x < moveable->GetCurrentWaypoint().x))
-			{
-				new_x = moveable->GetCurrentWaypoint().x;
-			}
-			if ((moveable->m_vel_y_m_s >= 0 && new_y >= moveable->GetCurrentWaypoint().y) || (moveable->m_vel_y_m_s < 0 && new_y < moveable->GetCurrentWaypoint().y))
-			{
-				new_y = moveable->GetCurrentWaypoint().y;
-			}
+
+			//todo
 		}
-		
-		
-		gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_id);
-		ECS_Utils::ChangeEntityPosition(moveable_id, new_x, new_y, false);
-		gCoordinator.CheckOutComponent(moveable_id, ComponentTypeEnum::MOVEABLE);
-
 	}
-	case  MoveableType::FORCE:
+
+	//adjust delta x or delta y to snap to waypoint is would have overshot it
+	if (moveable->GetNumWaypoints() > 0)
 	{
+		double waypoint_snap_pos_x = moveable->get_pos_x() + moveable->m_intended_delta_x_m;
+		double waypoint_snap_pos_y = moveable->get_pos_y() + moveable->m_intended_delta_y_m;
+		double intended_pos_y = waypoint_snap_pos_y;
+		double intended_pos_x = waypoint_snap_pos_x;
+		double waypoint_snap_delta_x = std::abs(intended_pos_x - moveable->GetCurrentWaypoint().x);
+		double waypoint_snap_delta_y = std::abs(intended_pos_y - moveable->GetCurrentWaypoint().y);
+		
+		if (moveable->m_vel_x_m_s >= 0 && intended_pos_x >= moveable->GetCurrentWaypoint().x)
+		{
+			moveable->m_intended_delta_x_m -= waypoint_snap_delta_x;
+		}
+		else if (moveable->m_vel_x_m_s < 0 && intended_pos_x < moveable->GetCurrentWaypoint().x)
+		{
+			moveable->m_intended_delta_x_m += waypoint_snap_delta_x;
+		}
 
-		//todo
-	}
+		if (moveable->m_vel_y_m_s >= 0 && intended_pos_y >= moveable->GetCurrentWaypoint().y)
+		{
+			moveable->m_intended_delta_y_m -= waypoint_snap_delta_y;
+		}
+		else if (moveable->m_vel_y_m_s < 0 && intended_pos_y < moveable->GetCurrentWaypoint().y)
+		{
+			moveable->m_intended_delta_y_m += waypoint_snap_delta_y;
+		}
 	}
 }
 

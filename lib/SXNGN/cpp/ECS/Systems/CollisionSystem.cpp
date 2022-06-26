@@ -1,12 +1,14 @@
 
+#define NOMINMAX
 #include<Collision.h>
 #include <ECS/Core/Coordinator.hpp>
 #include <Database.h>
 #include <ECS/Systems/CollisionSystem.hpp>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
-#include <Collision.h>
+#include <ECS/Utilities/Physics_Utils.hpp>
 #include <vector>
 #include <ECS/Utilities/ECS_Utils.hpp>
+
 
 namespace SXNGN::ECS::A {
 
@@ -143,11 +145,12 @@ namespace SXNGN::ECS::A {
 					}
 				}
 
-				else if (collisionable_1->collision_tag_ == CollisionTag::UNKNOWN || collisionable_2->collision_tag_ == CollisionTag::UNKNOWN)
+				else// if (collisionable_1->collision_tag_ == CollisionTag::UNKNOWN || collisionable_2->collision_tag_ == CollisionTag::UNKNOWN)
 				{
 					collision_result = HandleCollisionGeneric(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
 				}
 
+				/**
 				else if (collisionable_1->collision_tag_ == CollisionTag::PERSON || collisionable_2->collision_tag_ == CollisionTag::PERSON)
 				{
 					if (collisionable_1->collision_tag_ == CollisionTag::PERSON && collisionable_2->collision_tag_ == CollisionTag::PERSON)
@@ -179,7 +182,7 @@ namespace SXNGN::ECS::A {
 					collision_result = HandleCollisionPersonObject(collisionable_2, entity_2, collisionable_1, entity_1, gCoordinator);
 					}
 				}
-
+				**/
 
 				//check the data back in
 				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, c_collision.first);
@@ -317,6 +320,7 @@ namespace SXNGN::ECS::A {
 	}//namespace
 
 
+	/**
 	int Collision_System::HandleCollisionPersonPerson(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator)
 	{
 		//todo if same faction, let pass, else do not.
@@ -345,6 +349,7 @@ namespace SXNGN::ECS::A {
 			if (person_moveable)
 			{
 				Moveable* moveable = static_cast<Moveable*>(person_moveable);
+				moveable->m_intended_delta_x_m = moveable->m_intended_delta_x_m;
 				moveable->UpdatePosition(moveable->m_prev_pos_x_m, moveable->m_prev_pos_y_m);
 				
 				if (gCoordinator.EntityHasComponent(person_entity, ComponentTypeEnum::RENDERABLE))
@@ -393,6 +398,7 @@ namespace SXNGN::ECS::A {
 		}
 		return 0;
 	}
+	**/
 
 	//catch all, inefficient, method to handle collisions between types that don't categorize into other methods
 	//simple for now. Only handles when one moving object hits an immoveable object and calculates where to stop the moveable object
@@ -433,23 +439,45 @@ namespace SXNGN::ECS::A {
 
 			if (moveable_obj)
 			{
-				//gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_entity);
-				//ECS_Utils::ChangeEntityPositionLastGood(moveable_entity);
-				auto prev_moveable_data = gCoordinator.GetComponentReadOnly(moveable_entity, ComponentTypeEnum::MOVEABLE);
-				const Moveable* prev_moveable = static_cast<const Moveable*>(prev_moveable_data);
-				SDL_Rect prev_moveable_box;
-				prev_moveable_box.x = (int) round(prev_moveable->m_prev_pos_x_m);
-				prev_moveable_box.y = (int) round(prev_moveable->m_prev_pos_y_m);
-				prev_moveable_box.w = moveable_obj->collision_box_.w;
-				prev_moveable_box.h = moveable_obj->collision_box_.h;
+				//get where the moveable currently is before this collision occurs
+				auto potential_moveable_data = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::MOVEABLE);
+				Moveable* pot_moveable = static_cast<Moveable*>(potential_moveable_data);
+				SDL_Rect pot_moveable_box;
+				pot_moveable_box.x = (int) round(pot_moveable->get_pos_x() + pot_moveable->m_intended_delta_x_m);
+				pot_moveable_box.y = (int) round(pot_moveable->get_pos_y() + pot_moveable->m_intended_delta_y_m);
+				pot_moveable_box.w = moveable_obj->collision_box_.w;
+				pot_moveable_box.h = moveable_obj->collision_box_.h;
 				//get where the moveable was last frame, where it wants to be this frame, and combine with immoveable obj location to find where it should smack into a wall and stop
-				SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, moveable_obj->collision_box_, prev_moveable_box);
-				
-				gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_entity);
-				//move the moveable entity to where it should smack into a wall
-				ECS_Utils::ChangeEntityPosition(moveable_entity, new_moveable_pos.x, new_moveable_pos.y, true);
-				//calling function expects to need to check moveable_entity back in, but ChangeEntityPosition also does that. So re-check it out here.
-				auto dummy = gCoordinator.CheckOutComponent(moveable_entity, ComponentTypeEnum::COLLISION);
+				//SDL_Rect new_moveable_pos = CollisionChecks::getCollisionLocation(immoveable_obj->collision_box_, pot_moveable_box);
+				std::pair<float, float> distance;
+				distance = Physics_Utils::CalculateDistanceTo(pot_moveable_box, immoveable_obj->collision_box_);
+				double xAxisTimeToCollide = pot_moveable->m_vel_x_m_s != 0.0 ? std::abs(distance.first / pot_moveable->m_vel_x_m_s) : 0;
+				double yAxisTimeToCollide = pot_moveable->m_vel_y_m_s != 0.0 ? std::abs(distance.second / pot_moveable->m_vel_y_m_s) : 0;
+
+				float shortest_time = 0.0;
+
+				//there is a collision, velocity tells what axis it occurred on
+
+				if (pot_moveable->m_vel_x_m_s != 0.0 && pot_moveable->m_vel_y_m_s == 0)
+				{
+					//moving in x direction but not y, so time to collision is X
+					shortest_time = xAxisTimeToCollide;
+					pot_moveable->m_intended_delta_x_m = shortest_time * pot_moveable->m_vel_x_m_s;
+
+				}
+				else if (pot_moveable->m_vel_y_m_s != 0.0 && pot_moveable->m_vel_x_m_s == 0)
+				{
+					shortest_time = yAxisTimeToCollide;
+					pot_moveable->m_intended_delta_y_m = shortest_time * pot_moveable->m_vel_y_m_s;
+				}
+				else
+				{
+					// Collision on X and Y axis (eg. slide up against a wall)
+					shortest_time = std::min(std::abs(xAxisTimeToCollide), std::abs(yAxisTimeToCollide));
+					pot_moveable->m_intended_delta_x_m = shortest_time * pot_moveable->m_vel_x_m_s;
+					pot_moveable->m_intended_delta_y_m = shortest_time * pot_moveable->m_vel_y_m_s;
+				}
+				gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, moveable_entity);
 				
 			}
 		}

@@ -118,7 +118,7 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/olc/)
  
 #add an executable for anything that will turn into an exe or whatever other executable format  
 add_executable(json_tests "src/tests/json_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
-target_link_libraries(json_tests SDL2::Main SDL2::Image SDL2::TTF)
+target_link_libraries(json_tests SDL2::Main SDL2::Image SDL2::TTF)  
 
 add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
 target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF)
