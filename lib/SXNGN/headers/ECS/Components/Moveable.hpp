@@ -84,11 +84,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Moveable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		double m_pos_x;
-		double m_pos_y;
 		p.component_type = component_type_enum;
-
-
 		j.at("m_intended_delta_x_m").get_to(p.m_intended_delta_x_m);
 		j.at("m_intended_delta_y_m").get_to(p.m_intended_delta_y_m);
 		j.at("m_vel_x_m_s").get_to(p.m_vel_x_m_s);

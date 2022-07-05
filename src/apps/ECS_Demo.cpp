@@ -462,6 +462,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SELECTABLE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::LOCATION);
 
 
 

@@ -14,11 +14,11 @@ namespace SXNGN {
 			{
 			public:
 				
-				static void ChangeEntityPosition(Entity entity, double x, double y);
+				//static void ChangeEntityPosition(Entity entity, double x, double y);
 
 				//static void ChangeEntityPositionLastGood(Entity entity);
 
-				static std::shared_ptr<SDL_Rect> GetEntityPosition(Entity entity);
+				//static Coordinate GetEntityPixelCoordinate(Entity entity);
 
 				static bool object_in_view(std::shared_ptr<ECS_Camera> camera, SDL_Rect object);
 

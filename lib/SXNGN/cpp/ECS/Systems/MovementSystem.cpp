@@ -114,14 +114,10 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 	sole::uuid uuid = gCoordinator.GetUUIDFromEntity(moveable_id);
 	gCoordinator.removeUUIDFromLocationMap(uuid, SXNGN::DEFAULT_SPACE);
 	gCoordinator.addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
-	gCoordinator.CheckInComponent(ComponentTypeEnum::COLLISION, moveable_id);
 	gCoordinator.updateCollisionMap(uuid, SXNGN::DEFAULT_SPACE);
 
 	moveable->m_intended_delta_x_m = 0;
 	moveable->m_intended_delta_y_m = 0;
-	
-	ECS_Utils::ChangeEntityPosition(moveable_id, confirmed_x, confirmed_y);
-	
 
 	if (moveable->Check_At_Destination(confirmed_x, confirmed_y))
 	{

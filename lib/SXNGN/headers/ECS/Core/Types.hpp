@@ -61,12 +61,13 @@ namespace SXNGN::ECS::A {
 			y = -1;
 		}
 
+		/**
 		Coordinate(int x_in, int y_in)
 		{
 			x = x_in;
 			y = y_in;
 		}
-
+		**/
 		Coordinate(double x_in, double y_in)
 		{
 			x = (int)round(x_in);

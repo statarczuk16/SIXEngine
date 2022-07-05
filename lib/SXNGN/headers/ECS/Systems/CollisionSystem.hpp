@@ -19,19 +19,17 @@ namespace SXNGN::ECS::A {
 
 		void Update_Position(Moveable* moveable, Entity moveable_id, float dt);
 
-		int HandleCollisionEvent(Collisionable* event, Entity event_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
+		std::set<Entity> HandleCollisionEvent(Entity entity1, Collisionable* collisonable1_ptr, Entity entity2, Collisionable* collisonable2_ptr);
 
-		int HandleCollisionPersonPerson(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
+		/**int HandleCollisionPersonPerson(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
 
 		int HandleCollisionPersonProjectile(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
 
 		int HandleCollisionPersonTile(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
 
-		int HandleCollisionPersonObject(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
+		int HandleCollisionPersonObject(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);**/
 
-		int HandleCollisionGeneric(Collisionable* person, Entity person_entity, Collisionable* other, Entity other_entity, Coordinator gCoordinator);
-
-
+		std::set<Entity> HandleCollisionDynamicOnStatic(Entity entity1, Collisionable* collisonable1_ptr, Entity entity2, Collisionable* collisonable2_ptr);
 		//std::pair< std::vector<const Collisionable*>, std::vector<Entity>> Load_Collision_Data(std::set<Entity> entities_with_collision);
 
 		//void Update_Position_With_Collision(Moveable* moveable, Entity moveable_id, std::vector<const Collisionable*> collisionables, std::vector<Entity> collisionable_entity_ids, float dt);

@@ -262,14 +262,14 @@ namespace SXNGN::ECS::A {
 					//didnt click on anything
 					return;
 				}
-				auto move_location = gCoordinator.GetComponentReadOnly(ec->e.order_event.clicked_entities.at(0), ComponentTypeEnum::COLLISION);
+				auto move_location = gCoordinator.GetComponentReadOnly(ec->e.order_event.clicked_entities.at(0), ComponentTypeEnum::LOCATION);
 				if (!move_location)
 				{
 					return;
 				}
-				const Collisionable* collisionable = static_cast<const Collisionable*>(move_location);
-				walk_chunk.location_.x = collisionable->collision_box_.x;
-				walk_chunk.location_.y = collisionable->collision_box_.y;
+				const Location* collisionable = static_cast<const Location*>(move_location);
+				walk_chunk.location_.x = collisionable->m_pos_x_m_;
+				walk_chunk.location_.y = collisionable->m_pos_y_m_;
 				walk_chunk.skill_level_required_ = 0;
 				walk_chunk.skill_required_ = TaskSkill::WALKING;
 				walk_chunk.work_required_ = 1;

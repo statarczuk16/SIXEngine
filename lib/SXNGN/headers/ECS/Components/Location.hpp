@@ -20,12 +20,14 @@ namespace SXNGN::ECS::A {
 	{
 		Location(double x, double y)
 		{
+			component_type = ComponentTypeEnum::LOCATION;
 			m_pos_x_m_ = x;//current position x
 			m_pos_y_m_ = y;//current position y
 		}
 
 		Location(int x, int y)
 		{
+			component_type = ComponentTypeEnum::LOCATION;
 			m_pos_x_m_ = (int)round(x);//current position x
 			m_pos_y_m_ = (int)round(y);//current position y
 		}
@@ -39,8 +41,8 @@ namespace SXNGN::ECS::A {
 		Coordinate GetGridCoordinate()
 		{
 			Coordinate coordinate(m_pos_x_m_, m_pos_y_m_);
-			coordinate.x / SXNGN::BASE_TILE_WIDTH;
-			coordinate.x / SXNGN::BASE_TILE_HEIGHT;
+			coordinate.x /= SXNGN::BASE_TILE_WIDTH;
+			coordinate.y /= SXNGN::BASE_TILE_HEIGHT;
 			return coordinate;
 		}
 

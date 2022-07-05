@@ -6,7 +6,8 @@ namespace SXNGN {
 		namespace A {
 
 
-			std::shared_ptr<SDL_Rect> ECS_Utils::GetEntityPosition(Entity entity)
+			/**
+			Coordinate ECS_Utils::GetEntityPixelCoordinate(Entity entity)
 			{
 				auto gCoordinator = *SXNGN::Database::get_coordinator();
 				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::LOCATION))
@@ -14,16 +15,13 @@ namespace SXNGN {
 					auto location_data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::LOCATION);
 					if (location_data)
 					{
-						const Moveable* moveable = static_cast<const Moveable*>(moveable_data);
-						std::shared_ptr<SDL_Rect> pos = std::make_shared<SDL_Rect>();
-						pos->x = (int) round(moveable->get_pos_x());
-						pos->y = (int) round(moveable->get_pos_y());
-						return pos;
-
+						const Location* location = static_cast<const Location*>(location_data);
+						return Coordinate(location->m_pos_x_m_, location->m_pos_y_m_);
 					}
 				}
 				return nullptr;
 			 }
+			 **/
 
 			
 

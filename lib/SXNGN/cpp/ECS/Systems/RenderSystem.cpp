@@ -131,21 +131,28 @@ namespace SXNGN::ECS::A {
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::shared_ptr<ECS_Camera> camera_ptr = ECS_Camera::get_instance();
 		Entity camera_target = camera_ptr->get_target();
-		auto camera_target_position = ECS_Utils::GetEntityPosition(camera_target);
+		auto location_data = gCoordinator.CheckOutComponent(camera_target, ComponentTypeEnum::LOCATION);
+		if (location_data)
+		{
+			Location* location = static_cast<Location*>(location_data);
+			Coordinate camera_target_position = location->GetPixelCoordinate();
+			SDL_Rect camera_target_position_rect;
+			camera_target_position_rect.x = camera_target_position.x;
+			camera_target_position_rect.y = camera_target_position.y;
+			camera_ptr->set_position_actual(camera_target_position_rect);
+			gCoordinator.CheckInComponent(camera_target, ComponentTypeEnum::LOCATION);
+		}
+		
 		auto user_input_state = User_Input_State::get_instance();
 		
-		if (camera_target_position)
-		{
-			camera_ptr->set_position_actual(*camera_target_position);
-		}
 		//Iterate through entities this system manipulates/converts
 		//(Renders Renderables to screen)
 		SDL_Rect render_quad = { 0,0,0,0 };
 		auto it = m_actable_entities.begin();
-		std::vector<const Entity> renderables_ground_layer;
-		std::vector<const Entity> renderables_object_layer;
-		std::vector<const Entity> renderables_air_layer;
-		std::vector<const Entity> renderables_ui_layer;
+		std::vector<Entity> renderables_ground_layer;
+		std::vector<Entity> renderables_object_layer;
+		std::vector<Entity> renderables_air_layer;
+		std::vector<Entity> renderables_ui_layer;
 		std::array<ECS_Component*, MAX_ENTITIES>& all_renderables = gCoordinator.CheckOutAllData(ComponentTypeEnum::RENDERABLE);
 		std::array<ECS_Component*, MAX_ENTITIES>& all_locations = gCoordinator.CheckOutAllData(ComponentTypeEnum::LOCATION);
 		//for (auto const& entity : m_actable_entities)
@@ -232,7 +239,7 @@ namespace SXNGN::ECS::A {
 
 		Location* location_ptr = static_cast<Location*>(location_data);
 
-		Coordinate render_location = location_ptr->GetGridCoordinate();
+		Coordinate render_location = location_ptr->GetPixelCoordinate();
 		SDL_Rect bounding_box;
 		bounding_box.x = render_location.x;
 		bounding_box.y = render_location.y;
@@ -367,10 +374,7 @@ namespace SXNGN::ECS::A {
 
 				gCoordinator.AddComponent(entity, renderable_component);
 				gCoordinator.RemoveComponent(entity, pre_renderable.get_component_type());
-
-				Location* location = new Location(pre_renderable.x,
-					pre_renderable.y);
-				gCoordinator.AddComponent(entity, renderable_component);
+				
 
 
 

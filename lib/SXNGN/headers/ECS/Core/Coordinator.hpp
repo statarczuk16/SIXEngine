@@ -118,29 +118,16 @@ namespace SXNGN {
 
 					mSystemManager->EntitySignatureChanged(entity, signature, quiet);
 
-					if (component->get_component_type() == ComponentTypeEnum::COLLISION)
+					if (component->get_component_type() == ComponentTypeEnum::LOCATION)
 					{
-						Collisionable* collionable_ptr = static_cast<Collisionable*>(component);
-						if (collionable_ptr->collision_tag_ != CollisionTag::EVENT)
-						{
-							int grid_x = collionable_ptr->collision_box_.x / BASE_TILE_WIDTH;
-							int grid_y = collionable_ptr->collision_box_.y / BASE_TILE_HEIGHT;
+							Location* location_ptr = static_cast<Location*>(component);
+							Coordinate grid  = location_ptr->GetGridCoordinate();
+							int grid_x = grid.x;
+							int grid_y = grid.y;
 							sole::uuid uuid = mEntityManager->GetUUIDFromEntity(entity);
 							addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
 							updateCollisionMap(grid_x, grid_y, SXNGN::DEFAULT_SPACE);
-						}
 					}
-					/**
-					if (component->get_component_type() == ComponentTypeEnum::TILE)
-					{
-						Tile* tile_ptr = static_cast<Tile*>(component);
-						int grid_x = tile_ptr->grid_x_;
-						int grid_y = tile_ptr->grid_y_;
-						sole::uuid uuid = mEntityManager->GetUUIDFromEntity(entity);
-						addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
-						updateCollisionMap(grid_x, grid_y, SXNGN::DEFAULT_SPACE);
-					}
-					**/
 					
 				}
 
@@ -356,6 +343,11 @@ namespace SXNGN {
 				/// <param name="component_type"></param>
 				/// <param name="data_and_key"></param>
 				void CheckInComponent(ComponentTypeEnum component_type, Entity entity)
+				{
+					return mComponentManager->CheckInComponent(component_type, entity);
+				}
+
+				void CheckInComponent(Entity entity, ComponentTypeEnum component_type)
 				{
 					return mComponentManager->CheckInComponent(component_type, entity);
 				}

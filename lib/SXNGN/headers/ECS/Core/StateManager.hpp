@@ -194,7 +194,7 @@ namespace SXNGN::ECS::A {
 			if (space_to_entity_location_map_.count(SXNGN::DEFAULT_SPACE) < 1)
 			{
 				std::vector<std::vector<std::set<sole::uuid> > > entity_map;
-				for (int i = 0; i < getGameSettings()->level_settings.level_width_tiles; i++)
+				for (unsigned int i = 0; i < getGameSettings()->level_settings.level_width_tiles; i++)
 				{
 					entity_map[i] = std::vector<std::set<sole::uuid> >();
 				}

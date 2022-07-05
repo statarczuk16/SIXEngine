@@ -12,7 +12,7 @@ namespace SXNGN {
 			class JSON_Utils 
 			{
 			public:
-				static std::tuple<std::vector<A::Pre_Renderable>, std::vector<A::Collisionable>, std::vector<A::Tile>>
+				static std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>>
 					json_to_tile_batch(nlohmann::json);
 				
 				static nlohmann::json component_to_json(const ECS_Component* component);

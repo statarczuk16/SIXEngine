@@ -2,12 +2,12 @@
 #include <queue>
 
 namespace SXNGN::ECS::A {
-	std::tuple<std::vector<Pre_Renderable>, std::vector<Collisionable>, std::vector<Tile>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
+	std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
 	{
-		std::vector<Pre_Renderable> pre_renders;
-		std::vector<Collisionable> collisionables;
-		std::vector<Tile> tiles;
-		std::vector<Coordinate> locations;
+		std::vector<Pre_Renderable*> pre_renders;
+		std::vector<Collisionable*> collisionables;
+		std::vector<Tile*> tiles;
+		std::vector<Location*> locations;
 		int tiles_high = tile_chunks_height * TILES_TO_CHUNK_EDGE;
 		int tiles_wide = tile_chunks_width * TILES_TO_CHUNK_EDGE;
 		for (int h = 0; h < tiles_high; h++)
@@ -21,33 +21,35 @@ namespace SXNGN::ECS::A {
 				collision_box.y = y_pixels;
 				collision_box.w = SXNGN::BASE_TILE_WIDTH;
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
-				Pre_Renderable* pre_render;
-				Collisionable* collision;
-				Tile* tile;
-				Location* location;
+				Pre_Renderable* pre_render = nullptr;
+				Collisionable* collision = nullptr;
+				//Tile* tile;
+				Location* location = nullptr;
 				if (h == 0 || h == tiles_high - 1 || w == 0 || w == tiles_wide - 1)
 				{
 					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER);
 					collision = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT);
 					location = new Location(x_pixels, y_pixels);
-					tile = new Tile();
+					//tile = new Tile();
+					
 					//tile = Entity_Builder_Utils::Create_Tile(w, h);
 				}
 				else
 				{
 					pre_render = new Pre_Renderable(tileset, base_tile, A::RenderLayer::GROUND_LAYER);
-					tile = new Tile();
+					//tile = new Tile();
 					location = new Location(x_pixels, y_pixels);
 					//collision = Entity_Builder_Utils::Create_Collisionable(collision_box,  CollisionType::NONE);
 					//tile = Entity_Builder_Utils::Create_Tile(w, h);
 				}
 				
-				pre_renders.push_back(*pre_render);
-				collisionables.push_back(*collision);
-				tiles.push_back(*tile);
+				pre_renders.push_back(pre_render);
+				locations.push_back(location);
+				collisionables.push_back(collision);
+				//tiles.push_back(*tile);
 			}
 		}
-		return std::make_tuple(pre_renders, collisionables, tiles);
+		return std::make_tuple(pre_renders, collisionables, locations);
 	}
 
 	void Map_Utils::CreateNewWorld()
@@ -55,23 +57,33 @@ namespace SXNGN::ECS::A {
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 	
 		auto settings = gCoordinator->get_state_manager()->getGameSettings();
-		std::tuple<std::vector<Pre_Renderable>, std::vector<Collisionable>, std::vector<Tile>> game_map = CreateTileMap(settings->level_settings.level_width_chunks, settings->level_settings.level_height_chunks, "APOCALYPSE_MAP", "ROCK_GROUND");
+		std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>> game_map = CreateTileMap(settings->level_settings.level_width_chunks, settings->level_settings.level_height_chunks, "APOCALYPSE_MAP", "ROCK_GROUND");
 
 		auto game_map_pre_renders = std::get<0>(game_map);
 		auto game_map_collisionables = std::get<1>(game_map);
-		auto game_map_tiles = std::get<2>(game_map);
+		auto game_map_locations = std::get<2>(game_map);
 
 		for (int i = 0; i < game_map_pre_renders.size(); i++)
 		{
 			auto map_tile_entity = gCoordinator->CreateEntity();
-			Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i)); //fixme why the copy constructor???
-			gCoordinator->AddComponent(map_tile_entity, pre_render);
+			Pre_Renderable* pre_render = (game_map_pre_renders.at(i)); //fixme why the copy constructor???
+			if (pre_render)
+			{
+				gCoordinator->AddComponent(map_tile_entity, pre_render);
+			}
 			
-			Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
-			gCoordinator->AddComponent(map_tile_entity, collisionable);
 			
-			Tile* tile = new Tile(game_map_tiles.at(i));
-			gCoordinator->AddComponent(map_tile_entity, tile);
+			Collisionable* collisionable =(game_map_collisionables.at(i));
+			if (collisionable)
+			{
+				gCoordinator->AddComponent(map_tile_entity, collisionable);
+			}
+			
+			Location* location = (game_map_locations.at(i));
+			if (location)
+			{
+				gCoordinator->AddComponent(map_tile_entity, location);
+			}
 			
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 		}
@@ -287,6 +299,7 @@ namespace SXNGN::ECS::A {
 			}
 			else
 			{
+				// Unwind the final node to get the full path A* will use
 				std::vector<Coordinate> temp_queue;
 				A_Star_Node* parent = final_node;
 				int iter = 0;
@@ -294,7 +307,8 @@ namespace SXNGN::ECS::A {
 				while (parent != nullptr && iter < size_map)
 				{
 					parent->is_solution_node_ = true;
-					temp_queue.push_back(Coordinate(parent->grid_x_ * SXNGN::BASE_TILE_WIDTH, parent->grid_y_ * SXNGN::BASE_TILE_HEIGHT));
+					Coordinate solution_node = Coordinate(parent->grid_x_ * SXNGN::BASE_TILE_WIDTH, parent->grid_y_ * SXNGN::BASE_TILE_HEIGHT);
+					temp_queue.push_back(solution_node);
 					parent = parent->parent_;
 					iter += 1;
 				}
