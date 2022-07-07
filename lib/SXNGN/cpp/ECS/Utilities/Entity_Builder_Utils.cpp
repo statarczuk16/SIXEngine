@@ -41,7 +41,7 @@ namespace SXNGN {
 				auto person_entity = coordinator.CreateEntity();
 				SDL_LogDebug(1, "Created Person Entity: %s: ID: %d", name.c_str(), person_entity);
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
-				Sint32 y_pixels = x_grid * SXNGN::BASE_TILE_HEIGHT;
+				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
 				Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER, name);
 				coordinator.AddComponent(person_entity, pre_renderable);
 
@@ -52,7 +52,7 @@ namespace SXNGN {
 				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::DYNAMIC);
 				coordinator.AddComponent(person_entity, collisionable);
 
-				Location* location = new Location(x_grid, y_grid);
+				Location* location = new Location(x_pixels, y_pixels);
 				coordinator.AddComponent(person_entity, location);
 
 
@@ -60,7 +60,6 @@ namespace SXNGN {
 				input_tags_comp->input_tags_.insert(User_Input_Tags::MOUSE_CONTROL);
 				if (player_controlled)
 				{
-					
 					input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
 					input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
 				}

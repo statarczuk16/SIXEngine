@@ -45,7 +45,7 @@ void Movement_System::Update(float dt)
 			//If no Collision, Update_Position_Without_Collision
 			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
 
-			Location* location_ptr = static_cast<Location*>(check_out_move);
+			Location* location_ptr = static_cast<Location*>(check_out_location);
 			//update position
 			Update_Position(moveable_ptr, location_ptr, entity_actable, dt);
 			//check data back in
@@ -109,11 +109,10 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 	double confirmed_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
 	location->m_pos_x_m_ = confirmed_x;
 	location->m_pos_y_m_ = confirmed_y;
-	int grid_x = (int)round(confirmed_x);
-	int grid_y = (int)round(confirmed_y);
+	Coordinate moveable_coord = location->GetGridCoordinate();
 	sole::uuid uuid = gCoordinator.GetUUIDFromEntity(moveable_id);
 	gCoordinator.removeUUIDFromLocationMap(uuid, SXNGN::DEFAULT_SPACE);
-	gCoordinator.addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
+	gCoordinator.addUUIDToLocationMap(moveable_coord.x, moveable_coord.y, uuid, SXNGN::DEFAULT_SPACE);
 	gCoordinator.updateCollisionMap(uuid, SXNGN::DEFAULT_SPACE);
 
 	moveable->m_intended_delta_x_m = 0;

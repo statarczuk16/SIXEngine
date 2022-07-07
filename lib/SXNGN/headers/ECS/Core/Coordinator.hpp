@@ -238,7 +238,9 @@ namespace SXNGN {
 							continue;
 						}
 						auto collisionable = collisionables[entity];
-						auto collision_ptr = static_cast<const Collisionable*>(collisionable);
+						auto collision_ptr = static_cast<Collisionable*>(collisionable);
+						collision_ptr->resolved_ = false; //if updating collision map, set collision to 
+						//unresolved so collision system will check if new position hit something
 						if (collision_ptr->collision_type_ == CollisionType::STATIC)
 						{
 							sum_traversal_cost = 0;

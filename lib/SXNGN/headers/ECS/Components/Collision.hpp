@@ -80,9 +80,6 @@ namespace SXNGN::ECS::A {
 			width_ = width;
 			
 			buffer_pixels = 0;
-			width_ = 0;
-			height_ = 0;
-
 			collision_type_ = type;
 			if (type == CollisionType::STATIC)
 			{

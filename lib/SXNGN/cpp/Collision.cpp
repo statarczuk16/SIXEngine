@@ -74,22 +74,22 @@ namespace SXNGN {
 		bottomB = b.y + b.h;
 
 		//If any of the sides from A are outside of B
-		if ((bottomA - topB) + buffer < 0)
+		if ((bottomA - topB) + buffer <= 0)
 		{
 			return false;
 		}
 
-		if ((topA - bottomB) - buffer > 0)
+		if ((topA - bottomB) - buffer >= 0)
 		{
 			return false;
 		}
 
-		if ((rightA - leftB) + buffer < 0)
+		if ((rightA - leftB) + buffer <= 0)
 		{
 			return false;
 		}
 
-		if ((leftA - rightB) - buffer > 0)
+		if ((leftA - rightB) - buffer >= 0)
 		{
 			return false;
 		}

@@ -36,6 +36,7 @@ namespace SXNGN::ECS::A {
 
 		std::array<ECS_Component*, MAX_ENTITIES>& all_collisionables = gCoordinator.CheckOutAllData(ComponentTypeEnum::COLLISION);
 		std::array<ECS_Component*, MAX_ENTITIES>& all_locations = gCoordinator.CheckOutAllData(ComponentTypeEnum::LOCATION);
+		std::array<ECS_Component*, MAX_ENTITIES>& all_moveables = gCoordinator.CheckOutAllData(ComponentTypeEnum::MOVEABLE);
 		auto it_act = m_actable_entities.begin();
 		//First sweep check out all data needed
 		while (it_act != m_actable_entities.end())
@@ -72,9 +73,16 @@ namespace SXNGN::ECS::A {
 			Entity entity_outer = *it_unresolved;
 			Collisionable* collisionable_outer = static_cast<Collisionable*>(all_collisionables[entity_outer]);
 			Location* location_outer = static_cast<Location*>(all_locations[entity_outer]);
+			
 			SDL_Rect collision_box_outer;
 			collision_box_outer.x = location_outer->m_pos_x_m_;
 			collision_box_outer.y = location_outer->m_pos_y_m_;
+			Moveable* moveable_outer = static_cast<Moveable*>(all_moveables[entity_outer]);
+			if (moveable_outer)
+			{
+				collision_box_outer.x += moveable_outer->m_intended_delta_x_m;
+				collision_box_outer.y += moveable_outer->m_intended_delta_y_m;
+			}
 			collision_box_outer.w = collisionable_outer->width_;
 			collision_box_outer.h = collisionable_outer->height_;
 
@@ -90,6 +98,12 @@ namespace SXNGN::ECS::A {
 				SDL_Rect collision_box_inner;
 				collision_box_inner.x = location_inner->m_pos_x_m_;
 				collision_box_inner.y = location_inner->m_pos_y_m_;
+				Moveable* moveable_inner = static_cast<Moveable*>(all_moveables[entity_inner]);
+				if (moveable_inner)
+				{
+					collision_box_inner.x += moveable_inner->m_intended_delta_x_m;
+					collision_box_inner.y += moveable_inner->m_intended_delta_y_m;
+				}
 				collision_box_inner.w = collisionable_inner->width_;
 				collision_box_inner.h = collisionable_inner->height_;
 				it_all++;
@@ -127,6 +141,7 @@ namespace SXNGN::ECS::A {
 		//gCoordinator.CheckInAllData(ComponentTypeEnum::LOCATION);
 		gCoordinator.CheckInAllData(ComponentTypeEnum::COLLISION);
 		gCoordinator.CheckInAllData(ComponentTypeEnum::LOCATION);
+		gCoordinator.CheckInAllData(ComponentTypeEnum::MOVEABLE);
 
 		//stop = std::chrono::high_resolution_clock::now();
 		//duration = std::chrono::duration_cast<std::chrono::milliseconds> (stop - start);
@@ -305,6 +320,7 @@ namespace SXNGN::ECS::A {
 				}//if clickable
 			}//if mouse event type
 		} //if event data present
+		return entities_to_destroy;
 	}
 
 	std::set<Entity> Collision_System::HandleCollisionDynamicOnStatic(Entity entity1, Collisionable* collisonable1_ptr, Entity entity2, Collisionable* collisonable2_ptr)
@@ -349,13 +365,14 @@ namespace SXNGN::ECS::A {
 		ECS_Component* dynamic_m_d = gCoordinator.CheckOutComponent(dynamic_e, ComponentTypeEnum::MOVEABLE);
 		Moveable* dynamic_m = static_cast<Moveable*>(dynamic_m_d);
 
-		SDL_Rect dynamic_e_potential_position;
+		SDL_Rect dynamic_e_position;
 		//get current position of dynamic entity
-		dynamic_e_potential_position.x = dynamic_l->m_pos_x_m_;
-		dynamic_e_potential_position.y = dynamic_l->m_pos_y_m_;
-		dynamic_e_potential_position.w = dynamic_c->width_;
-		dynamic_e_potential_position.h = dynamic_c->height_;
+		dynamic_e_position.x = dynamic_l->m_pos_x_m_;
+		dynamic_e_position.y = dynamic_l->m_pos_y_m_;
+		dynamic_e_position.w = dynamic_c->width_;
+		dynamic_e_position.h = dynamic_c->height_;
 
+		SDL_Rect dynamic_e_potential_position = dynamic_e_position;
 		//add where movement system intends for it to move to this frame
 		dynamic_e_potential_position.x += dynamic_m->m_intended_delta_x_m;
 		dynamic_e_potential_position.y += dynamic_m->m_intended_delta_y_m;
@@ -370,32 +387,36 @@ namespace SXNGN::ECS::A {
 
 		//check if the intended position is valid
 		std::pair<float, float> distance;
-		distance = Physics_Utils::CalculateDistanceTo(dynamic_e_potential_position, static_e_position);
+		distance = Physics_Utils::CalculateDistanceTo(dynamic_e_position, static_e_position);
 		double xAxisTimeToCollide = dynamic_m->m_vel_x_m_s != 0.0 ? std::abs(distance.first / dynamic_m->m_vel_x_m_s) : 0;
 		double yAxisTimeToCollide = dynamic_m->m_vel_y_m_s != 0.0 ? std::abs(distance.second / dynamic_m->m_vel_y_m_s) : 0;
 
 		float shortest_time = 0.0;
-
+		double alternate_dist = 0.0;
 		//there is a collision, velocity tells what axis it occurred on
 
 		if (dynamic_m->m_vel_x_m_s != 0.0 && dynamic_m->m_vel_y_m_s == 0)
 		{
 			//moving in x direction but not y, so time to collision is X
 			shortest_time = xAxisTimeToCollide;
-			dynamic_m->m_intended_delta_x_m = shortest_time * dynamic_m->m_vel_x_m_s;
+			alternate_dist = shortest_time * dynamic_m->m_vel_x_m_s;
+			dynamic_m->m_intended_delta_x_m = alternate_dist;//
 
 		}
 		else if (dynamic_m->m_vel_y_m_s != 0.0 && dynamic_m->m_vel_x_m_s == 0)
 		{
 			shortest_time = yAxisTimeToCollide;
-			dynamic_m->m_intended_delta_y_m = shortest_time * dynamic_m->m_vel_y_m_s;
+			alternate_dist = shortest_time * dynamic_m->m_vel_y_m_s;
+			dynamic_m->m_intended_delta_y_m = alternate_dist;//distance.second;// shortest_time* dynamic_m->m_vel_y_m_s;
 		}
 		else
 		{
 			// Collision on X and Y axis (eg. slide up against a wall)
 			shortest_time = std::min(std::abs(xAxisTimeToCollide), std::abs(yAxisTimeToCollide));
-			dynamic_m->m_intended_delta_x_m = shortest_time * dynamic_m->m_vel_x_m_s;
-			dynamic_m->m_intended_delta_y_m = shortest_time * dynamic_m->m_vel_y_m_s;
+			alternate_dist = shortest_time * dynamic_m->m_vel_x_m_s;
+			dynamic_m->m_intended_delta_x_m = alternate_dist;// shortest_time* dynamic_m->m_vel_x_m_s;
+			alternate_dist = shortest_time * dynamic_m->m_vel_y_m_s;
+			dynamic_m->m_intended_delta_y_m = alternate_dist; //shortest_time * dynamic_m->m_vel_y_m_s;
 		}
 		gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, dynamic_e);
 
