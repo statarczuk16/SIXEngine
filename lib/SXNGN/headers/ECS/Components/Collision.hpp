@@ -61,7 +61,7 @@ namespace SXNGN::ECS::A {
 			buffer_pixels = 0;
 			radius_ = 0;
 			resolved_ = false;
-
+			traversal_cost_ = 1;
 			collision_type_ = type;
 			if (type == CollisionType::STATIC)
 			{
@@ -73,12 +73,12 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
-		Collisionable(Uint32 height, Uint32 width, CollisionType type = CollisionType::STATIC)
+		Collisionable(Uint32 height, Uint32 width, CollisionType type = CollisionType::STATIC, int traversal_cost = 1)
 		{
 			component_type = ComponentTypeEnum::COLLISION;
 			height_ = height;
 			width_ = width;
-			
+			traversal_cost_ = traversal_cost;
 			buffer_pixels = 0;
 			collision_type_ = type;
 			if (type == CollisionType::STATIC)
@@ -99,6 +99,7 @@ namespace SXNGN::ECS::A {
 		Uint32 radius_ = 0;
 		Uint32 width_ = 0;
 		Uint32 height_ = 0;
+		int traversal_cost_ = 1;
 
 	};
 
@@ -112,7 +113,8 @@ namespace SXNGN::ECS::A {
 			{"resolved_", p.resolved_},
 			{"radius_", p.radius_},
 			{"width_", p.width_},
-			{"height_", p.height_}
+			{"height_", p.height_},
+			{"traversal_cost_", p.traversal_cost_}
 		};
 	}
 
@@ -126,5 +128,6 @@ namespace SXNGN::ECS::A {
 		j.at("radius_").get_to(p.radius_);
 		j.at("width_").get_to(p.width_);
 		j.at("height_").get_to(p.height_);
+		j.at("traversal_cost_").get_to(p.traversal_cost_);
 	}
 }

@@ -24,10 +24,12 @@ namespace SXNGN {
 
 				coordinator.AddComponent(tile_entity, collisionable);
 
-				Tile* tile = new Tile();
+				Tile* tile = new Tile(-1);
 				coordinator.AddComponent(tile_entity, tile);
 
 				Location* location = new Location(collision_box.x, collision_box.y);
+
+				coordinator.AddComponent(tile_entity, location);
 
 				coordinator.AddComponent(tile_entity, collisionable);
 
@@ -49,7 +51,7 @@ namespace SXNGN {
 				Moveable* moveable = new Moveable(15);
 				coordinator.AddComponent(person_entity, moveable);
 
-				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::DYNAMIC);
+				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::DYNAMIC, -1);
 				coordinator.AddComponent(person_entity, collisionable);
 
 				Location* location = new Location(x_pixels, y_pixels);

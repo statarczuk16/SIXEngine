@@ -15,17 +15,21 @@ namespace SXNGN::ECS::A {
 	/// </summary>
 	struct Tile : ECS_Component
 	{
-		Tile()
+
+
+		Tile(int traversal_cost = 1)
 		{
 			component_type = ComponentTypeEnum::TILE;
+			traversal_cost_ = traversal_cost;
 		}
+		int traversal_cost_ = 0;
 
 	};
 
 	inline void to_json(json& j, const Tile& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::TILE]},
-
+			{"traversal_cost_", p.traversal_cost_}
 		};
 
 	}
@@ -33,6 +37,7 @@ namespace SXNGN::ECS::A {
 	inline void from_json(const json& j, Tile& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 		p.component_type = component_type_enum;
+		j.at("traversal_cost_").get_to(p.traversal_cost_);
 
 
 	}

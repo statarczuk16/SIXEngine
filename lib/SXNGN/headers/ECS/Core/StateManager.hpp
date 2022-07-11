@@ -205,6 +205,22 @@ namespace SXNGN::ECS::A {
 			return uuids_at_x_y;
 		}
 
+		int moveUUIDOnLocationMap(int grid_x_from, int grid_y_from, int grid_x_to, int grid_y_to, sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
+		{
+			if (space_to_entity_location_map_.count(space) < 1)
+			{
+				return 1;
+			}
+			auto uuid_in_map_it = space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_from).at(grid_y_from).find(uuid);
+			if (uuid_in_map_it != space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_from).at(grid_y_from).end())
+			{
+				space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_from).at(grid_y_from).erase(uuid_in_map_it);
+				
+			}
+			space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_to).at(grid_y_to).insert(uuid);
+			return 0;
+		}
+
 		void addUUIDToLocationMap(int grid_x, int grid_y, sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
 		{
 			

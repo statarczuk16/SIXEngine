@@ -70,7 +70,7 @@ void Movement_System::Translate_Waypoints_To_Movement(Location* location, Moveab
 			{
 				return;
 			}
-			auto position = location->GetGridCoordinate();
+			auto position = location->GetPixelCoordinate();
 			if (position.x == -1 || position.y == -1)
 			{
 				return;
@@ -107,14 +107,15 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
 	double confirmed_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
 	double confirmed_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
+
+	Coordinate moveable_coord_from = location->GetGridCoordinate();
 	location->m_pos_x_m_ = confirmed_x;
 	location->m_pos_y_m_ = confirmed_y;
 	Coordinate moveable_coord = location->GetGridCoordinate();
 	sole::uuid uuid = gCoordinator.GetUUIDFromEntity(moveable_id);
-	gCoordinator.removeUUIDFromLocationMap(uuid, SXNGN::DEFAULT_SPACE);
-	gCoordinator.addUUIDToLocationMap(moveable_coord.x, moveable_coord.y, uuid, SXNGN::DEFAULT_SPACE);
-	gCoordinator.updateCollisionMap(uuid, SXNGN::DEFAULT_SPACE);
-
+	gCoordinator.moveUUIDOnLocationMap(moveable_coord_from.x, moveable_coord_from.y, moveable_coord.x, moveable_coord.y, uuid);
+	gCoordinator.updateCollisionMap(moveable_coord_from.x, moveable_coord_from.y);
+	gCoordinator.updateCollisionMap(moveable_coord.x, moveable_coord.y);
 	moveable->m_intended_delta_x_m = 0;
 	moveable->m_intended_delta_y_m = 0;
 
@@ -150,32 +151,52 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 		}
 	}
 
-	//adjust delta x or delta y to snap to waypoint is would have overshot it
+	//adjust delta x or delta y to snap to waypoint if would have overshot it
 	if (moveable->GetNumWaypoints() > 0)
 	{
-		double waypoint_snap_pos_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
-		double waypoint_snap_pos_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
-		double intended_pos_y = waypoint_snap_pos_y;
-		double intended_pos_x = waypoint_snap_pos_x;
+		double intended_pos_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
+		double intended_pos_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
 		double waypoint_snap_delta_x = std::abs(intended_pos_x - moveable->GetCurrentWaypoint().x);
 		double waypoint_snap_delta_y = std::abs(intended_pos_y - moveable->GetCurrentWaypoint().y);
+		double snap_x = 0;
+		double snap_y = 0;
+		bool do_snap_x = false;
+		bool do_snap_y = false;
+		auto current_waypoint = moveable->GetCurrentWaypoint();
 		
-		if (moveable->m_vel_x_m_s >= 0 && intended_pos_x >= moveable->GetCurrentWaypoint().x)
+		if (moveable->m_vel_x_m_s > 0 && intended_pos_x > current_waypoint.x)
 		{
-			moveable->m_intended_delta_x_m -= waypoint_snap_delta_x;
+			snap_x -= waypoint_snap_delta_x;
+			do_snap_x = true;
 		}
-		else if (moveable->m_vel_x_m_s < 0 && intended_pos_x < moveable->GetCurrentWaypoint().x)
+		else if (moveable->m_vel_x_m_s < 0 && intended_pos_x < current_waypoint.x)
 		{
-			moveable->m_intended_delta_x_m += waypoint_snap_delta_x;
+			snap_x += waypoint_snap_delta_x;
+			do_snap_x = true;
 		}
 
-		if (moveable->m_vel_y_m_s >= 0 && intended_pos_y >= moveable->GetCurrentWaypoint().y)
+		if (moveable->m_vel_y_m_s > 0 && intended_pos_y > current_waypoint.y)
 		{
-			moveable->m_intended_delta_y_m -= waypoint_snap_delta_y;
+			snap_y -= waypoint_snap_delta_y;
+			do_snap_y = true;
 		}
-		else if (moveable->m_vel_y_m_s < 0 && intended_pos_y < moveable->GetCurrentWaypoint().y)
+		else if (moveable->m_vel_y_m_s < 0 && intended_pos_y < current_waypoint.y)
 		{
-			moveable->m_intended_delta_y_m += waypoint_snap_delta_y;
+			snap_y += waypoint_snap_delta_y;
+			do_snap_y = true;
+		}
+
+		if (do_snap_x || do_snap_y)
+		{
+			//std::cout << "Snapped!" << std::endl;
+			moveable->m_intended_delta_x_m += snap_x;
+			moveable->m_intended_delta_y_m += snap_y;
+			moveable->m_intended_delta_x_m = round(moveable->m_intended_delta_x_m);
+			moveable->m_intended_delta_y_m = round(moveable->m_intended_delta_y_m);
+			double new_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
+			double new_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
+			SDL_LogDebug(1, "Snapped from (%f,%f) to (%f,%f)", location->m_pos_x_m_, location->m_pos_y_m_, new_x, new_y);
+			
 		}
 	}
 }

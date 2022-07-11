@@ -178,7 +178,13 @@ namespace SXNGN {
 
 				int removeUUIDFromLocationMap(sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
 				{
-					return mStateManager->removeUUIDFromLocationMap(uuid, space);
+					int ret = mStateManager->removeUUIDFromLocationMap(uuid, space);
+					return ret;
+				}
+
+				int moveUUIDOnLocationMap(int grid_x_from, int grid_y_from, int grid_x_to, int grid_y_to, sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
+				{
+					return mStateManager->moveUUIDOnLocationMap(grid_x_from, grid_y_from, grid_x_to, grid_y_to, uuid, space);
 				}
 
 				std::pair<int, bool> getSetting(std::string setting)
@@ -220,9 +226,11 @@ namespace SXNGN {
 					//get the collision map for this space
 					auto collision_map = mStateManager->space_to_collision_map_.at(SXNGN::DEFAULT_SPACE);
 					//get all the collisonable objects
-					auto renderables = CheckOutAllData(ComponentTypeEnum::RENDERABLE);
-					auto collisionables = CheckOutAllData(ComponentTypeEnum::COLLISION);
-					int sum_traversal_cost = 1;
+					std::array<ECS_Component*, MAX_ENTITIES>& renderables = CheckOutAllData(ComponentTypeEnum::RENDERABLE);
+					std::array<ECS_Component*, MAX_ENTITIES>& collisionables = CheckOutAllData(ComponentTypeEnum::COLLISION);
+					std::array<ECS_Component*, MAX_ENTITIES>& tiles = CheckOutAllData(ComponentTypeEnum::TILE);
+					int sum_traversal_cost = 0;
+					bool traversible = true;
 					//go through all the uuids at this x,y and determine the sum collision value
 					for (sole::uuid uuid : uuids_at_x_y)
 					{
@@ -233,17 +241,25 @@ namespace SXNGN {
 							removeUUIDFromLocationMap(uuid);
 							continue;
 						}
-						if (collisionables[entity] == nullptr)
+						if (collisionables[entity] != nullptr)
 						{
-							continue;
+							auto collisionable = collisionables[entity];
+							auto collision_ptr = static_cast<Collisionable*>(collisionable);
+							collision_ptr->resolved_ = false; //if updating collision map, set collision to 
+							sum_traversal_cost += collision_ptr->traversal_cost_;
+							if (collision_ptr->traversal_cost_ == -1)
+							{
+								traversible = false;
+							}
 						}
-						auto collisionable = collisionables[entity];
-						auto collision_ptr = static_cast<Collisionable*>(collisionable);
-						collision_ptr->resolved_ = false; //if updating collision map, set collision to 
-						//unresolved so collision system will check if new position hit something
-						if (collision_ptr->collision_type_ == CollisionType::STATIC)
+						if (tiles[entity] != nullptr)
 						{
-							sum_traversal_cost = 0;
+							auto tile_ptr = static_cast<Tile*>(tiles[entity]);
+							sum_traversal_cost += tile_ptr->traversal_cost_;
+							if (tile_ptr->traversal_cost_ == -1)
+							{
+								traversible = false;
+							}
 						}
 						if (renderables[entity] != nullptr)
 						{
@@ -251,7 +267,6 @@ namespace SXNGN {
 							auto renderable_ptr = static_cast<Renderable*>(renderable);
 							renderable_ptr->display_string_debug_ = std::to_string(sum_traversal_cost);
 						}
-						
 					}
 					//update and store the collision map in the state manager
 					if (collision_map.size() < grid_x)
@@ -262,10 +277,17 @@ namespace SXNGN {
 					{
 						SDL_LogError(1, "Collision Map Bad Index");
 					}
+					//if either of these, mark as non-traversible
+					if (sum_traversal_cost < 0 || traversible == false)
+					{
+						traversible = false;
+						sum_traversal_cost = -1;
+					}
 					collision_map[grid_x][grid_y] = sum_traversal_cost;
 					mStateManager->space_to_collision_map_[SXNGN::DEFAULT_SPACE] = collision_map;
 					CheckInAllData(ComponentTypeEnum::COLLISION);
 					CheckInAllData(ComponentTypeEnum::RENDERABLE);
+					CheckInAllData(ComponentTypeEnum::TILE);
 					return 0;
 				}
 
@@ -278,6 +300,41 @@ namespace SXNGN {
 						return -1;
 					}
 					return updateCollisionMap(x_y.first, x_y.second, space);
+				}
+
+				/// <summary>
+				/// Update the entire collision map in this space
+				/// </summary>
+				/// <param name="space"></param>
+				/// <returns></returns>
+				int updateCollisionMap(std::string space = SXNGN::DEFAULT_SPACE)
+				{
+					//set up a collision map if it's not already there for the space
+					if (mStateManager->space_to_collision_map_.count(SXNGN::DEFAULT_SPACE) < 1)
+					{
+						std::vector<std::vector<int > > collision_map;
+						for (Uint32 i = 0; i < mStateManager->getGameSettings()->level_settings.level_width_tiles; i++)
+						{
+							collision_map.push_back(std::vector< int >());
+							for (Uint32 j = 0; j < mStateManager->getGameSettings()->level_settings.level_height_tiles; j++)
+							{
+								collision_map[i].push_back(1);
+							}
+						}
+						mStateManager->space_to_collision_map_[SXNGN::DEFAULT_SPACE] = collision_map;
+						return 0;
+					}
+
+					int width = mStateManager->getGameSettings()->level_settings.level_width_tiles;
+					int height = mStateManager->getGameSettings()->level_settings.level_height_tiles;
+					for (Uint32 i = 0; i < mStateManager->getGameSettings()->level_settings.level_width_tiles; i++)
+					{
+						for (Uint32 j = 0; j < mStateManager->getGameSettings()->level_settings.level_height_tiles; j++)
+						{
+							updateCollisionMap(i, j, space);
+						}
+					}
+
 				}
 
 				std::unordered_map < std::string, std::vector < std::vector < int > > > getCollisionMap()

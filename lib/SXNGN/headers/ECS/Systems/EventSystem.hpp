@@ -23,6 +23,8 @@ namespace SXNGN::ECS::A {
 
 		void Handle_Spawn_Event(Event_Component* ec);
 
+		void Handle_Mouse_Event(Event_Component* ec, Entity entity);
+
 		void Handle_Mouse_Wheel_Event(Event_Component* ec);
 
 		void Handle_Save_Event(Event_Component* ec);

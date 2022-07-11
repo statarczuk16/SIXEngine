@@ -32,13 +32,13 @@ namespace SXNGN::ECS::A {
 			m_pos_y_m_ = (int)round(y);//current position y
 		}
 
-		Coordinate GetPixelCoordinate()
+		const Coordinate GetPixelCoordinate() const
 		{
 			Coordinate coordinate(m_pos_x_m_, m_pos_y_m_);
 			return coordinate;
 		}
 
-		Coordinate GetGridCoordinate()
+		const Coordinate GetGridCoordinate() const 
 		{
 			Coordinate coordinate(m_pos_x_m_, m_pos_y_m_);
 			coordinate.x /= SXNGN::BASE_TILE_WIDTH;

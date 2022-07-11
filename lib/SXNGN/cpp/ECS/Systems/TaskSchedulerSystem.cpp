@@ -173,7 +173,7 @@ namespace SXNGN::ECS::A {
 		if (worker_loc)
 		{
 			auto distance = Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, worker_loc->GetPixelCoordinate(), task->tasks_.at(0).location_);
-			if (distance >= AT_DESTINATION_THRESH)
+			if (distance > AT_DESTINATION_THRESH)
 			{
 				return false;
 			}

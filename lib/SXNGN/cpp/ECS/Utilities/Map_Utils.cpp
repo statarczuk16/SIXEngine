@@ -2,7 +2,7 @@
 #include <queue>
 
 namespace SXNGN::ECS::A {
-	std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
+	std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
 	{
 		std::vector<Pre_Renderable*> pre_renders;
 		std::vector<Collisionable*> collisionables;
@@ -23,21 +23,21 @@ namespace SXNGN::ECS::A {
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 				Pre_Renderable* pre_render = nullptr;
 				Collisionable* collision = nullptr;
-				//Tile* tile;
+				Tile* tile;
 				Location* location = nullptr;
 				if (h == 0 || h == tiles_high - 1 || w == 0 || w == tiles_wide - 1)
 				{
 					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER);
-					collision = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT);
+					collision = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::STATIC, -1);
 					location = new Location(x_pixels, y_pixels);
-					//tile = new Tile();
+					tile = new Tile(-1);
 					
 					//tile = Entity_Builder_Utils::Create_Tile(w, h);
 				}
 				else
 				{
 					pre_render = new Pre_Renderable(tileset, base_tile, A::RenderLayer::GROUND_LAYER);
-					//tile = new Tile();
+					tile = new Tile(1);
 					location = new Location(x_pixels, y_pixels);
 					//collision = Entity_Builder_Utils::Create_Collisionable(collision_box,  CollisionType::NONE);
 					//tile = Entity_Builder_Utils::Create_Tile(w, h);
@@ -46,10 +46,10 @@ namespace SXNGN::ECS::A {
 				pre_renders.push_back(pre_render);
 				locations.push_back(location);
 				collisionables.push_back(collision);
-				//tiles.push_back(*tile);
+				tiles.push_back(tile);
 			}
 		}
-		return std::make_tuple(pre_renders, collisionables, locations);
+		return std::make_tuple(pre_renders, collisionables, locations, tiles);
 	}
 
 	void Map_Utils::CreateNewWorld()
@@ -57,11 +57,12 @@ namespace SXNGN::ECS::A {
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 	
 		auto settings = gCoordinator->get_state_manager()->getGameSettings();
-		std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>> game_map = CreateTileMap(settings->level_settings.level_width_chunks, settings->level_settings.level_height_chunks, "APOCALYPSE_MAP", "ROCK_GROUND");
+		std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> game_map = CreateTileMap(settings->level_settings.level_width_chunks, settings->level_settings.level_height_chunks, "APOCALYPSE_MAP", "ROCK_GROUND");
 
 		auto game_map_pre_renders = std::get<0>(game_map);
 		auto game_map_collisionables = std::get<1>(game_map);
 		auto game_map_locations = std::get<2>(game_map);
+		auto game_map_tiles = std::get<3>(game_map);
 
 		for (int i = 0; i < game_map_pre_renders.size(); i++)
 		{
@@ -83,6 +84,12 @@ namespace SXNGN::ECS::A {
 			if (location)
 			{
 				gCoordinator->AddComponent(map_tile_entity, location);
+			}
+
+			Tile* tile = (game_map_tiles.at(i));
+			if (tile)
+			{
+				gCoordinator->AddComponent(map_tile_entity, tile);
 			}
 			
 			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
@@ -182,6 +189,8 @@ namespace SXNGN::ECS::A {
 				return q;
 			}
 
+			
+
 			A_Star_Node* start_node = new A_Star_Node(start_grid_x, start_grid_y, end_grid_x, end_grid_y, collision_map[start_grid_x][start_grid_y]);
 			A_Star_Node* final_node = nullptr;
 			
@@ -210,27 +219,30 @@ namespace SXNGN::ECS::A {
 					break;
 				}
 				
+				/**
 				std::cout << " --- Visiting Node " << visiting_node->grid_x_ << " , " << visiting_node->grid_y_
 					<< " FX: " << visiting_node->fx_estimated_total_cost_
 					<< " GX: " << visiting_node->gx_cost_to_this_node_
 					<< " HX: " << visiting_node->hx_manhattan_cost_
 					<< std::endl;
-					
+				**/
 				//visit each neighbor of node
 				for (const int visit_x : visit_x_vals)
 				{
 					for (const int visit_y : visit_y_vals)
 					{
 						//dont visit yourself (0,0) or any diagonal moves (1,1) (-1,1) (1,-1) (-1,-1) because cannot move diagonally through a solid block
-						//if (abs(visit_x) == abs(visit_y))
-						//{
-						//	continue;
-						//}
+						if (abs(visit_x) == abs(visit_y))
+						{
+							continue;
+						}
 
 						if (visit_x == 0 && visit_y == 0)
 						{
 							continue; //don't visit self
 						}
+
+
 
 						int node_to_visit_x = visiting_node->grid_x_ + visit_x;
 						int node_to_visit_y = visiting_node->grid_y_ + visit_y;
@@ -250,7 +262,6 @@ namespace SXNGN::ECS::A {
 									end_grid_y,
 									collision_map[node_to_visit_x][node_to_visit_y]);
 								a_star_map[node_to_visit_x][node_to_visit_y] = node_to_visit;
-
 							}
 
 							//if the node to visit has already been expanded (has been the visiting node), no better bath will be found through it.
@@ -323,6 +334,29 @@ namespace SXNGN::ECS::A {
 				{
 					SDL_LogDebug(1, "Waypoint Generated: %d, %d", temp_queue[i].x / SXNGN::BASE_TILE_WIDTH, temp_queue[i].y / SXNGN::BASE_TILE_HEIGHT);
 					q.push(temp_queue[i]);
+				}
+
+				SDL_LogDebug(1, "Printing Collision Map");
+				for (int i = 0; i < collision_map.size(); i++)
+				{
+					for (int j = 0; j < collision_map[i].size(); j++)
+					{
+						if (a_star_map[j][i] == nullptr)
+						{
+							//std::cout << std::setw(3) << collision_map[j][i];
+							std::cout << std::setw(3) << ".";
+						}
+						else if (a_star_map[j][i]->is_solution_node_)
+						{
+							std::cout << std::setw(3) << 'X';
+						}
+						else
+						{
+							std::cout << std::setw(3) << a_star_map[j][i]->traversal_cost;
+						}
+						
+					}
+					std::cout << std::endl;
 				}
 			}
 
