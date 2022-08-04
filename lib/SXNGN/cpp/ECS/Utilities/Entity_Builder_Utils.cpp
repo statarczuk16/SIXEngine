@@ -11,7 +11,7 @@ namespace SXNGN {
 				auto tile_entity = coordinator.CreateEntity();
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
 				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
-				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(x_pixels, y_pixels, sprite_sheet, sprite_name, A::RenderLayer::GROUND_LAYER, name);
+				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::GROUND_LAYER, name);
 				coordinator.AddComponent(tile_entity, pre_renderable);
 
 				SDL_Rect collision_box;
@@ -20,12 +20,18 @@ namespace SXNGN {
 				collision_box.w = SXNGN::BASE_TILE_WIDTH;
 				collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 
-				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, collision_type);
+				Collisionable* collisionable = new Collisionable(collision_box.w, collision_box.h);
 
 				coordinator.AddComponent(tile_entity, collisionable);
 
-				A::Tile* tile = new A::Tile(x_grid, y_grid);
+				Tile* tile = new Tile(-1);
 				coordinator.AddComponent(tile_entity, tile);
+
+				Location* location = new Location(collision_box.x, collision_box.y);
+
+				coordinator.AddComponent(tile_entity, location);
+
+				coordinator.AddComponent(tile_entity, collisionable);
 
 				coordinator.AddComponent(tile_entity, Create_Gamestate_Component_from_Enum(game_state));
 
@@ -37,37 +43,27 @@ namespace SXNGN {
 				auto person_entity = coordinator.CreateEntity();
 				SDL_LogDebug(1, "Created Person Entity: %s: ID: %d", name.c_str(), person_entity);
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
-				Sint32 y_pixels = x_grid * SXNGN::BASE_TILE_HEIGHT;
-				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(x_pixels, y_pixels, sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER, name);
+				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
+				Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER, name);
 				coordinator.AddComponent(person_entity, pre_renderable);
 
 
-				SXNGN::ECS::A::Moveable* moveable = Create_Moveable(x_pixels, y_pixels, 15, A::MoveableType::VELOCITY);
+				Moveable* moveable = new Moveable(15);
 				coordinator.AddComponent(person_entity, moveable);
 
-				SDL_Rect collision_box;
-				//collision_box.x = int(round(moveable->get_pos_x() + SXNGN::BASE_TILE_WIDTH / 2));
-				//collision_box.y = int(round(moveable->get_pos_y() + SXNGN::BASE_TILE_HEIGHT / 2));
-				//collision_box.w = SXNGN::BASE_TILE_WIDTH / 2;
-				//collision_box.h = SXNGN::BASE_TILE_HEIGHT / 2;
-
-				collision_box.x = int(round(moveable->get_pos_x()  ));
-				collision_box.y = int(round(moveable->get_pos_y()  ));
-				collision_box.w = SXNGN::BASE_TILE_WIDTH ;
-				collision_box.h = SXNGN::BASE_TILE_HEIGHT ;
-
-				SXNGN::ECS::A::Collisionable* collisionable = Create_Collisionable(collision_box, CollisionType::ELASTIC, CollisionTag::PERSON);
-				collisionable->buffer_pixels = 0;
-
-
+				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::DYNAMIC, -1);
 				coordinator.AddComponent(person_entity, collisionable);
-				SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new A::User_Input_Tags_Collection();
-				input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::MOUSE_CONTROL);
+
+				Location* location = new Location(x_pixels, y_pixels);
+				coordinator.AddComponent(person_entity, location);
+
+
+				SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
+				input_tags_comp->input_tags_.insert(User_Input_Tags::MOUSE_CONTROL);
 				if (player_controlled)
 				{
-					
-					input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::WASD_CONTROL);
-					input_tags_comp->input_tags_.insert(SXNGN::ECS::A::User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
+					input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
+					input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
 				}
 				coordinator.AddComponent(person_entity, input_tags_comp);
 
@@ -130,11 +126,16 @@ namespace SXNGN {
 				//mouse events take place in the game world. If a mouse click were to hit the main UI, it would not have produced a mouse event, rather been handled in the UserInputSystem
 				SDL_Rect mouse_click_world_position = ECS_Utils::convert_screen_position_to_world_position(camera_ptr, mouse_event.click.x, mouse_event.click.y);
 				
-				collisionable->collision_box_ = mouse_click_world_position;
+				collisionable->width_ = 1;
+				collisionable->height_ = 1;
+				//collisionable->collision_box_ = mouse_click_world_position;
 				collisionable->collision_tag_ = CollisionTag::EVENT;
-				collisionable->collision_type_ = CollisionType::IMMOVEABLE;
+				collisionable->collision_type_ = CollisionType::DYNAMIC;
 				collisionable->buffer_pixels = 0;
+
+				Location* location = new Location(mouse_click_world_position.x, mouse_click_world_position.y);
 				coordinator.AddComponent(event_entity, collisionable);
+				coordinator.AddComponent(event_entity, location);
 				coordinator.AddComponent(event_entity, event_component);
 				coordinator.AddComponent(event_entity, Create_Gamestate_Component_from_Enum(game_state));
 				return event_entity;
@@ -207,7 +208,7 @@ namespace SXNGN {
 
 				return pre_renderable;
 			}
-			**/
+			
 			A::Moveable* Entity_Builder_Utils::Create_Moveable(double pos_x_m, double pos_y_m, Sint32 speed_m_s, A::MoveableType movement_type)
 			{
 				SXNGN::ECS::A::Moveable* moveable = new A::Moveable();
@@ -219,10 +220,11 @@ namespace SXNGN {
 				return moveable;
 			}
 
-			Collisionable* Entity_Builder_Utils::Create_Collisionable(SDL_Rect collision_box, A::CollisionType collision_type, CollisionTag collision_tag)
+			Collisionable* Entity_Builder_Utils::Create_Collisionable_Square(int width, int height, A::CollisionType collision_type, CollisionTag collision_tag)
 			{
-				A::Collisionable* collision = new A::Collisionable();
-				collision->collision_box_ = collision_box;
+				Collisionable* collision = new Collisionable();
+				collision->width_ = width;
+				collision->height_ = height;
 				collision->collision_type_ = collision_type;
 				collision->collision_tag_ = collision_tag;
 				return collision;
@@ -233,6 +235,7 @@ namespace SXNGN {
 				A::Tile* tile = new A::Tile(x_grid, y_grid);
 				return tile;
 			}
+			**/
 
 			
 		}

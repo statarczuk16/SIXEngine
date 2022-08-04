@@ -131,30 +131,44 @@ namespace SXNGN::ECS::A {
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::shared_ptr<ECS_Camera> camera_ptr = ECS_Camera::get_instance();
 		Entity camera_target = camera_ptr->get_target();
-		auto camera_target_position = ECS_Utils::GetEntityPosition(camera_target);
+		auto location_data = gCoordinator.CheckOutComponent(camera_target, ComponentTypeEnum::LOCATION);
+		if (location_data)
+		{
+			Location* location = static_cast<Location*>(location_data);
+			Coordinate camera_target_position = location->GetPixelCoordinate();
+			SDL_Rect camera_target_position_rect;
+			camera_target_position_rect.x = camera_target_position.x;
+			camera_target_position_rect.y = camera_target_position.y;
+			camera_ptr->set_position_actual(camera_target_position_rect);
+			gCoordinator.CheckInComponent(camera_target, ComponentTypeEnum::LOCATION);
+		}
+		
 		auto user_input_state = User_Input_State::get_instance();
 		
-		if (camera_target_position)
-		{
-			camera_ptr->set_position_actual(*camera_target_position);
-		}
 		//Iterate through entities this system manipulates/converts
 		//(Renders Renderables to screen)
 		SDL_Rect render_quad = { 0,0,0,0 };
 		auto it = m_actable_entities.begin();
-		std::vector<const Renderable*> renderables_ground_layer;
-		std::vector<const Renderable*> renderables_object_layer;
-		std::vector<const Renderable*> renderables_air_layer;
-		std::vector<const Renderable*> renderables_ui_layer;
+		std::vector<Entity> renderables_ground_layer;
+		std::vector<Entity> renderables_object_layer;
+		std::vector<Entity> renderables_air_layer;
+		std::vector<Entity> renderables_ui_layer;
 		std::array<ECS_Component*, MAX_ENTITIES>& all_renderables = gCoordinator.CheckOutAllData(ComponentTypeEnum::RENDERABLE);
+		std::array<ECS_Component*, MAX_ENTITIES>& all_locations = gCoordinator.CheckOutAllData(ComponentTypeEnum::LOCATION);
 		//for (auto const& entity : m_actable_entities)
 		while (it != m_actable_entities.end())
 		{
 			auto const& entity = *it;
 			it++;
+
+
 			//Get renderable
-			ECS_Component* data = all_renderables[entity];//gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
-			Renderable* renderable_ptr = static_cast<Renderable*>(data);
+			ECS_Component* render_data = all_renderables[entity];//gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
+			Renderable* renderable_ptr = static_cast<Renderable*>(render_data);
+
+			ECS_Component* location_data = all_locations[entity];//gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::RENDERABLE);
+			Location* location_ptr = static_cast<Location*>(location_data);
+
 			bool draw_outline = user_input_state->selected_entities.count(entity);
 			if (draw_outline)
 			{
@@ -167,10 +181,10 @@ namespace SXNGN::ECS::A {
 
 			switch (renderable_ptr->render_layer_)
 			{
-			case RenderLayer::AIR_LAYER: renderables_air_layer.push_back(renderable_ptr); break;
-			case RenderLayer::GROUND_LAYER: renderables_ground_layer.push_back(renderable_ptr); break;
-			case RenderLayer::OBJECT_LAYER: renderables_object_layer.push_back(renderable_ptr); break;
-			case RenderLayer::UI_LAYER: renderables_ui_layer.push_back(renderable_ptr); break;
+			case RenderLayer::AIR_LAYER: renderables_air_layer.push_back(entity); break;
+			case RenderLayer::GROUND_LAYER: renderables_ground_layer.push_back(entity); break;
+			case RenderLayer::OBJECT_LAYER: renderables_object_layer.push_back(entity); break;
+			case RenderLayer::UI_LAYER: renderables_ui_layer.push_back(entity); break;
 			default:
 			{
 				printf("RenderSystem: Renderable %s has unknown RenderLayer\n", renderable_ptr->renderable_name_.c_str());
@@ -179,33 +193,30 @@ namespace SXNGN::ECS::A {
 			}
 			//gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
 		}
-		gCoordinator.CheckInAllData(ComponentTypeEnum::RENDERABLE);
+		
 
 		auto view_port = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-		//SDL_Rect belowUIViewPort;
-		//belowUIViewPort.x = 0;
-		//belowUIViewPort.y = 80;
-		//belowUIViewPort.w = gCoordinator.get_state_manager()->getGameSettings()->resolution.w;
-		//belowUIViewPort.h = gCoordinator.get_state_manager()->getGameSettings()->resolution.h;
+		
 		SDL_RenderSetViewport(gCoordinator.Get_Renderer(), view_port.get());
 		//Order of these matters. UI should appear over ground, etc
-		for (auto renderable : renderables_ground_layer)
+		for (auto renderable_entity : renderables_ground_layer)
 		{
-			Render(renderable, camera_ptr);
+			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
 
-		for (auto renderable : renderables_object_layer)
+		for (auto renderable_entity : renderables_object_layer)
 		{
-			Render(renderable, camera_ptr);
+			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
-		for (auto renderable : renderables_air_layer)
+		for (auto renderable_entity : renderables_air_layer)
 		{
-			Render(renderable, camera_ptr);
+			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
-		for (auto renderable : renderables_ui_layer)
+		for (auto renderable_entity : renderables_ui_layer)
 		{
-			Render(renderable, camera_ptr);
+			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
+
 		SDL_Rect normalViewPort;
 		normalViewPort.x = 0;
 		normalViewPort.y = 0;
@@ -215,15 +226,25 @@ namespace SXNGN::ECS::A {
 		//This draws the UI components in the UI Singleton, main menu buttons, etc. Precedence over renderable_ui_layer, which might be context menus in the gameplay window 
 		//whereas the singleton holds "constant" stuff corresponding to the game state
 		Draw_GUI();
+
+		gCoordinator.CheckInAllData(ComponentTypeEnum::RENDERABLE);
+		gCoordinator.CheckInAllData(ComponentTypeEnum::LOCATION);
 	}
 
-	void Renderer_System::Render(const Renderable* renderable, std::shared_ptr<ECS_Camera> camera)
+	void Renderer_System::Render(ECS_Component* render_data, ECS_Component* location_data, std::shared_ptr<ECS_Camera> camera)
 	{
+		//Get renderable
+		
+		Renderable* renderable_ptr = static_cast<Renderable*>(render_data);
+
+		Location* location_ptr = static_cast<Location*>(location_data);
+
+		Coordinate render_location = location_ptr->GetPixelCoordinate();
 		SDL_Rect bounding_box;
-		bounding_box.x = renderable->x_;
-		bounding_box.y = renderable->y_;
-		bounding_box.w = renderable->tile_map_snip_.w;
-		bounding_box.h = renderable->tile_map_snip_.h;
+		bounding_box.x = render_location.x;
+		bounding_box.y = render_location.y;
+		bounding_box.w = renderable_ptr->tile_map_snip_.w;
+		bounding_box.h = renderable_ptr->tile_map_snip_.h;
 		//If the renderable is on screen (within camera lens)
 		if (ECS_Utils::object_in_view(camera, bounding_box))
 		{
@@ -240,32 +261,30 @@ namespace SXNGN::ECS::A {
 			render_quad.w = bounding_box.w;
 			render_quad.h = bounding_box.h;
 
-			
-
-			if (renderable->sprite_map_texture_ != nullptr)
+			if (renderable_ptr->sprite_map_texture_ != nullptr)
 			{
-				renderable->sprite_map_texture_
-					->render2(render_quad, renderable->tile_map_snip_,0.0,nullptr, SDL_FLIP_NONE,renderable->outline);
+				renderable_ptr->sprite_map_texture_
+					->render2(render_quad, renderable_ptr->tile_map_snip_,0.0,nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
 			}
 			else
 			{
-				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable->renderable_name_);
+				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable_ptr->renderable_name_);
 				abort();
 			}
 
-			if (renderable->draw_debug_ && renderable->display_string_debug_ != "")
+			if (renderable_ptr->draw_debug_ && renderable_ptr->display_string_debug_ != "")
 			{
 				auto gCoordinator = SXNGN::Database::get_coordinator();
 				FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
 				int x = render_quad.x;
 				int y = render_quad.y;
-				renderable->sprite_map_texture_->render_text(x, y, debug_font, renderable->display_string_debug_);
+				renderable_ptr->sprite_map_texture_->render_text(x, y, debug_font, renderable_ptr->display_string_debug_);
 			}
 			auto gCoordinator = SXNGN::Database::get_coordinator();
 			FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
 			int x = render_quad.x;
 			int y = render_quad.y;
-			renderable->sprite_map_texture_->render_text(x, y, debug_font, "x");
+			renderable_ptr->sprite_map_texture_->render_text(x, y, debug_font, "x");
 		}
 	}
 
@@ -324,7 +343,7 @@ namespace SXNGN::ECS::A {
 			}
 
 			
-			//See if the factory has the data needed to process the sprite type of the Pre_Renderable
+			//See if the factory has the render_data needed to process the sprite type of the Pre_Renderable
 			if (sprite_factory_component->tile_name_string_to_rect_map_.count(pre_renderable.sprite_factory_sprite_type_) > 0)
 			{
 				auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name_);
@@ -336,8 +355,6 @@ namespace SXNGN::ECS::A {
 
 				auto tile_snip_box = sprite_factory_component->tile_name_string_to_rect_map_[pre_renderable.sprite_factory_sprite_type_];
 				Renderable* renderable_component = new Renderable(
-					pre_renderable.x,
-					pre_renderable.y,
 					*tile_snip_box,
 					pre_renderable.sprite_factory_name_,
 					pre_renderable.sprite_factory_sprite_type_,
@@ -357,6 +374,8 @@ namespace SXNGN::ECS::A {
 
 				gCoordinator.AddComponent(entity, renderable_component);
 				gCoordinator.RemoveComponent(entity, pre_renderable.get_component_type());
+				
+
 
 
 			}

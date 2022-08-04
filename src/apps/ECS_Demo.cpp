@@ -462,6 +462,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SELECTABLE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::LOCATION);
 
 
 
@@ -668,6 +669,7 @@ int main(int argc, char* args[])
 
 	int frame_count = 0;
 	std::vector<SDL_Event> events_this_frame;
+	gCoordinator.updateCollisionMap();
 	while (!quit)
 	{
 		/////////////////////////////////Frame Start

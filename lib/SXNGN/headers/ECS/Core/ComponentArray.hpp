@@ -118,6 +118,11 @@ public:
 
 		ECS_Component* to_return = nullptr;
 
+		if (entity < 0 || entity > MAX_ENTITIES)
+		{
+			return to_return;
+		}
+
 		if (mComponentInUse[entity] == true)
 		{
 			SDL_LogCritical(1, "CheckoutData: Component of entity %d already in use!", entity);

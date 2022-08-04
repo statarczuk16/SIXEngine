@@ -26,8 +26,7 @@ namespace SXNGN::ECS::A {
 	struct Moveable : ECS_Component
 	{
 		private:
-			double m_pos_x_m = 0;//current position x
-			double m_pos_y_m = 0;//current position y
+			
 		//SDL_Rect position_box_;
 		public:
 			double m_intended_delta_x_m = 0;//the potential position - will be taken up if not corrected by collision system this frame
@@ -38,42 +37,28 @@ namespace SXNGN::ECS::A {
 			MoveableType moveable_type_ = MoveableType::VELOCITY;
 			NAVIGATION_TYPE navigation_type_ = NAVIGATION_TYPE::A_STAR;
 
-			Location destination_;
-			Location position_;
+			Coordinate destination_;
 			bool new_destination_ = false;
 			bool at_destination_ = false;
-			std::queue<Location> waypoints_;
+			std::queue<Coordinate> waypoints_;
 
 			Moveable();
 
-			void Update_Destination(Location new_location);
-		
+			Moveable(int speed_m_s);
 
-			bool Check_At_Destination();
+			void Update_Destination(Coordinate new_location);
 		
-
-			bool Check_At_Waypoint();
+			bool Check_At_Destination(double x, double y);
 		
+			bool Check_At_Waypoint(double x, double y);
 
-			bool SolveDestination(NAVIGATION_TYPE method);
+			bool SolveDestination(double x, double y, NAVIGATION_TYPE method);
 		
-
-			void UpdatePosition(double new_x, double new_y);
-		
-
-			Location GetCurrentWaypoint();
+			Coordinate GetCurrentWaypoint();
 
 			unsigned int GetNumWaypoints();
 		
-			Location GetPosition();
 
-			void set_pos_x(double x);
-
-			void set_pos_y(double y);
-
-			double get_pos_x() const;
-
-			double get_pos_y() const;
 		
 	};
 
@@ -81,8 +66,7 @@ namespace SXNGN::ECS::A {
 	inline void to_json(json& j, const Moveable& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::MOVEABLE]},
-			{"m_pos_x_m", p.get_pos_x()},
-			{"m_pos_y_m", p.get_pos_y()},
+
 			{"m_intended_delta_x_m", p.m_intended_delta_x_m},
 			{"m_intended_delta_y_m", p.m_intended_delta_y_m},
 			{"m_vel_x_m_s", p.m_vel_x_m_s},
@@ -91,7 +75,7 @@ namespace SXNGN::ECS::A {
 			{"moveable_type_", p.moveable_type_},
 			{"navigation_type_", p.navigation_type_},
 			{"destination_", p.destination_},
-			{"position_", p.position_},
+
 			{"new_destination_", p.new_destination_},
 			{"at_destination_", p.at_destination_},
 			//{"waypoints_", p.waypoints_},
@@ -100,13 +84,7 @@ namespace SXNGN::ECS::A {
 
 	inline void from_json(const json& j, Moveable& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
-		double m_pos_x;
-		double m_pos_y;
 		p.component_type = component_type_enum;
-		j.at("m_pos_x_m").get_to(m_pos_x);
-		p.set_pos_x(m_pos_x);
-		j.at("m_pos_y_m").get_to(m_pos_y);
-		p.set_pos_y(m_pos_y);
 		j.at("m_intended_delta_x_m").get_to(p.m_intended_delta_x_m);
 		j.at("m_intended_delta_y_m").get_to(p.m_intended_delta_y_m);
 		j.at("m_vel_x_m_s").get_to(p.m_vel_x_m_s);
@@ -115,7 +93,7 @@ namespace SXNGN::ECS::A {
 		j.at("moveable_type_").get_to(p.moveable_type_);
 		j.at("navigation_type_").get_to(p.navigation_type_);
 		j.at("destination_").get_to(p.destination_);
-		j.at("position_").get_to(p.position_);
+
 		j.at("new_destination_").get_to(p.new_destination_);
 		j.at("at_destination_").get_to(p.at_destination_);
 		//j.at("waypoints_").get_to(p.waypoints_);

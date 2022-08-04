@@ -39,9 +39,9 @@ namespace SXNGN::ECS::A {
 		{
 			return;
 		}
-		auto target_sprite = gCoordinator.GetComponentReadOnly(camera_target, A::ComponentTypeEnum::RENDERABLE);
+		auto target_location = gCoordinator.GetComponentReadOnly(camera_target, A::ComponentTypeEnum::LOCATION);
 
-		if (target_sprite == nullptr)
+		if (target_location == nullptr)
 		{
 			SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Camera target destroyed.");
 			camera_target = -1;
@@ -49,14 +49,15 @@ namespace SXNGN::ECS::A {
 		}
 
 		//Find the x/y of the target entity and update the camera position accordingly
-		if (target_sprite->component_type == A::ComponentTypeEnum::RENDERABLE)
+		if (target_location->component_type == ComponentTypeEnum::LOCATION)
 		{
-			A::Renderable* target_sprite_renderable = (A::Renderable*) target_sprite;
+			Location* target_location_ptr = (Location*) target_location;
+			Coordinate coordinate = target_location_ptr->GetPixelCoordinate();
 			SDL_Rect position;
-			position.x = target_sprite_renderable->x_;
-			position.y = target_sprite_renderable->y_;
-			position.w = target_sprite_renderable->tile_map_snip_.w;
-			position.h = target_sprite_renderable->tile_map_snip_.h;
+			position.x = coordinate.x;
+			position.y = coordinate.y;
+			position.w = 0;// = target_location_ptr->tile_map_snip_.w;
+			position.h = 0;// target_location_ptr->tile_map_snip_.h;
 
 			camera->set_position_actual(position);
 			SDL_Rect position_scaled = position;

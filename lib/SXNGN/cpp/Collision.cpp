@@ -74,22 +74,22 @@ namespace SXNGN {
 		bottomB = b.y + b.h;
 
 		//If any of the sides from A are outside of B
-		if ((bottomA - topB) + buffer < 0)
+		if ((bottomA - topB) + buffer <= 0)
 		{
 			return false;
 		}
 
-		if ((topA - bottomB) - buffer > 0)
+		if ((topA - bottomB) - buffer >= 0)
 		{
 			return false;
 		}
 
-		if ((rightA - leftB) + buffer < 0)
+		if ((rightA - leftB) + buffer <= 0)
 		{
 			return false;
 		}
 
-		if ((leftA - rightB) - buffer > 0)
+		if ((leftA - rightB) - buffer >= 0)
 		{
 			return false;
 		}
@@ -283,33 +283,4 @@ namespace SXNGN {
 		return false;
 	}
 
-	using CollisionType = SXNGN::ECS::A::CollisionType;
-	 std::vector<std::vector<const SXNGN::ECS::A::Collisionable*>> CollisionChecks::determineCollisions(SDL_Rect box, std::vector<const SXNGN::ECS::A::Collisionable*> collision_components, int buffer)
-	{
-		 std::vector<const SXNGN::ECS::A::Collisionable*> immoveable_collisions;
-		 std::vector<const SXNGN::ECS::A::Collisionable*> elastic_collisions;
-
-		for(int i = 0; i < collision_components.size(); i++)
-		{
-			if (checkCollisionBuffer(box, collision_components.at(i)->collision_box_, buffer))
-			{
-				switch (collision_components.at(i)->collision_type_)
-				{
-				case CollisionType::IMMOVEABLE:
-				{
-					immoveable_collisions.push_back(collision_components.at(i));
-					break;
-				}
-				case CollisionType::ELASTIC:
-				{
-					elastic_collisions.push_back(collision_components.at(i));
-					break;
-				}
-				}
-			}
-		}
-
-		std::vector<std::vector<const SXNGN::ECS::A::Collisionable*>> ret = { immoveable_collisions , elastic_collisions };
-		return ret;
-	}
 }

@@ -68,7 +68,7 @@ namespace SXNGN {
 				{
 					visited_ = true;
 					//if node is not traversible
-					if (traversal_cost == 0)
+					if (traversal_cost == -1)
 					{
 						return false;
 					}
@@ -100,17 +100,17 @@ namespace SXNGN {
 			public:
 
 
-				static std::tuple<std::vector<Pre_Renderable>, std::vector<Collisionable>, std::vector<Tile>> CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile);
+				static std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile);
 				
 				static void CreateNewWorld();
 
 				static void StartNewGame();
 
-				static Uint32 GetDistance(NAVIGATION_TYPE method, Location start, Location end);
+				static Uint32 GetDistance(NAVIGATION_TYPE method, Coordinate start, Coordinate end);
 
-				static std::queue<Location> GetPath(NAVIGATION_TYPE method, Location start, Location end);
+				static std::queue<Coordinate> GetPath(NAVIGATION_TYPE method, Coordinate start, Coordinate end);
 				
-				static std::pair<double, double> GetVector(Location start, Location end);
+				static std::pair<double, double> GetVector(Coordinate start, Coordinate end);
 
 			};
 		}

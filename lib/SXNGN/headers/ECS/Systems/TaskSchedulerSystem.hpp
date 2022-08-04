@@ -23,7 +23,7 @@ namespace SXNGN::ECS::A {
 
 		TaskPair FindHighestPriorityJob(Task_Worker_Component* worker, bool remove);
 
-		bool Worker_Can_Do_Work(Task_Worker_Component* worker, Moveable* worker_mov, Task_Component* task);
+		bool Worker_Can_Do_Work(Task_Worker_Component* worker, Location* worker_loc, Task_Component* task);
 
 		void Worker_Do_Work(Task_Worker_Component * worker, Task_Component * task, double dt);
 

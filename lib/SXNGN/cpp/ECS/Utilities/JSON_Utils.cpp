@@ -8,7 +8,7 @@
 namespace SXNGN {
 	namespace ECS {
 		namespace A {
-			std::tuple<std::vector<A::Pre_Renderable>, std::vector<A::Collisionable>, std::vector<A::Tile>>
+			std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>>
 				JSON_Utils::json_to_tile_batch(nlohmann::json jf)
 			{
 				int tiles_wide = 0;

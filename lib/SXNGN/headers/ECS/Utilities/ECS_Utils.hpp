@@ -14,11 +14,11 @@ namespace SXNGN {
 			{
 			public:
 				
-				static void ChangeEntityPosition(Entity entity, double x, double y);
+				//static void ChangeEntityPosition(Entity entity, double x, double y);
 
 				//static void ChangeEntityPositionLastGood(Entity entity);
 
-				static std::shared_ptr<SDL_Rect> GetEntityPosition(Entity entity);
+				//static Coordinate GetEntityPixelCoordinate(Entity entity);
 
 				static bool object_in_view(std::shared_ptr<ECS_Camera> camera, SDL_Rect object);
 
@@ -28,7 +28,6 @@ namespace SXNGN {
 
 				// Convert a position on the screen where (0,0) = top left to a world position where top left = camera top left + zoom in /scale shenanigans
 				static SDL_Rect convert_screen_position_to_world_position(std::shared_ptr<ECS_Camera> camera, int entity_x_unscaled, int entity_y_unscaled, ComponentTypeEnum game_state = ComponentTypeEnum::MAIN_GAME_STATE);
-
 
 			};
 		}

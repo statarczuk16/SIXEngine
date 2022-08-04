@@ -58,10 +58,10 @@ int main(int argc, char* args[])
 	collision_box.w = SXNGN::BASE_TILE_WIDTH;
 	collision_box.h = SXNGN::BASE_TILE_HEIGHT;
 	SXNGN::ECS::A::Collisionable* collision;
-	SXNGN::ECS::A::Tile* tile;
+	//SXNGN::ECS::A::Tile* tile;
 	
-	collision = SXNGN::ECS::A::Entity_Builder_Utils::Create_Collisionable(collision_box, SXNGN::ECS::A::CollisionType::IMMOVEABLE);
-	tile = SXNGN::ECS::A::Entity_Builder_Utils::Create_Tile(w, h);
+	//collision = SXNGN::ECS::A::Entity_Builder_Utils::Create_Collisionable(collision_box, SXNGN::ECS::A::CollisionType::IMMOVEABLE);
+	//tile = SXNGN::ECS::A::Entity_Builder_Utils::Create_Tile(w, h);
 
 	auto map_tile_entity_1 = gCoordinator.CreateEntity();
 	gCoordinator.AddComponent(map_tile_entity_1, collision);

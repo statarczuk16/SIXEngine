@@ -66,9 +66,11 @@ namespace SXNGN::ECS::A {
 			Task_Worker_Component* worker = nullptr;
 			ECS_Component* worker_ptr = nullptr;
 			worker_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::TASK_WORKER);
+			
 			if(worker_ptr)
 			{
 				//When no job, find the highest priority and start it
+				worker = static_cast<Task_Worker_Component*>(worker_ptr);
 				worker = static_cast<Task_Worker_Component*>(worker_ptr);
 				if (worker->current_job_ == MAX_ENTITIES)
 				{
@@ -85,7 +87,8 @@ namespace SXNGN::ECS::A {
 				}
 				Entity job_id = worker->current_job_;
 				ECS_Component* moveable_ptr = nullptr;
-				Moveable* moveable = nullptr;
+				Moveable* worker_moveable = nullptr;
+				Location* worker_location = nullptr;
 				ECS_Component* task_ptr = nullptr;
 				Task_Component* task = nullptr;
 				task_ptr = gCoordinator.CheckOutComponent(job_id, ComponentTypeEnum::TASK);
@@ -98,16 +101,20 @@ namespace SXNGN::ECS::A {
 
 				if (moveable_ptr = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::MOVEABLE))
 				{
-					moveable = static_cast<Moveable*>(moveable_ptr);
+					worker_moveable = static_cast<Moveable*>(moveable_ptr);
+				}
+				if (ECS_Component* location_data = gCoordinator.CheckOutComponent(worker_id, ComponentTypeEnum::LOCATION))
+				{
+					worker_location = static_cast<Location*>(location_data);
 				}
 				//if transitioning jobs, 
 				if (worker->job_transition_)
 				{
 					worker->job_transition_ = false;
-					if (moveable)
+					if (worker_moveable)
 					{
-						moveable->Update_Destination(task->tasks_.at(0).location_);
-						bool path_to_dest_exists = moveable->SolveDestination(moveable->navigation_type_);
+						worker_moveable->Update_Destination(task->tasks_.at(0).location_);
+						bool path_to_dest_exists = worker_moveable->SolveDestination(worker_location->m_pos_x_m_, worker_location->m_pos_y_m_, worker_moveable->navigation_type_);
 						if (path_to_dest_exists == false)
 						{
 							SDL_LogDebug(1, "Worker %d Canceled Job %d : Can't Reach", worker_id, job_id);
@@ -118,9 +125,9 @@ namespace SXNGN::ECS::A {
 				}
 				else
 				{
-					if (moveable->Check_At_Destination())
+					if (worker_moveable->Check_At_Destination(worker_location->m_pos_x_m_, worker_location->m_pos_y_m_))
 					{
-						if (Worker_Can_Do_Work(worker, moveable, task))
+						if (Worker_Can_Do_Work(worker, worker_location, task))
 						{
 							Worker_Do_Work(worker, task, dt);
 						}
@@ -136,7 +143,11 @@ namespace SXNGN::ECS::A {
 
 
 
-				if (moveable)
+				if (worker_location)
+				{
+					gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, worker_id);
+				}
+				if (worker_moveable)
 				{
 					gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, worker_id);
 				}
@@ -153,16 +164,16 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	bool Task_Scheduler_System::Worker_Can_Do_Work(Task_Worker_Component* worker, Moveable* worker_mov, Task_Component* task)
+	bool Task_Scheduler_System::Worker_Can_Do_Work(Task_Worker_Component* worker, Location* worker_loc, Task_Component* task)
 	{
 		if (task->tasks_.empty())
 		{
 			return false;
 		}
-		if (worker_mov)
+		if (worker_loc)
 		{
-			auto distance = Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, worker_mov->position_, task->tasks_.at(0).location_);
-			if (distance >= AT_DESTINATION_THRESH)
+			auto distance = Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, worker_loc->GetPixelCoordinate(), task->tasks_.at(0).location_);
+			if (distance > AT_DESTINATION_THRESH)
 			{
 				return false;
 			}
@@ -243,26 +254,38 @@ namespace SXNGN::ECS::A {
 							auto const& entity_int = *it_int;
 							it_int++;
 							auto check_out_worker = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::TASK_WORKER);
-							if (check_out_worker)
-							{
-								Task_Worker_Component* worker_ptr = static_cast<Task_Worker_Component*>(check_out_worker);
 
+							Task_Worker_Component* worker = nullptr;
+							if (ECS_Component* worker_data = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::TASK_WORKER))
+							{
+								worker = static_cast<Task_Worker_Component*>(worker_data);
+							}
+
+							Location* worker_location = nullptr;
+							if (ECS_Component* location_data = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::LOCATION))
+							{
+								worker_location = static_cast<Location*>(location_data);
+							}
+
+							Moveable* worker_moveable = nullptr;
+							if (ECS_Component* move_data = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::MOVEABLE))
+							{
+								worker_moveable = static_cast<Moveable*>(move_data);
+							}
+
+
+
+							if (worker && worker_location && worker_moveable)
+							{
+								
 								//if worker has the skill required to do the work the task current needs
-								if (worker_ptr->skill_enable_[task_ptr->tasks_.at(0).skill_required_] > SkillPriority::NONE)
+								if (worker->skill_enable_[task_ptr->tasks_.at(0).skill_required_] > SkillPriority::NONE)
 								{
 									worker_candidate_map_[entity_int] = -1;//is a candidate
-								}
-								//and is the closest to the job
-								auto moveable_check_out = gCoordinator.GetComponentReadOnly(entity_int, ComponentTypeEnum::MOVEABLE);
-								const Moveable* moveable_ptr;
-								if (moveable_check_out)
-								{
-									moveable_ptr = static_cast<const Moveable*>(moveable_check_out);
-									Location start;
-									start.x = (int)(round(moveable_ptr->get_pos_x()));
-									start.y = (int)(round(moveable_ptr->get_pos_y()));
 
-									Location end = task_ptr->tasks_.at(0).location_;
+									//and is the closest to the job
+									Coordinate start = worker_location->GetPixelCoordinate();
+									Coordinate end = task_ptr->tasks_.at(0).location_;
 
 									auto distance_cost = Map_Utils::GetDistance(NAVIGATION_TYPE::MANHATTAN, start, end);
 									if (distance_cost < lowest_cost)
@@ -272,15 +295,13 @@ namespace SXNGN::ECS::A {
 										best_worker.insert(entity_int);
 									}
 									worker_candidate_map_[entity_int] = distance_cost;//for debug
-
 								}
-								else
-								{
-									//... how to determine cost for things that don't move?
-									continue;
-								}
+								
+								gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, entity_int);
+								gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, entity_int);
+								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_int);
 							}
-							gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, entity_int);
+							
 						}
 					}
 					//else find the required units and assign them

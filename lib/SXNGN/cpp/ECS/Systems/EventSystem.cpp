@@ -25,11 +25,11 @@ namespace SXNGN::ECS::A {
 		//actable entities for event system are entities with event component
 		while (it_act != m_actable_entities.end())
 		{
-			auto const& entity_actable = *it_act;
+			auto const& ec = *it_act;
 			it_act++;
 
 			//thread safe checkout of data
-			auto check_out_event = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::EVENT);
+			auto check_out_event = gCoordinator.CheckOutComponent(ec, ComponentTypeEnum::EVENT);
 			if (check_out_event)
 			{
 
@@ -64,6 +64,10 @@ namespace SXNGN::ECS::A {
 				}
 				case EventType::MOUSE:
 				{
+					//mouse events are also handled in user_input_system (event "used up" by GUI if GUI is single_click_entities)
+					//and handled in collision system (event "used up" by a world object if obj is single_click_entities)
+					//mouse events not handled in those two systems are handled here, where check is if the mouse event selects a tile
+					Handle_Mouse_Event(event_ptr, ec);
 					SDL_LogInfo(1, "Event_System::Update:: Got Mouse Event");
 					break;
 				}
@@ -160,9 +164,9 @@ namespace SXNGN::ECS::A {
 				}
 				}
 				//check data back in
-				gCoordinator.CheckInComponent(ComponentTypeEnum::EVENT, entity_actable);
+				gCoordinator.CheckInComponent(ComponentTypeEnum::EVENT, ec);
 
-				entities_to_cleanup.push_back(entity_actable);
+				entities_to_cleanup.push_back(ec);
 			}
 
 		}
@@ -224,20 +228,131 @@ namespace SXNGN::ECS::A {
 		Entity event_entity = Entity_Builder_Utils::Create_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, load_game_state_change, "Load Game State Change");
 	}
 
+	void Event_System::Handle_Mouse_Event(Event_Component* ec, Entity entity)
+	{
+		//First, get the grid where the mouse event happened by looking up its location component
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		Event_Component* event_ptr = ec;
+		Location* location_ptr;
+		if (ECS_Component* location_data = gCoordinator.CheckOutComponent(entity, ComponentTypeEnum::LOCATION))
+		{
+			location_ptr = static_cast<Location*>(location_data);
+		}
+		else
+		{
+			SDL_LogError(1, "Mouse Event without Location");
+			std::terminate();
+			return;
+		}
+		Coordinate mouse_click_grid = location_ptr->GetGridCoordinate();
+		gCoordinator.CheckInComponent(entity, ComponentTypeEnum::LOCATION);
+		//find all the entities in the single_click_entities grid
+		auto entity_map_all = gCoordinator.getSpaceToEntityMap();
+		auto entity_map = entity_map_all[SXNGN::DEFAULT_SPACE];
+
+		std::set<sole::uuid> uuids_clicked = entity_map[mouse_click_grid.x][mouse_click_grid.y];
+		std::set<Entity> entities_clicked;
+		for (auto id : uuids_clicked)
+		{
+			Entity entity = gCoordinator.GetEntityFromUUID(id);
+			entities_clicked.insert(entity);
+		}
+
+
+		//if it is clickable
+		std::vector<Entity> single_click_entities(entities_clicked.size());
+		std::vector<Entity> double_click_entities(entities_clicked.size());
+		std::vector<Entity> boxed_entities(entities_clicked.size());
+		
+		
+		switch (event_ptr->e.mouse_event.type)
+		{
+			// if it's a click event, get more specific click type
+			case MouseEventType::CLICK:
+			{
+			
+				if (event_ptr->e.mouse_event.click.double_click)
+				{
+					//SDL_LogDebug(1, "Entity %d Double Clicked\n", entities_clicked);
+					std::copy(entities_clicked.begin(), entities_clicked.end(), double_click_entities.begin());
+				}
+				else
+				{
+					//SDL_LogDebug(1, "Entity %d Clicked\n", other_e);
+					std::copy(entities_clicked.begin(), entities_clicked.end(), single_click_entities.begin());
+				}
+				break;
+			}
+			//or selection box
+			case MouseEventType::BOX:
+			{			
+				//SDL_LogDebug(1, "Entity %d Mouse Boxed\n", other_e);
+				std::copy(entities_clicked.begin(), entities_clicked.end(), boxed_entities.begin());
+				break;
+			}
+			default:
+			{
+				SDL_LogCritical(1, "EventSystem: Unknown Mouse Event");
+				abort();
+			}
+		}//switch mouse event type
+
+		bool additive = false;
+		bool subtractive = false;
+		bool enqueue = false;
+		//priority of modified mouse clicks in this order
+		if (event_ptr->e.mouse_event.shift_click)
+		{
+			enqueue = true;
+		}
+		else if (event_ptr->e.mouse_event.ctrl_click)
+		{
+			additive = true;
+		}
+		else if (event_ptr->e.mouse_event.alt_click)
+		{
+			subtractive = true;
+		}
+
+		//dragged box or left click is selection
+		if (event_ptr->e.mouse_event.type == MouseEventType::BOX || event_ptr->e.mouse_event.click.button == MOUSE_BUTTON::LEFT)
+		{
+			//get where the moveable currently is before this collision occurs
+			
+			if (gCoordinator.getSetting("Debug_Spawn_Block").first == 1)
+			{
+				Entity_Builder_Utils::Create_Spawn_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_);
+			}
+			else
+			{
+				
+				//create event for user input system - tell it what entities were selected by a mouse event
+				Entity_Builder_Utils::Create_Selection_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, single_click_entities, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+			}
+		}
+		//right click is an order 
+		else if (event_ptr->e.mouse_event.click.button == MOUSE_BUTTON::RIGHT)
+		{
+			//create event for user input system - tell it what the target of the order is 
+			//todo different types of orders besides MOVE
+			Entity_Builder_Utils::Create_Order_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, OrderType::MOVE, single_click_entities, double_click_entities, boxed_entities, additive, subtractive, enqueue);
+		}
+	}
+
 	void Event_System::Handle_Mouse_Wheel_Event(Event_Component* ec)
 	{
-		auto cached_input_state = User_Input_State::get_instance();
-		if (cached_input_state->selected_entities.size() == 0)
-		{
-			SXNGN::Database::modify_scale(ec->e.mouse_wheel_event.y_);
-			std::cout << "Scale now: " << SXNGN::Database::get_scale() << std::endl;
-		}
+		//auto cached_input_state = User_Input_State::get_instance();
+		//if (cached_input_state->selected_entities.size() == 0)
+		//{
+		SXNGN::Database::modify_scale(ec->e.mouse_wheel_event.y_);
+		std::cout << "Scale now: " << SXNGN::Database::get_scale() << std::endl;
+		//}
 	}
 
 	void Event_System::Handle_Spawn_Event(Event_Component* ec)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
-		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::IMMOVEABLE, "spawned_block");
+		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::STATIC, "spawned_block");
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)
@@ -262,14 +377,14 @@ namespace SXNGN::ECS::A {
 					//didnt click on anything
 					return;
 				}
-				auto move_location = gCoordinator.GetComponentReadOnly(ec->e.order_event.clicked_entities.at(0), ComponentTypeEnum::COLLISION);
+				auto move_location = gCoordinator.GetComponentReadOnly(ec->e.order_event.clicked_entities.at(0), ComponentTypeEnum::LOCATION);
 				if (!move_location)
 				{
 					return;
 				}
-				const Collisionable* collisionable = static_cast<const Collisionable*>(move_location);
-				walk_chunk.location_.x = collisionable->collision_box_.x;
-				walk_chunk.location_.y = collisionable->collision_box_.y;
+				const Location* collisionable = static_cast<const Location*>(move_location);
+				walk_chunk.location_.x = collisionable->m_pos_x_m_;
+				walk_chunk.location_.y = collisionable->m_pos_y_m_;
 				walk_chunk.skill_level_required_ = 0;
 				walk_chunk.skill_required_ = TaskSkill::WALKING;
 				walk_chunk.work_required_ = 1;
