@@ -509,22 +509,21 @@ namespace SXNGN::ECS::A {
 		{
 			
 			SDL_Rect rect;
-			SDL_Rect circle_potential;
+			vf2d circle_potential;
 			SDL_Rect circle_real;
 			rect.x = loc_1->m_pos_x_m_;
 			rect.y = loc_1->m_pos_y_m_;
 			rect.w = collisonable1_ptr->width_;
 			rect.h = collisonable1_ptr->height_;
 
-			circle_real.x = loc_1->m_pos_x_m_;
-			circle_real.y = loc_1->m_pos_y_m_;
+			circle_real.x = loc_2->m_pos_x_m_;
+			circle_real.y = loc_2->m_pos_y_m_;
 			circle_real.w = collisonable2_ptr->radius_;
 			circle_real.h = collisonable2_ptr->radius_;
 
 			circle_potential.x = dynamic_e_potential_position.x;
 			circle_potential.y = dynamic_e_potential_position.y;
-			circle_potential.w = collisonable2_ptr->radius_;
-			circle_potential.h = collisonable2_ptr->radius_;
+			int radius = collisonable2_ptr->radius_;
 			
 			if (entity2 != dynamic_e)
 			{
@@ -532,27 +531,41 @@ namespace SXNGN::ECS::A {
 			}
 			
 
-			int nX = std::max(rect.x, std::min(rect.x + rect.w, circle_potential.x));
-			int nY = std::max(rect.y, std::min(rect.y + rect.h, circle_potential.y));
-			vi2d vect;
-			vect.x = nX - circle_potential.x;
-			vect.y = nY - circle_potential.y;
-			int mag = vect.mag();
-			int overlap = circle_potential.w - mag;
-			vi2d correction = vect.norm() * -1;
-			correction *= overlap;
-			int new_x = circle_potential.x + correction.x;
-			int new_y = circle_potential.y + correction.y;
-			int diff_x = new_x - circle_potential.x;
-			int diff_y = new_y - circle_potential.y;
-			dynamic_m->m_intended_delta_x_m = diff_x;
-			dynamic_m->m_intended_delta_y_m = diff_y;
+			float nearest_x = std::max(float(rect.x), std::min(float(rect.x + rect.w), circle_potential.x));
+			float nearest_y = std::max(float(rect.y), std::min(float(rect.y + rect.h), circle_potential.y));
+			vf2d ray_to_nearest_intersection;
+			ray_to_nearest_intersection.x = nearest_x - circle_potential.x;
+			ray_to_nearest_intersection.y = nearest_y - circle_potential.y;
+			
+			
+			float overlap = radius - ray_to_nearest_intersection.mag();
+			if (std::isnan(overlap))
+			{
+				overlap = 0;
+			}
+			if (overlap > 0)
+			{
+				vf2d correction = ray_to_nearest_intersection.norm() * overlap;
+				vf2d corrected_position = circle_potential - correction;
 
-			std::cout << "Rectangle Circle Collision" << std::endl;
-			std::cout << "Circle at " << circle_real.x << " " << circle_real.y << " with radius " << circle_real.w << " moving to " << circle_potential.x << " " << circle_potential.y << std::endl;
-			std::cout << "but rectangle at " << rect.x << " " << rect.y << " in the way " << std::endl;
-			std::cout << "overlap: " << overlap << " correction " << correction << correction.x << " " << correction.y << std::endl;
-			std::cout << "new potential move: " << diff_x << " " << diff_y << std::endl;
+				double diff_x = corrected_position.x - circle_real.x;
+				double diff_y = corrected_position.y - circle_real.y;
+				
+
+				
+				std::cout << "Rectangle Circle Collision" << std::endl;
+				std::cout << "Corrected from" << dynamic_m->m_intended_delta_x_m << "," << dynamic_m->m_intended_delta_y_m << std::endl;
+				std::cout << "Corrected to  " << diff_x << "," << diff_y << std::endl;
+				std::cout << "Circle at " << circle_real.x << " " << circle_real.y << " with radius " << radius << " moving to " << circle_potential.x << " " << circle_potential.y << std::endl;
+				std::cout << "but rectangle at " << rect.x << " " << rect.y << " in the way " << std::endl;
+				std::cout << "overlap: " << overlap << std::endl;
+
+				dynamic_m->m_intended_delta_x_m = diff_x;
+				dynamic_m->m_intended_delta_y_m = diff_y;
+				
+				
+			}
+			
 
 			
 

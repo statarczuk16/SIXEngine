@@ -178,7 +178,11 @@ template <class T>
 		v2d_generic& operator=(const v2d_generic& v) = default;
 		T mag() const { return T(std::sqrt(x * x + y * y)); }
 		T mag2() const { return x * x + y * y; }
-		v2d_generic  norm() const { T r = 1 / mag(); return v2d_generic(x * r, y * r); }
+		v2d_generic  norm() const 
+		{
+			T r = 1 / mag();
+			return v2d_generic(x * r, y * r); 
+		}
 		v2d_generic  perp() const { return v2d_generic(-y, x); }
 		v2d_generic  floor() const { return v2d_generic(std::floor(x), std::floor(y)); }
 		v2d_generic  ceil() const { return v2d_generic(std::ceil(x), std::ceil(y)); }

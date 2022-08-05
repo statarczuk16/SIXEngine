@@ -30,7 +30,7 @@ namespace SXNGN::ECS::A {
 
 		
 
-		void Render(ECS_Component* render_data, ECS_Component* location_data, std::shared_ptr<ECS_Camera> camera);
+		void Render(Entity entity, ECS_Component* render_data, ECS_Component* location_data, std::shared_ptr<ECS_Camera> camera);
 
 	};
 

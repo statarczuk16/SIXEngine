@@ -201,20 +201,20 @@ namespace SXNGN::ECS::A {
 		//Order of these matters. UI should appear over ground, etc
 		for (auto renderable_entity : renderables_ground_layer)
 		{
-			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
+			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
 
 		for (auto renderable_entity : renderables_object_layer)
 		{
-			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
+			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
 		for (auto renderable_entity : renderables_air_layer)
 		{
-			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
+			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
 		for (auto renderable_entity : renderables_ui_layer)
 		{
-			Render(all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
+			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
 		}
 
 		SDL_Rect normalViewPort;
@@ -231,10 +231,18 @@ namespace SXNGN::ECS::A {
 		gCoordinator.CheckInAllData(ComponentTypeEnum::LOCATION);
 	}
 
-	void Renderer_System::Render(ECS_Component* render_data, ECS_Component* location_data, std::shared_ptr<ECS_Camera> camera)
+	void Renderer_System::Render(Entity entity, ECS_Component* render_data, ECS_Component* location_data, std::shared_ptr<ECS_Camera> camera)
 	{
 		//Get renderable
-		
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+
+		const Collisionable* collisionable = nullptr;
+		auto collisionable_data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::COLLISION);
+		if (collisionable_data)
+		{
+			collisionable = static_cast<const Collisionable*>(collisionable_data);;
+		}
+
 		Renderable* renderable_ptr = static_cast<Renderable*>(render_data);
 
 		Location* location_ptr = static_cast<Location*>(location_data);
@@ -270,6 +278,11 @@ namespace SXNGN::ECS::A {
 			{
 				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable_ptr->renderable_name_);
 				abort();
+			}
+
+			if (collisionable != nullptr && collisionable->collision_shape_ == CollisionShape::CIRCLE)
+			{
+				renderable_ptr->sprite_map_texture_->render_circle(render_quad.x, render_quad.y, collisionable->radius_);
 			}
 
 			if (renderable_ptr->draw_debug_ && renderable_ptr->display_string_debug_ != "")

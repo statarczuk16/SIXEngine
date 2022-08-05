@@ -133,6 +133,47 @@ void SXNGN::Texture::render_text(int x, int y, FC_Font* font, std::string string
 	FC_Draw(font, renderer_, x, y, string.c_str());
 }
 
+void SXNGN::Texture::render_circle(int32_t center_x, int32_t center_y, int32_t radius)
+{
+	center_x *= SXNGN::Database::get_scale();
+	center_y *= SXNGN::Database::get_scale();
+	radius *= SXNGN::Database::get_scale();
+	const int32_t diameter = (radius * 2);
+
+	int32_t x = (radius - 1);
+	int32_t y = 0;
+	int32_t tx = 1;
+	int32_t ty = 1;
+	int32_t error = (tx - diameter);
+
+	while (x >= y)
+	{
+		//  Each of the following renders an octant of the circle
+		SDL_RenderDrawPoint(renderer_, center_x + x, center_y - y);
+		SDL_RenderDrawPoint(renderer_, center_x + x, center_y + y);
+		SDL_RenderDrawPoint(renderer_, center_x - x, center_y - y);
+		SDL_RenderDrawPoint(renderer_, center_x - x, center_y + y);
+		SDL_RenderDrawPoint(renderer_, center_x + y, center_y - x);
+		SDL_RenderDrawPoint(renderer_, center_x + y, center_y + x);
+		SDL_RenderDrawPoint(renderer_, center_x - y, center_y - x);
+		SDL_RenderDrawPoint(renderer_, center_x - y, center_y + x);
+
+		if (error <= 0)
+		{
+			++y;
+			error += ty;
+			ty += 2;
+		}
+
+		if (error > 0)
+		{
+			--x;
+			tx += 2;
+			error += (tx - diameter);
+		}
+	}
+}
+
 void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle, SDL_Point* center, SDL_RendererFlip flip, bool outline)
 {
 	//Set rendering space and render to screen
