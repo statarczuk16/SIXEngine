@@ -17,7 +17,11 @@ namespace SXNGN {
 		//Box collision detector
 		static bool checkCollision(SDL_Rect a, SDL_Rect b);
 		//Use buffer
-		static bool checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer);
+		static bool checkCollisionRectRectBuffer(SDL_Rect a, SDL_Rect b, int buffer);
+
+		static bool checkCollisionRectCircleBuffer(SDL_Rect a, SDL_Rect b, int buffer);
+
+		static bool checkCollisionCircleCircleBuffer(SDL_Rect a, SDL_Rect b, int buffer);
 
 		static SDL_Rect getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable_now, SDL_Rect moveable_previous);
 

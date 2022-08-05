@@ -46,6 +46,7 @@ namespace SXNGN::ECS::A {
 		{
 			component_type = ComponentTypeEnum::COLLISION;
 			collision_type_ = CollisionType::STATIC;
+			collision_shape_ = CollisionShape::UNKNOWN;
 			buffer_pixels = 0;
 			resolved_ = false;
 			radius_ = 0;
@@ -57,9 +58,9 @@ namespace SXNGN::ECS::A {
 		Collisionable(Uint32 radius, CollisionType type = CollisionType::STATIC)
 		{
 			component_type = ComponentTypeEnum::COLLISION;
+			collision_shape_ = CollisionShape::CIRCLE;
 			radius_ = radius;
 			buffer_pixels = 0;
-			radius_ = 0;
 			resolved_ = false;
 			traversal_cost_ = 1;
 			collision_type_ = type;
@@ -76,6 +77,7 @@ namespace SXNGN::ECS::A {
 		Collisionable(Uint32 height, Uint32 width, CollisionType type = CollisionType::STATIC, int traversal_cost = 1)
 		{
 			component_type = ComponentTypeEnum::COLLISION;
+			collision_shape_ = CollisionShape::RECTANGLE;
 			height_ = height;
 			width_ = width;
 			traversal_cost_ = traversal_cost;
@@ -94,6 +96,7 @@ namespace SXNGN::ECS::A {
 		//SDL_Rect collision_box_;
 		CollisionType collision_type_ = CollisionType::UNKNOWN;
 		CollisionTag collision_tag_ = CollisionTag::UNKNOWN;
+		CollisionShape collision_shape_ = CollisionShape::UNKNOWN;
 		int buffer_pixels = 0;//"halo" around the collision box making it collide larger/smaller than it really is
 		bool resolved_ = false; //set to true whenever this object is checked by collision system. 
 		Uint32 radius_ = 0;
@@ -109,6 +112,7 @@ namespace SXNGN::ECS::A {
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::COLLISION]},
 			{"collision_type_", p.collision_type_},
 			{"collision_tag_", p.collision_tag_},
+			{"collision_shape_", p.collision_shape_},
 			{"buffer_pixels", p.buffer_pixels},
 			{"resolved_", p.resolved_},
 			{"radius_", p.radius_},
@@ -123,6 +127,7 @@ namespace SXNGN::ECS::A {
 		p.component_type = component_type_enum;
 		j.at("collision_type_").get_to(p.collision_type_);
 		j.at("collision_tag_").get_to(p.collision_tag_);
+		j.at("collision_shape_").get_to(p.collision_shape_);
 		j.at("buffer_pixels").get_to(p.buffer_pixels);
 		j.at("resolved_").get_to(p.resolved_);
 		j.at("radius_").get_to(p.radius_);

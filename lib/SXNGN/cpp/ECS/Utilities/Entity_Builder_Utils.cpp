@@ -51,7 +51,7 @@ namespace SXNGN {
 				Moveable* moveable = new Moveable(15);
 				coordinator.AddComponent(person_entity, moveable);
 
-				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::DYNAMIC, -1);
+				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH/2, CollisionType::DYNAMIC);
 				coordinator.AddComponent(person_entity, collisionable);
 
 				Location* location = new Location(x_pixels, y_pixels);

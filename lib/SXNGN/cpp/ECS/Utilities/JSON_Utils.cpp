@@ -136,6 +136,13 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				case ComponentTypeEnum::LOCATION:
+				{
+					Location component = *static_cast<const Location*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
 				default :
 				{
 					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
@@ -232,6 +239,13 @@ namespace SXNGN {
 					{
 						auto component_inst = j.get<Task_Component>();
 						ECS_Component* component_ptr = new Task_Component(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::LOCATION:
+					{
+						auto component_inst = j.get<Location>();
+						ECS_Component* component_ptr = new Location(component_inst);
 						return component_ptr;
 						break;
 					}

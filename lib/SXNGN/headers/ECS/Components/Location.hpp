@@ -18,6 +18,11 @@ namespace SXNGN::ECS::A {
 	/// </summary>
 	struct Location : ECS_Component
 	{
+		Location()
+		{
+
+		}
+
 		Location(double x, double y)
 		{
 			component_type = ComponentTypeEnum::LOCATION;

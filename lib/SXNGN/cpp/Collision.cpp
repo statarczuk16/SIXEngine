@@ -53,7 +53,7 @@ namespace SXNGN {
 		return true;
 	}
 
-	bool SXNGN::CollisionChecks::checkCollisionBuffer(SDL_Rect a, SDL_Rect b, int buffer)
+	bool SXNGN::CollisionChecks::checkCollisionRectRectBuffer(SDL_Rect a, SDL_Rect b, int buffer)
 	{
 		//The sides of the rectangles
 		int leftA, leftB;
@@ -96,6 +96,36 @@ namespace SXNGN {
 
 		//If none of the sides from A are outside B
 		return true;
+	}
+
+	bool SXNGN::CollisionChecks::checkCollisionRectCircleBuffer(SDL_Rect rect, SDL_Rect circle, int buffer)
+	{
+
+		int xB;
+		int yB;
+		int radiusB;
+
+		xB = circle.x;
+		yB = circle.y;
+		radiusB = circle.w;
+		
+
+		int nX = max(rect.x, min(rect.x + rect.w, xB));
+		int nY = max(rect.y, min(rect.y + rect.h, yB));
+
+		double magnitude = sqrt(pow((nX - xB), 2) + pow((nY - yB),2));
+
+		if (magnitude <= radiusB)
+		{
+			return true;
+		}
+		return false;
+	}
+
+	bool SXNGN::CollisionChecks::checkCollisionCircleCircleBuffer(SDL_Rect a, SDL_Rect b, int buffer)
+	{
+
+		return false;
 	}
 
 	SDL_Rect SXNGN::CollisionChecks::getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable)
@@ -268,7 +298,7 @@ namespace SXNGN {
 		//Go through the tiles
 		for (int i = 0; i < tiles.size(); ++i)
 		{
-			//If the tile is a wall type tile
+			//If the tile is rect wall type tile
 			if ((tiles.at(i).getType() == TileType::WALL))
 			{
 				//If the collision box touches the wall tile

@@ -36,7 +36,7 @@ namespace SXNGN {
 
 				//Note object_bounds.w * 2 -- extra buffer so objects a bit out of camera range are still rendered
 				//dont want stuff to disappear//appear while the player can still see them
-				if (SXNGN::CollisionChecks::checkCollisionBuffer(scaled_camera_lens, object_bounds, object_bounds.w * 2))
+				if (SXNGN::CollisionChecks::checkCollisionRectRectBuffer(scaled_camera_lens, object_bounds, object_bounds.w * 2))
 				{
 					return true;
 				}

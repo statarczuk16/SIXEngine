@@ -1,6 +1,6 @@
 
 #define NOMINMAX
-#include<Collision.h>
+#include <Collision.h>
 #include <ECS/Core/Coordinator.hpp>
 #include <Database.h>
 #include <ECS/Systems/CollisionSystem.hpp>
@@ -8,6 +8,7 @@
 #include <ECS/Utilities/Physics_Utils.hpp>
 #include <vector>
 #include <ECS/Utilities/ECS_Utils.hpp>
+#include <v2d_generic.h>
 
 
 namespace SXNGN::ECS::A {
@@ -83,8 +84,18 @@ namespace SXNGN::ECS::A {
 				collision_box_outer.x += moveable_outer->m_intended_delta_x_m;
 				collision_box_outer.y += moveable_outer->m_intended_delta_y_m;
 			}
-			collision_box_outer.w = collisionable_outer->width_;
-			collision_box_outer.h = collisionable_outer->height_;
+			
+			CollisionShape outer_shape = collisionable_outer->collision_shape_;
+			if (outer_shape == CollisionShape::CIRCLE)
+			{
+				collision_box_outer.w = collisionable_outer->radius_;
+				collision_box_outer.h = collisionable_outer->radius_;
+			}
+			else
+			{
+				collision_box_outer.w = collisionable_outer->width_;
+				collision_box_outer.h = collisionable_outer->height_;
+			}
 
 			it_unresolved++;
 			auto it_all = entity_all.begin();
@@ -104,8 +115,19 @@ namespace SXNGN::ECS::A {
 					collision_box_inner.x += moveable_inner->m_intended_delta_x_m;
 					collision_box_inner.y += moveable_inner->m_intended_delta_y_m;
 				}
-				collision_box_inner.w = collisionable_inner->width_;
-				collision_box_inner.h = collisionable_inner->height_;
+
+				CollisionShape inner_shape = collisionable_inner->collision_shape_;
+				if (inner_shape == CollisionShape::CIRCLE)
+				{
+					collision_box_inner.w = collisionable_inner->radius_;
+					collision_box_inner.h = collisionable_inner->radius_;
+				}
+				else
+				{
+					collision_box_inner.w = collisionable_inner->width_;
+					collision_box_inner.h = collisionable_inner->height_;
+				}
+				
 				it_all++;
 				if (entity_inner == entity_outer)
 				{
@@ -114,12 +136,54 @@ namespace SXNGN::ECS::A {
 				
 				Uint8 collision_buffer_pixels = collisionable_outer->buffer_pixels + collisionable_inner->buffer_pixels;
 				//does obj a touch obj b
-				if (CollisionChecks::checkCollisionBuffer(collision_box_outer, collision_box_inner, collision_buffer_pixels))
+				if (inner_shape == CollisionShape::RECTANGLE && outer_shape == CollisionShape::RECTANGLE)
 				{
-					confirmed_collisions.push_back(std::make_pair(entity_inner, entity_outer));
-					resolved_collisions++;
-					//int collision_result = HandleCollisionGeneric(collisionable_outer, entity_actable_outer, collisionable_inner, entity_actable_inner, gCoordinator);
-					outer_collided_with_something = true;
+					if (CollisionChecks::checkCollisionRectRectBuffer(collision_box_outer, collision_box_inner, collision_buffer_pixels))
+					{
+						confirmed_collisions.push_back(std::make_pair(entity_inner, entity_outer));
+						resolved_collisions++;
+						//int collision_result = HandleCollisionGeneric(collisionable_outer, entity_actable_outer, collisionable_inner, entity_actable_inner, gCoordinator);
+						outer_collided_with_something = true;
+
+					}
+				}
+				else if (inner_shape == CollisionShape::RECTANGLE && outer_shape == CollisionShape::CIRCLE)
+				{
+					if (CollisionChecks::checkCollisionRectCircleBuffer(collision_box_inner, collision_box_outer, collision_buffer_pixels))
+					{
+						confirmed_collisions.push_back(std::make_pair(entity_inner, entity_outer));
+						resolved_collisions++;
+						//int collision_result = HandleCollisionGeneric(collisionable_outer, entity_actable_outer, collisionable_inner, entity_actable_inner, gCoordinator);
+						outer_collided_with_something = true;
+
+					}
+
+				}
+				else if (inner_shape == CollisionShape::CIRCLE && outer_shape == CollisionShape::RECTANGLE)
+				{
+					if (CollisionChecks::checkCollisionRectCircleBuffer(collision_box_outer, collision_box_inner, collision_buffer_pixels))
+					{
+						confirmed_collisions.push_back(std::make_pair(entity_inner, entity_outer));
+						resolved_collisions++;
+						//int collision_result = HandleCollisionGeneric(collisionable_outer, entity_actable_outer, collisionable_inner, entity_actable_inner, gCoordinator);
+						outer_collided_with_something = true;
+
+					}
+				}
+				else if (inner_shape == CollisionShape::CIRCLE && outer_shape == CollisionShape::CIRCLE)
+				{
+					if (CollisionChecks::checkCollisionCircleCircleBuffer(collision_box_outer, collision_box_inner, collision_buffer_pixels))
+					{
+						abort();
+						confirmed_collisions.push_back(std::make_pair(entity_inner, entity_outer));
+						resolved_collisions++;
+						//int collision_result = HandleCollisionGeneric(collisionable_outer, entity_actable_outer, collisionable_inner, entity_actable_inner, gCoordinator);
+						outer_collided_with_something = true;
+
+					}
+				}
+				else
+				{
 
 				}
 				
@@ -362,8 +426,25 @@ namespace SXNGN::ECS::A {
 		ECS_Component* dynamic_l_d = gCoordinator.CheckOutComponent(dynamic_e, ComponentTypeEnum::LOCATION);
 		Location* dynamic_l = static_cast<Location*>(dynamic_l_d);
 
+
+		Location* loc_1 = nullptr;
+		Location* loc_2 = nullptr;
+		if (static_e == entity1)
+		{
+			loc_1 = static_l;
+			loc_2 = dynamic_l;
+		}
+		else
+		{
+			loc_2 = static_l;
+			loc_1 = dynamic_l;
+		}
+
 		ECS_Component* dynamic_m_d = gCoordinator.CheckOutComponent(dynamic_e, ComponentTypeEnum::MOVEABLE);
 		Moveable* dynamic_m = static_cast<Moveable*>(dynamic_m_d);
+
+		auto shape_1 = collisonable1_ptr->collision_shape_;
+		auto shape_2 = collisonable2_ptr->collision_shape_;
 
 		SDL_Rect dynamic_e_position;
 		//get current position of dynamic entity
@@ -385,39 +466,110 @@ namespace SXNGN::ECS::A {
 		static_e_position.h = static_c->height_;
 
 
-		//check if the intended position is valid
-		std::pair<float, float> distance;
-		distance = Physics_Utils::CalculateDistanceTo(dynamic_e_position, static_e_position);
-		double xAxisTimeToCollide = dynamic_m->m_vel_x_m_s != 0.0 ? std::abs(distance.first / dynamic_m->m_vel_x_m_s) : 0;
-		double yAxisTimeToCollide = dynamic_m->m_vel_y_m_s != 0.0 ? std::abs(distance.second / dynamic_m->m_vel_y_m_s) : 0;
-
-		float shortest_time = 0.0;
-		double alternate_dist = 0.0;
-		//there is a collision, velocity tells what axis it occurred on
-
-		if (dynamic_m->m_vel_x_m_s != 0.0 && dynamic_m->m_vel_y_m_s == 0)
+		if (shape_1 == CollisionShape::RECTANGLE && shape_2 == CollisionShape::RECTANGLE)
 		{
-			//moving in x direction but not y, so time to collision is X
-			shortest_time = xAxisTimeToCollide;
-			alternate_dist = shortest_time * dynamic_m->m_vel_x_m_s;
-			dynamic_m->m_intended_delta_x_m = alternate_dist;//
+			
+
+
+			//check if the intended position is valid
+			std::pair<float, float> distance;
+			distance = Physics_Utils::CalculateDistanceTo(dynamic_e_position, static_e_position);
+			double xAxisTimeToCollide = dynamic_m->m_vel_x_m_s != 0.0 ? std::abs(distance.first / dynamic_m->m_vel_x_m_s) : 0;
+			double yAxisTimeToCollide = dynamic_m->m_vel_y_m_s != 0.0 ? std::abs(distance.second / dynamic_m->m_vel_y_m_s) : 0;
+
+			float shortest_time = 0.0;
+			double alternate_dist = 0.0;
+			//there is a collision, velocity tells what axis it occurred on
+
+			if (dynamic_m->m_vel_x_m_s != 0.0 && dynamic_m->m_vel_y_m_s == 0)
+			{
+				//moving in x direction but not y, so time to collision is X
+				shortest_time = xAxisTimeToCollide;
+				alternate_dist = shortest_time * dynamic_m->m_vel_x_m_s;
+				dynamic_m->m_intended_delta_x_m = alternate_dist;//
+
+			}
+			else if (dynamic_m->m_vel_y_m_s != 0.0 && dynamic_m->m_vel_x_m_s == 0)
+			{
+				shortest_time = yAxisTimeToCollide;
+				alternate_dist = shortest_time * dynamic_m->m_vel_y_m_s;
+				dynamic_m->m_intended_delta_y_m = alternate_dist;//distance.second;// shortest_time* dynamic_m->m_vel_y_m_s;
+			}
+			else
+			{
+				// Collision on X and Y axis (eg. slide up against a wall)
+				shortest_time = std::min(std::abs(xAxisTimeToCollide), std::abs(yAxisTimeToCollide));
+				alternate_dist = shortest_time * dynamic_m->m_vel_x_m_s;
+				dynamic_m->m_intended_delta_x_m = alternate_dist;// shortest_time* dynamic_m->m_vel_x_m_s;
+				alternate_dist = shortest_time * dynamic_m->m_vel_y_m_s;
+				dynamic_m->m_intended_delta_y_m = alternate_dist; //shortest_time * dynamic_m->m_vel_y_m_s;
+			}
+		}
+		else if (shape_1 == CollisionShape::RECTANGLE && shape_2 == CollisionShape::CIRCLE)
+		{
+			
+			SDL_Rect rect;
+			SDL_Rect circle_potential;
+			SDL_Rect circle_real;
+			rect.x = loc_1->m_pos_x_m_;
+			rect.y = loc_1->m_pos_y_m_;
+			rect.w = collisonable1_ptr->width_;
+			rect.h = collisonable1_ptr->height_;
+
+			circle_real.x = loc_1->m_pos_x_m_;
+			circle_real.y = loc_1->m_pos_y_m_;
+			circle_real.w = collisonable2_ptr->radius_;
+			circle_real.h = collisonable2_ptr->radius_;
+
+			circle_potential.x = dynamic_e_potential_position.x;
+			circle_potential.y = dynamic_e_potential_position.y;
+			circle_potential.w = collisonable2_ptr->radius_;
+			circle_potential.h = collisonable2_ptr->radius_;
+			
+			if (entity2 != dynamic_e)
+			{
+				abort();
+			}
+			
+
+			int nX = std::max(rect.x, std::min(rect.x + rect.w, circle_potential.x));
+			int nY = std::max(rect.y, std::min(rect.y + rect.h, circle_potential.y));
+			vi2d vect;
+			vect.x = nX - circle_potential.x;
+			vect.y = nY - circle_potential.y;
+			int mag = vect.mag();
+			int overlap = circle_potential.w - mag;
+			vi2d correction = vect.norm() * -1;
+			correction *= overlap;
+			int new_x = circle_potential.x + correction.x;
+			int new_y = circle_potential.y + correction.y;
+			int diff_x = new_x - circle_potential.x;
+			int diff_y = new_y - circle_potential.y;
+			dynamic_m->m_intended_delta_x_m = diff_x;
+			dynamic_m->m_intended_delta_y_m = diff_y;
+
+			std::cout << "Rectangle Circle Collision" << std::endl;
+			std::cout << "Circle at " << circle_real.x << " " << circle_real.y << " with radius " << circle_real.w << " moving to " << circle_potential.x << " " << circle_potential.y << std::endl;
+			std::cout << "but rectangle at " << rect.x << " " << rect.y << " in the way " << std::endl;
+			std::cout << "overlap: " << overlap << " correction " << correction << correction.x << " " << correction.y << std::endl;
+			std::cout << "new potential move: " << diff_x << " " << diff_y << std::endl;
+
+			
 
 		}
-		else if (dynamic_m->m_vel_y_m_s != 0.0 && dynamic_m->m_vel_x_m_s == 0)
+		else if (shape_1 == CollisionShape::CIRCLE && shape_2 == CollisionShape::RECTANGLE)
 		{
-			shortest_time = yAxisTimeToCollide;
-			alternate_dist = shortest_time * dynamic_m->m_vel_y_m_s;
-			dynamic_m->m_intended_delta_y_m = alternate_dist;//distance.second;// shortest_time* dynamic_m->m_vel_y_m_s;
+			
+		}
+		else if (shape_1 == CollisionShape::CIRCLE && shape_2 == CollisionShape::CIRCLE)
+		{
+			
 		}
 		else
 		{
-			// Collision on X and Y axis (eg. slide up against a wall)
-			shortest_time = std::min(std::abs(xAxisTimeToCollide), std::abs(yAxisTimeToCollide));
-			alternate_dist = shortest_time * dynamic_m->m_vel_x_m_s;
-			dynamic_m->m_intended_delta_x_m = alternate_dist;// shortest_time* dynamic_m->m_vel_x_m_s;
-			alternate_dist = shortest_time * dynamic_m->m_vel_y_m_s;
-			dynamic_m->m_intended_delta_y_m = alternate_dist; //shortest_time * dynamic_m->m_vel_y_m_s;
+
 		}
+		
 		gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, dynamic_e);
 
 		gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, dynamic_e);
@@ -555,7 +707,7 @@ entity_to_collisionable_all.push_back(std::make_pair(entity_actable, collisionab
 						}
 						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
 						//does obj a touch obj b
-						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
+						if (CollisionChecks::checkCollisionRectRectBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
 						{
 							confirmed_collisions.push_back(std::make_pair((*it_coll_a).first, (*it_coll_b).first));
 							outer_collided_with_something = true;
@@ -594,7 +746,7 @@ entity_to_collisionable_all.push_back(std::make_pair(entity_actable, collisionab
 						}
 						int collision_buffer_pixels = (*it_coll_a).second->buffer_pixels + (*it_coll_b).second->buffer_pixels;
 						//does obj a touch obj b
-						if (CollisionChecks::checkCollisionBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
+						if (CollisionChecks::checkCollisionRectRectBuffer((*it_coll_a).second->collision_box_, (*it_coll_b).second->collision_box_, collision_buffer_pixels))
 						{
 							//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "Collision Method 2: Entity %d hit Entity %d", (*it_coll_a).first, (*it_coll_b).first);
 
