@@ -6,7 +6,11 @@ and may not be redistributed without written permission.
 
 # About
 
-This is an Entity Component System Architecture game engine aimed at 2D tile based games. 
+This is an Entity Component System Architecture game engine aimed at 2D tile based games. It features tools for GUI development and top-down game style development.
+
+<img src="./doc/gifs/a_star_maze.gif" alt="A Star Pathfinding" width="500" height="600">
+
+<img src="./doc/gifs/ui_test.gif" alt="A Star Pathfinding" width="500" height="600">
 
 # Install/Use
 
