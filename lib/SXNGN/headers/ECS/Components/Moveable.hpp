@@ -1,7 +1,6 @@
 #pragma once
 
 #include "SDL.h"
-#include <Sprite/Tile.h>
 #include <memory>
 #include <ECS/Core/Component.hpp>
 #include <ECS/Core/Types.hpp>

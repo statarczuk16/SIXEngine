@@ -4,7 +4,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 project(RiskTheSix)
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
-
+add_definitions(-DNOMINMAX) #disable stupid windows.h thing intefering with std::min std::max
 
 set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 #put external libraries on path
@@ -29,7 +29,7 @@ elseif (MINGW)
 		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/)
 	endif()
 else()
-	message("Linux")
+	message("Linux")   
 endif()
 
 if(MSVC OR MINGW)

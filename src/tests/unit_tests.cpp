@@ -11,13 +11,13 @@ std::vector<std::function<void()>> tests;
 int test_1()
 {
 	int radius = 5;
-	SDL_Rect rect;
+	SDL_FRect rect;
 	rect.x = 10;
 	rect.y = 0;
 	rect.w = 5;
 	rect.h = 5;
 
-	SDL_Rect circle;
+	SDL_FRect circle;
 	circle.x = 0;
 	circle.y = 0;
 	circle.w = radius;

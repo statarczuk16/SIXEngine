@@ -9,7 +9,7 @@ namespace SXNGN::ECS::A {
 
     std::shared_ptr<CameraComponent> CameraComponent::instance_;//have to define static privates in cpp as well as h
 
-    CameraComponent::CameraComponent(SDL_Rect lens, SDL_Rect position, SDL_Rect screen_bounds, Entity target)
+    CameraComponent::CameraComponent(SDL_FRect lens, SDL_FRect position, SDL_FRect screen_bounds, Entity target)
     {
         lens_ = lens;
         position_actual_ = position;
@@ -23,7 +23,7 @@ namespace SXNGN::ECS::A {
     }
 
 
-    std::shared_ptr<CameraComponent> CameraComponent::init_instance(SDL_Rect lens, SDL_Rect position, SDL_Rect screen_bounds, Entity target)
+    std::shared_ptr<CameraComponent> CameraComponent::init_instance(SDL_FRect lens, SDL_FRect position, SDL_FRect screen_bounds, Entity target)
     {
         instance_ = std::make_shared<CameraComponent>(lens, position, screen_bounds, target);
         return instance_;
@@ -39,12 +39,12 @@ namespace SXNGN::ECS::A {
         instance_->target_ = target;
     }
 
-    void CameraComponent::set_position_actual(SDL_Rect pos_actual)
+    void CameraComponent::set_position_actual(SDL_FRect pos_actual)
     {
         instance_->position_actual_ = pos_actual;
     }
 
-    void CameraComponent::set_position_scaled(SDL_Rect pos_scaled)
+    void CameraComponent::set_position_scaled(SDL_FRect pos_scaled)
     {
         instance_->position_scaled_ = pos_scaled;
     }

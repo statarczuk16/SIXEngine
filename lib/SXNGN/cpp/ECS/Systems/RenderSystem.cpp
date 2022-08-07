@@ -136,7 +136,7 @@ namespace SXNGN::ECS::A {
 		{
 			Location* location = static_cast<Location*>(location_data);
 			Coordinate camera_target_position = location->GetPixelCoordinate();
-			SDL_Rect camera_target_position_rect;
+			SDL_FRect camera_target_position_rect;
 			camera_target_position_rect.x = camera_target_position.x;
 			camera_target_position_rect.y = camera_target_position.y;
 			camera_ptr->set_position_actual(camera_target_position_rect);
@@ -248,7 +248,7 @@ namespace SXNGN::ECS::A {
 		Location* location_ptr = static_cast<Location*>(location_data);
 
 		Coordinate render_location = location_ptr->GetPixelCoordinate();
-		SDL_Rect bounding_box;
+		SDL_FRect bounding_box;
 		bounding_box.x = render_location.x;
 		bounding_box.y = render_location.y;
 		bounding_box.w = renderable_ptr->tile_map_snip_.w;
@@ -257,7 +257,7 @@ namespace SXNGN::ECS::A {
 		if (ECS_Utils::object_in_view(camera, bounding_box))
 		{
 
-			SDL_Rect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
+			SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
 			//get the position of this object with respect to the camera lens
 			int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
 			int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
@@ -282,7 +282,7 @@ namespace SXNGN::ECS::A {
 
 			if (collisionable != nullptr && collisionable->collision_shape_ == CollisionShape::CIRCLE)
 			{
-				renderable_ptr->sprite_map_texture_->render_circle(render_quad.x, render_quad.y, collisionable->radius_);
+				renderable_ptr->sprite_map_texture_->render_circle(render_quad.x + collisionable->radius_, render_quad.y + collisionable->radius_, collisionable->radius_);
 			}
 
 			if (renderable_ptr->draw_debug_ && renderable_ptr->display_string_debug_ != "")

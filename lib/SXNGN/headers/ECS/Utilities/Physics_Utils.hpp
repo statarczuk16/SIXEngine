@@ -13,6 +13,8 @@ namespace SXNGN {
 
 				static std::pair<float, float> CalculateDistanceTo(SDL_Rect e1, SDL_Rect e2);
 
+				static std::pair<float, float> CalculateDistanceTo(SDL_FRect e1, SDL_FRect e2);
+
 			};
 
 		}

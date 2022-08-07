@@ -53,14 +53,14 @@ namespace SXNGN::ECS::A {
 		{
 			Location* target_location_ptr = (Location*) target_location;
 			Coordinate coordinate = target_location_ptr->GetPixelCoordinate();
-			SDL_Rect position;
+			SDL_FRect position;
 			position.x = coordinate.x;
 			position.y = coordinate.y;
 			position.w = 0;// = target_location_ptr->tile_map_snip_.w;
 			position.h = 0;// target_location_ptr->tile_map_snip_.h;
 
 			camera->set_position_actual(position);
-			SDL_Rect position_scaled = position;
+			SDL_FRect position_scaled = position;
 			position_scaled.x *= Database::get_scale();
 			position_scaled.y *= Database::get_scale();
 			camera->set_position_scaled(position_scaled);

@@ -428,13 +428,13 @@ int main(int argc, char* args[])
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
 
 	auto settings = gCoordinator.get_state_manager()->getGameSettings();
-	SDL_Rect camera_lens;
+	SDL_FRect camera_lens;
 	camera_lens.h = settings->resolution.h;
 	camera_lens.w = settings->resolution.w;
 	camera_lens.x = 0;
 	camera_lens.y = 0;
 
-	SDL_Rect camera_position;
+	SDL_FRect camera_position;
 	camera_position.x = 0;
 	camera_position.y = 0;
 	camera_position.w = 0;

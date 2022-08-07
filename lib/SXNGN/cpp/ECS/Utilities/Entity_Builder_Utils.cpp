@@ -51,7 +51,7 @@ namespace SXNGN {
 				Moveable* moveable = new Moveable(15);
 				coordinator.AddComponent(person_entity, moveable);
 
-				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH/2, CollisionType::DYNAMIC);
+				Collisionable* collisionable = new Collisionable(SXNGN::BASE_TILE_WIDTH/2.0 - 1, CollisionType::DYNAMIC);
 				coordinator.AddComponent(person_entity, collisionable);
 
 				Location* location = new Location(x_pixels, y_pixels);
@@ -124,7 +124,7 @@ namespace SXNGN {
 				Collisionable* collisionable = new Collisionable();
 
 				//mouse events take place in the game world. If a mouse click were to hit the main UI, it would not have produced a mouse event, rather been handled in the UserInputSystem
-				SDL_Rect mouse_click_world_position = ECS_Utils::convert_screen_position_to_world_position(camera_ptr, mouse_event.click.x, mouse_event.click.y);
+				SDL_FRect mouse_click_world_position = ECS_Utils::convert_screen_position_to_world_position(camera_ptr, mouse_event.click.x, mouse_event.click.y);
 				
 				collisionable->width_ = 1;
 				collisionable->height_ = 1;

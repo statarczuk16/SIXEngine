@@ -253,7 +253,7 @@ namespace SXNGN::ECS::A {
 						{
 							auto const& entity_int = *it_int;
 							it_int++;
-							auto check_out_worker = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::TASK_WORKER);
+							
 
 							Task_Worker_Component* worker = nullptr;
 							if (ECS_Component* worker_data = gCoordinator.CheckOutComponent(entity_int, ComponentTypeEnum::TASK_WORKER))
@@ -297,10 +297,24 @@ namespace SXNGN::ECS::A {
 									worker_candidate_map_[entity_int] = distance_cost;//for debug
 								}
 								
+								
+							}
+
+							if (worker)
+							{
 								gCoordinator.CheckInComponent(ComponentTypeEnum::TASK_WORKER, entity_int);
+							}
+							if (worker_location)
+							{
 								gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, entity_int);
+							}
+							if (worker_moveable)
+							{
 								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_int);
 							}
+							
+							
+							
 							
 						}
 					}

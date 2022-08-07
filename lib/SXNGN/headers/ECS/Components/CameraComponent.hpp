@@ -25,9 +25,9 @@ namespace SXNGN::ECS::A {
 
     public:
 
-        CameraComponent(SDL_Rect lens, SDL_Rect position, SDL_Rect screen_bounds, Entity target = -1);
+        CameraComponent(SDL_FRect lens, SDL_FRect position, SDL_FRect screen_bounds, Entity target = -1);
 
-        static std::shared_ptr<CameraComponent> init_instance(SDL_Rect lens, SDL_Rect position, SDL_Rect screen_bounds, Entity target = -1);
+        static std::shared_ptr<CameraComponent> init_instance(SDL_FRect lens, SDL_FRect position, SDL_FRect screen_bounds, Entity target = -1);
        
 
         static std::shared_ptr<CameraComponent> get_instance();
@@ -36,18 +36,18 @@ namespace SXNGN::ECS::A {
         static void set_target(Entity target);
       
 
-        static void set_position_actual(SDL_Rect pos_actual);
+        static void set_position_actual(SDL_FRect pos_actual);
        
 
-        static void set_position_scaled(SDL_Rect pos_scaled);
+        static void set_position_scaled(SDL_FRect pos_scaled);
        
 
         static Entity get_target();
 
-        SDL_Rect lens_;
-        SDL_Rect position_actual_; //relation to the level
-        SDL_Rect position_scaled_;//scaled (old position * scaling factor)
-        SDL_Rect screen_bounds_;
+        SDL_FRect lens_;
+        SDL_FRect position_actual_; //relation to the level
+        SDL_FRect position_scaled_;//scaled (old position * scaling factor)
+        SDL_FRect screen_bounds_;
         Entity target_;
        
     };

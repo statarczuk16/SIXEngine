@@ -18,7 +18,7 @@ namespace SXNGN::ECS::A {
 	};
 
 	struct GameSettings {
-		SDL_Rect resolution;
+		SDL_FRect resolution;
 		LevelGenerationSettings level_settings;
 		std::map < std::string, unsigned int > settings_map;
 	};
@@ -59,7 +59,7 @@ namespace SXNGN::ECS::A {
 			this->game_settings.level_settings.level_height_tiles = height * TILES_TO_CHUNK_EDGE;
 		}
 
-		void setResolution(SDL_Rect resolution)
+		void setResolution(SDL_FRect resolution)
 		{
 			this->game_settings.resolution = resolution;
 		}
@@ -110,7 +110,7 @@ namespace SXNGN::ECS::A {
 		{
 			this->setLevelHeightTiles(DEFAULT_WORLD_HEIGHT_CHUNKS);
 			this->setLevelWidthTiles(DEFAULT_WORLD_WIDTH_CHUNKS);
-			SDL_Rect resolution;
+			SDL_FRect resolution;
 			resolution.w = DEFAULT_SCREEN_RES_WIDTH;
 			resolution.h = DEFAULT_SCREEN_RES_HEIGHT;
 			resolution.x = 0;

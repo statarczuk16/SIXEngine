@@ -1,6 +1,6 @@
 #include <Collision.h>
-#include <Sprite/Tile.h>
 #include <ECS/Components/Collision.hpp>
+
 
 
 namespace SXNGN {
@@ -8,7 +8,7 @@ namespace SXNGN {
 	
 
 
-	bool SXNGN::CollisionChecks::checkCollision(SDL_Rect a, SDL_Rect b)
+	bool SXNGN::CollisionChecks::checkCollision(SDL_FRect a, SDL_FRect b)
 	{
 		//The sides of the rectangles
 		int leftA, leftB;
@@ -53,13 +53,13 @@ namespace SXNGN {
 		return true;
 	}
 
-	bool SXNGN::CollisionChecks::checkCollisionRectRectBuffer(SDL_Rect a, SDL_Rect b, int buffer)
+	bool SXNGN::CollisionChecks::checkCollisionRectRectBuffer(SDL_FRect a, SDL_FRect b, int buffer)
 	{
 		//The sides of the rectangles
-		int leftA, leftB;
-		int rightA, rightB;
-		int topA, topB;
-		int bottomA, bottomB;
+		float leftA, leftB;
+		float rightA, rightB;
+		float topA, topB;
+		float bottomA, bottomB;
 
 		//Calculate the sides of rect A
 		leftA = a.x;
@@ -98,22 +98,22 @@ namespace SXNGN {
 		return true;
 	}
 
-	bool SXNGN::CollisionChecks::checkCollisionRectCircleBuffer(SDL_Rect rect, SDL_Rect circle, int buffer)
+	bool SXNGN::CollisionChecks::checkCollisionRectCircleBuffer(SDL_FRect rect, SDL_FRect circle, int buffer)
 	{
 
-		int xB;
-		int yB;
-		int radiusB;
+		float xB;
+		float yB;
+		float radiusB;
 
 		xB = circle.x;
 		yB = circle.y;
 		radiusB = circle.w;
 		
 
-		int nX = max(rect.x, min(rect.x + rect.w, xB));
-		int nY = max(rect.y, min(rect.y + rect.h, yB));
+		float nX = std::max(rect.x, std::min(rect.x + rect.w, xB));
+		float nY = std::max(rect.y, std::min(rect.y + rect.h, yB));
 
-		double magnitude = sqrt(pow((nX - xB), 2) + pow((nY - yB),2));
+		float magnitude = sqrt(pow((nX - xB), 2.0) + pow((nY - yB),2.0));
 
 		if (magnitude <= radiusB)
 		{
@@ -122,20 +122,20 @@ namespace SXNGN {
 		return false;
 	}
 
-	bool SXNGN::CollisionChecks::checkCollisionCircleCircleBuffer(SDL_Rect a, SDL_Rect b, int buffer)
+	bool SXNGN::CollisionChecks::checkCollisionCircleCircleBuffer(SDL_FRect a, SDL_FRect b, int buffer)
 	{
 
 		return false;
 	}
 
-	SDL_Rect SXNGN::CollisionChecks::getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable)
+	SDL_FRect SXNGN::CollisionChecks::getCollisionLocation(SDL_FRect fixed, SDL_FRect moveable)
 	{
-		SDL_Rect new_move_location;
+		SDL_FRect new_move_location;
 		//The sides of the rectangles
-		int leftFix, leftMoveNow, leftMovePrev;
-		int rightFix, rightMoveNow, rightMovePrev;
-		int topFix, topMoveNow, topMovePrev;
-		int bottomFix, bottomMoveNow, bottomMovePrev;
+		float leftFix, leftMoveNow, leftMovePrev;
+		float rightFix, rightMoveNow, rightMovePrev;
+		float topFix, topMoveNow, topMovePrev;
+		float bottomFix, bottomMoveNow, bottomMovePrev;
 
 		//Calculate the sides of rect A
 		leftFix = fixed.x;
@@ -150,8 +150,8 @@ namespace SXNGN {
 		bottomMoveNow = moveable.y + moveable.h;
 
 		//determine if object is now colliding with static object
-		int xon = (std::max)(0, (std::min)(rightFix, rightMoveNow) - (std::max)(leftFix, leftMoveNow)) > 0;
-		int yon = (std::max)(0, (std::min)(bottomFix, bottomMoveNow) - (std::max)(topFix, topMoveNow)) > 0;
+		float xon = std::max(float(0.0), std::min(rightFix, rightMoveNow) - std::max(leftFix, leftMoveNow)) > 0.0;
+		float yon = std::max(float(0.0), std::min(bottomFix, bottomMoveNow) - std::max(topFix, topMoveNow)) > 0.0;
 		bool x_overlap_now = xon > 0;
 		bool y_overlap_now = yon > 0;
 		if ((x_overlap_now && y_overlap_now) == false)
@@ -205,14 +205,14 @@ namespace SXNGN {
 
 	}
 
-	 SDL_Rect SXNGN::CollisionChecks::getCollisionLocation(SDL_Rect fixed, SDL_Rect moveable_now, SDL_Rect moveable_prev)
+	 SDL_FRect SXNGN::CollisionChecks::getCollisionLocation(SDL_FRect fixed, SDL_FRect moveable_now, SDL_FRect moveable_prev)
 	{
-		 SDL_Rect new_move_location;
+		 SDL_FRect new_move_location;
 		 //The sides of the rectangles
-		 int leftFix, leftMoveNow, leftMovePrev;
-		 int rightFix, rightMoveNow, rightMovePrev;
-		 int topFix, topMoveNow, topMovePrev;
-		 int bottomFix, bottomMoveNow, bottomMovePrev;
+		 float leftFix, leftMoveNow, leftMovePrev;
+		 float rightFix, rightMoveNow, rightMovePrev;
+		 float topFix, topMoveNow, topMovePrev;
+		 float bottomFix, bottomMoveNow, bottomMovePrev;
 
 		 //Calculate the sides of rect A
 		 leftFix = fixed.x;
@@ -227,8 +227,8 @@ namespace SXNGN {
 		 bottomMoveNow = moveable_now.y + moveable_now.h;
 
 		 //determine if object is now colliding with static object
-		 int xon = (std::max)(0, (std::min)(rightFix, rightMoveNow) - (std::max)(leftFix, leftMoveNow)) > 0;
-		 int yon = (std::max)(0, (std::min)(bottomFix, bottomMoveNow) - (std::max)(topFix, topMoveNow)) > 0;
+		 int xon = std::max(float(0), (std::min)(rightFix, rightMoveNow) - (std::max)(leftFix, leftMoveNow)) > 0;
+		 int yon = std::max(float(0), (std::min)(bottomFix, bottomMoveNow) - (std::max)(topFix, topMoveNow)) > 0;
 		 bool x_overlap_now = xon > 0;
 		 bool y_overlap_now = yon > 0;
 		 if ((x_overlap_now && y_overlap_now) == false)
@@ -246,8 +246,8 @@ namespace SXNGN {
 		 bottomMovePrev = moveable_prev.y + moveable_prev.h;
 
 		 //determine if object WAS colliding before now
-		 int xop = (std::max)(0, (std::min)(rightFix, rightMovePrev) - (std::max)(leftFix, leftMovePrev)) > 0;
-		 int yop = (std::max)(0, (std::min)(bottomFix, bottomMovePrev) - (std::max)(topFix, topMovePrev)) > 0;
+		 int xop = (std::max)(float(0), (std::min)(rightFix, rightMovePrev) - (std::max)(leftFix, leftMovePrev)) > 0;
+		 int yop = (std::max)(float(0), (std::min)(bottomFix, bottomMovePrev) - (std::max)(topFix, topMovePrev)) > 0;
 		 bool x_overlap_prev = xop > 0;
 		 bool y_overlap_prev = yop > 0;
 
@@ -292,25 +292,5 @@ namespace SXNGN {
 	}
 
 
-	//fixme should this be here?
-	bool SXNGN::CollisionChecks::touchesWall(SDL_Rect box, std::vector<SXNGN::Tile> tiles)
-	{
-		//Go through the tiles
-		for (int i = 0; i < tiles.size(); ++i)
-		{
-			//If the tile is rect wall type tile
-			if ((tiles.at(i).getType() == TileType::WALL))
-			{
-				//If the collision box touches the wall tile
-				if (CollisionChecks::checkCollision(box, *tiles.at(i).getCollisionBox()))
-				{
-					return true;
-				}
-			}
-		}
-
-		//If no wall tiles were touched
-		return false;
-	}
 
 }

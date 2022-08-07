@@ -108,6 +108,11 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 	double confirmed_x = location->m_pos_x_m_ + moveable->m_intended_delta_x_m;
 	double confirmed_y = location->m_pos_y_m_ + moveable->m_intended_delta_y_m;
 
+	if(std::isnan(confirmed_x) || (std::isnan(confirmed_y)))
+	{
+		std::terminate();
+	}
+
 	Coordinate moveable_coord_from = location->GetGridCoordinate();
 	location->m_pos_x_m_ = confirmed_x;
 	location->m_pos_y_m_ = confirmed_y;

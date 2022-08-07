@@ -75,7 +75,7 @@ namespace SXNGN::ECS::A {
 			Collisionable* collisionable_outer = static_cast<Collisionable*>(all_collisionables[entity_outer]);
 			Location* location_outer = static_cast<Location*>(all_locations[entity_outer]);
 			
-			SDL_Rect collision_box_outer;
+			SDL_FRect collision_box_outer;
 			collision_box_outer.x = location_outer->m_pos_x_m_;
 			collision_box_outer.y = location_outer->m_pos_y_m_;
 			Moveable* moveable_outer = static_cast<Moveable*>(all_moveables[entity_outer]);
@@ -90,6 +90,8 @@ namespace SXNGN::ECS::A {
 			{
 				collision_box_outer.w = collisionable_outer->radius_;
 				collision_box_outer.h = collisionable_outer->radius_;
+				collision_box_outer.x += collisionable_outer->radius_;
+				collision_box_outer.y += collisionable_outer->radius_;
 			}
 			else
 			{
@@ -106,7 +108,7 @@ namespace SXNGN::ECS::A {
 				Entity entity_inner = *it_all;
 				Collisionable* collisionable_inner = static_cast<Collisionable*>(all_collisionables[entity_inner]);
 				Location* location_inner = static_cast<Location*>(all_locations[entity_inner]);
-				SDL_Rect collision_box_inner;
+				SDL_FRect collision_box_inner;
 				collision_box_inner.x = location_inner->m_pos_x_m_;
 				collision_box_inner.y = location_inner->m_pos_y_m_;
 				Moveable* moveable_inner = static_cast<Moveable*>(all_moveables[entity_inner]);
@@ -121,6 +123,8 @@ namespace SXNGN::ECS::A {
 				{
 					collision_box_inner.w = collisionable_inner->radius_;
 					collision_box_inner.h = collisionable_inner->radius_;
+					collision_box_inner.x += collisionable_inner->radius_;
+					collision_box_inner.y += collisionable_inner->radius_;
 				}
 				else
 				{
@@ -446,20 +450,20 @@ namespace SXNGN::ECS::A {
 		auto shape_1 = collisonable1_ptr->collision_shape_;
 		auto shape_2 = collisonable2_ptr->collision_shape_;
 
-		SDL_Rect dynamic_e_position;
+		SDL_FRect dynamic_e_position;
 		//get current position of dynamic entity
 		dynamic_e_position.x = dynamic_l->m_pos_x_m_;
 		dynamic_e_position.y = dynamic_l->m_pos_y_m_;
 		dynamic_e_position.w = dynamic_c->width_;
 		dynamic_e_position.h = dynamic_c->height_;
 
-		SDL_Rect dynamic_e_potential_position = dynamic_e_position;
+		SDL_FRect dynamic_e_potential_position = dynamic_e_position;
 		//add where movement system intends for it to move to this frame
 		dynamic_e_potential_position.x += dynamic_m->m_intended_delta_x_m;
 		dynamic_e_potential_position.y += dynamic_m->m_intended_delta_y_m;
 
 		//get current position of static entity
-		SDL_Rect static_e_position;
+		SDL_FRect static_e_position;
 		static_e_position.x = static_l->m_pos_x_m_;
 		static_e_position.y = static_l->m_pos_y_m_;
 		static_e_position.w = static_c->width_;
@@ -510,19 +514,18 @@ namespace SXNGN::ECS::A {
 			
 			SDL_Rect rect;
 			vf2d circle_potential;
-			SDL_Rect circle_real;
+			vf2d circle_real;
 			rect.x = loc_1->m_pos_x_m_;
 			rect.y = loc_1->m_pos_y_m_;
 			rect.w = collisonable1_ptr->width_;
 			rect.h = collisonable1_ptr->height_;
 
-			circle_real.x = loc_2->m_pos_x_m_;
-			circle_real.y = loc_2->m_pos_y_m_;
-			circle_real.w = collisonable2_ptr->radius_;
-			circle_real.h = collisonable2_ptr->radius_;
+			// If circle, center hitbox at center of square instead of at top-right
 
-			circle_potential.x = dynamic_e_potential_position.x;
-			circle_potential.y = dynamic_e_potential_position.y;
+			circle_real.x = loc_2->m_pos_x_m_ + (collisonable2_ptr->radius_ );
+			circle_real.y = loc_2->m_pos_y_m_ + (collisonable2_ptr->radius_ );
+			circle_potential.x = dynamic_e_potential_position.x + (collisonable2_ptr->radius_ );
+			circle_potential.y = dynamic_e_potential_position.y + (collisonable2_ptr->radius_ );
 			int radius = collisonable2_ptr->radius_;
 			
 			if (entity2 != dynamic_e)
@@ -547,21 +550,40 @@ namespace SXNGN::ECS::A {
 			{
 				vf2d correction = ray_to_nearest_intersection.norm() * overlap;
 				vf2d corrected_position = circle_potential - correction;
+				vf2d diff;
+				diff.x = corrected_position.x - circle_real.x;
+				diff.y = corrected_position.y - circle_real.y;
 
-				double diff_x = corrected_position.x - circle_real.x;
-				double diff_y = corrected_position.y - circle_real.y;
+				//case where center of circle is directly on edge of square
+				//the ray_to_nearest_point is 0, so can't create a normal vector to reverse
+				//create a different normal vector to use based on current positon vs potential position
+				if (std::isnan(diff.x) || std::isnan(diff.y))
+				{
+					vf2d vector_toward_dest(circle_potential.x - circle_real.x, circle_potential.y - circle_real.y);
+					correction = vector_toward_dest.norm() * overlap;
+					corrected_position = circle_potential - correction;
+					diff.x = corrected_position.x - circle_real.x;
+					diff.y = corrected_position.y - circle_real.y;
+
+				}
+
 				
-
 				
 				std::cout << "Rectangle Circle Collision" << std::endl;
 				std::cout << "Corrected from" << dynamic_m->m_intended_delta_x_m << "," << dynamic_m->m_intended_delta_y_m << std::endl;
-				std::cout << "Corrected to  " << diff_x << "," << diff_y << std::endl;
+				std::cout << "Corrected to  " << diff.x << "," << diff.y << std::endl;
 				std::cout << "Circle at " << circle_real.x << " " << circle_real.y << " with radius " << radius << " moving to " << circle_potential.x << " " << circle_potential.y << std::endl;
 				std::cout << "but rectangle at " << rect.x << " " << rect.y << " in the way " << std::endl;
 				std::cout << "overlap: " << overlap << std::endl;
 
-				dynamic_m->m_intended_delta_x_m = diff_x;
-				dynamic_m->m_intended_delta_y_m = diff_y;
+				if (std::isnan(diff.x) || (std::isnan(diff.y)))
+				{
+					std::terminate();
+				}
+				dynamic_m->m_intended_delta_x_m = diff.x;
+				dynamic_m->m_intended_delta_y_m = diff.y;
+
+
 				
 				
 			}
