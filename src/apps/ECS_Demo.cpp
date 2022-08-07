@@ -167,6 +167,11 @@ bool init()
 
 int init_menus()
 {
+
+	const int BUTTON_WIDTH = 150;
+	const int BUTTON_HEIGHT = 50;
+
+	const int STAT_LABEL_HEIGHT = 25;
 	auto coordinator = SXNGN::Database::get_coordinator();
 	const int WINDOW_HEIGHT = 620;
 	const int WINDOW_WIDTH = 320;
@@ -177,7 +182,7 @@ int init_menus()
 	auto mmw_c = UserInputUtils::create_window_raw(nullptr, 220, resolution.h - WINDOW_HEIGHT, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_MENU_STATE, mmw_c);
 
-	auto start_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "New Game", 1);
+	auto start_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "New Game", 1, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	Event_Component new_game_event;
 	new_game_event.e.common.type = EventType::STATE_CHANGE;
 	new_game_event.e.state_change.new_states.push_front(ComponentTypeEnum::NEW_GAME_STATE);
@@ -185,7 +190,7 @@ int init_menus()
 	start_button_c->triggered_events.push_back(new_game_event);
 	mmw_c->child_components_.push_back(start_button_c);
 
-	auto load_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Load Game", 2);
+	auto load_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Load Game", 2, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	Event_Component load_game_event;
 	load_game_event.e.common.type = EventType::LOAD;
 	load_game_event.e.load.filePath = "No File Path";
@@ -194,7 +199,7 @@ int init_menus()
 
 	
 
-	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings", 4);
+	auto settings_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Settings", 4, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	Event_Component settings_state_event;
 	settings_state_event.e.common.type = EventType::STATE_CHANGE;
 	settings_state_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_SETTINGS_STATE);
@@ -203,7 +208,7 @@ int init_menus()
 	settings_button_c->triggered_events.push_back(settings_state_event);
 	mmw_c->child_components_.push_back(settings_button_c);
 
-	auto exit_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Exit", 5);
+	auto exit_button_c = UserInputUtils::create_button(mmw_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Exit", 5, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	Event_Component exit_button_event;
 	exit_button_event.e.common.type = EventType::EXIT;
 	exit_button_c->triggered_events.push_back(exit_button_event);
@@ -223,11 +228,11 @@ int init_menus()
 		int row = i / 2;
 		int column = i % 2;
 		auto parent_scale = SP_HALF;
-		auto setting_button_c_row = UserInputUtils::create_button(msw_container->window_, h_align, v_align, parent_scale, UILayer::MID, (char*)("Setting " + std::to_string(i)).c_str(), row, column);
+		auto setting_button_c_row = UserInputUtils::create_button(msw_container->window_, h_align, v_align, parent_scale, UILayer::MID, (char*)("Setting " + std::to_string(i)).c_str(), row, column, BUTTON_WIDTH, BUTTON_HEIGHT);
 		msw_container->child_components_.push_back(setting_button_c_row);
 	}
 
-	auto back_button_c = UserInputUtils::create_button(msw_container->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS);
+	auto back_button_c = UserInputUtils::create_button(msw_container->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	
 	Event_Component back_state_event;
 	back_state_event.e.common.type = EventType::STATE_CHANGE;
@@ -244,16 +249,16 @@ int init_menus()
 	ui->add_ui_element(ComponentTypeEnum::NEW_GAME_STATE, new_game_window_c);
 
 	//New Game Label
-	auto ngl_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "New Game", 0);
+	auto ngl_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "New Game", 0, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	new_game_window_c->child_components_.push_back(ngl_c);
 
-	auto lwel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Width (Chunks)", 1, 1);
+	auto lwel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Width (Chunks)", 1, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	new_game_window_c->child_components_.push_back(lwel_c);
 
 	auto lwe_c = UserInputUtils::create_num_entry(new_game_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, UILayer::MID, "level_width_entry", 2, 24, TE_INT, 4, 2, 1);
 	new_game_window_c->child_components_.push_back(lwe_c);
 
-	auto lhel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Height (Chunks)", 3, 1);
+	auto lhel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Height (Chunks)", 3, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	new_game_window_c->child_components_.push_back(lhel_c);
 
 	auto lhe_c = UserInputUtils::create_num_entry(new_game_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, UILayer::MID, "level_height_entry", 2, 24, TE_INT, 4, 4, 1);
@@ -278,7 +283,7 @@ int init_menus()
 	std::function<void()> ng_update_height_b = std::bind(ng_update_height, lhe_c);
 	lhe_c->callback_functions_.push_back(ng_update_height_b);
 		
-	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1);
+	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	//Callback functions for level width/height 
 	/**std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_start_game = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
@@ -290,7 +295,7 @@ int init_menus()
 	new_game_window_c->child_components_.push_back(new_game_start_b);
 		
 
-	auto back_from_bg_button_c = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS_NG);
+	auto back_from_bg_button_c = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Back", NUM_SETTINGS_NG, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	Event_Component back_state_event_ng;
 	back_state_event_ng.e.common.type = EventType::STATE_CHANGE;
 	back_state_event_ng.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
@@ -300,20 +305,20 @@ int init_menus()
 
 	//************************* In Game UI
 
-	const int MAIN_GAME_STATE_MENU_WIDTH = 80;
+	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	// Window
-	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, MAIN_GAME_STATE_MENU_WIDTH, UILayer::BOTTOM);
+	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
 	//offset the game world display below this menu strip at the top
 	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-	overworld_viewport->y = MAIN_GAME_STATE_MENU_WIDTH;
+	overworld_viewport->y = MAIN_GAME_STATE_MENU_HEIGHT;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
 	//Open Menu Button
-	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0);
+	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0, BUTTON_WIDTH, BUTTON_HEIGHT);
 	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
 
-	auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0);
+	auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	ig_ui_window_top_c->child_components_.push_back(ig_debug_toggle_1);
 
@@ -332,12 +337,12 @@ int init_menus()
 	ig_go_to_menu_button->callback_functions_.push_back(mg_toggle_menu_visible);
 
 	//Exit to Desktop
-	auto pop_up_menu_exit_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Exit To Desktop", 3);
+	auto pop_up_menu_exit_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Exit To Desktop", 3, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	pop_up_menu_exit_button_c->triggered_events.push_back(exit_button_event);
 	ig_ui_window_pop_up_c->child_components_.push_back(pop_up_menu_exit_button_c);
 
 	//Exit to Main Menu
-	auto pop_up_menu_exit_to_main_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Exit To Menu", 2);
+	auto pop_up_menu_exit_to_main_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Exit To Menu", 2, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	pop_up_menu_exit_to_main_button_c->callback_functions_.push_back(mg_toggle_menu_visible);
 	ig_ui_window_pop_up_c->child_components_.push_back(pop_up_menu_exit_to_main_button_c);
 
@@ -350,13 +355,13 @@ int init_menus()
 
 
 	//Close Menu
-	auto pop_up_menu_close_menu_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Resume", 0);
+	auto pop_up_menu_close_menu_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Resume", 0, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	pop_up_menu_close_menu_button_c->callback_functions_.push_back(mg_toggle_menu_visible);
 	ig_ui_window_pop_up_c->child_components_.push_back(pop_up_menu_close_menu_button_c);
 
 
 	//Save Button
-	auto save_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Save", 1);
+	auto save_button_c = UserInputUtils::create_button(ig_ui_window_pop_up_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Save", 1, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	Event_Component save_game_event;
 	save_game_event.e.common.type = EventType::SAVE;
 	save_game_event.e.save.filePath = "No File Path";
@@ -369,43 +374,43 @@ int init_menus()
 
 
 	//************************* Debug Overlay
-	auto debug_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w-80, 0, 80, resolution.h, UILayer::MID);
-	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FPS", 0);
+	auto debug_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w-80, MAIN_GAME_STATE_MENU_HEIGHT, 80, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FPS", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(debug_fps_l);
 
-	debug_fps_actual = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 1);
+	debug_fps_actual = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 1, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(debug_fps_actual);
 
 
 
-	input_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "INPUT", 2);
+	input_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "INPUT", 2, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(input_system_label);
-	task_scheduler_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "TASK", 4);
+	task_scheduler_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "TASK", 4, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(task_scheduler_label);
-	movement_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "MOVEMENT", 6);
+	movement_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "MOVEMENT", 6, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(movement_system_label);
-	collision_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "COLLISION", 8);
+	collision_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "COLLISION", 8, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(collision_system_label);
-	event_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "EVENT", 10);
+	event_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "EVENT", 10, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(event_system_label);
-	render_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "RENDER", 12);
+	render_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "RENDER", 12, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(render_system_label);
-	ecs_stats_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "ENTITIES", 14);
+	ecs_stats_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "ENTITIES", 14, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(ecs_stats_label);
 
-	 input_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 1", 3);
+	 input_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 1", 3, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(input_system_ms);
-	 task_scheduler_ms= UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 2", 5);
+	 task_scheduler_ms= UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A 2", 5, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(task_scheduler_ms);
-	 movement_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A ", 7);
+	 movement_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A ", 7, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(movement_system_ms);
-	 collision_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 9);
+	 collision_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 9, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(collision_system_ms);
-	 event_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 11);
+	 event_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 11, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(event_system_ms);
-	 render_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 13);
+	 render_system_ms = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 13, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(render_system_ms);
-	 ecs_stats_num_entities = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 15);
+	 ecs_stats_num_entities = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 15, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(ecs_stats_num_entities);
 
 	 ui->add_ui_element(ComponentTypeEnum::CORE_BG_GAME_STATE, debug_window_c);
@@ -457,6 +462,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::OVERWORLD_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
@@ -593,67 +599,12 @@ int main(int argc, char* args[])
 	gCoordinator.AddComponent(apoc_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
 	
-
-	//todo save utility or game state
-	/**
-	std::string savefile = g_save_folder + "/save1.json";
-	std::ifstream ifs(savefile);
-	json jf = json::parse(ifs);
-	std::cout << jf << std::endl;
-
-	std::tuple<std::vector<Pre_Renderable>, std::vector<Collisionable>, std::vector<Tile>> game_map;
-	for (auto& [key, val] : jf.items())
-	{
-		std::cout << "key: " << key << ", value:" << val << '\n';
-		if (key == "map")
-		{
-			game_map = SXNGN::ECS::A::JSON_Utils::json_to_tile_batch(val);
-		}
-	}
-	
-
-	auto game_map_pre_renders = std::get<0>(game_map);
-	auto game_map_collisionables = std::get<1>(game_map);
-	auto game_map_tiles = std::get<2>(game_map);
-
-	for (int i = 0; i < game_map_pre_renders.size(); i++)
-	{
-		auto map_tile_entity = gCoordinator.CreateEntity();
-		Pre_Renderable* pre_render = new Pre_Renderable(game_map_pre_renders.at(i));
-		gCoordinator.AddComponent(map_tile_entity, pre_render);
-		Collisionable* collisionable = new Collisionable(game_map_collisionables.at(i));
-		gCoordinator.AddComponent(map_tile_entity, collisionable);
-		Tile* tile = new Tile(game_map_tiles.at(i));
-		gCoordinator.AddComponent(map_tile_entity, tile);
-
-		gCoordinator.AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
-		
-	}
-	**/
 	std::forward_list<ComponentTypeEnum> active_game_states;
 	active_game_states.clear();
 	active_game_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
 	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 	init_menus();
-
-
-
-	//std::cout << extracted << std::endl;
-
-	//auto json_to_entity_test = SXNGN::ECS::A::JSON_Utils::json_to_component(extracted);
-	/**
-		json j = game_map_pre_renders;
-		std::cout << j << std::endl;
-
-	std::string savefile_out = g_save_folder + "/save2.json";
-	std::ofstream file(savefile_out);
-	file << j;
-	**/
-
-	
-
-
 
 	SXNGN::Timer move_timer;//time passed between movement system calls
 

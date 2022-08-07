@@ -5,10 +5,10 @@
 namespace SXNGN::ECS::A {
 
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_button* new_kiss_button = new kiss_button();
-		kiss_button_new_uc(new_kiss_button, parent_window.get(), name, 40, 0, 150, 50);
+		kiss_button_new_uc(new_kiss_button, parent_window.get(), name, 40, 0, width, height);
 		new_kiss_button->h_align = h_align;
 		new_kiss_button->v_align = v_align;
 		new_kiss_button->row = row;
@@ -21,10 +21,10 @@ namespace SXNGN::ECS::A {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_select_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_select_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_selectbutton* new_kiss_toggle = new kiss_selectbutton();
-		kiss_selectbutton_new_uc(new_kiss_toggle, parent_window.get(), 40, 0, 150, 50);
+		kiss_selectbutton_new_uc(new_kiss_toggle, parent_window.get(), 40, 0, width, height);
 		new_kiss_toggle->h_align = h_align;
 		new_kiss_toggle->v_align = v_align;
 		new_kiss_toggle->row = row;
@@ -47,10 +47,10 @@ namespace SXNGN::ECS::A {
 		return std::make_shared<UIContainerComponent>(mmw_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_label(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_label(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_label* new_kiss_label = new kiss_label();
-		kiss_label_new(new_kiss_label, parent_window.get(), name, 0, 0);
+		kiss_label_new_uc(new_kiss_label, parent_window.get(), name, 0, 0, width, height);
 		new_kiss_label->h_align = h_align;//label center to parent window window
 		new_kiss_label->v_align = v_align;
 		new_kiss_label->txt_h_align = txt_h_align;//text center to this label

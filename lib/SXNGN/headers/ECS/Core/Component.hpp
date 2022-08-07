@@ -38,6 +38,7 @@ namespace SXNGN::ECS::A {
 	MAIN_GAME_STATE,
 	NEW_GAME_STATE,
 	MAIN_SETTINGS_STATE,
+	OVERWORLD_STATE,
 	CORE_BG_GAME_STATE,//don't forget to add to component_type_enum_to_string and reverse when adding a new enum
 	NUM_COMPONENT_TYPES
 };
@@ -72,6 +73,7 @@ namespace SXNGN::ECS::A {
 			{ComponentTypeEnum::CORE_BG_GAME_STATE,"CORE_BG_GAME_STATE"},
 			{ComponentTypeEnum::MAIN_GAME_STATE,"MAIN_GAME_STATE"},
 			{ComponentTypeEnum::MAIN_SETTINGS_STATE,"MAIN_SETTINGS_STATE"},
+			{ComponentTypeEnum::OVERWORLD_STATE,"OVERWORLD_STATE"},
 			{ComponentTypeEnum::NEW_GAME_STATE,"NEW_GAME_STATE"}
 
 		};
@@ -106,6 +108,7 @@ namespace SXNGN::ECS::A {
 			{"CORE_BG_GAME_STATE",ComponentTypeEnum::CORE_BG_GAME_STATE},
 			{"MAIN_GAME_STATE",ComponentTypeEnum::MAIN_GAME_STATE},
 			{"MAIN_SETTINGS_STATE",ComponentTypeEnum::MAIN_SETTINGS_STATE},
+			{"OVERWORLD_STATE",ComponentTypeEnum::OVERWORLD_STATE},
 			{"NEW_GAME_STATE",ComponentTypeEnum::NEW_GAME_STATE}
 		};
 		return component_type_string_to_enum;

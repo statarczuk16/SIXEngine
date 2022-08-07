@@ -56,6 +56,7 @@ namespace SXNGN::ECS::A {
 	{
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 	
+		ComponentTypeEnum state = ComponentTypeEnum::OVERWORLD_STATE;
 		auto settings = gCoordinator->get_state_manager()->getGameSettings();
 		std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> game_map = CreateTileMap(settings->level_settings.level_width_chunks, settings->level_settings.level_height_chunks, "APOCALYPSE_MAP", "ROCK_GROUND");
 
@@ -67,7 +68,7 @@ namespace SXNGN::ECS::A {
 		for (int i = 0; i < game_map_pre_renders.size(); i++)
 		{
 			auto map_tile_entity = gCoordinator->CreateEntity();
-			Pre_Renderable* pre_render = (game_map_pre_renders.at(i)); //fixme why the copy constructor???
+			Pre_Renderable* pre_render = (game_map_pre_renders.at(i)); 
 			if (pre_render)
 			{
 				gCoordinator->AddComponent(map_tile_entity, pre_render);
@@ -92,18 +93,15 @@ namespace SXNGN::ECS::A {
 				gCoordinator->AddComponent(map_tile_entity, tile);
 			}
 			
-			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
+			gCoordinator->AddComponent(map_tile_entity, Create_Gamestate_Component_from_Enum(state));
 		}
 
-		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 8, "APOCALYPSE_MAP", "GUNMAN_1", true, "Player");
+		Entity test_person = Entity_Builder_Utils::Create_Person(*gCoordinator, state, 4, 8, "APOCALYPSE_MAP", "GUNMAN_1", true, "Player");
 
-		Entity test_worker = Entity_Builder_Utils::Create_Person(*gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, 4, 4, "APOCALYPSE_MAP", "GUNMAN_2", false, "Worker");
+		Entity test_worker = Entity_Builder_Utils::Create_Person(*gCoordinator, state, 4, 4, "APOCALYPSE_MAP", "GUNMAN_2", false, "Worker");
 
 		auto camera = CameraComponent::get_instance();
 		camera->set_target(test_person);
-
-		
-	
 
 	}
 
@@ -182,7 +180,7 @@ namespace SXNGN::ECS::A {
 				
 				return q;
 			}
-			if (collision_map[end_grid_x][end_grid_y] == 0 || collision_map[start_grid_x][start_grid_y] == 0)
+			if (collision_map[end_grid_x][end_grid_y] == -1 || collision_map[start_grid_x][start_grid_y] == -1)
 			{
 				SDL_LogDebug(1, "A* Path Navigation Failed Unreachable Destination ");
 				

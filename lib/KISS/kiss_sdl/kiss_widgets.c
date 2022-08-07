@@ -239,6 +239,19 @@ int kiss_window_draw(kiss_window *window, SDL_Renderer *renderer)
 	return 1;
 }
 
+int kiss_label_new_uc(kiss_label* label, kiss_window* wdw, char* text,
+	int x, int y, int width, int height)
+{
+	if (!label || !text) return -1;
+	if (label->font.magic != KISS_MAGIC) label->font = kiss_textfont;
+	label->textcolor = kiss_black;
+	kiss_makerect(&label->rect, x, y, width, height);
+	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
+	label->visible = 0;
+	label->wdw = wdw;
+	return 0;
+}
+
 int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
 	int x, int y)
 {
