@@ -198,6 +198,17 @@ namespace SXNGN::ECS::A {
 		auto view_port = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 		
 		SDL_RenderSetViewport(gCoordinator.Get_Renderer(), view_port.get());
+		/**
+		SDL_SetRenderDrawColor(gCoordinator.get_texture_manager()->get_renderer(), 153, 145, 128, 0);
+		SDL_Rect rectangle;
+		
+		rectangle.x = 0;
+		rectangle.y = 0;
+		rectangle.w = gCoordinator.get_state_manager()->getGameSettings()->resolution.w;
+		rectangle.h = gCoordinator.get_state_manager()->getGameSettings()->resolution.h;;
+		SDL_RenderFillRect(gCoordinator.get_texture_manager()->get_renderer(), &rectangle);
+		**/
+
 		//Order of these matters. UI should appear over ground, etc
 		for (auto renderable_entity : renderables_ground_layer)
 		{

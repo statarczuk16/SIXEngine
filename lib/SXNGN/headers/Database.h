@@ -1,6 +1,8 @@
 #pragma once
 #include <SDL.h>
 #include <memory>
+#include <map>
+#include <string>
 
 namespace SXNGN {
 
@@ -24,6 +26,8 @@ namespace SXNGN {
         static Uint8 collision_budget_ms_;
         static Uint8 get_collision_budget_ms();
 
+        static std::map<std::string, double> property_map_;
+        static std::map<std::string, double>* get_property_map();
 
 
         static Uint8 get_screen_ticks_per_frame();

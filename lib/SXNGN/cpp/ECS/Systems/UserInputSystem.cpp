@@ -60,27 +60,40 @@ namespace SXNGN::ECS::A {
 				auto const& entity_interest = *it_inter;
 				it_inter++;
 
-				if (keyboard_events.empty() == false)
+				
+				auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
+				if (tags_ptr)
 				{
-					auto tags_ptr = gCoordinator.GetComponentReadOnly(entity_interest, ComponentTypeEnum::INPUT_TAGS);
-					if (tags_ptr)
+					User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
+					if (keyboard_events.empty() == false && input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL))
 					{
-						User_Input_Tags_Collection input_tags = *static_cast<const User_Input_Tags_Collection*>(tags_ptr);
-						if (input_tags.input_tags_.count(User_Input_Tags::WASD_CONTROL))
+						if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
 						{
-							if (input_tags.input_tags_.count(User_Input_Tags::PLAYER_CONTROL_MOVEMENT))
+							auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
+							if (check_out_move)
 							{
-								auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
-								if (check_out_move)
-								{
-									Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
-									Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
-									gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
-								}
+								Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
+								Translate_User_Input_To_Movement(moveable_ptr, entity_interest, keyboard_events, dt);
+								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
+							}
+						}
+					}
+					if (input_tags.input_tags_.count(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT))
+					{
+						std::map<std::string, double>* properties = SXNGN::Database::get_property_map();
+						if (properties->count(input_tags.property_tag_) > 0)
+						{
+							auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
+							if (check_out_move)
+							{
+								Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
+								moveable_ptr->m_vel_x_m_s = properties->at(input_tags.property_tag_);
+								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
 							}
 						}
 					}
 				}
+				
 				
 			}
 			entities_to_cleanup.push_back(entity_actable);

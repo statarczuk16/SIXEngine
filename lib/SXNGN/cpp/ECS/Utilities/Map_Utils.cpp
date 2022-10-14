@@ -65,34 +65,48 @@ namespace SXNGN::ECS::A {
 		auto dune_1 = gCoordinator->CreateEntity();
 		Pre_Renderable* pre_render_1 = nullptr;
 		Location* location_1 = nullptr;
+		Moveable* moveable_1 = nullptr;
+
+		User_Input_Tags_Collection* user_input_tags_dune = new User_Input_Tags_Collection();
+		user_input_tags_dune->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
+		user_input_tags_dune->property_tag_ = OVERWORLD_PACE;
 		
 		//put two of the same next to each other so they can scroll
 		pre_render_1 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);	
 		location_1 = new Location(0, 0);
+		moveable_1 = new Moveable();
+		gCoordinator->AddComponent(dune_1, user_input_tags_dune);
 		gCoordinator->AddComponent(dune_1, pre_render_1);
+		gCoordinator->AddComponent(dune_1, location_1);
 		gCoordinator->AddComponent(dune_1, location_1);
 		gCoordinator->AddComponent(dune_1, Create_Gamestate_Component_from_Enum(state));
 
 		auto dune_2 = gCoordinator->CreateEntity();
 		Pre_Renderable* pre_render_2 = nullptr;
 		Location* location_2 = nullptr;
+		Moveable* moveable_2 = nullptr;
 
 		//fixme 3200 is width of the scrolling image, should get from constant or something
 		pre_render_2 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);
 		location_2 = new Location(1600, 0);
+		moveable_2 = new Moveable();
+		
+		gCoordinator->AddComponent(dune_2, user_input_tags_dune);
 		gCoordinator->AddComponent(dune_2, pre_render_2);
 		gCoordinator->AddComponent(dune_2, location_2);
+		gCoordinator->AddComponent(dune_2, moveable_2);
 		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
 
 		auto character = gCoordinator->CreateEntity();
-		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::GROUND_LAYER);
+		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER);
 		location_2 = new Location(800, 225);
 		gCoordinator->AddComponent(character, pre_render_2);
+		gCoordinator->AddComponent(character, user_input_tags_dune);
 		gCoordinator->AddComponent(character, location_2);
 		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
 
-		auto camera = CameraComponent::get_instance();
-		camera->set_target(character);
+		//auto camera = CameraComponent::get_instance();
+		//camera->set_target(character);
 					
 
 	}

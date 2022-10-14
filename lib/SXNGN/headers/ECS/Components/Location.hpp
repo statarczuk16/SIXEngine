@@ -53,6 +53,7 @@ namespace SXNGN::ECS::A {
 
 		double m_pos_x_m_ = 0.0;//current position x
 		double m_pos_y_m_ = 0.0;//current position y
+		bool m_track_in_grid_map_ = true; //if false, will be ignored by anything to do with state manager's space_to_entity_location_map_
 		
 
 

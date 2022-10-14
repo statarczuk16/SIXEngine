@@ -206,8 +206,8 @@ namespace SXNGN::ECS::A {
 				space_to_entity_location_map_[SXNGN::DEFAULT_SPACE] = entity_map;
 				
 			}
-			auto size_x = space_to_entity_location_map_[space].size();
-			auto size_y = space_to_entity_location_map_[space].at(grid_x).size();
+			//auto size_x = space_to_entity_location_map_[space].size();
+			//auto size_y = space_to_entity_location_map_[space].at(grid_x).size();
 			if (grid_x < space_to_entity_location_map_[space].size()  && grid_y < space_to_entity_location_map_[space].at(grid_x).size())
 			{
 				return space_to_entity_location_map_[space].at(grid_x).at(grid_y);

@@ -120,10 +120,9 @@ namespace SXNGN {
 
 					if (component->get_component_type() == ComponentTypeEnum::LOCATION)
 					{
-						//only care about the collision map for the tactical/grid view state
-						if (EntityHasComponent(entity, ComponentTypeEnum::TACTICAL_STATE))
+						Location* location_ptr = static_cast<Location*>(component);
+						if (location_ptr->m_track_in_grid_map_ == true)
 						{
-							Location* location_ptr = static_cast<Location*>(component);
 							Coordinate grid = location_ptr->GetGridCoordinate();
 							int grid_x = grid.x;
 							int grid_y = grid.y;
@@ -131,9 +130,7 @@ namespace SXNGN {
 							addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
 							updateCollisionMap(grid_x, grid_y, SXNGN::DEFAULT_SPACE);
 						}
-							
 					}
-					
 				}
 
 				
@@ -277,10 +274,18 @@ namespace SXNGN {
 					if (collision_map.size() < grid_x)
 					{
 						SDL_LogError(1, "Collision Map Bad Index");
+						CheckInAllData(ComponentTypeEnum::COLLISION);
+						CheckInAllData(ComponentTypeEnum::RENDERABLE);
+						CheckInAllData(ComponentTypeEnum::TILE);
+						return -1;
 					}
 					if (collision_map[grid_x].size() < grid_y)
 					{
 						SDL_LogError(1, "Collision Map Bad Index");
+						CheckInAllData(ComponentTypeEnum::COLLISION);
+						CheckInAllData(ComponentTypeEnum::RENDERABLE);
+						CheckInAllData(ComponentTypeEnum::TILE);
+						return -1;
 					}
 					//if either of these, mark as non-traversible
 					if (sum_traversal_cost < 0 || traversible == false)

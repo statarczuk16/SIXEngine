@@ -315,8 +315,36 @@ int init_menus()
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
 	//Open Menu Button
-	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,3, BUTTON_WIDTH, BUTTON_HEIGHT);
 	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
+
+	
+
+	std::function<void(double new_pace)> set_pace = [](double new_pace)
+	{
+		SXNGN::Database::property_map_.operator[](SXNGN::OVERWORLD_PACE) = new_pace;
+	};
+	std::function<void()> set_pace_stop = std::bind(set_pace, 0.0);
+	std::function<void()> set_pace_slow = std::bind(set_pace, 1.0);
+	std::function<void()> set_pace_medium = std::bind(set_pace, 3.0);
+	std::function<void()> set_pace_fast = std::bind(set_pace, 6.0);
+
+
+	auto ig_pace_0 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Stop", 0, 4, BUTTON_WIDTH, BUTTON_HEIGHT);
+	ig_ui_window_top_c->child_components_.push_back(ig_pace_0);
+	ig_pace_0->callback_functions_.push_back(set_pace_stop);
+
+	auto ig_pace_1 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Slow", 0, 5, BUTTON_WIDTH, BUTTON_HEIGHT);
+	ig_ui_window_top_c->child_components_.push_back(ig_pace_1);
+	ig_pace_1->callback_functions_.push_back(set_pace_slow);
+
+	auto ig_pace_2 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Medium", 0, 6, BUTTON_WIDTH, BUTTON_HEIGHT);
+	ig_ui_window_top_c->child_components_.push_back(ig_pace_2);
+	ig_pace_2->callback_functions_.push_back(set_pace_medium);
+
+	auto ig_pace_3 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Fast", 0, 7, BUTTON_WIDTH, BUTTON_HEIGHT);
+	ig_ui_window_top_c->child_components_.push_back(ig_pace_3);
+	ig_pace_3->callback_functions_.push_back(set_pace_fast);
 
 	auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
 

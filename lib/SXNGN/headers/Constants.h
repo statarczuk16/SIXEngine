@@ -31,4 +31,6 @@ namespace SXNGN {
 
 	const std::string DEFAULT_SPACE = "DEFAULT_SPACE";
 
+	const std::string OVERWORLD_PACE = "OVERWORLD_PACE";
+
 }

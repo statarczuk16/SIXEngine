@@ -118,9 +118,13 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 	location->m_pos_y_m_ = confirmed_y;
 	Coordinate moveable_coord = location->GetGridCoordinate();
 	sole::uuid uuid = gCoordinator.GetUUIDFromEntity(moveable_id);
-	gCoordinator.moveUUIDOnLocationMap(moveable_coord_from.x, moveable_coord_from.y, moveable_coord.x, moveable_coord.y, uuid);
-	gCoordinator.updateCollisionMap(moveable_coord_from.x, moveable_coord_from.y);
-	gCoordinator.updateCollisionMap(moveable_coord.x, moveable_coord.y);
+	if (location->m_track_in_grid_map_ == false)
+	{
+		gCoordinator.moveUUIDOnLocationMap(moveable_coord_from.x, moveable_coord_from.y, moveable_coord.x, moveable_coord.y, uuid);
+		gCoordinator.updateCollisionMap(moveable_coord_from.x, moveable_coord_from.y);
+		gCoordinator.updateCollisionMap(moveable_coord.x, moveable_coord.y);
+	}
+	
 	moveable->m_intended_delta_x_m = 0;
 	moveable->m_intended_delta_y_m = 0;
 

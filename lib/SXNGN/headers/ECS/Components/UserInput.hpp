@@ -14,6 +14,7 @@ namespace SXNGN::ECS::A {
 		MOUSE_CONTROL, //can be selected with mouse
 		WASD_CONTROL, //movement controlled by keyboard
 		PLAYER_CONTROL_MOVEMENT,
+		PROPERTY_CONTROL_MOVEMENT //movement controlled by gui
 	};
 
 
@@ -27,6 +28,7 @@ namespace SXNGN::ECS::A {
 			component_type = ComponentTypeEnum::INPUT_TAGS;
 		}
 		std::unordered_set<User_Input_Tags> input_tags_;
+		std::string property_tag_ = ""; //used if input tags include PROPERTY_CONTROL_MOVEMENT
 	};
 
 	
@@ -34,6 +36,7 @@ namespace SXNGN::ECS::A {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::INPUT_TAGS]},
 			{"input_tags_", p.input_tags_},
+			{"property_tag_", p.property_tag_},
 		};
 	}
 
@@ -41,6 +44,7 @@ namespace SXNGN::ECS::A {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 		p.component_type = component_type_enum;
 		j.at("input_tags_").get_to(p.input_tags_);
+		j.at("property_tag_").get_to(p.property_tag_);
 	}
 
 	/// <summary>
