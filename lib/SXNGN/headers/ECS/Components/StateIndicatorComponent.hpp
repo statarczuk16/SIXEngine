@@ -42,7 +42,7 @@ namespace SXNGN::ECS::A {
 	{
 		OverworldGameStateComponent()
 		{
-			component_type = ComponentTypeEnum::OVERWORLD_STATE;
+			component_type = ComponentTypeEnum::TACTICAL_STATE;
 		}
 	};
 
@@ -53,7 +53,7 @@ namespace SXNGN::ECS::A {
 		case ComponentTypeEnum::MAIN_GAME_STATE: return new MainGameStateComponent();
 		case ComponentTypeEnum::MAIN_MENU_STATE: return new MainMenuStateComponent();
 		case ComponentTypeEnum::CORE_BG_GAME_STATE: return new CoreBackGroundGameStateComponent();
-		case ComponentTypeEnum::OVERWORLD_STATE: return new OverworldGameStateComponent();
+		case ComponentTypeEnum::TACTICAL_STATE: return new OverworldGameStateComponent();
 		default: 
 		{
 			printf("Error:: StateIndicatorComponent::Create_Gamestate_Component_from_Enum no game state named: %s", component_type_enum_to_string().at(game_state).c_str());

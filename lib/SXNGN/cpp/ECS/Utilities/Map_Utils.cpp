@@ -52,11 +52,46 @@ namespace SXNGN::ECS::A {
 		return std::make_tuple(pre_renders, collisionables, locations, tiles);
 	}
 
-	void Map_Utils::CreateNewWorld()
+
+	void Map_Utils::CreateOverworldMap()
+	{
+		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
+		//build the infinite scrolling map oregon trail style
+		const std::string tileset = "OVERWORLD_MAP";
+		std::vector<Pre_Renderable*> pre_renders;
+		std::vector<Location*> locations;
+		ComponentTypeEnum state = ComponentTypeEnum::MAIN_GAME_STATE;
+		
+		auto dune_1 = gCoordinator->CreateEntity();
+		Pre_Renderable* pre_render_1 = nullptr;
+		Location* location_1 = nullptr;
+		
+		//put two of the same next to each other so they can scroll
+		pre_render_1 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);	
+		location_1 = new Location(0, 0);
+		gCoordinator->AddComponent(dune_1, pre_render_1);
+		gCoordinator->AddComponent(dune_1, location_1);
+		gCoordinator->AddComponent(dune_1, Create_Gamestate_Component_from_Enum(state));
+
+		auto dune_2 = gCoordinator->CreateEntity();
+		Pre_Renderable* pre_render_2 = nullptr;
+		Location* location_2 = nullptr;
+
+		//fixme 3200 is width of the scrolling image, should get from constant or something
+		pre_render_2 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);
+		location_2 = new Location(3200, 0);
+		gCoordinator->AddComponent(dune_2, pre_render_2);
+		gCoordinator->AddComponent(dune_2, location_2);
+		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
+					
+
+	}
+
+	void Map_Utils::CreateTacticalMap()
 	{
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 	
-		ComponentTypeEnum state = ComponentTypeEnum::OVERWORLD_STATE;
+		ComponentTypeEnum state = ComponentTypeEnum::TACTICAL_STATE;
 		auto settings = gCoordinator->get_state_manager()->getGameSettings();
 		std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> game_map = CreateTileMap(settings->level_settings.level_width_chunks, settings->level_settings.level_height_chunks, "APOCALYPSE_MAP", "ROCK_GROUND");
 
@@ -114,7 +149,8 @@ namespace SXNGN::ECS::A {
 		active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 		gCoordinator->GameStateChanged(active_game_states);
 
-		CreateNewWorld();
+		CreateTacticalMap();
+		CreateOverworldMap();
 
 	}
 

@@ -462,7 +462,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
-	gCoordinator.RegisterComponent(ComponentTypeEnum::OVERWORLD_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::TACTICAL_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
@@ -589,7 +589,7 @@ int main(int argc, char* args[])
 	}
 
 
-	//Build the apocalypse map sprite factory
+	//Build the apocalypse map sprite factory for the tactical map
 	auto apoc_map_pre_entity = gCoordinator.CreateEntity();
 	Pre_Sprite_Factory* apocalypse_map_pre = new Pre_Sprite_Factory();
 	std::string apoc_tile_manifest_path = g_media_folder + "/wasteland_tile/manifest.txt";
@@ -597,6 +597,15 @@ int main(int argc, char* args[])
 	apocalypse_map_pre->tile_manifest_path_ = apoc_tile_manifest_path;
 	gCoordinator.AddComponent(apoc_map_pre_entity, apocalypse_map_pre);
 	gCoordinator.AddComponent(apoc_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
+
+	//Build the apocalypse map sprite factory for the overworld map
+	auto dune_map_pre_entity = gCoordinator.CreateEntity();
+	Pre_Sprite_Factory* dune_map_pre = new Pre_Sprite_Factory();
+	std::string overworld_tile_manifest_path = g_media_folder + "/overworld/manifest.txt";
+	dune_map_pre->name_ = "OVERWORLD_MAP";
+	dune_map_pre->tile_manifest_path_ = overworld_tile_manifest_path;
+	gCoordinator.AddComponent(dune_map_pre_entity, dune_map_pre);
+	gCoordinator.AddComponent(dune_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
 	
 	std::forward_list<ComponentTypeEnum> active_game_states;
