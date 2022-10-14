@@ -196,13 +196,28 @@ namespace SXNGN::ECS::A {
 				std::vector<std::vector<std::set<sole::uuid> > > entity_map;
 				for (unsigned int i = 0; i < getGameSettings()->level_settings.level_width_tiles; i++)
 				{
-					entity_map[i] = std::vector<std::set<sole::uuid> >();
+					entity_map.push_back(std::vector<std::set<sole::uuid> >());
+					for (unsigned int j = 0; j < getGameSettings()->level_settings.level_height_tiles; j++)
+					{
+						entity_map[i].push_back(std::set<sole::uuid>());
+					}
 				}
 
 				space_to_entity_location_map_[SXNGN::DEFAULT_SPACE] = entity_map;
+				
 			}
-			auto uuids_at_x_y = space_to_entity_location_map_[space].at(grid_x).at(grid_y);
-			return uuids_at_x_y;
+			auto size_x = space_to_entity_location_map_[space].size();
+			auto size_y = space_to_entity_location_map_[space].at(grid_x).size();
+			if (grid_x < space_to_entity_location_map_[space].size()  && grid_y < space_to_entity_location_map_[space].at(grid_x).size())
+			{
+				return space_to_entity_location_map_[space].at(grid_x).at(grid_y);
+			}
+			else
+			{
+				return std::set<sole::uuid>();
+			}
+			
+			
 		}
 
 		int moveUUIDOnLocationMap(int grid_x_from, int grid_y_from, int grid_x_to, int grid_y_to, sole::uuid uuid, std::string space = SXNGN::DEFAULT_SPACE)
@@ -211,13 +226,15 @@ namespace SXNGN::ECS::A {
 			{
 				return 1;
 			}
-			auto uuid_in_map_it = space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_from).at(grid_y_from).find(uuid);
-			if (uuid_in_map_it != space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_from).at(grid_y_from).end())
+
+			auto uuid_in_map = getUUIDSAtLocation(grid_x_from, grid_y_from, space);
+			auto uuid_in_map_it = uuid_in_map.find(uuid);
+			if (uuid_in_map_it != uuid_in_map.end())
 			{
-				space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_from).at(grid_y_from).erase(uuid_in_map_it);
+				space_to_entity_location_map_.at(space).at(grid_x_from).at(grid_y_from).erase(*uuid_in_map_it);
 				
 			}
-			space_to_entity_location_map_.at(SXNGN::DEFAULT_SPACE).at(grid_x_to).at(grid_y_to).insert(uuid);
+			space_to_entity_location_map_.at(space).at(grid_x_to).at(grid_y_to).insert(uuid);
 			return 0;
 		}
 

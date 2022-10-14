@@ -120,13 +120,18 @@ namespace SXNGN {
 
 					if (component->get_component_type() == ComponentTypeEnum::LOCATION)
 					{
+						//only care about the collision map for the tactical/grid view state
+						if (EntityHasComponent(entity, ComponentTypeEnum::TACTICAL_STATE))
+						{
 							Location* location_ptr = static_cast<Location*>(component);
-							Coordinate grid  = location_ptr->GetGridCoordinate();
+							Coordinate grid = location_ptr->GetGridCoordinate();
 							int grid_x = grid.x;
 							int grid_y = grid.y;
 							sole::uuid uuid = mEntityManager->GetUUIDFromEntity(entity);
 							addUUIDToLocationMap(grid_x, grid_y, uuid, SXNGN::DEFAULT_SPACE);
 							updateCollisionMap(grid_x, grid_y, SXNGN::DEFAULT_SPACE);
+						}
+							
 					}
 					
 				}

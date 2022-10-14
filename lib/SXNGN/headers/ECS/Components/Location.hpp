@@ -53,6 +53,7 @@ namespace SXNGN::ECS::A {
 
 		double m_pos_x_m_ = 0.0;//current position x
 		double m_pos_y_m_ = 0.0;//current position y
+		
 
 
 	};

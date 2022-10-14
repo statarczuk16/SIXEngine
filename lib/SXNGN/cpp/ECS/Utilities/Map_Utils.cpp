@@ -79,10 +79,20 @@ namespace SXNGN::ECS::A {
 
 		//fixme 3200 is width of the scrolling image, should get from constant or something
 		pre_render_2 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);
-		location_2 = new Location(3200, 0);
+		location_2 = new Location(1600, 0);
 		gCoordinator->AddComponent(dune_2, pre_render_2);
 		gCoordinator->AddComponent(dune_2, location_2);
 		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
+
+		auto character = gCoordinator->CreateEntity();
+		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::GROUND_LAYER);
+		location_2 = new Location(800, 225);
+		gCoordinator->AddComponent(character, pre_render_2);
+		gCoordinator->AddComponent(character, location_2);
+		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
+
+		auto camera = CameraComponent::get_instance();
+		camera->set_target(character);
 					
 
 	}
@@ -149,7 +159,7 @@ namespace SXNGN::ECS::A {
 		active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 		gCoordinator->GameStateChanged(active_game_states);
 
-		CreateTacticalMap();
+		//CreateTacticalMap();
 		CreateOverworldMap();
 
 	}
