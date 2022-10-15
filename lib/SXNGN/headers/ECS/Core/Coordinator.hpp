@@ -205,6 +205,11 @@ namespace SXNGN {
 					mStateManager->game_settings.settings_map[setting] = value;
 				}
 
+				const GameSettings* getGameSettings()
+				{
+					return mStateManager->getGameSettings();
+				}
+
 				int updateCollisionMap(int grid_x, int grid_y, std::string space = SXNGN::DEFAULT_SPACE)
 				{
 					//get all the other uuids at this location

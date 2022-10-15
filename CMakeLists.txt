@@ -10,7 +10,7 @@ set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 #put external libraries on path
 list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
 #put the cmake sdl tools on the path
-list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
+list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2) 
 
 #To help find_package find SDL2 when on Windows and libraries are in vclib folder.
 if(MSVC)

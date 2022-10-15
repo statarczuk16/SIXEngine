@@ -392,7 +392,7 @@ namespace SXNGN::ECS::A {
 				renderable_component->render_layer_ = pre_renderable.render_layer_;
 				if (renderable_component->render_layer_ == SXNGN::ECS::A::RenderLayer::UNKNOWN)
 				{
-					printf("RenderSystem:: %s has unknown RenderLayer", renderable_component->renderable_name_.c_str());
+					//printf("RenderSystem:: %s has unknown RenderLayer", renderable_component->renderable_name_.c_str());
 					abort();
 				}
 
@@ -400,10 +400,12 @@ namespace SXNGN::ECS::A {
 
 				gCoordinator.AddComponent(entity, renderable_component);
 				gCoordinator.RemoveComponent(entity, pre_renderable.get_component_type());
-				
 
-
-
+			}
+			else
+			{
+				SDL_LogError(1, "Error: Sprite Type %s was not in manifest", pre_renderable.sprite_factory_sprite_type_);
+				abort();
 			}
 		}
 		

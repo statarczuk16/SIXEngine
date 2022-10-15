@@ -26,6 +26,7 @@
 #include <ECS/Systems/CollisionSystem.hpp>
 #include <ECS/Systems/TaskSchedulerSystem.hpp>
 #include <string.h>
+#include <ECS/Systems/ParallaxSystem.hpp>
 
 
 
@@ -486,6 +487,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MOVEABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::COLLISION);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TILE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::PARALLAX);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_MENU_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
@@ -587,6 +589,15 @@ int main(int argc, char* args[])
 		gCoordinator.SetSystemSignatureActable<Event_System>(signature);
 	}
 	event_system->Init();
+
+	//Parallax system moves the background
+	auto parallax_system = gCoordinator.RegisterSystem<Parallax_System>();
+	{
+		Signature signature;
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::PARALLAX));
+		gCoordinator.SetSystemSignatureActable<Parallax_System>(signature);
+	}
+	parallax_system->Init();
 
 	//Task Scheduler System assigns workers to tasks
 	auto task_scheduler_system = gCoordinator.RegisterSystem<Task_Scheduler_System>();
@@ -697,6 +708,7 @@ int main(int argc, char* args[])
 
 		system_timer.start();
 		movement_system->Update(dt);
+		parallax_system->Update(dt);
 		task_scheduler_system->Update(dt);
 		move_timer.start(); //restart delta t for next frame
 		strncpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);

@@ -9,6 +9,7 @@
 #include <ECS/Components/SpriteFactory.hpp>
 #include <ECS/Components/UserInput.hpp>
 #include <ECS/Components/Tile.hpp>
+#include <ECS/Components/Parallax.hpp>
 #include <ECS/Components/ExternEntity.hpp>
 #include <ECS/Components/EventComponent.hpp>
 #include <ECS/Components/StateIndicatorComponent.hpp>

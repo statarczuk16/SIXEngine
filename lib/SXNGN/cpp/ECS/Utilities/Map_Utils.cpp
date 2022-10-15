@@ -65,48 +65,109 @@ namespace SXNGN::ECS::A {
 		auto dune_1 = gCoordinator->CreateEntity();
 		Pre_Renderable* pre_render_1 = nullptr;
 		Location* location_1 = nullptr;
-		Moveable* moveable_1 = nullptr;
+		Moveable* movement_common = nullptr;
 
-		User_Input_Tags_Collection* user_input_tags_dune = new User_Input_Tags_Collection();
-		user_input_tags_dune->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
-		user_input_tags_dune->property_tag_ = OVERWORLD_PACE;
+
+
 		
 		//put two of the same next to each other so they can scroll
-		pre_render_1 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);	
+		pre_render_1 = new Pre_Renderable(tileset, "DUNES_0", RenderLayer::AIR_LAYER);
 		location_1 = new Location(0, 0);
-		moveable_1 = new Moveable();
-		gCoordinator->AddComponent(dune_1, user_input_tags_dune);
+		movement_common = new Moveable();
 		gCoordinator->AddComponent(dune_1, pre_render_1);
 		gCoordinator->AddComponent(dune_1, location_1);
-		gCoordinator->AddComponent(dune_1, moveable_1);
+		gCoordinator->AddComponent(dune_1, movement_common);
 		gCoordinator->AddComponent(dune_1, Create_Gamestate_Component_from_Enum(state));
 
 		auto dune_2 = gCoordinator->CreateEntity();
 		Pre_Renderable* pre_render_2 = nullptr;
 		Location* location_2 = nullptr;
-		Moveable* moveable_2 = nullptr;
 
-		//fixme 3200 is width of the scrolling image, should get from constant or something
-		pre_render_2 = new Pre_Renderable(tileset, "DUNES", RenderLayer::GROUND_LAYER);
-		location_2 = new Location(1600, 0);
-		moveable_2 = new Moveable();
-		
-		gCoordinator->AddComponent(dune_2, user_input_tags_dune);
+		pre_render_2 = new Pre_Renderable(tileset, "DUNES_1", RenderLayer::AIR_LAYER);
+		location_2 = new Location(0, 0);
 		gCoordinator->AddComponent(dune_2, pre_render_2);
 		gCoordinator->AddComponent(dune_2, location_2);
-		gCoordinator->AddComponent(dune_2, moveable_2);
+		gCoordinator->AddComponent(dune_2, movement_common);
 		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
 
+		auto parallax_entity = gCoordinator->CreateEntity();
+		Parallax* parallax = new Parallax();
+		parallax->speed_multiplier_ = 1.0;
+		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_1));
+		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_2));
+		parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		gCoordinator->AddComponent(parallax_entity, parallax);
+		gCoordinator->AddComponent(parallax_entity, Create_Gamestate_Component_from_Enum(state));
+
+
+		//put two of the same next to each other so they can scroll
+		auto dune_3 = gCoordinator->CreateEntity();
+		auto pre_render_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::OBJECT_LAYER);
+		auto location_3 = new Location(0, 0);
+		auto movement_common_3 = new Moveable();
+		gCoordinator->AddComponent(dune_3, pre_render_3);
+		gCoordinator->AddComponent(dune_3, location_3);
+		gCoordinator->AddComponent(dune_3, movement_common_3);
+		gCoordinator->AddComponent(dune_3, Create_Gamestate_Component_from_Enum(state));
+
+		//put two of the same next to each other so they can scroll
+		auto dune_4 = gCoordinator->CreateEntity();
+		auto pre_render_4 = new Pre_Renderable(tileset, "DUNES_3", RenderLayer::OBJECT_LAYER);
+		auto location_4 = new Location(0, 0);
+		gCoordinator->AddComponent(dune_4, pre_render_4);
+		gCoordinator->AddComponent(dune_4, location_4);
+		gCoordinator->AddComponent(dune_4, movement_common_3);
+		gCoordinator->AddComponent(dune_4, Create_Gamestate_Component_from_Enum(state));
+
+		auto parallax_entity_2 = gCoordinator->CreateEntity();
+		Parallax* parallax_2 = new Parallax();
+		parallax_2->speed_multiplier_ = 0.33;
+		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_3));
+		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_4));
+		parallax_2->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		gCoordinator->AddComponent(parallax_entity_2, parallax_2);
+		gCoordinator->AddComponent(parallax_entity_2, Create_Gamestate_Component_from_Enum(state));
+
+		//put two of the same next to each other so they can scroll
+		auto dune_5 = gCoordinator->CreateEntity();
+		auto pre_render_5 = new Pre_Renderable(tileset, "SKY_DAY", RenderLayer::GROUND_LAYER);
+		auto location_5 = new Location(0, 0);
+		auto movement_common_5 = new Moveable();
+		gCoordinator->AddComponent(dune_5, pre_render_5);
+		gCoordinator->AddComponent(dune_5, location_5);
+		gCoordinator->AddComponent(dune_5, movement_common_5);
+		gCoordinator->AddComponent(dune_5, Create_Gamestate_Component_from_Enum(state));
+
+		//put two of the same next to each other so they can scroll
+		auto dune_6 = gCoordinator->CreateEntity();
+		auto pre_render_6 = new Pre_Renderable(tileset, "SKY_NIGHT", RenderLayer::GROUND_LAYER);
+		auto location_6 = new Location(0, 0);
+		gCoordinator->AddComponent(dune_6, pre_render_6);
+		gCoordinator->AddComponent(dune_6, location_6);
+		gCoordinator->AddComponent(dune_6, movement_common_5);
+		gCoordinator->AddComponent(dune_6, Create_Gamestate_Component_from_Enum(state));
+
+		auto parallax_entity_3 = gCoordinator->CreateEntity();
+		Parallax* parallax_3 = new Parallax();
+		parallax_3->speed_multiplier_ = 0.1;
+		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_3));
+		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_4));
+		parallax_3->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		gCoordinator->AddComponent(parallax_entity_3, parallax_3);
+		gCoordinator->AddComponent(parallax_entity_3, Create_Gamestate_Component_from_Enum(state));
+
+
+		
+
 		auto character = gCoordinator->CreateEntity();
-		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER);
+		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::UI_LAYER);
 		location_2 = new Location(800, 225);
 		gCoordinator->AddComponent(character, pre_render_2);
-		gCoordinator->AddComponent(character, user_input_tags_dune);
 		gCoordinator->AddComponent(character, location_2);
 		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
 
-		//auto camera = CameraComponent::get_instance();
-		//camera->set_target(character);
+		auto camera = CameraComponent::get_instance();
+		camera->set_target(character);
 					
 
 	}
