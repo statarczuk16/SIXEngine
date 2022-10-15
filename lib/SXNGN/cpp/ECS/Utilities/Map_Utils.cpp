@@ -78,7 +78,7 @@ namespace SXNGN::ECS::A {
 		gCoordinator->AddComponent(dune_1, user_input_tags_dune);
 		gCoordinator->AddComponent(dune_1, pre_render_1);
 		gCoordinator->AddComponent(dune_1, location_1);
-		gCoordinator->AddComponent(dune_1, location_1);
+		gCoordinator->AddComponent(dune_1, moveable_1);
 		gCoordinator->AddComponent(dune_1, Create_Gamestate_Component_from_Enum(state));
 
 		auto dune_2 = gCoordinator->CreateEntity();
