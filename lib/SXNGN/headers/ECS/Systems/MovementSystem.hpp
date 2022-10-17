@@ -10,7 +10,7 @@ namespace SXNGN::ECS::A {
 	class Movement_System : public System
 	{
 	public:
-		void Init();
+		virtual void Init();
 
 		void Update(float dt);
 

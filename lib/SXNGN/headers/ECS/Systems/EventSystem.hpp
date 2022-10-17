@@ -15,7 +15,7 @@ namespace SXNGN::ECS::A {
 	class Event_System : public System
 	{
 	public:
-		void Init();
+		virtual void Init();
 
 		void Update(float dt);
 

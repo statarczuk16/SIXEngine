@@ -72,6 +72,15 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
+		void ResetSystems()
+		{
+			auto it = mSystems.begin();
+			while (it != mSystems.end())
+			{
+				it->second->Init();
+			}
+		}
+
 		/// <summary>
 		/// Currently no difference between EntityDestroyed
 		/// </summary>

@@ -13,7 +13,7 @@ namespace SXNGN::ECS::A {
 	class Collision_System : public System
 	{
 	public:
-		void Init();
+		virtual void Init();
 
 		void Update(float dt);
 

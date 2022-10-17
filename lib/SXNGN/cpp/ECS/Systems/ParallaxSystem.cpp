@@ -10,7 +10,21 @@ namespace SXNGN::ECS::A
 
 	void Parallax_System::Init()
 	{
-		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "User_Input_System Init");
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Parallax_System Init");
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		auto it_act = m_actable_entities.begin();
+		while (it_act != m_actable_entities.end())
+		{
+			auto const& entity_actable = *it_act;
+			it_act++;
+			auto parallax_data = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::PARALLAX);
+			if (parallax_data)
+			{
+				Parallax* parallax_ptr = static_cast<Parallax*>(parallax_data);
+				parallax_ptr->init_ = false;
+			}
+			gCoordinator.CheckInComponent(entity_actable, ComponentTypeEnum::PARALLAX);
+		}
 	}
 
 	/// <summary>
@@ -138,6 +152,10 @@ namespace SXNGN::ECS::A
 							}
 							
 							gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
+						}
+						else
+						{
+							
 						}
 								
 					}

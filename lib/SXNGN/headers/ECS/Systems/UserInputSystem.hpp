@@ -24,7 +24,7 @@ namespace SXNGN::ECS::A {
 	class User_Input_System : public System
 	{
 	public:
-		void Init();
+		virtual void Init();
 
 		void Handle_GUI_Input(std::vector<SDL_Event>& events);
 

@@ -32,6 +32,8 @@ namespace SXNGN::ECS::A {
 
 		SystemTypeEnum system_type;
 
+		void Init();
+
 		//A A's main loop will (probably) iterate over m_actable_entities every frame
 		//But will only loop over m_accessible_entities if an actable_entity required data from
 		//an accessable_entity

@@ -11,7 +11,7 @@ namespace SXNGN::ECS::A {
 	class Task_Scheduler_System : public System
 	{
 	public:
-		void Init();
+		virtual void Init();
 
 		void Update(float dt);
 
