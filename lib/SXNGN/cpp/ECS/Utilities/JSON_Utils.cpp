@@ -143,6 +143,13 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				case ComponentTypeEnum::PARALLAX:
+				{
+					Parallax component = *static_cast<const Parallax*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
 				default :
 				{
 					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
@@ -246,6 +253,13 @@ namespace SXNGN {
 					{
 						auto component_inst = j.get<Location>();
 						ECS_Component* component_ptr = new Location(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::PARALLAX:
+					{
+						auto component_inst = j.get<Parallax>();
+						ECS_Component* component_ptr = new Parallax(component_inst);
 						return component_ptr;
 						break;
 					}

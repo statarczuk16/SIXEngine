@@ -86,12 +86,18 @@ namespace SXNGN::ECS::A
 				double first_onscreen_image_x = DBL_MAX; //the x location of the first image that should be on the screen.
 				double image_width_p = 0.0;
 				double image_height_p = 0.0;
+				//SDL_Log("Parallax Entity %d", entity_actable);
 				while (it != parallax_ptr->parallax_images_.end())
 				{
 					sole::uuid image_id = *it;
 					
 					it++;
 					Entity image_entity = gCoordinator.GetEntityFromUUID(image_id);
+					//SDL_Log("Contains image with Entity %d", image_entity);
+					if (!(gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::MOVEABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::RENDERABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::LOCATION)))
+					{
+						continue;
+					}
 					auto check_out_move = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::MOVEABLE);
 					if (check_out_move)
 					{
@@ -114,8 +120,10 @@ namespace SXNGN::ECS::A
 					if (check_out_loc)
 					{
 						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						
 						if (location_ptr)
 						{
+							//std::cout << "Image " << image_entity << " has location " << location_ptr->m_pos_x_m_ << std::endl;
 							//if images are moving left, when an image escapes left side of screen, put it in the BACK of the queue
 							if (speed_horizontal < 0.0)
 							{
@@ -150,42 +158,67 @@ namespace SXNGN::ECS::A
 									parallax_images_new_entity.push_back(image_entity);
 								}
 							}
+							else
+							{
+								if (location_ptr->m_pos_x_m_ < first_onscreen_image_x)
+								{
+									first_onscreen_image_x = location_ptr->m_pos_x_m_;
+								}
+								parallax_images_new_entity.push_back(image_entity);
+
+							}
 							
 							gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
 						}
 						else
 						{
 							
-						}
-								
+						}		
+					}
+					else
+					{
+
 					}
 					
 				}
-				
-				if (overlap || (parallax_ptr->init_ == false && parallax_images_new_entity.size() > 0))
-				{
-					parallax_ptr->init_ = true;
-					//now have list, in order, of images to be rendered, their width, and starting x position
-					auto it2 = parallax_images_new_entity.begin();
-					int idx = 0;
-					while (it2 != parallax_images_new_entity.end())
-					{
-						Entity image_entity = *it2;
-						it2++;
-						auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
-						if (check_out_loc)
-						{
-							Location* location_ptr = static_cast<Location*>(check_out_loc);
-							if (location_ptr)
-							{
-								location_ptr->m_pos_x_m_ = first_onscreen_image_x + (image_width_p * idx) - 1.0;
-							}
-							gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::LOCATION);
-						}
-						idx++;
 
+				if (first_onscreen_image_x != DBL_MAX)
+				{
+					
+					if (overlap || (parallax_ptr->init_ == false && parallax_images_new_entity.size() > 0))
+					{
+						//SDL_Log("Flip!");
+						parallax_ptr->init_ = true;
+						//now have list, in order, of images to be rendered, their width, and starting x position
+						auto it2 = parallax_images_new_entity.begin();
+						int idx = 0;
+						while (it2 != parallax_images_new_entity.end())
+						{
+							Entity image_entity = *it2;
+							it2++;
+							auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
+							if (check_out_loc)
+							{
+								Location* location_ptr = static_cast<Location*>(check_out_loc);
+								if (location_ptr)
+								{
+									std::cout << "Image " << image_entity << " moved from " << location_ptr->m_pos_x_m_;
+									location_ptr->m_pos_x_m_ = first_onscreen_image_x + (image_width_p * idx - 1.0);
+									std::cout << " to " << location_ptr->m_pos_x_m_ << std::endl;
+								}
+								gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::LOCATION);
+							}
+							idx++;
+
+						}
 					}
 				}
+				else
+				{
+					std::cout << "Bad!" << std::endl;
+				}
+				
+				
 				
 				
 

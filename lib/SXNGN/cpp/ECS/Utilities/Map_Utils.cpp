@@ -72,7 +72,7 @@ namespace SXNGN::ECS::A {
 		
 		//put two of the same next to each other so they can scroll
 		pre_render_1 = new Pre_Renderable(tileset, "DUNES_0", RenderLayer::AIR_LAYER);
-		location_1 = new Location(0, 0);
+		location_1 = new Location(1600, 0);
 		movement_common = new Moveable();
 		gCoordinator->AddComponent(dune_1, pre_render_1);
 		gCoordinator->AddComponent(dune_1, location_1);
@@ -103,7 +103,7 @@ namespace SXNGN::ECS::A {
 		//put two of the same next to each other so they can scroll
 		auto dune_3 = gCoordinator->CreateEntity();
 		auto pre_render_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::OBJECT_LAYER);
-		auto location_3 = new Location(0, 0);
+		auto location_3 = new Location(1600, 0);
 		auto movement_common_3 = new Moveable();
 		gCoordinator->AddComponent(dune_3, pre_render_3);
 		gCoordinator->AddComponent(dune_3, location_3);
@@ -150,8 +150,21 @@ namespace SXNGN::ECS::A {
 		auto parallax_entity_3 = gCoordinator->CreateEntity();
 		Parallax* parallax_3 = new Parallax();
 		parallax_3->speed_multiplier_ = 0.1;
-		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_3));
-		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_4));
+		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_5));
+		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_6));
+
+		auto it = parallax_3->parallax_images_.begin();
+		/**
+		while (it != parallax_3->parallax_images_.end())
+		{
+			sole::uuid image_id = *it;
+
+			it++;
+			Entity image_entity = gCoordinator->GetEntityFromUUID(image_id);
+			SDL_Log("Contains image with Entity %d", image_entity);
+		}
+		**/
+
 		parallax_3->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
 		gCoordinator->AddComponent(parallax_entity_3, parallax_3);
 		gCoordinator->AddComponent(parallax_entity_3, Create_Gamestate_Component_from_Enum(state));

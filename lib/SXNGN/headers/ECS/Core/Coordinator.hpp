@@ -656,7 +656,7 @@ namespace SXNGN {
 						catch (const std::exception& exc)
 						{
 							std::cerr << "Error converting JSON to Object: " << component_pair.dump(4) << std::endl;
-							std::cerr << exc.what();
+							std::cerr << exc.what() << std::endl;
 						}
 					}
 					auto uuid_it = j.find("uuid_");

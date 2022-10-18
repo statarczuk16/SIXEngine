@@ -280,7 +280,7 @@ namespace SXNGN::ECS::A {
 			render_quad.w = bounding_box.w;
 			render_quad.h = bounding_box.h;
 
-			SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
+			//SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
 
 			if (renderable_ptr->sprite_map_texture_ != nullptr)
 			{

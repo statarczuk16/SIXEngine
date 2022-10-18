@@ -52,7 +52,14 @@ namespace SXNGN::ECS::A {
 	inline void from_json(const json& j, Parallax& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 		p.component_type = component_type_enum;
-		j.at("parallax_images_").get_to(p.parallax_images_);
+		auto uuid_arr = j.at("parallax_images_");
+		for (auto element : uuid_arr)
+		{
+			sole::uuid input = sole::rebuild(element);
+			std::string test = input.str();
+			p.parallax_images_.push_back(input);	
+		}
+
 		j.at("speed_source_horizontal_").get_to(p.speed_source_horizontal_);
 		j.at("speed_source_vertical_").get_to(p.speed_source_vertical_);
 		j.at("speed_multiplier_").get_to(p.speed_multiplier_);
