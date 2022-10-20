@@ -326,9 +326,9 @@ int init_menus()
 		SXNGN::Database::property_map_.operator[](SXNGN::OVERWORLD_PACE) = new_pace;
 	};
 	std::function<void()> set_pace_stop = std::bind(set_pace, 0.0);
-	std::function<void()> set_pace_slow = std::bind(set_pace, -1.0);
+	std::function<void()> set_pace_slow = std::bind(set_pace, 1.0);
 	std::function<void()> set_pace_medium = std::bind(set_pace, -2.0);
-	std::function<void()> set_pace_fast = std::bind(set_pace, -3.0);
+	std::function<void()> set_pace_fast = std::bind(set_pace, 3.0);
 
 
 	auto ig_pace_0 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Stop", 0, 4, BUTTON_WIDTH, BUTTON_HEIGHT);

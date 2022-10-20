@@ -77,15 +77,19 @@ namespace SXNGN::ECS::A
 				// 1. Apply speed to the moveable component
 				// 2. Determine width of the image from renderable component 
 				// 3. For location components:
-				//	  1. Determine if image needs to be wrapped around (if off screen left, move to the right, vice versa) If so add to BACK of queue
-				//    2. Else move to FRONT of queue
-				// 4. For each location component in queue, start from first image that should be on screen and append the rest to that image
+				//	  1. Determine if image needs to be wrapped around (if off screen left, move to the right, vice versa) If so remove from queue and save
+				//    2. Else push back onto the queue to preserve original order
+				// 4. Push the saved image entity to be wrapped around onto the front or back of the queue (if it is the new leftmost or rightmost image respectively)
+				// 5. If new rightmost or newleftmost, calculate new position of leftmost or rightmost based on being left or right of its neighbor
+				// 6. If a redraw is warranted (init, new right image, new left image) refresh the locations by drawing each image in the queue in order, starting from leftmost position
 
 				auto it = parallax_ptr->parallax_images_.begin();
-				bool overlap = false;
-				double first_onscreen_image_x = DBL_MAX; //the x location of the first image that should be on the screen.
+				bool new_leftmost_image = false;
+				bool new_rightmost_image = false;
 				double image_width_p = 0.0;
 				double image_height_p = 0.0;
+				Entity new_right_entity = -1;
+				Entity new_left_entity = -1;
 				//SDL_Log("Parallax Entity %d", entity_actable);
 				while (it != parallax_ptr->parallax_images_.end())
 				{
@@ -127,53 +131,36 @@ namespace SXNGN::ECS::A
 							//if images are moving left, when an image escapes left side of screen, put it in the BACK of the queue
 							if (speed_horizontal < 0.0)
 							{
-								if (location_ptr->m_pos_x_m_ + image_width_p < 0.0)
+								if (location_ptr->m_pos_x_m_ + image_width_p < 0.0 && new_right_entity == -1)
 								{
-									overlap = true;
-									parallax_images_new_entity.push_back(image_entity);
+									new_rightmost_image = true;
+									new_right_entity = image_entity;
 								}
 								else
 								{
-									if (location_ptr->m_pos_x_m_ < first_onscreen_image_x)
-									{
-										first_onscreen_image_x = location_ptr->m_pos_x_m_;
-									}
-									parallax_images_new_entity.push_front(image_entity);
+									parallax_images_new_entity.push_back(image_entity);
 								}
 							}
 							//if images are moving right, when an image escapes the right side of screen, put it in the FRONT of the queue
 							else if(speed_horizontal > 0.0)
 							{
-								if (location_ptr->m_pos_x_m_ > gCoordinator.getGameSettings()->resolution.w)
+								if (location_ptr->m_pos_x_m_ > gCoordinator.getGameSettings()->resolution.w && new_right_entity == -1)
 								{
-									overlap = true;
-									parallax_images_new_entity.push_front(image_entity);
+									new_leftmost_image = true;
+									new_left_entity = image_entity;
 								}
 								else
 								{
-									if (location_ptr->m_pos_x_m_ < first_onscreen_image_x)
-									{
-										first_onscreen_image_x = location_ptr->m_pos_x_m_;
-									}
 									parallax_images_new_entity.push_back(image_entity);
 								}
 							}
 							else
 							{
-								if (location_ptr->m_pos_x_m_ < first_onscreen_image_x)
-								{
-									first_onscreen_image_x = location_ptr->m_pos_x_m_;
-								}
 								parallax_images_new_entity.push_back(image_entity);
-
 							}
 							
 							gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
-						}
-						else
-						{
-							
-						}		
+						}	
 					}
 					else
 					{
@@ -182,47 +169,128 @@ namespace SXNGN::ECS::A
 					
 				}
 
-				if (first_onscreen_image_x != DBL_MAX)
+
+				
+				if (new_rightmost_image)
 				{
 					
-					if (overlap || (parallax_ptr->init_ == false && parallax_images_new_entity.size() > 0))
-					{
-						//SDL_Log("Flip!");
-						parallax_ptr->init_ = true;
-						//now have list, in order, of images to be rendered, their width, and starting x position
-						auto it2 = parallax_images_new_entity.begin();
-						int idx = 0;
-						while (it2 != parallax_images_new_entity.end())
-						{
-							Entity image_entity = *it2;
-							it2++;
-							auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
-							if (check_out_loc)
-							{
-								Location* location_ptr = static_cast<Location*>(check_out_loc);
-								if (location_ptr)
-								{
-									std::cout << "Image " << image_entity << " moved from " << location_ptr->m_pos_x_m_;
-									location_ptr->m_pos_x_m_ = first_onscreen_image_x + (image_width_p * idx - 1.0);
-									std::cout << " to " << location_ptr->m_pos_x_m_ << std::endl;
-								}
-								gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::LOCATION);
-							}
-							idx++;
+					//push the new found rightmost image onto the back of the queue
+					parallax_images_new_entity.push_back(new_right_entity);
+					//if there is a new image in the end of the queue, it should be the rightmost image, so change its location to be so
+					//by placing it one image width to the right of the image next to it in the queue
+					auto it_new_right = parallax_images_new_entity.end() - 1;
+					Entity image_entity_new_right = *it_new_right;
+					auto it_prev_rightmost = it_new_right - 1;
+					Entity image_entity_prev_rightmost = *it_prev_rightmost;
 
+					double prev_rightmost_x;
+					double rightmost_x;
+					auto check_out_loc = gCoordinator.CheckOutComponent(image_entity_prev_rightmost, ComponentTypeEnum::LOCATION);
+					if (check_out_loc)
+					{
+						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						if (location_ptr)
+						{
+							prev_rightmost_x = location_ptr->m_pos_x_m_;
 						}
+						gCoordinator.CheckInComponent(image_entity_prev_rightmost, ComponentTypeEnum::LOCATION);
+					}
+					check_out_loc = gCoordinator.CheckOutComponent(image_entity_new_right, ComponentTypeEnum::LOCATION);
+					if (check_out_loc)
+					{
+						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						if (location_ptr)
+						{
+							location_ptr->m_pos_x_m_ = (prev_rightmost_x + image_width_p);
+							rightmost_x = location_ptr->m_pos_x_m_;
+							SDL_Log("New rightmost image: %d at %f", new_right_entity, rightmost_x);
+						}
+						gCoordinator.CheckInComponent(image_entity_new_right, ComponentTypeEnum::LOCATION);
 					}
 				}
-				else
+
+				if (new_leftmost_image)
 				{
-					std::cout << "Bad!" << std::endl;
+					//push the new found leftmost image onto the back of the queue
+					parallax_images_new_entity.push_front(new_left_entity);
+					//if there is a new image in the front of the queue, it should be the leftmost image, so change its location to be so
+					//by placing it one image width to the left of the image next to it in the queue
+					auto it_new_left = parallax_images_new_entity.begin();
+					Entity image_entity_new_left = *it_new_left;
+					auto it_prev_leftmost = it_new_left + 1;
+					Entity image_entity_prev_leftmost = *it_prev_leftmost;
+
+					double prev_leftmost_x;
+					double leftmost_x;
+					auto check_out_loc = gCoordinator.CheckOutComponent(image_entity_prev_leftmost, ComponentTypeEnum::LOCATION);
+					if (check_out_loc)
+					{
+						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						if (location_ptr)
+						{
+							prev_leftmost_x = location_ptr->m_pos_x_m_;
+							
+						}
+						gCoordinator.CheckInComponent(image_entity_prev_leftmost, ComponentTypeEnum::LOCATION);
+					}
+					check_out_loc = gCoordinator.CheckOutComponent(image_entity_new_left, ComponentTypeEnum::LOCATION);
+					if (check_out_loc)
+					{
+						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						if (location_ptr)
+						{
+							location_ptr->m_pos_x_m_ = (prev_leftmost_x - image_width_p);
+							leftmost_x = location_ptr->m_pos_x_m_;
+							SDL_Log("New leftmost image: %d at %f", new_left_entity, leftmost_x);
+						}
+						gCoordinator.CheckInComponent(new_left_entity, ComponentTypeEnum::LOCATION);
+					}
 				}
 				
+				//want to reset positions of the images in any of these cases
+				bool redraw = new_leftmost_image || new_rightmost_image || parallax_ptr->init_ == false;
 				
-				
-				
+					
+				if (redraw && (parallax_ptr->parallax_images_.size() == parallax_images_new_entity.size()))
+				{
+					
+					parallax_ptr->parallax_images_.clear(); //replace this with the new queue generated
+					
+					//dont want to "blow" the initilizaton redrwaw if the images aren't in the system yet
+					if (parallax_images_new_entity.size() > 0)
+					{
+						parallax_ptr->init_ = true;
+					}
+					
+					auto it2 = parallax_images_new_entity.begin();
+					int idx = 0;
+					double start_x;
+					while (it2 != parallax_images_new_entity.end())
+					{
+						Entity image_entity = *it2;
+						parallax_ptr->parallax_images_.push_back(gCoordinator.GetUUIDFromEntity(image_entity));
+						it2++;
+						auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
+						if (check_out_loc)
+						{
+							Location* location_ptr = static_cast<Location*>(check_out_loc);
+							if (location_ptr)
+							{
+								if (idx == 0)
+								{
+									start_x = location_ptr->m_pos_x_m_;
+								}
+								std::cout << "Image " << image_entity << " moved from " << location_ptr->m_pos_x_m_;
+								location_ptr->m_pos_x_m_ = start_x + (image_width_p * idx - 1.0);
+								std::cout << " to " << location_ptr->m_pos_x_m_ << std::endl;
+							}
+							gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::LOCATION);
+						}
+						idx++;
 
-				/// Second, 
+					}
+						
+				}
 			}
 			gCoordinator.CheckInComponent(entity_actable, ComponentTypeEnum::PARALLAX);
 			
