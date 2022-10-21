@@ -60,7 +60,7 @@ namespace SXNGN::ECS::A {
 		const std::string tileset = "OVERWORLD_MAP";
 		std::vector<Pre_Renderable*> pre_renders;
 		std::vector<Location*> locations;
-		ComponentTypeEnum state = ComponentTypeEnum::MAIN_GAME_STATE;
+		ComponentTypeEnum state = ComponentTypeEnum::OVERWORLD_STATE;
 		
 		auto dune_1 = gCoordinator->CreateEntity();
 		Pre_Renderable* pre_render_1 = nullptr;
@@ -253,6 +253,7 @@ namespace SXNGN::ECS::A {
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 
 		std::forward_list<ComponentTypeEnum> active_game_states;
+		active_game_states.push_front(ComponentTypeEnum::OVERWORLD_STATE);
 		active_game_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
 		active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 		gCoordinator->GameStateChanged(active_game_states);

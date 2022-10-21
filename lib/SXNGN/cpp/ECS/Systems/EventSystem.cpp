@@ -224,6 +224,7 @@ namespace SXNGN::ECS::A {
 		Event_Component load_game_state_change;
 		load_game_state_change.e.common.type = EventType::STATE_CHANGE;
 		load_game_state_change.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+		load_game_state_change.e.state_change.new_states.push_front(ComponentTypeEnum::OVERWORLD_STATE);
 		load_game_state_change.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
 		Entity event_entity = Entity_Builder_Utils::Create_Event(gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, load_game_state_change, "Load Game State Change");
 	}

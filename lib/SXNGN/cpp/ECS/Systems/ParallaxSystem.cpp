@@ -40,6 +40,7 @@ namespace SXNGN::ECS::A
 		auto it_act = m_actable_entities.begin();
 		//actable entities for user input system are UserInputCache (vector of sdl events)
 		auto total = m_actable_entities.size();
+		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
@@ -131,7 +132,7 @@ namespace SXNGN::ECS::A
 							//if images are moving left, when an image escapes left side of screen, put it in the BACK of the queue
 							if (speed_horizontal < 0.0)
 							{
-								if (location_ptr->m_pos_x_m_ + image_width_p < 0.0 && new_right_entity == -1)
+								if (location_ptr->m_pos_x_m_ + image_width_p < overworld_viewport->x && new_right_entity == -1)
 								{
 									new_rightmost_image = true;
 									new_right_entity = image_entity;
@@ -144,7 +145,7 @@ namespace SXNGN::ECS::A
 							//if images are moving right, when an image escapes the right side of screen, put it in the FRONT of the queue
 							else if(speed_horizontal > 0.0)
 							{
-								if (location_ptr->m_pos_x_m_ > gCoordinator.getGameSettings()->resolution.w && new_right_entity == -1)
+								if (location_ptr->m_pos_x_m_ > overworld_viewport->x + overworld_viewport->w && new_right_entity == -1)
 								{
 									new_leftmost_image = true;
 									new_left_entity = image_entity;

@@ -380,6 +380,8 @@ int init_menus()
 	main_menu_exit_event.e.state_change.hard_remove = true;
 	main_menu_exit_event.e.state_change.new_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
 	main_menu_exit_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
+	main_menu_exit_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::OVERWORLD_STATE);
+	main_menu_exit_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::TACTICAL_STATE);
 	pop_up_menu_exit_to_main_button_c->triggered_events.push_back(main_menu_exit_event);
 
 
@@ -493,6 +495,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TACTICAL_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::OVERWORLD_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK_WORKER);
