@@ -311,7 +311,7 @@ int init_menus()
 	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
 	//offset the game world display below this menu strip at the top
-	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::OVERWORLD_STATE);
 	overworld_viewport->y = MAIN_GAME_STATE_MENU_HEIGHT;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
@@ -327,7 +327,7 @@ int init_menus()
 	};
 	std::function<void()> set_pace_stop = std::bind(set_pace, 0.0);
 	std::function<void()> set_pace_slow = std::bind(set_pace, 1.0);
-	std::function<void()> set_pace_medium = std::bind(set_pace, -2.0);
+	std::function<void()> set_pace_medium = std::bind(set_pace, 2.0);
 	std::function<void()> set_pace_fast = std::bind(set_pace, 3.0);
 
 

@@ -90,21 +90,21 @@ namespace SXNGN::ECS::A {
 		gCoordinator->AddComponent(dune_2, movement_common);
 		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
 
-		//put two of the same next to each other so they can scroll
-		auto dune_test_1 = gCoordinator->CreateEntity();
-		auto pre_render_test = new Pre_Renderable(tileset, "SKY_DAY", RenderLayer::AIR_LAYER);
-		auto location_test = new Location(0, 0);
-		gCoordinator->AddComponent(dune_test_1, pre_render_test);
-		gCoordinator->AddComponent(dune_test_1, location_test);
-		gCoordinator->AddComponent(dune_test_1, movement_common);
-		gCoordinator->AddComponent(dune_test_1, Create_Gamestate_Component_from_Enum(state));
+		auto dune_3 = gCoordinator->CreateEntity();
+		auto pre_render_dune_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::AIR_LAYER);
+		auto location_dune_3 = new Location(0, 0);
+		gCoordinator->AddComponent(dune_3, pre_render_dune_3);
+		gCoordinator->AddComponent(dune_3, location_dune_3);
+		gCoordinator->AddComponent(dune_3, movement_common);
+		gCoordinator->AddComponent(dune_3, Create_Gamestate_Component_from_Enum(state));
+
 
 		auto parallax_entity = gCoordinator->CreateEntity();
 		Parallax* parallax = new Parallax();
 		parallax->speed_multiplier_ = 1.0;
 		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_1));
 		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_2));
-		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_test_1));
+		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_3));
 		parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
 		gCoordinator->AddComponent(parallax_entity, parallax);
 		gCoordinator->AddComponent(parallax_entity, Create_Gamestate_Component_from_Enum(state));
@@ -112,7 +112,7 @@ namespace SXNGN::ECS::A {
 
 		//put two of the same next to each other so they can scroll
 		auto dune_3 = gCoordinator->CreateEntity();
-		auto pre_render_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::OBJECT_LAYER);
+		auto pre_render_3 = new Pre_Renderable(tileset, "MOUNTAINS_0", RenderLayer::OBJECT_LAYER);
 		auto location_3 = new Location(0, 0);
 		auto movement_common_3 = new Moveable();
 		gCoordinator->AddComponent(dune_3, pre_render_3);
@@ -122,7 +122,7 @@ namespace SXNGN::ECS::A {
 
 		//put two of the same next to each other so they can scroll
 		auto dune_4 = gCoordinator->CreateEntity();
-		auto pre_render_4 = new Pre_Renderable(tileset, "DUNES_3", RenderLayer::OBJECT_LAYER);
+		auto pre_render_4 = new Pre_Renderable(tileset, "MOUNTAINS_1", RenderLayer::OBJECT_LAYER);
 		auto location_4 = new Location(0, 0);
 		gCoordinator->AddComponent(dune_4, pre_render_4);
 		gCoordinator->AddComponent(dune_4, location_4);

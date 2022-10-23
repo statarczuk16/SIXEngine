@@ -1,6 +1,7 @@
 #include <ECS/Systems/ParallaxSystem.hpp>
 #include <ECS/Core/Coordinator.hpp>
 #include <ECS/Components/Parallax.hpp>
+#include <ECS/Utilities/ECS_Utils.hpp>
 
 
 
@@ -41,6 +42,10 @@ namespace SXNGN::ECS::A
 		//actable entities for user input system are UserInputCache (vector of sdl events)
 		auto total = m_actable_entities.size();
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+		auto camera = CameraComponent::get_instance();
+		auto camera_lens_unscaled = ECS_Utils::determine_camera_lens_unscaled(camera);
+		double screen_left_bound = camera_lens_unscaled.x;
+		double screen_right_bound = camera_lens_unscaled.x + camera_lens_unscaled.w;
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
@@ -132,7 +137,7 @@ namespace SXNGN::ECS::A
 							//if images are moving left, when an image escapes left side of screen, put it in the BACK of the queue
 							if (speed_horizontal < 0.0)
 							{
-								if (location_ptr->m_pos_x_m_ + image_width_p < overworld_viewport->x && new_right_entity == -1)
+								if (location_ptr->m_pos_x_m_ + image_width_p < screen_left_bound && new_right_entity == -1)
 								{
 									new_rightmost_image = true;
 									new_right_entity = image_entity;
@@ -145,7 +150,7 @@ namespace SXNGN::ECS::A
 							//if images are moving right, when an image escapes the right side of screen, put it in the FRONT of the queue
 							else if(speed_horizontal > 0.0)
 							{
-								if (location_ptr->m_pos_x_m_ > overworld_viewport->x + overworld_viewport->w && new_right_entity == -1)
+								if (location_ptr->m_pos_x_m_ > screen_right_bound && new_right_entity == -1)
 								{
 									new_leftmost_image = true;
 									new_left_entity = image_entity;

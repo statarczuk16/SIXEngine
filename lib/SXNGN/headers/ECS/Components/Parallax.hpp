@@ -27,12 +27,14 @@ namespace SXNGN::ECS::A {
 			component_type = ComponentTypeEnum::PARALLAX;
 			speed_source_horizontal_ = SXNGN::BAD_STRING_RETURN;
 			speed_source_vertical_ = BAD_STRING_RETURN;
+			speed_sign_ = 0;
 		}
 		std::deque<sole::uuid> parallax_images_; //queue of uuids, in order, of the images to display
 		std::string speed_source_horizontal_;//database property to get scrolling speed from
 		std::string speed_source_vertical_;//database property to get scrolling speed from
 		double speed_multiplier_; //multiply value found at speed_source_horizontal_
 		bool init_ = false; //parallax system will init the parallax by placing all the images end to end from 0.0
+		int speed_sign_; //0 = no preference, match speed source, 1 = always positive, -1 = always negative
 		
 		
 
@@ -44,6 +46,7 @@ namespace SXNGN::ECS::A {
 			{"parallax_images_", p.parallax_images_},
 			{"speed_source_horizontal_", p.speed_source_horizontal_},
 			{"speed_source_vertical_", p.speed_source_vertical_},
+			{"speed_sign_", p.speed_sign_},
 			{"speed_multiplier_", p.speed_multiplier_}
 		};
 
@@ -62,6 +65,7 @@ namespace SXNGN::ECS::A {
 
 		j.at("speed_source_horizontal_").get_to(p.speed_source_horizontal_);
 		j.at("speed_source_vertical_").get_to(p.speed_source_vertical_);
+		j.at("speed_sign_").get_to(p.speed_sign_);
 		j.at("speed_multiplier_").get_to(p.speed_multiplier_);
 
 

@@ -23,6 +23,7 @@ namespace SXNGN::ECS::A {
 	void Renderer_System::Init()
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Renderer_System Init");
+		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Renderer_System Init");
 
 
 	}
