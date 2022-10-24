@@ -194,7 +194,8 @@ namespace SXNGN::ECS::A {
 		UNKNOWN,
 		BOTTOM,
 		MID,
-		TOP
+		TOP,
+		TOPPER
 	};
 
 }

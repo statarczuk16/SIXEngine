@@ -111,29 +111,29 @@ namespace SXNGN::ECS::A {
 
 
 		//put two of the same next to each other so they can scroll
-		auto dune_3 = gCoordinator->CreateEntity();
+		auto mtn_1 = gCoordinator->CreateEntity();
 		auto pre_render_3 = new Pre_Renderable(tileset, "MOUNTAINS_0", RenderLayer::OBJECT_LAYER);
 		auto location_3 = new Location(0, 0);
 		auto movement_common_3 = new Moveable();
-		gCoordinator->AddComponent(dune_3, pre_render_3);
-		gCoordinator->AddComponent(dune_3, location_3);
-		gCoordinator->AddComponent(dune_3, movement_common_3);
-		gCoordinator->AddComponent(dune_3, Create_Gamestate_Component_from_Enum(state));
+		gCoordinator->AddComponent(mtn_1, pre_render_3);
+		gCoordinator->AddComponent(mtn_1, location_3);
+		gCoordinator->AddComponent(mtn_1, movement_common_3);
+		gCoordinator->AddComponent(mtn_1, Create_Gamestate_Component_from_Enum(state));
 
 		//put two of the same next to each other so they can scroll
-		auto dune_4 = gCoordinator->CreateEntity();
+		auto mtn_2 = gCoordinator->CreateEntity();
 		auto pre_render_4 = new Pre_Renderable(tileset, "MOUNTAINS_1", RenderLayer::OBJECT_LAYER);
 		auto location_4 = new Location(0, 0);
-		gCoordinator->AddComponent(dune_4, pre_render_4);
-		gCoordinator->AddComponent(dune_4, location_4);
-		gCoordinator->AddComponent(dune_4, movement_common_3);
-		gCoordinator->AddComponent(dune_4, Create_Gamestate_Component_from_Enum(state));
+		gCoordinator->AddComponent(mtn_2, pre_render_4);
+		gCoordinator->AddComponent(mtn_2, location_4);
+		gCoordinator->AddComponent(mtn_2, movement_common_3);
+		gCoordinator->AddComponent(mtn_2, Create_Gamestate_Component_from_Enum(state));
 
 		auto parallax_entity_2 = gCoordinator->CreateEntity();
 		Parallax* parallax_2 = new Parallax();
-		parallax_2->speed_multiplier_ = 0.33;
-		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_3));
-		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_4));
+		parallax_2->speed_multiplier_ = 0.2;
+		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(mtn_1));
+		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(mtn_2));
 		parallax_2->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
 		gCoordinator->AddComponent(parallax_entity_2, parallax_2);
 		gCoordinator->AddComponent(parallax_entity_2, Create_Gamestate_Component_from_Enum(state));
@@ -160,6 +160,7 @@ namespace SXNGN::ECS::A {
 		auto parallax_entity_3 = gCoordinator->CreateEntity();
 		Parallax* parallax_3 = new Parallax();
 		parallax_3->speed_multiplier_ = 0.1;
+		parallax_3->speed_sign_ = -1.0;
 		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_5));
 		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_6));
 

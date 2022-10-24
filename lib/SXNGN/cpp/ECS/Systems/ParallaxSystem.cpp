@@ -68,6 +68,10 @@ namespace SXNGN::ECS::A
 					{
 						speed_horizontal = properties->at(parallax_ptr->speed_source_horizontal_);
 						speed_horizontal *= parallax_ptr->speed_multiplier_;
+						if (parallax_ptr->speed_sign_ != 0)
+						{
+							speed_horizontal *= parallax_ptr->speed_sign_;
+						}
 					}
 				}
 				if (parallax_ptr->speed_source_vertical_ != BAD_STRING_RETURN)

@@ -285,11 +285,6 @@ int init_menus()
 	lhe_c->callback_functions_.push_back(ng_update_height_b);
 		
 	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
-	//Callback functions for level width/height 
-	/**std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_start_game = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		
-	};**/
 
 	std::function<void()> ng_start = Map_Utils::StartNewGame;
 	new_game_start_b->callback_functions_.push_back(ng_start);
@@ -307,54 +302,44 @@ int init_menus()
 	//************************* In Game UI
 
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
+	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
+	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 120;
+	const int OVERWORLD_STATE_HEIGHT = 320;
 	// Window
-	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, resolution.w, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
+	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
 	//offset the game world display below this menu strip at the top
-	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::OVERWORLD_STATE);
-	overworld_viewport->y = MAIN_GAME_STATE_MENU_HEIGHT;
+	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+	overworld_viewport->y = MAIN_GAME_STATE_MENU_HEIGHT; 
+	overworld_viewport->x = MAIN_GAME_STATE_SIDE_MENU_WIDTH;
+	//offset for a strip of menu at the bottom
+	overworld_viewport->h = OVERWORLD_STATE_HEIGHT;
+	overworld_viewport->w -= 2* MAIN_GAME_STATE_SIDE_MENU_WIDTH;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
+
+
 	//Open Menu Button
-	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Menu",0,3, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_CENTER, SP_NONE, UILayer::MID, "Menu",0,0, BUTTON_WIDTH, BUTTON_HEIGHT);
 	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
 
 	
 
-	std::function<void(double new_pace)> set_pace = [](double new_pace)
-	{
-		SXNGN::Database::property_map_.operator[](SXNGN::OVERWORLD_PACE) = new_pace;
-	};
-	std::function<void()> set_pace_stop = std::bind(set_pace, 0.0);
-	std::function<void()> set_pace_slow = std::bind(set_pace, 1.0);
-	std::function<void()> set_pace_medium = std::bind(set_pace, 2.0);
-	std::function<void()> set_pace_fast = std::bind(set_pace, 3.0);
-
-
-	auto ig_pace_0 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Stop", 0, 4, BUTTON_WIDTH, BUTTON_HEIGHT);
-	ig_ui_window_top_c->child_components_.push_back(ig_pace_0);
-	ig_pace_0->callback_functions_.push_back(set_pace_stop);
-
-	auto ig_pace_1 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Slow", 0, 5, BUTTON_WIDTH, BUTTON_HEIGHT);
-	ig_ui_window_top_c->child_components_.push_back(ig_pace_1);
-	ig_pace_1->callback_functions_.push_back(set_pace_slow);
-
-	auto ig_pace_2 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Medium", 0, 6, BUTTON_WIDTH, BUTTON_HEIGHT);
-	ig_ui_window_top_c->child_components_.push_back(ig_pace_2);
-	ig_pace_2->callback_functions_.push_back(set_pace_medium);
-
-	auto ig_pace_3 = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Fast", 0, 7, BUTTON_WIDTH, BUTTON_HEIGHT);
-	ig_ui_window_top_c->child_components_.push_back(ig_pace_3);
-	ig_pace_3->callback_functions_.push_back(set_pace_fast);
+	
 
 	auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	ig_ui_window_top_c->child_components_.push_back(ig_debug_toggle_1);
 
+
+	const int POP_UP_GAME_MENU_W = 240;
+	const int POP_UP_GAME_MENU_X = resolution.w / 2 - POP_UP_GAME_MENU_W / 2;
+	const int POP_UP_GAME_MENU_Y = 85;
+	const int POP_UP_GAME_MENU_H = resolution.h - POP_UP_GAME_MENU_W;
 	//************************* Pop Up Game Menu
-	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, resolution.w/2 - 240/2, 85, 240, resolution.h - 240, UILayer::MID);
+	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, POP_UP_GAME_MENU_X, POP_UP_GAME_MENU_Y, POP_UP_GAME_MENU_W, POP_UP_GAME_MENU_H, UILayer::MID);
 	ig_ui_window_pop_up_c->window_->visible = false;
-	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, ig_ui_window_pop_up_c);
 	//Callback function to toggle menu visiblility 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_menu = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
@@ -400,14 +385,89 @@ int init_menus()
 	ig_ui_window_pop_up_c->child_components_.push_back(save_button_c);
 
 
+	//************************* Left Side State Relevant Menu
+	auto overworld_left_side_menu_c = UserInputUtils::create_window_raw(nullptr, 0, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "OVERWORLD", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(debug_fps_l);
+
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, overworld_left_side_menu_c);
+
+
+	//************************* Bottom Side State Relevant Menu
+
+	auto bottom_side_state_menu_c = UserInputUtils::create_window_raw(nullptr, 0, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	
+
+	auto pace_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_CENTER, VA_CENTER, SP_NONE, UILayer::MID, "Pace", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	
+
+
+	/// Pace Selector Pop Up
+	auto pace_pop_up_c = UserInputUtils::create_window_raw(bottom_side_state_menu_c->window_, 0, 0 - BUTTON_HEIGHT * 5, BUTTON_WIDTH*1.5, BUTTON_HEIGHT*5, UILayer::MID);
+	pace_pop_up_c->window_->h_align = HA_CENTER;
+	pace_pop_up_c->window_->visible = false;
+	std::function<void()> mg_toggle_pace_visible = std::bind(toggle_menu, pace_pop_up_c);
+	pace_button_c->callback_functions_.push_back(mg_toggle_pace_visible);
 
 
 
+	bottom_side_state_menu_c->child_components_.push_back(pace_button_c);
+	
 
+	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_CENTER, VA_CENTER, SP_NONE, UILayer::TOPPER, "Slow", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	pace_pop_up_c->child_components_.push_back(ig_pace_0);
+	
+
+	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::TOPPER, "Medium", 1, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	pace_pop_up_c->child_components_.push_back(ig_pace_1);
+	
+
+	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::TOPPER, "Fast", 2, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	pace_pop_up_c->child_components_.push_back(ig_pace_2);
+
+	bottom_side_state_menu_c->child_components_.push_back(pace_pop_up_c);
+	
+	
+	std::function<void(std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)> exclusive_select = [](std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)
+	{
+		for (auto select : all_buttons)
+		{
+			select->selectbutton_->selected = false;
+		}
+		all_buttons[selected_button]->selectbutton_->selected = true;
+		
+	};
+	std::function<void(std::string property, double new_value)> set_property = [](std::string property, double new_value)
+	{
+		SXNGN::Database::property_map_.operator[](property) = new_value;
+	};
+
+	//set the pace value
+	std::function<void()> set_pace_stop = std::bind(set_property, SXNGN::OVERWORLD_PACE, 0.0);
+	std::function<void()> set_pace_slow = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.0);
+	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE, 2.0);
+	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE, 3.0);
+
+	//unselect all the other toggles
+	std::function<void()> set_pace_0 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 0);
+	std::function<void()> set_pace_1 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 1);
+	std::function<void()> set_pace_2 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 2);
+
+
+	ig_pace_0->callback_functions_.push_back(set_pace_stop);
+	ig_pace_1->callback_functions_.push_back(set_pace_slow);
+	ig_pace_2->callback_functions_.push_back(set_pace_fast);
+
+	ig_pace_0->callback_functions_.push_back(set_pace_0);
+	ig_pace_1->callback_functions_.push_back(set_pace_1);
+	ig_pace_2->callback_functions_.push_back(set_pace_2);
+
+
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);
 	//************************* Debug Overlay
-	auto debug_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w-80, MAIN_GAME_STATE_MENU_HEIGHT, 80, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
-	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FPS", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	debug_window_c->child_components_.push_back(debug_fps_l);
+	auto debug_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_SIDE_MENU_WIDTH, resolution.h - 2* MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	std::shared_ptr<UIContainerComponent> side_menu_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FPS", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	debug_window_c->child_components_.push_back(side_menu_label);
 
 	debug_fps_actual = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 1, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(debug_fps_actual);
@@ -462,22 +522,7 @@ int main(int argc, char* args[])
 	
 	
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
-
-	auto settings = gCoordinator.get_state_manager()->getGameSettings();
-	SDL_FRect camera_lens;
-	camera_lens.h = settings->resolution.h;
-	camera_lens.w = settings->resolution.w;
-	camera_lens.x = 0;
-	camera_lens.y = 0;
-
-	SDL_FRect camera_position;
-	camera_position.x = 0;
-	camera_position.y = 0;
-	camera_position.w = 0;
-	camera_position.h = 0;
-
-	//singleton, used by world creation utility to lock camera onto main character
-	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
+	
 
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_SPRITE_FACTORY);
@@ -656,6 +701,22 @@ int main(int argc, char* args[])
 	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 	init_menus();
+	std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+	auto settings = gCoordinator.get_state_manager()->getGameSettings();
+	SDL_FRect camera_lens;
+	camera_lens.h = overworld_viewport->h;
+	camera_lens.w = overworld_viewport->w;
+	camera_lens.x = 0;
+	camera_lens.y = 0;
+
+	SDL_FRect camera_position;
+	camera_position.x = 0;
+	camera_position.y = 0;
+	camera_position.w = 0;
+	camera_position.h = 0;
+
+	//singleton, used by world creation utility to lock camera onto main character
+	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
 
 	SXNGN::Timer move_timer;//time passed between movement system calls
 

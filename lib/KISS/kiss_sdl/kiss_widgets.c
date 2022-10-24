@@ -80,12 +80,33 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 
 }
 
-int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect *return_rect, h_alignment ha, v_alignment va, scale_to_parent_width sp_w, int column, int row)
+int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect *return_rect, h_alignment ha, v_alignment va, scale_to_parent_width sp_w, int column, int row)
 {
-	if (ui_rect == NULL || parent_rect == NULL || return_rect == NULL)
+	if (ui_rect == NULL || return_rect == NULL)
 	{
 		printf("kiss_widgets::determine_render_position null input argument");
 		abort();
+	}
+
+	SDL_Rect temp_parent;
+
+	if (parent_ != NULL)
+	{
+		kiss_window* parent = parent_;
+		while (parent)
+		{
+			temp_parent.x += parent->rect.x;
+			temp_parent.y += parent->rect.y;
+			parent = parent->wdw;
+		}
+
+	}
+	else
+	{
+		temp_parent.x = 0;
+		temp_parent.y = 0;
+		temp_parent.w = ui_rect->w;
+		temp_parent.h = ui_rect->h;
 	}
 
 	return_rect->h = ui_rect->h;
@@ -98,27 +119,27 @@ int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect
 	{
 		case SP_FILL:
 		{
-			return_rect->w = parent_rect->w;
+			return_rect->w = temp_parent.w;
 			break;
 		}
 		case SP_FILL_WITH_BUFFER:
 		{
-			return_rect->w = parent_rect->w - 20;
+			return_rect->w = temp_parent.w - 20;
 			break;
 		}
 		case SP_HALF:
 		{
-			return_rect->w = (parent_rect->w / 2) - 20;
+			return_rect->w = (temp_parent.w / 2) - 20;
 			break;
 		}
 		case SP_THIRD:
 		{
-			return_rect->w = (parent_rect->w / 3) - 20;
+			return_rect->w = (temp_parent.w / 3) - 20;
 			break;
 		}
 		case SP_FOURTH:
 		{
-			return_rect->w = (parent_rect->w / 4) - 20;
+			return_rect->w = (temp_parent.w / 4) - 20;
 			break;
 		}
 		case SP_NONE:
@@ -140,24 +161,24 @@ int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect
 		case HA_CENTER:
 		{
 			//set x position to middle of parent window
-			return_rect->x = parent_rect->x + (parent_rect->w / 2) - (return_rect->w/2);
+			return_rect->x = temp_parent.x + (temp_parent.w / 2) - (return_rect->w/2);
 			break;
 		}
 		case HA_COLUMN:
 		{
-			return_rect->x = parent_rect->x + 15 + (((return_rect->w) + 10) * column);
+			return_rect->x = temp_parent.x + 15 + (((return_rect->w) + 10) * column);
 			break;
 		}
 		case HA_NONE:
 		{
 			//offset ui rect by the position of parent window
-			return_rect->x = ui_rect->x + parent_rect->x;
+			return_rect->x = ui_rect->x + temp_parent.x;
 			break;
 		}
 		default:
 		{
 			//offset ui rect by the position of parent window
-			return_rect->x = ui_rect->x + parent_rect->x;
+			return_rect->x = ui_rect->x + temp_parent.x;
 			break;
 		}
 	}
@@ -167,25 +188,25 @@ int determine_render_position(SDL_Rect *ui_rect, SDL_Rect *parent_rect, SDL_Rect
 		case VA_CENTER:
 		{
 			//set y position to middle of parent window
-			return_rect->y = parent_rect->y + (parent_rect->h / 2) - (return_rect->h / 2);
+			return_rect->y = temp_parent.y + (temp_parent.h / 2) - (return_rect->h / 2);
 			break;
 		}
 		case VA_ROW:
 		{
 			//use the size of the UI element as the row size + a bit of offset
-			return_rect->y = parent_rect->y + 10 + (((return_rect->h)+5) * row );
+			return_rect->y = temp_parent.y + 10 + (((return_rect->h)+5) * row );
 			break;
 		}
 		case VA_NONE:
 		{
 			//offset ui rect by the position of parent window
-			return_rect->y =  parent_rect->y + ui_rect->y;
+			return_rect->y =  temp_parent.y + ui_rect->y;
 			break;
 		}
 		default:
 		{
 			//offset ui rect by the position of parent window
-			return_rect->y = parent_rect->y + ui_rect->y;
+			return_rect->y = temp_parent.y + ui_rect->y;
 			break;
 		}
 	}
@@ -229,15 +250,7 @@ int kiss_window_event(kiss_window *window, SDL_Event *event, int *draw)
 	return 0;
 }
 
-int kiss_window_draw(kiss_window *window, SDL_Renderer *renderer)
-{
-	if (window && window->wdw) window->visible = window->wdw->visible;
-	if (!window || !window->visible || !renderer) return 0;
-	kiss_fillrect(renderer, &window->rect, window->bg);
-	if (window->decorate)
-		kiss_decorate(renderer, &window->rect, kiss_sand_dark, kiss_edge);
-	return 1;
-}
+
 
 int kiss_label_new_uc(kiss_label* label, kiss_window* wdw, char* text,
 	int x, int y, int width, int height)
@@ -263,6 +276,47 @@ int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
 	label->visible = 0;
 	label->wdw = wdw;
 	return 0;
+}
+
+int kiss_window_draw(kiss_window* window, SDL_Renderer* renderer)
+{
+	
+	if (!window)
+	{
+		return 0;
+	}
+	
+	if (window->wdw)
+	{
+		window->visible = (window->wdw->visible && window->visible);
+		parent_window_rect = &window->wdw->rect;
+		//pass by ref - sets button->r_rect
+		//pass by ref - sets textx and texty
+	}
+	else
+	{
+		temp_parent.x = 0;
+		temp_parent.y = 0;
+		temp_parent.w = window->rect.w;
+		temp_parent.h = window->rect.h;
+		parent_window_rect = &temp_parent;
+	}
+	
+	(void)determine_render_position(&window->rect, window->wdw, &window->r_rect, window->h_align, window->v_align, window->parent_scale, window->column, window->row);
+
+		
+	
+	if (!window || !window->visible || !renderer)
+	{
+		return 0;
+	}
+	kiss_fillrect(renderer, &window->r_rect, window->bg);
+	if (window->decorate)
+	{
+		kiss_decorate(renderer, &window->r_rect, kiss_sand_dark, kiss_edge);
+	}
+		
+	return 1;
 }
 
 int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)

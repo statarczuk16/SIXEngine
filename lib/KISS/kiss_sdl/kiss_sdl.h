@@ -143,6 +143,12 @@ typedef struct kiss_window {
 	int visible;
 	int focus;
 	SDL_Rect rect;
+	SDL_Rect r_rect;
+	h_alignment h_align;
+	v_alignment v_align;
+	scale_to_parent_width parent_scale;
+	int row;
+	int column;
 	int decorate;
 	SDL_Color bg;
 	struct kiss_window *wdw;
@@ -390,7 +396,7 @@ SDL_Renderer* kiss_init(char* title, kiss_array *a, int w, int h, const char * r
 int kiss_clean(kiss_array *a);
 int kiss_window_new(kiss_window *window, kiss_window *wdw, int decorate,
 	int x, int y, int w, int h);
-int determine_render_position(SDL_Rect* ui_rect, SDL_Rect* parent_rect, SDL_Rect* return_rect, h_alignment ha, v_alignment va, scale_to_parent_width sp_w, int column, int row);
+int determine_render_position(SDL_Rect* ui_rect, kiss_window* parent, SDL_Rect* return_rect, h_alignment ha, v_alignment va, scale_to_parent_width sp_w, int column, int row);
 int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alignment va, int* out_x, int* out_y, int text_width, int text_height);
 
 int kiss_window_event(kiss_window *window, SDL_Event *event, int *draw);
