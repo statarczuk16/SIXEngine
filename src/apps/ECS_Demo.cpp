@@ -304,7 +304,7 @@ int init_menus()
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
 	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 120;
-	const int OVERWORLD_STATE_HEIGHT = 320;
+	const int OVERWORLD_STATE_HEIGHT = 360;
 	// Window
 	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
@@ -414,16 +414,16 @@ int init_menus()
 	bottom_side_state_menu_c->child_components_.push_back(pace_button_c);
 	
 
-	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_CENTER, VA_CENTER, SP_NONE, UILayer::TOPPER, "Slow", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
-	pace_pop_up_c->child_components_.push_back(ig_pace_0);
+	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOPPER, "Slow", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	
 	
 
-	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::TOPPER, "Medium", 1, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
-	pace_pop_up_c->child_components_.push_back(ig_pace_1);
+	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOPPER, "Medium", 1, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	
 	
 
-	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::TOPPER, "Fast", 2, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
-	pace_pop_up_c->child_components_.push_back(ig_pace_2);
+	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOPPER, "Fast", 2, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
+	
 
 	bottom_side_state_menu_c->child_components_.push_back(pace_pop_up_c);
 	
@@ -448,6 +448,9 @@ int init_menus()
 	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE, 2.0);
 	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE, 3.0);
 
+	pace_pop_up_c->child_components_.push_back(ig_pace_0);
+	pace_pop_up_c->child_components_.push_back(ig_pace_1);
+	pace_pop_up_c->child_components_.push_back(ig_pace_2);
 	//unselect all the other toggles
 	std::function<void()> set_pace_0 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 0);
 	std::function<void()> set_pace_1 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 1);
@@ -461,6 +464,8 @@ int init_menus()
 	ig_pace_0->callback_functions_.push_back(set_pace_0);
 	ig_pace_1->callback_functions_.push_back(set_pace_1);
 	ig_pace_2->callback_functions_.push_back(set_pace_2);
+
+
 
 
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);

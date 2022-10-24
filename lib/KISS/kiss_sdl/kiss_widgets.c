@@ -89,16 +89,29 @@ int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect 
 	}
 
 	SDL_Rect temp_parent;
+	temp_parent.x = 0;
+	temp_parent.y = 0;
+	temp_parent.h = 0;
+	temp_parent.w = 0;
 
+	//if this component has a parent window
 	if (parent_ != NULL)
 	{
+		//take parent width and height from first parent
 		kiss_window* parent = parent_;
-		while (parent)
+		temp_parent.w = parent->rect.w;
+		temp_parent.h = parent->rect.h;
+		temp_parent.x += parent->r_rect.x;
+		temp_parent.y += parent->r_rect.y;
+		//recursive up the chain to get absolute position of the first parent, since its position is relative to ITS parent
+		/**
+		while (parent != NULL)
 		{
-			temp_parent.x += parent->rect.x;
-			temp_parent.y += parent->rect.y;
+			temp_parent.x += parent->r_rect.x;
+			temp_parent.y += parent->r_rect.y;
 			parent = parent->wdw;
 		}
+		**/
 
 	}
 	else
@@ -260,7 +273,7 @@ int kiss_label_new_uc(kiss_label* label, kiss_window* wdw, char* text,
 	label->textcolor = kiss_black;
 	kiss_makerect(&label->rect, x, y, width, height);
 	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
-	label->visible = 0;
+	label->visible = 1;
 	label->wdw = wdw;
 	return 0;
 }
@@ -273,7 +286,7 @@ int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
 	label->textcolor = kiss_black;
 	kiss_makerect(&label->rect, x, y, 150, 50);
 	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
-	label->visible = 0;
+	label->visible = 1;
 	label->wdw = wdw;
 	return 0;
 }
@@ -285,28 +298,18 @@ int kiss_window_draw(kiss_window* window, SDL_Renderer* renderer)
 	{
 		return 0;
 	}
-	
+	int visible = window->visible;
 	if (window->wdw)
 	{
-		window->visible = (window->wdw->visible && window->visible);
-		parent_window_rect = &window->wdw->rect;
-		//pass by ref - sets button->r_rect
-		//pass by ref - sets textx and texty
+		visible = (window->wdw->visible && window->visible);
 	}
-	else
-	{
-		temp_parent.x = 0;
-		temp_parent.y = 0;
-		temp_parent.w = window->rect.w;
-		temp_parent.h = window->rect.h;
-		parent_window_rect = &temp_parent;
-	}
+
 	
 	(void)determine_render_position(&window->rect, window->wdw, &window->r_rect, window->h_align, window->v_align, window->parent_scale, window->column, window->row);
 
 		
 	
-	if (!window || !window->visible || !renderer)
+	if (!window || !visible || !renderer)
 	{
 		return 0;
 	}
@@ -323,16 +326,16 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 {
 	char buf[KISS_MAX_LABEL], *p;
 	int len, y, x;
-
-	if (label && label->wdw)
+	int visible = label->visible;
+	if (label)
 	{
-		label->visible = label->wdw->visible;
+		visible = label->visible && label->wdw->visible;
 		//pass by ref - sets button->r_rect
-		(void)determine_render_position(&label->rect, &label->wdw->rect, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
+		(void)determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
 		//pass by ref - sets textx and texty
 		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_NONE, &x, &y, kiss_textwidth(label->font, label->text, NULL), label->r_rect.h);
 	}
-	if (!label || !label->visible || !renderer)
+	if (!label || !visible || !renderer)
 	{
 		return 0;
 	}
@@ -379,7 +382,7 @@ int kiss_button_new(kiss_button *button, kiss_window *wdw, char *text,
 		button->font.fontheight / 2;
 	button->active = 0;
 	button->prelight = 0;
-	button->visible = 0;
+	button->visible = 1;
 	button->focus = 0;
 	button->wdw = wdw;
 	button->v_align = VA_NONE;
@@ -413,7 +416,7 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 		button->font.fontheight / 2;
 	button->active = 0;
 	button->prelight = 0;
-	button->visible = 0;
+	button->visible = 1;
 	button->focus = 0;
 	button->wdw = wdw;
 	button->v_align = VA_NONE;
@@ -467,16 +470,16 @@ int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 
 int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 {
-
-	if (button && button->wdw)
+	int visible = 0;
+	if (button)
 	{
-		button->visible = button->wdw->visible;
+		visible = (button->wdw->visible && button->visible);
 		//pass by ref - sets button->r_rect
-		(void) determine_render_position(&button->rect, &button->wdw->rect, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
+		(void) determine_render_position(&button->rect, button->wdw, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
 		//pass by ref - sets textx and texty
 		(void) determine_text_render_position(&button->r_rect, button->txt_h_align, button->txt_v_align, &button->textx, &button->texty, button->text_width, button->font.fontheight);
 	}
-	if (!button || !button->visible || !renderer)
+	if (!button || !visible || !renderer)
 	{
 		return 0;
 	}
@@ -536,6 +539,7 @@ int kiss_selectbutton_new_uc(kiss_selectbutton* selectbutton, kiss_window* wdw,
 		selectbutton->unselectedimg = kiss_unselected;
 	kiss_makerect(&selectbutton->rect, x, y, w, h);
 	selectbutton->selected = 0;
+	selectbutton->visible = 1;
 	selectbutton->focus = 0;
 	selectbutton->wdw = wdw;
 	selectbutton->v_align = VA_NONE;
@@ -560,7 +564,7 @@ int kiss_selectbutton_event(kiss_selectbutton *selectbutton,
 		return 0;
 	if (event->type == SDL_MOUSEBUTTONDOWN &&
 		kiss_pointinrect(event->button.x, event->button.y,
-		&selectbutton->rect)) {
+		&selectbutton->r_rect)) {
 		selectbutton->selected ^= 1;
 		*draw = 1;
 		return 1;
@@ -570,25 +574,26 @@ int kiss_selectbutton_event(kiss_selectbutton *selectbutton,
 
 int kiss_selectbutton_draw(kiss_selectbutton *selectbutton,	SDL_Renderer *renderer)
 {
-	if (selectbutton && selectbutton->wdw)
+	int visible = 0;
+	if (selectbutton)
 	{
-		selectbutton->visible = selectbutton->wdw->visible;
+		visible = (selectbutton->wdw->visible && selectbutton->visible);
 		//pass by ref - sets button->r_rect
-		(void)determine_render_position(&selectbutton->rect, &selectbutton->wdw->rect, &selectbutton->r_rect, selectbutton->h_align, selectbutton->v_align, selectbutton->parent_scale, selectbutton->column, selectbutton->row);
+		(void)determine_render_position(&selectbutton->rect, selectbutton->wdw, &selectbutton->r_rect, selectbutton->h_align, selectbutton->v_align, selectbutton->parent_scale, selectbutton->column, selectbutton->row);
 		//pass by ref - sets textx and texty
 		//(void)determine_text_render_position(&selectbutton->r_rect, selectbutton->txt_h_align, selectbutton->txt_v_align, &selectbutton->textx, &selectbutton->texty, selectbutton->text_width, selectbutton->font.fontheight);
 	}
-	if (!selectbutton || !selectbutton->visible || !renderer)
+	if (!selectbutton || !visible || !renderer)
 	{
 		return 0;
 	}
 	if (selectbutton->selected)
 	{
-		kiss_renderimage(renderer, selectbutton->selectedimg, selectbutton->rect.x, selectbutton->r_rect.y, NULL);
+		kiss_renderimage(renderer, selectbutton->selectedimg, selectbutton->r_rect.x, selectbutton->r_rect.y, NULL);
 	}
 	else
 	{
-		kiss_renderimage(renderer, selectbutton->unselectedimg, selectbutton->rect.x, selectbutton->r_rect.y, NULL);
+		kiss_renderimage(renderer, selectbutton->unselectedimg, selectbutton->r_rect.x, selectbutton->r_rect.y, NULL);
 	}
 	return 1;
 }
@@ -622,7 +627,7 @@ int kiss_vscrollbar_new(kiss_vscrollbar *vscrollbar, kiss_window *wdw,
 	vscrollbar->downclicked = 0;
 	vscrollbar->sliderclicked = 0;
 	vscrollbar->lasttick = 0;
-	vscrollbar->visible = 0;
+	vscrollbar->visible = 1;
 	vscrollbar->focus = 0;
 	vscrollbar->wdw = wdw;
 	return 0;
@@ -760,7 +765,7 @@ int kiss_hscrollbar_new(kiss_hscrollbar *hscrollbar, kiss_window *wdw,
 	hscrollbar->rightclicked = 0;
 	hscrollbar->sliderclicked = 0;
 	hscrollbar->lasttick = 0;
-	hscrollbar->visible = 0;
+	hscrollbar->visible = 1;
 	hscrollbar->focus = 0;
 	hscrollbar->wdw = wdw;
 	return 0;
@@ -884,7 +889,7 @@ int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 	progressbar->step = 0.02;
 	progressbar->lasttick = 0;
 	progressbar->run = 0;
-	progressbar->visible = 0;
+	progressbar->visible = 1;
 	progressbar->wdw = wdw;
 	return 0;
 }
@@ -944,7 +949,7 @@ int kiss_entry_new(kiss_entry *entry, kiss_window *wdw, int decorate,
 	entry->textx = x + kiss_border;
 	entry->texty = y + kiss_border;
 	entry->active = 0;
-	entry->visible = 0;
+	entry->visible = 1;
 	entry->focus = 0;
 	entry->wdw = wdw;
 	entry->lower_bound = 0;
@@ -1062,16 +1067,16 @@ int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 int kiss_entry_draw(kiss_entry *entry, SDL_Renderer *renderer)
 {
 	SDL_Color color;
-
+	int visible = 0;
 	if (entry && entry->wdw)
 	{
-		entry->visible = entry->wdw->visible;
-		(void)determine_render_position(&entry->rect, &entry->wdw->rect, &entry->r_rect, entry->h_align, entry->v_align, entry->parent_scale, entry->column, entry->row);
+		visible = entry->visible && entry->wdw->visible;
+		(void)determine_render_position(&entry->rect, entry->wdw, &entry->r_rect, entry->h_align, entry->v_align, entry->parent_scale, entry->column, entry->row);
 		//pass by ref - sets textx and texty
 		(void)determine_text_render_position(&entry->r_rect, entry->txt_h_align, entry->txt_v_align, &entry->textx, &entry->texty, entry->textwidth, entry->font.fontheight);
 	}
 
-	if (!entry || !entry->visible || !renderer)
+	if (!entry || !visible || !renderer)
 	{
 		return 0;
 	}
@@ -1114,7 +1119,7 @@ int kiss_textbox_new(kiss_textbox *textbox, kiss_window *wdw, int decorate,
 	textbox->textwidth = w - 2 * kiss_border;
 	textbox->highlightline = -1;
 	textbox->selectedline = -1;
-	textbox->visible = 0;
+	textbox->visible = 1;
 	textbox->focus = 0;
 	textbox->wdw = wdw;
 	return 0;
@@ -1179,10 +1184,13 @@ int kiss_textbox_draw(kiss_textbox *textbox, SDL_Renderer *renderer)
 	SDL_Rect highlightrect;
 	char buf[KISS_MAX_LENGTH];
 	int numoflines, i;
-
+	int visible = 0;
 	if (textbox && textbox->wdw)
-		textbox->visible = textbox->wdw->visible;
-	if (!textbox || !textbox->visible || !renderer) return 0;
+	{
+		visible = textbox->visible && textbox->wdw->visible;
+	}
+		
+	if (!textbox || !visible || !renderer) return 0;
 	kiss_fillrect(renderer, &textbox->rect, textbox->bg);
 	if (textbox->decorate)
 		kiss_decorate(renderer, &textbox->rect, kiss_sand,
@@ -1229,7 +1237,7 @@ int kiss_combobox_new(kiss_combobox *combobox, kiss_window *wdw,
 		x + combobox->textbox.rect.w, combobox->textbox.rect.y,
 		combobox->textbox.rect.h) == -1)
 		return -1;
-	combobox->visible = 0;
+	combobox->visible = 1;
 	combobox->wdw = wdw;
 	combobox->vscrollbar.step = 0.;
 	if (combobox->textbox.array->length - combobox->textbox.maxlines > 0)
@@ -1298,9 +1306,13 @@ int kiss_combobox_event(kiss_combobox *combobox, SDL_Event *event, int *draw)
 
 int kiss_combobox_draw(kiss_combobox *combobox, SDL_Renderer *renderer)
 {
+	int visible = 0;
 	if (combobox && combobox->wdw)
-		combobox->visible = combobox->wdw->visible;
-	if (!combobox || !combobox->visible || !renderer) return 0;
+	{
+		visible = combobox->visible && combobox->wdw->visible;
+	}
+		
+	if (!combobox || !visible || !renderer) return 0;
 	kiss_renderimage(renderer, combobox->combo,
 		combobox->entry.rect.x + combobox->entry.rect.w,
 		combobox->entry.rect.y + combobox->entry.rect.h -
