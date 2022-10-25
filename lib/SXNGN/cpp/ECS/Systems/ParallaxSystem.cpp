@@ -46,6 +46,13 @@ namespace SXNGN::ECS::A
 		auto camera_lens_unscaled = ECS_Utils::determine_camera_lens_unscaled(camera);
 		double screen_left_bound = camera_lens_unscaled.x;
 		double screen_right_bound = camera_lens_unscaled.x + camera_lens_unscaled.w;
+		std::map<std::string, double>* properties = SXNGN::Database::get_property_map();
+		double stop_or_go = 0.0;
+		if (properties->count(SXNGN::OVERWORLD_GO) > 0)
+		{
+			stop_or_go = properties->at(SXNGN::OVERWORLD_GO);
+		}
+		
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
@@ -59,7 +66,7 @@ namespace SXNGN::ECS::A
 				std::deque<Entity> parallax_images_new_entity;
 				/// First, determine the scroll speed of the images
 				Parallax* parallax_ptr = static_cast<Parallax*>(parallax_data);
-				std::map<std::string, double>* properties = SXNGN::Database::get_property_map();
+				
 				
 				if (parallax_ptr->speed_source_horizontal_ != BAD_STRING_RETURN)
 				{
@@ -68,6 +75,7 @@ namespace SXNGN::ECS::A
 					{
 						speed_horizontal = properties->at(parallax_ptr->speed_source_horizontal_);
 						speed_horizontal *= parallax_ptr->speed_multiplier_;
+						speed_horizontal *= stop_or_go;
 						if (parallax_ptr->speed_sign_ != 0)
 						{
 							speed_horizontal *= parallax_ptr->speed_sign_;
@@ -80,6 +88,7 @@ namespace SXNGN::ECS::A
 					{
 						speed_vertical = properties->at(parallax_ptr->speed_source_vertical_);
 						speed_vertical *= parallax_ptr->speed_multiplier_;
+						speed_vertical *= stop_or_go;
 					}
 				}
 

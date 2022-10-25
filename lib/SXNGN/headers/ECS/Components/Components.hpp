@@ -18,3 +18,4 @@
 #include <ECS/Components/TaskComponent.hpp>
 #include <ECS/Components/TaskWorkerComponent.hpp>
 #include <ECS/Components/Location.hpp>
+#include <ECS/Components/DatabaseComponent.hpp>

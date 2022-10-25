@@ -55,6 +55,7 @@ namespace SXNGN::ECS::A {
 		new_kiss_label->v_align = v_align;
 		new_kiss_label->txt_h_align = txt_h_align;//text center to this label
 		new_kiss_label->row = row;
+		new_kiss_label->column = column;
 		new_kiss_label->parent_scale = parent_scale;
 		UIContainerComponent ngl_c(parent_window, layer, UIType::LABEL);
 		ngl_c.label_ = new_kiss_label;

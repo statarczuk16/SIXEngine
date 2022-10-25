@@ -179,6 +179,7 @@ int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect 
 		}
 		case HA_COLUMN:
 		{
+			//return_rect->x = temp_parent.x + 15 + (((return_rect->w) + 10) * column);
 			return_rect->x = temp_parent.x + 15 + (((return_rect->w) + 10) * column);
 			break;
 		}
