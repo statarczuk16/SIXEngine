@@ -20,7 +20,7 @@ namespace SXNGN::ECS::A {
 	struct GameSettings {
 		SDL_FRect resolution;
 		LevelGenerationSettings level_settings;
-		std::map < std::string, unsigned int > settings_map;
+		
 	};
 
 	class StateManager

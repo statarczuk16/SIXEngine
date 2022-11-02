@@ -3,7 +3,6 @@
 #include <SDL.h>
 #include <Database.h>
 #include <ECS/Core/Component.hpp>
-#include <ECS/Components/CameraComponent.hpp>
 #include <ECS/Core/Types.hpp>
 #include <memory>
 

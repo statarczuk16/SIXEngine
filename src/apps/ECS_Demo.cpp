@@ -444,22 +444,22 @@ int init_menus()
 	};
 	std::function<void(std::string property, double new_value)> set_property = [](std::string property, double new_value)
 	{
-		SXNGN::Database::property_map_.operator[](property) = new_value;
+		gCoordinator.setSetting(property, new_value);
 	};
 
 	std::function<void(std::string property, double new_value)> cache_and_replace_property = [](std::string property, double new_value)
 	{
 		std::string property_cache = property + SXNGN::CACHE;
-		double old_value = SXNGN::Database::property_map_.operator[](property);
-		SXNGN::Database::property_map_.operator[](property_cache) = old_value;
-		SXNGN::Database::property_map_.operator[](property) = new_value;
+		auto pair = gCoordinator.getSetting(property);
+		gCoordinator.setSetting(property_cache, pair.first);
+		gCoordinator.setSetting(property, new_value);
 	};
 
 	std::function<void(std::string property)> restore_property_from_cache = [](std::string property)
 	{
 		std::string property_cache = property + SXNGN::CACHE;
-		double old_value = SXNGN::Database::property_map_.operator[](property_cache);
-		SXNGN::Database::property_map_.operator[](property) = old_value;
+		auto old_pair = gCoordinator.getSetting(property_cache);
+		gCoordinator.setSetting(property, old_pair.first);
 	};
 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_button_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
@@ -510,6 +510,7 @@ int init_menus()
 	ig_pace_0->callback_functions_.push_back(set_pace_0);
 	ig_pace_1->callback_functions_.push_back(set_pace_1);
 	ig_pace_2->callback_functions_.push_back(set_pace_2);
+
 
 	for (auto f : ig_pace_1->callback_functions_)
 	{
@@ -603,6 +604,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SELECTABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::LOCATION);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::DATABASE_SINGLE);
 
 
 

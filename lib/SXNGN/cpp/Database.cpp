@@ -5,7 +5,7 @@ float SXNGN::Database::scale_;
 Uint8 SXNGN::Database::max_fps_;
 Uint8 SXNGN::Database::collision_budget_ms_;
 std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
-std::map<std::string, double> SXNGN::Database::property_map_;
+
 
 SXNGN::Database::Database()
 {
@@ -16,11 +16,6 @@ SXNGN::Database::Database()
 
 }
 
-
-std::map<std::string, double>* SXNGN::Database::get_property_map()
-{
-	return &property_map_;
-}
 
 float SXNGN::Database::get_scale()
 {

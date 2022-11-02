@@ -13,7 +13,7 @@ list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2) 
 
 #To help find_package find SDL2 when on Windows and libraries are in vclib folder.
-if(MSVC)
+if(MSVC) 
 	message("Setting hints for MSVC")
 	set(SDL_HINT_END "include/")
 	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)

@@ -46,7 +46,8 @@ namespace SXNGN::ECS::A
 		auto camera_lens_unscaled = ECS_Utils::determine_camera_lens_unscaled(camera);
 		double screen_left_bound = camera_lens_unscaled.x;
 		double screen_right_bound = camera_lens_unscaled.x + camera_lens_unscaled.w;
-		std::map<std::string, double>* properties = SXNGN::Database::get_property_map();
+		auto db_comp = DatabaseComponent::get_instance();
+		auto properties = &db_comp->settings_map;
 		double stop_or_go = 0.0;
 		if (properties->count(SXNGN::OVERWORLD_GO) > 0)
 		{

@@ -150,6 +150,13 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				case ComponentTypeEnum::DATABASE_SINGLE:
+				{
+					DatabaseComponent component = *static_cast<const DatabaseComponent*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
 				default :
 				{
 					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
@@ -260,6 +267,13 @@ namespace SXNGN {
 					{
 						auto component_inst = j.get<Parallax>();
 						ECS_Component* component_ptr = new Parallax(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::DATABASE_SINGLE:
+					{
+						auto component_inst = j.get<DatabaseComponent>();
+						ECS_Component* component_ptr = new DatabaseComponent(component_inst);
 						return component_ptr;
 						break;
 					}

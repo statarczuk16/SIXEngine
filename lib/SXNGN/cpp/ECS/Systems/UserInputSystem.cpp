@@ -80,14 +80,14 @@ namespace SXNGN::ECS::A {
 					}
 					if (input_tags.input_tags_.count(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT))
 					{
-						std::map<std::string, double>* properties = SXNGN::Database::get_property_map();
-						if (properties->count(input_tags.property_tag_) > 0)
+						auto db_comp = DatabaseComponent::get_instance();
+						if (db_comp->settings_map.count(input_tags.property_tag_) > 0)
 						{
 							auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
 							if (check_out_move)
 							{
 								Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
-								moveable_ptr->m_vel_x_m_s = properties->at(input_tags.property_tag_);
+								moveable_ptr->m_vel_x_m_s = db_comp->settings_map.at(input_tags.property_tag_);
 								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
 							}
 						}

@@ -258,7 +258,9 @@ namespace SXNGN::ECS::A {
 		active_game_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
 		active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
 		gCoordinator->GameStateChanged(active_game_states);
-
+		auto db = DatabaseComponent::get_instance();
+		auto db_entity = gCoordinator->CreateEntity();
+		gCoordinator->AddComponent(db_entity, db.get());
 		//CreateTacticalMap();
 		CreateOverworldMap();
 

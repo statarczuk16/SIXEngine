@@ -189,20 +189,22 @@ namespace SXNGN {
 					return mStateManager->moveUUIDOnLocationMap(grid_x_from, grid_y_from, grid_x_to, grid_y_to, uuid, space);
 				}
 
-				std::pair<int, bool> getSetting(std::string setting)
+				std::pair<double, bool> getSetting(std::string setting)
 				{
-					if (mStateManager->game_settings.settings_map.count(setting) == 0)
+					auto settings_component = DatabaseComponent::get_instance();
+					if (settings_component->settings_map.count(setting) == 0)
 					{
-						return std::make_pair(0, false);
+						return std::make_pair(0.0, false);
 					}
 					else
 					{
-						return std::make_pair(mStateManager->game_settings.settings_map.at(setting), true);
+						return std::make_pair(settings_component->settings_map.at(setting), true);
 					}
 				}
-				void setSetting(std::string setting, unsigned int value)
+				void setSetting(std::string setting, double value)
 				{
-					mStateManager->game_settings.settings_map[setting] = value;
+					auto settings_component = DatabaseComponent::get_instance();
+					settings_component->settings_map[setting] = value;
 				}
 
 				const GameSettings* getGameSettings()
@@ -571,8 +573,14 @@ namespace SXNGN {
 				void Dump_Spaced_Entity_To_ECS(std::shared_ptr<ExternEntity> entity_to_dump)
 				{
 					Entity new_id = mEntityManager->CreateEntity(entity_to_dump->uuid_);
-					for (auto component : entity_to_dump->entity_components_)
+					for (ECS_Component* component : entity_to_dump->entity_components_)
 					{
+						if (component->component_type == ComponentTypeEnum::DATABASE_SINGLE)
+						{
+							auto db_shared = DatabaseComponent::init_instance();
+							DatabaseComponent* db_comp = static_cast<DatabaseComponent*>(component);
+							db_shared->merge_db(db_comp);
+						}
 						AddComponent(new_id, component);
 					}
 				}

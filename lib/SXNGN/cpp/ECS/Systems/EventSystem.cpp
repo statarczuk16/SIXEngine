@@ -206,14 +206,17 @@ namespace SXNGN::ECS::A {
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto user_input_state = User_Input_State::get_instance();
-		std::ifstream i("world.json"); //FIX ME
+		std::ifstream i("world.json"); //FIXME
 		json j;
 		try 
 		{
 			while (i >> j)
 			{
 				//std::cout << j.dump(4) << std::endl;
-				auto extern_entity = gCoordinator.JSON_To_Entity(j);
+				std::shared_ptr<ExternEntity> extern_entity = gCoordinator.JSON_To_Entity(j);
+
+				
+
 				gCoordinator.Dump_Spaced_Entity_To_ECS(extern_entity);
 			}
 		}
