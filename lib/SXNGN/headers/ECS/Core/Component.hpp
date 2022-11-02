@@ -35,6 +35,7 @@ namespace SXNGN::ECS::A {
 	EVENT,
 	TASK,
 	TASK_WORKER,
+	PARTY,
 	GAME_STATE_START_HERE, //!!!! only game state enums after this point !!!!
 	MAIN_MENU_STATE,
 	MAIN_GAME_STATE,

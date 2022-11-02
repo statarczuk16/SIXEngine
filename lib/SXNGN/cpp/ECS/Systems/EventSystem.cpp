@@ -214,9 +214,6 @@ namespace SXNGN::ECS::A {
 			{
 				//std::cout << j.dump(4) << std::endl;
 				std::shared_ptr<ExternEntity> extern_entity = gCoordinator.JSON_To_Entity(j);
-
-				
-
 				gCoordinator.Dump_Spaced_Entity_To_ECS(extern_entity);
 			}
 		}
