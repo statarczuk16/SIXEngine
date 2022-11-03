@@ -33,13 +33,13 @@ namespace SXNGN::ECS::A {
 	inline void to_json(json& j, const Party& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::PARTY]},
-			{"character_ids_",character_ids_},
-			{"health_",health_},
-			{"stamina_",stamina_},
-			{"food_",food_},
-			{"water_",water_},
-			{"hands_",hands_},
-			{"muscle_",muscle_}
+			{"character_ids_",p.character_ids_},
+			{"health_",p.health_},
+			{"stamina_",p.stamina_},
+			{"food_",p.food_},
+			{"water_",p.water_},
+			{"hands_",p.hands_},
+			{"muscle_",p.muscle_}
 
 		};
 
@@ -48,13 +48,13 @@ namespace SXNGN::ECS::A {
 	inline void from_json(const json& j, Party& p) {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 		p.component_type = component_type_enum;
-		p.character_ids_ = character_ids_;
-		p.health_ = health_;
-		p.stamina_ = stamina_;
-		p.food_ = food_;
-		p.water_ = water_;
-		p.hands_ = hands_;
-		p.muscle_ = muscle_;
+		j.at("character_ids_").get_to(p.character_ids_);
+		j.at("health_").get_to(p.health_);
+		j.at("stamina_").get_to(p.stamina_);
+		j.at("food_").get_to(p.food_);
+		j.at("water_").get_to(p.water_);
+		j.at("hands_").get_to(p.hands_);
+		j.at("muscle_").get_to(p.muscle_);
 
 	}
 

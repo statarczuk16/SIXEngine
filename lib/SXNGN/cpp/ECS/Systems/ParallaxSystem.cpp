@@ -194,8 +194,17 @@ namespace SXNGN::ECS::A
 				if (new_rightmost_image)
 				{
 					
-					//push the new found rightmost image onto the back of the queue
-					parallax_images_new_entity.push_back(new_right_entity);
+					if (parallax_ptr->flip_1_delete_0)
+					{
+						//push the new found rightmost image onto the back of the queue
+						parallax_images_new_entity.push_back(new_right_entity);
+					}
+					else
+					{
+						gCoordinator.DestroyEntity(new_right_entity);
+					}
+					
+					
 					//if there is a new image in the end of the queue, it should be the rightmost image, so change its location to be so
 					//by placing it one image width to the right of the image next to it in the queue
 					auto it_new_right = parallax_images_new_entity.end() - 1;
@@ -231,8 +240,17 @@ namespace SXNGN::ECS::A
 
 				if (new_leftmost_image)
 				{
-					//push the new found leftmost image onto the back of the queue
-					parallax_images_new_entity.push_front(new_left_entity);
+
+					if (parallax_ptr->flip_1_delete_0)
+					{
+						//push the new found leftmost image onto the front of the queue
+						parallax_images_new_entity.push_front(new_left_entity);
+					}
+					else
+					{
+						gCoordinator.DestroyEntity(new_left_entity);
+					}
+					
 					//if there is a new image in the front of the queue, it should be the leftmost image, so change its location to be so
 					//by placing it one image width to the left of the image next to it in the queue
 					auto it_new_left = parallax_images_new_entity.begin();

@@ -19,4 +19,4 @@
 #include <ECS/Components/TaskWorkerComponent.hpp>
 #include <ECS/Components/Location.hpp>
 #include <ECS/Components/DatabaseComponent.hpp>
-#include <ECS/Components/PartyComponent.hpp>
+#include <ECS/Components/Party.hpp>

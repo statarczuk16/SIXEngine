@@ -164,24 +164,10 @@ namespace SXNGN::ECS::A {
 		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_5));
 		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_6));
 
-		auto it = parallax_3->parallax_images_.begin();
-		/**
-		while (it != parallax_3->parallax_images_.end())
-		{
-			sole::uuid image_id = *it;
-
-			it++;
-			Entity image_entity = gCoordinator->GetEntityFromUUID(image_id);
-			SDL_Log("Contains image with Entity %d", image_entity);
-		}
-		**/
 
 		parallax_3->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
 		gCoordinator->AddComponent(parallax_entity_3, parallax_3);
 		gCoordinator->AddComponent(parallax_entity_3, Create_Gamestate_Component_from_Enum(state));
-
-
-		
 
 		auto character = gCoordinator->CreateEntity();
 		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::UI_LAYER);
