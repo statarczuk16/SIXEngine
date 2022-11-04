@@ -19,4 +19,5 @@
 #include <ECS/Components/TaskWorkerComponent.hpp>
 #include <ECS/Components/Location.hpp>
 #include <ECS/Components/DatabaseComponent.hpp>
+#include <ECS/Components/WorldMap.hpp>
 #include <ECS/Components/Party.hpp>

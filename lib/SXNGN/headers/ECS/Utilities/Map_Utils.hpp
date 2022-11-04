@@ -104,7 +104,11 @@ namespace SXNGN {
 				
 				static void CreateTacticalMap(); 
 
-				static void CreateOverworldMap();
+				static void InitializeScrollingBackground();
+
+				static WorldMap* CSVToWorldMap(std::string world_map_path = "");
+
+				static void InitializeWorldMap();
 
 				static void StartNewGame();
 

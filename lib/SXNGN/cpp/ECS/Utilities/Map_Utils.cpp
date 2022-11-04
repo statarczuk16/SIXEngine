@@ -1,5 +1,7 @@
 #include <ECS/Utilities/Map_Utils.hpp>
 #include <queue>
+#include <sstream>
+#include <fstream>
 
 namespace SXNGN::ECS::A {
 	std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
@@ -52,8 +54,121 @@ namespace SXNGN::ECS::A {
 		return std::make_tuple(pre_renders, collisionables, locations, tiles);
 	}
 
+	WorldMap* Map_Utils::CSVToWorldMap(std::string world_map_path)
+	{
+		// File pointer
+		std::fstream fin;
 
-	void Map_Utils::CreateOverworldMap()
+		// Open an existing file
+		std::vector < std::vector < std::string > > rows;
+		fin.open(world_map_path, std::ios::in);
+		if (fin.is_open())
+		{
+			// Read the Data from the file
+			// as String Vector
+			std::vector<std::string> row;
+			std::string line, word, temp;
+			
+
+			while (std::getline(fin, line))
+			{
+
+				row.clear();
+				// used for breaking words
+				std::stringstream s(line);
+				// read every column data of a row and
+				// store it in a string variable, 'word'
+				while (std::getline(s, word, ',')) {
+
+					// add all the column data
+					// of a row to a vector
+					row.push_back(word);
+				}
+				rows.push_back(row);
+
+			}
+		}
+		
+
+		std::cout << std::endl;
+		WorldMap* world_map = new WorldMap();
+		int x = 0;
+		int y = 0;
+		std::vector<std::vector<std::vector<WorldLocation*>>> rows_of_locations;
+		for (std::vector<std::string> row : rows)
+		{
+			std::vector<std::vector<WorldLocation*>> locations_this_row;
+			for (std::string str : row)
+			{
+				std::vector<WorldLocation*> locations_this_coord;
+				if (str.find('r') != std::string::npos)
+				{
+					WorldLocation* loc = new WorldLocation();
+					loc->traversal_cost_ = 1;
+					loc->location_name_ = "a road";
+					loc->map_x_ = x;
+					loc->map_y_ = y;
+					locations_this_coord.push_back(loc);
+
+				}
+				if (str.find('s') != std::string::npos)
+				{
+					WorldLocation* loc = new WorldLocation();
+					loc->traversal_cost_ = 0;
+					loc->location_name_ = "a settlement";
+					loc->has_settlement_ = true;
+					loc->map_layer_ = RenderLayer::OBJECT_LAYER;
+					loc->map_x_ = x;
+					loc->map_y_ = y;
+					locations_this_coord.push_back(loc);
+				}
+				if (str.find('x') != std::string::npos)
+				{
+					WorldLocation* loc = new WorldLocation();
+					loc->traversal_cost_ = 0;
+					loc->location_name_ = "ruins";
+					loc->has_ruins_ = true;
+					loc->map_layer_ = RenderLayer::OBJECT_LAYER;
+					loc->map_x_ = x;
+					loc->map_y_ = y;
+					locations_this_coord.push_back(loc);
+				}
+				std::cout << std::setw(3);
+				std::cout << str << ", ";
+
+				x++;
+				locations_this_row.push_back(locations_this_coord);
+			}
+			
+			rows_of_locations.push_back(locations_this_row);
+			std::cout << std::endl;
+			y++;
+		}
+		
+		return nullptr;
+		
+
+
+	}
+
+	void Map_Utils::InitializeWorldMap()
+	{
+		std::string world_map_path = "";
+		if (world_map_path == "")
+		{
+			std::string g_media_folder = "uninit";
+			g_media_folder = Gameutils::find_folder_in_project_string("media");
+			if (g_media_folder == SXNGN::BAD_STRING_RETURN)
+			{
+				std::cout << "Fatal: " << " Could not find media folder" << std::endl;
+				return;
+			}
+			world_map_path = g_media_folder + "/maps/world_map.csv";
+		}
+		WorldMap* new_world_map = CSVToWorldMap(world_map_path);
+	}
+
+	void Map_Utils::InitializeScrollingBackground()
 	{
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 		//build the infinite scrolling map oregon trail style
@@ -67,9 +182,8 @@ namespace SXNGN::ECS::A {
 		Location* location_1 = nullptr;
 		Moveable* movement_common = nullptr;
 
+		InitializeWorldMap();
 
-
-		
 		//put two of the same next to each other so they can scroll
 		pre_render_1 = new Pre_Renderable(tileset, "DUNES_0", RenderLayer::AIR_LAYER);
 		location_1 = new Location(0, 0);
@@ -248,7 +362,7 @@ namespace SXNGN::ECS::A {
 		auto db_entity = gCoordinator->CreateEntity();
 		gCoordinator->AddComponent(db_entity, db.get());
 		//CreateTacticalMap();
-		CreateOverworldMap();
+		InitializeScrollingBackground();
 
 	}
 
