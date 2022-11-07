@@ -485,8 +485,8 @@ int init_menus()
 	//set the pace value
 	std::function<void()> set_pace_stop = std::bind(set_property, SXNGN::OVERWORLD_PACE, 0.0);
 	std::function<void()> set_pace_slow = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.0);
-	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE, 2.0);
-	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE, 3.0);
+	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.25);
+	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.5);
 
 	pace_pop_up_c->child_components_.push_back(ig_pace_0);
 	pace_pop_up_c->child_components_.push_back(ig_pace_1);
