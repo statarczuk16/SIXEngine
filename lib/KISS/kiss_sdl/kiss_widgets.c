@@ -433,7 +433,9 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 
 int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 {
-	if (!button || !button->visible || !event) return 0;
+	int visible = 0;
+	visible = (button->wdw->visible && button->visible);
+	if (!visible || !event) return 0;
 	if (event->type == SDL_WINDOWEVENT &&
 		event->window.event == SDL_WINDOWEVENT_EXPOSED)
 		*draw = 1;
@@ -475,6 +477,7 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 	if (button)
 	{
 		visible = (button->wdw->visible && button->visible);
+		
 		//pass by ref - sets button->r_rect
 		(void) determine_render_position(&button->rect, button->wdw, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
 		//pass by ref - sets textx and texty
@@ -556,7 +559,9 @@ int kiss_selectbutton_new_uc(kiss_selectbutton* selectbutton, kiss_window* wdw,
 int kiss_selectbutton_event(kiss_selectbutton *selectbutton,
 	SDL_Event *event, int *draw)
 {
-	if (!selectbutton || !selectbutton->visible || !event) return 0;
+	int visible = 0;
+	visible = (selectbutton->wdw->visible && selectbutton->visible);
+	if (!visible || !event) return 0;
 	if (event->type == SDL_WINDOWEVENT &&
 		event->window.event == SDL_WINDOWEVENT_EXPOSED)
 		*draw = 1;
@@ -654,7 +659,9 @@ static void vnewpos(kiss_vscrollbar *vscrollbar, double step, int *draw)
 int kiss_vscrollbar_event(kiss_vscrollbar *vscrollbar, SDL_Event *event,
 	int *draw)
 {
-	if (!vscrollbar || !vscrollbar->visible) return 0;
+	int visible = 0;
+	visible = (vscrollbar->wdw->visible && vscrollbar->visible);
+	if (!vscrollbar || !visible) return 0;
 	if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))) {
 		vscrollbar->upclicked = 0;
 		vscrollbar->downclicked = 0;
@@ -792,7 +799,9 @@ static void hnewpos(kiss_hscrollbar *hscrollbar, double step, int *draw)
 int kiss_hscrollbar_event(kiss_hscrollbar *hscrollbar, SDL_Event *event,
 	int *draw)
 {
-	if (!hscrollbar || !hscrollbar->visible) return 0;
+	int visible = 0;
+	visible = (hscrollbar->wdw->visible && hscrollbar->visible);
+	if (!hscrollbar || !visible) return 0;
 	if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))) {
 		hscrollbar->leftclicked = 0;
 		hscrollbar->rightclicked = 0;
@@ -898,7 +907,9 @@ int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 int kiss_progressbar_event(kiss_progressbar *progressbar, SDL_Event *event,
 	int *draw)
 {
-	if (!progressbar || !progressbar->visible) return 0;
+	int visible = 0;
+	visible = (progressbar->wdw->visible && progressbar->visible);
+	if (!progressbar || !visible) return 0;
 	if (progressbar->run && kiss_getticks() > progressbar->lasttick +
 		kiss_progress_interval) {
 		progressbar->fraction += progressbar->step;
@@ -962,7 +973,9 @@ int kiss_entry_new(kiss_entry *entry, kiss_window *wdw, int decorate,
 
 int kiss_entry_event(kiss_entry *entry, SDL_Event *event, int *draw)
 {
-	if (!entry || !entry->visible || !event) return 0;
+	int visible = 0;
+	visible = (entry->wdw->visible && entry->visible);
+	if (!entry || !visible || !event) return 0;
 	if (event->type == SDL_WINDOWEVENT &&
 		event->window.event == SDL_WINDOWEVENT_EXPOSED)
 		*draw = 1;

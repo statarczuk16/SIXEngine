@@ -286,9 +286,17 @@ namespace SXNGN::ECS::A {
 		auto character = gCoordinator->CreateEntity();
 		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::UI_LAYER);
 		location_2 = new Location(800, 225);
+		auto movement_character = new Moveable();
+		movement_character->m_speed_m_s = 10.0;
+		gCoordinator->AddComponent(character, movement_character);
 		gCoordinator->AddComponent(character, pre_render_2);
 		gCoordinator->AddComponent(character, location_2);
 		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
+		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();		
+		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
+		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
+		
+		gCoordinator->AddComponent(character, input_tags_comp);
 
 		auto camera = CameraComponent::get_instance();
 		camera->set_target(character);
