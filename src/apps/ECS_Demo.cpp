@@ -775,6 +775,8 @@ int main(int argc, char* args[])
 
 	//singleton, used by world creation utility to lock camera onto main character
 	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
+	main_camera_comp->bounded_horizontal_ = false;
+	main_camera_comp->bounded_vertical_ = true;
 
 	SXNGN::Timer move_timer;//time passed between movement system calls
 

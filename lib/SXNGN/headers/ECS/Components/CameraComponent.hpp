@@ -48,6 +48,9 @@ namespace SXNGN::ECS::A {
         SDL_FRect position_scaled_;//scaled (old position * scaling factor)
         SDL_FRect screen_bounds_;
         Entity target_;
+        bool bounded_horizontal_; //do not let camera lens travel left/right outside of the screen_bounds_ rect
+        bool bounded_vertical_; //do not let camera lens travel up/down outside of the screen_bounds_ rect
+
        
     };
 

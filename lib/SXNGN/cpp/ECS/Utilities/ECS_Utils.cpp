@@ -71,27 +71,31 @@ namespace SXNGN {
 				screen_bounds_scaled.w *= SXNGN::Database::get_scale();
 				screen_bounds_scaled.h *= SXNGN::Database::get_scale();
 
-
-				//don't allow left side of camera to go further left than the screen
-				if (return_view.x < screen_bounds_scaled.x)
+				if (camera->bounded_horizontal_)
 				{
-					return_view.x = screen_bounds_scaled.x;
+					//don't allow left side of camera to go further left than the screen
+					if (return_view.x < screen_bounds_scaled.x)
+					{
+						return_view.x = screen_bounds_scaled.x;
+					}
+					//don't right side of camera further right than right side of screen
+					if ((return_view.x + lens.w) > (screen_bounds_scaled.x + screen_bounds_scaled.w))
+					{
+						return_view.x = (screen_bounds_scaled.x + screen_bounds_scaled.w - lens.w);
+					}
 				}
-				//don't right side of camera further right than right side of screen
-				if ((return_view.x + lens.w) > (screen_bounds_scaled.x + screen_bounds_scaled.w))
+				if(camera->bounded_vertical_)
 				{
-					return_view.x = (screen_bounds_scaled.x + screen_bounds_scaled.w - lens.w);
+					if (return_view.y < screen_bounds_scaled.y)
+					{
+						return_view.y = screen_bounds_scaled.y;
+					}
+					if (return_view.y + lens.h > (screen_bounds_scaled.y + screen_bounds_scaled.h))
+					{
+						return_view.y = screen_bounds_scaled.y + screen_bounds_scaled.h - lens.h;
+					}
 				}
-
-				if (return_view.y < screen_bounds_scaled.y)
-				{
-					return_view.y = screen_bounds_scaled.y;
-				}
-				if (return_view.y + lens.h > (screen_bounds_scaled.y + screen_bounds_scaled.h))
-				{
-					return_view.y = screen_bounds_scaled.y + screen_bounds_scaled.h - lens.h;
-				}
-
+				
 				return return_view;
 			}
 

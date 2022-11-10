@@ -18,6 +18,7 @@ namespace SXNGN::ECS::A {
         position_scaled_.w = 0;
         position_scaled_.h = 0;
         screen_bounds_ = screen_bounds;
+        bounded_horizontal_ = false;
         target_ = target;
         component_type = ECS::A::ComponentTypeEnum::CAMERA_SINGLE;
     }
