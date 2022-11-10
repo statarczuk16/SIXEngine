@@ -255,7 +255,7 @@ namespace SXNGN::ECS::A {
 					
 				space_to_entity_location_map_[SXNGN::DEFAULT_SPACE] = entity_map;
 			}
-			if (grid_x > space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].size() || grid_y > space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].at(grid_x).size())
+			if (grid_x >= space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].size() || grid_y >= space_to_entity_location_map_[SXNGN::DEFAULT_SPACE].at(grid_x).size())
 			{
 				SDL_LogError(1, "addUUIDToLocationMap Bad Index: %d, %d ", grid_x, grid_y);
 				return;
