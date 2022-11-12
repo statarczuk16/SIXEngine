@@ -28,8 +28,8 @@ namespace SXNGN::ECS::A {
 		bool has_settlement_;
 		bool has_ruins_;
 		RenderLayer map_layer_;
-		uint16_t map_x_;
-		uint16_t map_y_;
+		uint16_t map_grid_x_;
+		uint16_t map_grid_y_;
 
 
 	};
@@ -39,8 +39,8 @@ namespace SXNGN::ECS::A {
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::WORLD_LOCATION]},
 			{"traversal_cost_", p.traversal_cost_},
 			{"map_layer_", p.map_layer_},
-			{"map_x_", p.map_x_},
-			{"map_y_", p.map_y_}
+			{"map_grid_x_", p.map_grid_x_},
+			{"map_grid_y_", p.map_grid_y_}
 		};
 	}
 
@@ -49,8 +49,8 @@ namespace SXNGN::ECS::A {
 			p.component_type = component_type_enum;
 			j.at("traversal_cost_").get_to(p.traversal_cost_);
 			j.at("map_layer_").get_to(p.map_layer_);
-			j.at("map_x_").get_to(p.map_x_);
-			j.at("map_y_").get_to(p.map_y_);
+			j.at("map_grid_x_").get_to(p.map_grid_x_);
+			j.at("map_grid_y_").get_to(p.map_grid_y_);
 		};
 
 	

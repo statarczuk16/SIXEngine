@@ -106,8 +106,8 @@ namespace SXNGN::ECS::A {
 					WorldLocation* loc = new WorldLocation();
 					loc->traversal_cost_ = 1;
 					loc->location_name_ = "a road";
-					loc->map_x_ = x;
-					loc->map_y_ = y;
+					loc->map_grid_x_ = x;
+					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
 
 				}
@@ -118,8 +118,8 @@ namespace SXNGN::ECS::A {
 					loc->location_name_ = "a settlement";
 					loc->has_settlement_ = true;
 					loc->map_layer_ = RenderLayer::OBJECT_LAYER;
-					loc->map_x_ = x;
-					loc->map_y_ = y;
+					loc->map_grid_x_ = x;
+					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
 				}
 				if (str.find('x') != std::string::npos)
@@ -129,8 +129,8 @@ namespace SXNGN::ECS::A {
 					loc->location_name_ = "ruins";
 					loc->has_ruins_ = true;
 					loc->map_layer_ = RenderLayer::OBJECT_LAYER;
-					loc->map_x_ = x;
-					loc->map_y_ = y;
+					loc->map_grid_x_ = x;
+					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
 				}
 				std::cout << std::setw(3);
@@ -166,6 +166,9 @@ namespace SXNGN::ECS::A {
 			world_map_path = g_media_folder + "/maps/world_map.csv";
 		}
 		WorldMap* new_world_map = CSVToWorldMap(world_map_path);
+		auto gCoordinator = Database::get_coordinator();
+		Entity world_map_entity = gCoordinator->CreateEntity();
+		gCoordinator->AddComponent(world_map_entity, new_world_map);
 	}
 
 	void Map_Utils::InitializeScrollingBackground()
