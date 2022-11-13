@@ -31,6 +31,7 @@ namespace SXNGN::ECS::A {
         static void merge_db(DatabaseComponent* new_db);
 
         std::map < std::string, double > settings_map;
+       
      
     };
 

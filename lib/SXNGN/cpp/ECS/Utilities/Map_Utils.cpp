@@ -54,7 +54,7 @@ namespace SXNGN::ECS::A {
 		return std::make_tuple(pre_renders, collisionables, locations, tiles);
 	}
 
-	WorldMap* Map_Utils::CSVToWorldMap(std::string world_map_path)
+	std::vector<std::vector<std::vector<WorldLocation*>>> Map_Utils::CSVToWorldMap(std::string world_map_path)
 	{
 		// File pointer
 		std::fstream fin;
@@ -88,15 +88,13 @@ namespace SXNGN::ECS::A {
 
 			}
 		}
-		
-
 		std::cout << std::endl;
-		WorldMap* world_map = new WorldMap();
-		int x = 0;
+		
 		int y = 0;
 		std::vector<std::vector<std::vector<WorldLocation*>>> rows_of_locations;
 		for (std::vector<std::string> row : rows)
 		{
+			int x = 0;
 			std::vector<std::vector<WorldLocation*>> locations_this_row;
 			for (std::string str : row)
 			{
@@ -117,7 +115,7 @@ namespace SXNGN::ECS::A {
 					loc->traversal_cost_ = 0;
 					loc->location_name_ = "a settlement";
 					loc->has_settlement_ = true;
-					loc->map_layer_ = RenderLayer::OBJECT_LAYER;
+					loc->map_layer_ = RenderLayer::AIR_LAYER;
 					loc->map_grid_x_ = x;
 					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
@@ -128,7 +126,7 @@ namespace SXNGN::ECS::A {
 					loc->traversal_cost_ = 0;
 					loc->location_name_ = "ruins";
 					loc->has_ruins_ = true;
-					loc->map_layer_ = RenderLayer::OBJECT_LAYER;
+					loc->map_layer_ = RenderLayer::AIR_LAYER;
 					loc->map_grid_x_ = x;
 					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
@@ -145,10 +143,7 @@ namespace SXNGN::ECS::A {
 			y++;
 		}
 		
-		return nullptr;
-		
-
-
+		return rows_of_locations;
 	}
 
 	void Map_Utils::InitializeWorldMap()
@@ -165,10 +160,54 @@ namespace SXNGN::ECS::A {
 			}
 			world_map_path = g_media_folder + "/maps/world_map.csv";
 		}
-		WorldMap* new_world_map = CSVToWorldMap(world_map_path);
+		std::vector<std::vector<std::vector<WorldLocation*>>> new_world_map = CSVToWorldMap(world_map_path);
 		auto gCoordinator = Database::get_coordinator();
 		Entity world_map_entity = gCoordinator->CreateEntity();
-		gCoordinator->AddComponent(world_map_entity, new_world_map);
+		WorldMap* world_map_component = new WorldMap();
+		
+		for (auto row : new_world_map)
+		{
+			std::vector< std::vector < sole::uuid> > uuids_this_row;
+			for (auto column : row)
+			{
+				std::vector<sole::uuid> uuids_this_at_this_location;
+				for (auto world_location : column)
+				{	
+					Entity location_entity = gCoordinator->CreateEntity();
+					sole::uuid uuid_ = gCoordinator->GetUUIDFromEntity(location_entity);
+					uuids_this_at_this_location.push_back(uuid_);
+					world_map_component->uuid_to_is_loaded_map_[uuid_] = true;
+					gCoordinator->AddComponent(location_entity, world_location);
+					Location* location = new Location();
+					location->m_track_in_grid_map_ = false;
+					location->m_pos_x_m_ = world_location->map_grid_x_ * SXNGN::OVERWORLD_PIXELS_PER_GRID;
+					location->m_pos_y_m_ = world_location->map_grid_y_ * SXNGN::OVERWORLD_PIXELS_PER_GRID;
+					std::cout << "Map grid at " << world_location->map_grid_x_ << ", " << world_location->map_grid_y_ << " given location " << location->m_pos_x_m_ << " , " << location->m_pos_y_m_ << std::endl;
+					gCoordinator->AddComponent(location_entity, location);
+					Pre_Renderable* pre_render = new Pre_Renderable();
+					pre_render->render_layer_ = world_location->map_layer_;
+					pre_render->sprite_factory_name_ = "APOCALYPSE_MAP";
+					if (world_location->has_ruins_)
+					{
+						pre_render->sprite_factory_sprite_type_ = "RUIN_CAR";
+					}
+					else if (world_location->has_settlement_)
+					{
+						pre_render->sprite_factory_sprite_type_ = "SHRINE";
+					}
+					else if (world_location->traversal_cost_ == 1)
+					{
+						pre_render->sprite_factory_sprite_type_ = "ROAD_H_1";
+					}
+					gCoordinator->AddComponent(location_entity, pre_render);
+					gCoordinator->AddComponent(location_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
+					
+				}
+				uuids_this_row.push_back(uuids_this_at_this_location);
+			}
+			world_map_component->world_locations_.push_back(uuids_this_row);
+		}
+		gCoordinator->AddComponent(world_map_entity, world_map_component);
 	}
 
 	void Map_Utils::InitializeScrollingBackground()
@@ -201,15 +240,16 @@ namespace SXNGN::ECS::A {
 		Location* location_2 = nullptr;
 
 		pre_render_2 = new Pre_Renderable(tileset, "DUNES_1", RenderLayer::AIR_LAYER);
-		location_2 = new Location(0, 0);
+		location_2 = new Location(1600, 0);
 		gCoordinator->AddComponent(dune_2, pre_render_2);
 		gCoordinator->AddComponent(dune_2, location_2);
 		gCoordinator->AddComponent(dune_2, movement_common);
 		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
 
+
 		auto dune_3 = gCoordinator->CreateEntity();
 		auto pre_render_dune_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::AIR_LAYER);
-		auto location_dune_3 = new Location(0, 0);
+		auto location_dune_3 = new Location(1600 + 1600, 0);
 		gCoordinator->AddComponent(dune_3, pre_render_dune_3);
 		gCoordinator->AddComponent(dune_3, location_dune_3);
 		gCoordinator->AddComponent(dune_3, movement_common);
@@ -240,7 +280,7 @@ namespace SXNGN::ECS::A {
 		//put two of the same next to each other so they can scroll
 		auto mtn_2 = gCoordinator->CreateEntity();
 		auto pre_render_4 = new Pre_Renderable(tileset, "MOUNTAINS_1", RenderLayer::OBJECT_LAYER);
-		auto location_4 = new Location(0, 0);
+		auto location_4 = new Location(1600, 0);
 		gCoordinator->AddComponent(mtn_2, pre_render_4);
 		gCoordinator->AddComponent(mtn_2, location_4);
 		gCoordinator->AddComponent(mtn_2, movement_common_3);
@@ -268,7 +308,7 @@ namespace SXNGN::ECS::A {
 		//put two of the same next to each other so they can scroll
 		auto dune_6 = gCoordinator->CreateEntity();
 		auto pre_render_6 = new Pre_Renderable(tileset, "SKY_NIGHT", RenderLayer::GROUND_LAYER);
-		auto location_6 = new Location(0, 0);
+		auto location_6 = new Location(1600, 0);
 		gCoordinator->AddComponent(dune_6, pre_render_6);
 		gCoordinator->AddComponent(dune_6, location_6);
 		gCoordinator->AddComponent(dune_6, movement_common_5);
@@ -303,6 +343,10 @@ namespace SXNGN::ECS::A {
 
 		auto camera = CameraComponent::get_instance();
 		camera->set_target(character);
+
+		auto db = DatabaseComponent::get_instance();
+		
+		db->settings_map["FOCUS_ENTITY"] = character;
 					
 
 	}
@@ -364,10 +408,10 @@ namespace SXNGN::ECS::A {
 	{
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
 
-		std::forward_list<ComponentTypeEnum> active_game_states;
-		active_game_states.push_front(ComponentTypeEnum::OVERWORLD_STATE);
-		active_game_states.push_front(ComponentTypeEnum::MAIN_GAME_STATE);
-		active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
+		std::set<ComponentTypeEnum> active_game_states;
+		active_game_states.insert(ComponentTypeEnum::OVERWORLD_STATE);
+		active_game_states.insert(ComponentTypeEnum::MAIN_GAME_STATE);
+		active_game_states.insert(ComponentTypeEnum::CORE_BG_GAME_STATE);
 		gCoordinator->GameStateChanged(active_game_states);
 		auto db = DatabaseComponent::get_instance();
 		auto db_entity = gCoordinator->CreateEntity();

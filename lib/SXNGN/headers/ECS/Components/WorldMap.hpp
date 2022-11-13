@@ -21,7 +21,7 @@ namespace SXNGN::ECS::A {
 			traversal_cost_ = 3;
 			has_settlement_ = false;
 			has_ruins_ = false;
-			map_layer_ = RenderLayer::GROUND_LAYER;
+			map_layer_ = RenderLayer::OBJECT_LAYER;
 		}
 		std::string location_name_;
 		int traversal_cost_;
@@ -30,6 +30,7 @@ namespace SXNGN::ECS::A {
 		RenderLayer map_layer_;
 		uint16_t map_grid_x_;
 		uint16_t map_grid_y_;
+		
 
 
 	};
@@ -61,7 +62,8 @@ namespace SXNGN::ECS::A {
 		{
 			component_type = ComponentTypeEnum::WORLD_MAP;
 		}
-		std::vector< std::vector< std::vector< WorldLocation > > > world_locations_;
+		std::vector< std::vector< std::vector< sole::uuid > > > world_locations_;
+		std::unordered_map<sole::uuid, bool> uuid_to_is_loaded_map_;
 	};
 
 	
@@ -69,6 +71,7 @@ namespace SXNGN::ECS::A {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::WORLD_MAP]},
 			{"world_locations_", p.world_locations_},
+			{"uuid_to_is_loaded_map_", p.uuid_to_is_loaded_map_},
 		};
 
 	}
@@ -77,5 +80,6 @@ namespace SXNGN::ECS::A {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 		p.component_type = component_type_enum;
 		j.at("world_locations_").get_to(p.world_locations_);
+		j.at("uuid_to_is_loaded_map_").get_to(p.uuid_to_is_loaded_map_);
 	}
 }

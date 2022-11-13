@@ -20,7 +20,7 @@ namespace SXNGN::ECS::A {
 	{
 		Location()
 		{
-
+			component_type = ComponentTypeEnum::LOCATION;
 		}
 
 		Location(double x, double y)

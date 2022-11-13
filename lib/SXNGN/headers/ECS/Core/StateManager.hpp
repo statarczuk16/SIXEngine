@@ -137,14 +137,14 @@ namespace SXNGN::ECS::A {
 			}
 		}
 
-		void gameStateChanged(std::forward_list<ComponentTypeEnum> active_game_states)
+		void gameStateChanged(std::set<ComponentTypeEnum> active_game_states)
 		{
 			active_game_states_.clear();
 			active_game_states_ = active_game_states;
-			active_game_states_.sort();
+			//active_game_states_.sort();
 		}
 
-		std::forward_list<ComponentTypeEnum> getActiveGameStates()
+		std::set<ComponentTypeEnum> getActiveGameStates()
 		{
 			return active_game_states_;
 		}
@@ -317,7 +317,7 @@ namespace SXNGN::ECS::A {
 		std::unordered_map < std::string, std::unordered_map<sole::uuid, std::pair<int,int>>> space_to_entity_location_map_reverse_;
 		
 
-		std::forward_list<ComponentTypeEnum> active_game_states_;
+		std::set<ComponentTypeEnum> active_game_states_;
 		
 		std::unordered_map<ComponentTypeEnum, std::shared_ptr<SDL_Rect>> game_state_to_view_port_;
 		

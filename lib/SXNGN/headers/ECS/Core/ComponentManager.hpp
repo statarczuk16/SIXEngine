@@ -16,6 +16,7 @@ public:
 	{
 
 		assert(mComponentTypes.find(component_type) == mComponentTypes.end() && "Registering component type_ more than once.");
+		assert(mComponentTypes.size() <= MAX_COMPONENTS && "More than maximum components registered");
 
 		mComponentTypes.insert({ component_type, mNextComponentType});
 		//mComponentArrays.insert({ component_type, std::make_shared<ComponentArray>() });

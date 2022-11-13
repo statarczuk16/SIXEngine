@@ -20,7 +20,8 @@ namespace SXNGN::ECS::A {
 		GROUND_LAYER,
 		OBJECT_LAYER,
 		AIR_LAYER,
-		UI_LAYER
+		UI_LAYER,
+		TOP_LAYER
 		
 	};
 

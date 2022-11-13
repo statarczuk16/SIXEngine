@@ -106,7 +106,7 @@ namespace SXNGN {
 
 				static void InitializeScrollingBackground();
 
-				static WorldMap* CSVToWorldMap(std::string world_map_path = "");
+				static std::vector<std::vector<std::vector<WorldLocation*>>> CSVToWorldMap(std::string world_map_path = "");
 
 				static void InitializeWorldMap();
 

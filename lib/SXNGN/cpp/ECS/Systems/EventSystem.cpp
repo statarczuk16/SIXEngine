@@ -47,12 +47,12 @@ namespace SXNGN::ECS::A {
 						{
 							gCoordinator.ExtractEntitiesWithMatchingComponent(rs);
 						}
-						active_states.remove(rs);
+						active_states.erase(rs);
 					}
 					for (auto as : event_ptr->e.state_change.new_states)
 					{
-						active_states.remove(as);
-						active_states.push_front(as);
+						active_states.erase(as);
+						active_states.insert(as);
 					}
 					gCoordinator.GameStateChanged(active_states, true);
 					break;
@@ -182,7 +182,7 @@ namespace SXNGN::ECS::A {
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto user_input_state = User_Input_State::get_instance();
 		std::vector<std::pair<Entity, Signature>> all_entity_sigs = gCoordinator.Get_All_Entity_Signatures();
-		std::ofstream save_stream("world.json");
+		std::ofstream save_stream("game_save.json");
 		
 		for (auto entity_sig : all_entity_sigs)
 		{
@@ -195,9 +195,9 @@ namespace SXNGN::ECS::A {
 					abort();
 				}
 
-				json world_tile_to_save = gCoordinator.Entity_To_JSON(entity_sig.first, uuid);
-				save_stream << std::setw(4) << world_tile_to_save << std::endl;
-				//std::cout << world_tile_to_save.dump(4) << std::endl;
+				json entity_to_save = gCoordinator.Entity_To_JSON(entity_sig.first, uuid);
+				save_stream << std::setw(4) << entity_to_save << std::endl;
+				//std::cout << entity_to_save.dump(4) << std::endl;
 			}
 		}
 	}
@@ -206,7 +206,7 @@ namespace SXNGN::ECS::A {
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto user_input_state = User_Input_State::get_instance();
-		std::ifstream i("world.json"); //FIXME
+		std::ifstream i("game_save.json"); //FIXME
 		json j;
 		try 
 		{

@@ -146,7 +146,7 @@ namespace SXNGN::ECS::A {
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		auto ui = UICollectionSingleton::get_instance();
 
-		std::forward_list<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
+		std::set<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
 
 		for (auto state : active_game_states)
 		{

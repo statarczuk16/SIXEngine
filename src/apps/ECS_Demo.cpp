@@ -304,7 +304,7 @@ int init_menus()
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
 	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 120;
-	const int OVERWORLD_STATE_HEIGHT = 360;
+	const int OVERWORLD_STATE_HEIGHT = 460;
 	// Window
 	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
@@ -604,6 +604,8 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::EVENT);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SELECTABLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::LOCATION);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::WORLD_LOCATION);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::WORLD_MAP);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::DATABASE_SINGLE);
 
 
@@ -753,10 +755,10 @@ int main(int argc, char* args[])
 	gCoordinator.AddComponent(dune_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
 	
-	std::forward_list<ComponentTypeEnum> active_game_states;
+	std::set<ComponentTypeEnum> active_game_states;
 	active_game_states.clear();
-	active_game_states.push_front(ComponentTypeEnum::MAIN_MENU_STATE);
-	active_game_states.push_front(ComponentTypeEnum::CORE_BG_GAME_STATE);
+	active_game_states.insert(ComponentTypeEnum::MAIN_MENU_STATE);
+	active_game_states.insert(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 	init_menus();
 	std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
@@ -776,7 +778,7 @@ int main(int argc, char* args[])
 	//singleton, used by world creation utility to lock camera onto main character
 	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
 	main_camera_comp->bounded_horizontal_ = false;
-	main_camera_comp->bounded_vertical_ = true;
+	main_camera_comp->bounded_vertical_ = false;
 
 	SXNGN::Timer move_timer;//time passed between movement system calls
 

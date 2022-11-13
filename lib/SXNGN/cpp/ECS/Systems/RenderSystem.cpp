@@ -35,7 +35,7 @@ namespace SXNGN::ECS::A {
 		//get the singleton that holds the UI elements per game state
 		auto ui = UICollectionSingleton::get_instance();
 
-		std::forward_list<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
+		std::set<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
 		//For each active game state, draw the corresponding UI elements
 		for (auto state : active_game_states)
 		{

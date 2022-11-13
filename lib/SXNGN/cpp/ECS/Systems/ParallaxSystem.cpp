@@ -49,6 +49,18 @@ namespace SXNGN::ECS::A
 		auto db_comp = DatabaseComponent::get_instance();
 		auto properties = &db_comp->settings_map;
 		double stop_or_go = 0.0;
+		auto db = DatabaseComponent::get_instance();
+		double focus_y = -1;
+		if (db->settings_map.count("FOCUS_ENTITY"))
+		{
+			auto focus_data = gCoordinator.CheckOutComponent(db->settings_map["FOCUS_ENTITY"], ComponentTypeEnum::LOCATION);
+			if (focus_data)
+			{
+				Location* focus_ptr = static_cast<Location*>(focus_data);
+				focus_y = focus_ptr->m_pos_y_m_;
+				gCoordinator.CheckInComponent(db->settings_map["FOCUS_ENTITY"], ComponentTypeEnum::LOCATION);
+			}
+		}
 		if (properties->count(SXNGN::OVERWORLD_GO) > 0)
 		{
 			stop_or_go = properties->at(SXNGN::OVERWORLD_GO);
@@ -102,6 +114,8 @@ namespace SXNGN::ECS::A
 				Entity new_right_entity = -1;
 				Entity new_left_entity = -1;
 				//SDL_Log("Parallax Entity %d", entity_actable);
+				
+				
 				auto it = parallax_ptr->parallax_images_.begin();
 				if (true)
 				{
@@ -155,12 +169,29 @@ namespace SXNGN::ECS::A
 
 					}
 				}
+
+				it = parallax_ptr->parallax_images_.begin();
+				if (focus_y != -1)
+				{
+					while (it != parallax_ptr->parallax_images_.end())
+					{
+						sole::uuid image_id = *it;
+						it++;
+						Entity image_entity = gCoordinator.GetEntityFromUUID(image_id);
+						auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
+						if (check_out_loc)
+						{
+							Location* location_ptr = static_cast<Location*>(check_out_loc);
+							location_ptr->m_pos_y_m_ = focus_y - image_height_p + 64;
+							gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::LOCATION);
+						}
+					}
+				}
+
 				it = parallax_ptr->parallax_images_.end() - 1;
 				if (it != parallax_ptr->parallax_images_.begin())
 				{
 					sole::uuid image_id = *it;
-
-					it++;
 					Entity image_entity = gCoordinator.GetEntityFromUUID(image_id);
 					//SDL_Log("Contains image with Entity %d", image_entity);
 					if (!(gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::MOVEABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::RENDERABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::LOCATION)))
