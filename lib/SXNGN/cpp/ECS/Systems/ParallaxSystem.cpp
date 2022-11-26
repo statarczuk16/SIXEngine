@@ -57,7 +57,8 @@ namespace SXNGN::ECS::A
 			if (focus_data)
 			{
 				Location* focus_ptr = static_cast<Location*>(focus_data);
-				focus_y = focus_ptr->m_pos_y_m_;
+				double offset = (double)SXNGN::BASE_TILE_HEIGHT * 2.0;
+				focus_y = focus_ptr->m_pos_y_m_ - offset;
 				gCoordinator.CheckInComponent(db->settings_map["FOCUS_ENTITY"], ComponentTypeEnum::LOCATION);
 			}
 		}
@@ -132,7 +133,7 @@ namespace SXNGN::ECS::A
 					if (render_data)
 					{
 						const Renderable* renderable_ptr = static_cast<const Renderable*>(render_data);
-						image_width_p = renderable_ptr->tile_map_snip_.w;
+						image_width_p = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
 						image_height_p = renderable_ptr->tile_map_snip_.h;
 						gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::RENDERABLE);
 					}
@@ -202,7 +203,7 @@ namespace SXNGN::ECS::A
 					if (render_data)
 					{
 						const Renderable* renderable_ptr = static_cast<const Renderable*>(render_data);
-						image_width_p = renderable_ptr->tile_map_snip_.w;
+						image_width_p = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
 						image_height_p = renderable_ptr->tile_map_snip_.h;
 						gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::RENDERABLE);
 					}

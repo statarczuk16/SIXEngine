@@ -29,7 +29,7 @@ namespace SXNGN::ECS::A {
 				Location* location = nullptr;
 				if (h == 0 || h == tiles_high - 1 || w == 0 || w == tiles_wide - 1)
 				{
-					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER);
+					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER_0);
 					collision = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::STATIC, -1);
 					location = new Location(x_pixels, y_pixels);
 					tile = new Tile(-1);
@@ -38,7 +38,7 @@ namespace SXNGN::ECS::A {
 				}
 				else
 				{
-					pre_render = new Pre_Renderable(tileset, base_tile, A::RenderLayer::GROUND_LAYER);
+					pre_render = new Pre_Renderable(tileset, base_tile, A::RenderLayer::GROUND_LAYER_0);
 					tile = new Tile(1);
 					location = new Location(x_pixels, y_pixels);
 					//collision = Entity_Builder_Utils::Create_Collisionable(collision_box,  CollisionType::NONE);
@@ -104,6 +104,7 @@ namespace SXNGN::ECS::A {
 					WorldLocation* loc = new WorldLocation();
 					loc->traversal_cost_ = 1;
 					loc->location_name_ = "a road";
+					loc->map_layer_ = RenderLayer::OBJECT_LAYER_0;
 					loc->map_grid_x_ = x;
 					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
@@ -115,7 +116,7 @@ namespace SXNGN::ECS::A {
 					loc->traversal_cost_ = 0;
 					loc->location_name_ = "a settlement";
 					loc->has_settlement_ = true;
-					loc->map_layer_ = RenderLayer::AIR_LAYER;
+					loc->map_layer_ = RenderLayer::OBJECT_LAYER_2;
 					loc->map_grid_x_ = x;
 					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
@@ -126,7 +127,7 @@ namespace SXNGN::ECS::A {
 					loc->traversal_cost_ = 0;
 					loc->location_name_ = "ruins";
 					loc->has_ruins_ = true;
-					loc->map_layer_ = RenderLayer::AIR_LAYER;
+					loc->map_layer_ = RenderLayer::TOP_LAYER;
 					loc->map_grid_x_ = x;
 					loc->map_grid_y_ = y;
 					locations_this_coord.push_back(loc);
@@ -158,7 +159,7 @@ namespace SXNGN::ECS::A {
 				std::cout << "Fatal: " << " Could not find media folder" << std::endl;
 				return;
 			}
-			world_map_path = g_media_folder + "/maps/world_map.csv";
+			world_map_path = g_media_folder + "/maps/world_map_1d.csv";
 		}
 		std::vector<std::vector<std::vector<WorldLocation*>>> new_world_map = CSVToWorldMap(world_map_path);
 		auto gCoordinator = Database::get_coordinator();
@@ -198,6 +199,8 @@ namespace SXNGN::ECS::A {
 					else if (world_location->traversal_cost_ == 1)
 					{
 						pre_render->sprite_factory_sprite_type_ = "ROAD_H_1";
+						pre_render->scale_x_ = 2.0;
+						pre_render->scale_y_ = 2.0;
 					}
 					gCoordinator->AddComponent(location_entity, pre_render);
 					gCoordinator->AddComponent(location_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
@@ -227,7 +230,7 @@ namespace SXNGN::ECS::A {
 		InitializeWorldMap();
 
 		//put two of the same next to each other so they can scroll
-		pre_render_1 = new Pre_Renderable(tileset, "DUNES_0", RenderLayer::AIR_LAYER);
+		pre_render_1 = new Pre_Renderable(tileset, "DUNES_0", RenderLayer::GROUND_LAYER_1);
 		location_1 = new Location(0, 0);
 		movement_common = new Moveable();
 		gCoordinator->AddComponent(dune_1, pre_render_1);
@@ -239,7 +242,7 @@ namespace SXNGN::ECS::A {
 		Pre_Renderable* pre_render_2 = nullptr;
 		Location* location_2 = nullptr;
 
-		pre_render_2 = new Pre_Renderable(tileset, "DUNES_1", RenderLayer::AIR_LAYER);
+		pre_render_2 = new Pre_Renderable(tileset, "DUNES_1", RenderLayer::GROUND_LAYER_1);
 		location_2 = new Location(1600, 0);
 		gCoordinator->AddComponent(dune_2, pre_render_2);
 		gCoordinator->AddComponent(dune_2, location_2);
@@ -248,7 +251,7 @@ namespace SXNGN::ECS::A {
 
 
 		auto dune_3 = gCoordinator->CreateEntity();
-		auto pre_render_dune_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::AIR_LAYER);
+		auto pre_render_dune_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::GROUND_LAYER_1);
 		auto location_dune_3 = new Location(1600 + 1600, 0);
 		gCoordinator->AddComponent(dune_3, pre_render_dune_3);
 		gCoordinator->AddComponent(dune_3, location_dune_3);
@@ -269,7 +272,7 @@ namespace SXNGN::ECS::A {
 
 		//put two of the same next to each other so they can scroll
 		auto mtn_1 = gCoordinator->CreateEntity();
-		auto pre_render_3 = new Pre_Renderable(tileset, "MOUNTAINS_0", RenderLayer::OBJECT_LAYER);
+		auto pre_render_3 = new Pre_Renderable(tileset, "MOUNTAINS_0", RenderLayer::GROUND_LAYER_0);
 		auto location_3 = new Location(0, 0);
 		auto movement_common_3 = new Moveable();
 		gCoordinator->AddComponent(mtn_1, pre_render_3);
@@ -279,7 +282,7 @@ namespace SXNGN::ECS::A {
 
 		//put two of the same next to each other so they can scroll
 		auto mtn_2 = gCoordinator->CreateEntity();
-		auto pre_render_4 = new Pre_Renderable(tileset, "MOUNTAINS_1", RenderLayer::OBJECT_LAYER);
+		auto pre_render_4 = new Pre_Renderable(tileset, "MOUNTAINS_1", RenderLayer::GROUND_LAYER_0);
 		auto location_4 = new Location(1600, 0);
 		gCoordinator->AddComponent(mtn_2, pre_render_4);
 		gCoordinator->AddComponent(mtn_2, location_4);
@@ -288,7 +291,7 @@ namespace SXNGN::ECS::A {
 
 		auto parallax_entity_2 = gCoordinator->CreateEntity();
 		Parallax* parallax_2 = new Parallax();
-		parallax_2->speed_multiplier_ = 0.2;
+		parallax_2->speed_multiplier_ = 0.5;
 		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(mtn_1));
 		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(mtn_2));
 		parallax_2->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
@@ -297,7 +300,7 @@ namespace SXNGN::ECS::A {
 
 		//put two of the same next to each other so they can scroll
 		auto dune_5 = gCoordinator->CreateEntity();
-		auto pre_render_5 = new Pre_Renderable(tileset, "SKY_DAY", RenderLayer::GROUND_LAYER);
+		auto pre_render_5 = new Pre_Renderable(tileset, "SKY_DAY", RenderLayer::SKYBOX_LAYER);
 		auto location_5 = new Location(0, 0);
 		auto movement_common_5 = new Moveable();
 		gCoordinator->AddComponent(dune_5, pre_render_5);
@@ -307,7 +310,7 @@ namespace SXNGN::ECS::A {
 
 		//put two of the same next to each other so they can scroll
 		auto dune_6 = gCoordinator->CreateEntity();
-		auto pre_render_6 = new Pre_Renderable(tileset, "SKY_NIGHT", RenderLayer::GROUND_LAYER);
+		auto pre_render_6 = new Pre_Renderable(tileset, "SKY_NIGHT", RenderLayer::SKYBOX_LAYER);
 		auto location_6 = new Location(1600, 0);
 		gCoordinator->AddComponent(dune_6, pre_render_6);
 		gCoordinator->AddComponent(dune_6, location_6);
@@ -327,8 +330,8 @@ namespace SXNGN::ECS::A {
 		gCoordinator->AddComponent(parallax_entity_3, Create_Gamestate_Component_from_Enum(state));
 
 		auto character = gCoordinator->CreateEntity();
-		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::UI_LAYER);
-		location_2 = new Location(800, 225);
+		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
+		location_2 = new Location(0, 16+32);
 		auto movement_character = new Moveable();
 		movement_character->m_speed_m_s = 10.0;
 		gCoordinator->AddComponent(character, movement_character);
@@ -338,6 +341,8 @@ namespace SXNGN::ECS::A {
 		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();		
 		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
 		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
+		input_tags_comp->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
+		input_tags_comp->property_tag_ = SXNGN::OVERWORLD_PACE;
 		
 		gCoordinator->AddComponent(character, input_tags_comp);
 

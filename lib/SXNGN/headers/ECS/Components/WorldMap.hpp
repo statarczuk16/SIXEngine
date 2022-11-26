@@ -21,7 +21,7 @@ namespace SXNGN::ECS::A {
 			traversal_cost_ = 3;
 			has_settlement_ = false;
 			has_ruins_ = false;
-			map_layer_ = RenderLayer::OBJECT_LAYER;
+			map_layer_ = RenderLayer::OBJECT_LAYER_0;
 		}
 		std::string location_name_;
 		int traversal_cost_;

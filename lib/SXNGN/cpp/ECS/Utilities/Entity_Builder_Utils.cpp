@@ -11,7 +11,7 @@ namespace SXNGN {
 				auto tile_entity = coordinator.CreateEntity();
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
 				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
-				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::GROUND_LAYER, name);
+				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::GROUND_LAYER_0, name);
 				coordinator.AddComponent(tile_entity, pre_renderable);
 
 				SDL_Rect collision_box;
@@ -44,7 +44,7 @@ namespace SXNGN {
 				SDL_LogDebug(1, "Created Person Entity: %s: ID: %d", name.c_str(), person_entity);
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
 				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
-				Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER, name);
+				Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER_0, name);
 				coordinator.AddComponent(person_entity, pre_renderable);
 
 

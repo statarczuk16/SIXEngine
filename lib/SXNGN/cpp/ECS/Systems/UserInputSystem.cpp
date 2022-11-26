@@ -87,7 +87,13 @@ namespace SXNGN::ECS::A {
 							if (check_out_move)
 							{
 								Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
-								moveable_ptr->m_vel_x_m_s = db_comp->settings_map.at(input_tags.property_tag_);
+								double speed = db_comp->settings_map.at(input_tags.property_tag_);
+								double stop_or_go = 0.0;
+								if (db_comp->settings_map.count(SXNGN::OVERWORLD_GO) > 0)
+								{
+									stop_or_go = db_comp->settings_map.at(SXNGN::OVERWORLD_GO);
+								}
+								moveable_ptr->m_vel_x_m_s = speed * stop_or_go; //fixme make stop_or_go more flexible
 								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
 							}
 						}

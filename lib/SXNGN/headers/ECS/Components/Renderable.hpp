@@ -17,10 +17,19 @@ namespace SXNGN::ECS::A {
 	enum class RenderLayer
 	{
 		UNKNOWN,
-		GROUND_LAYER,
-		OBJECT_LAYER,
-		AIR_LAYER,
-		UI_LAYER,
+		SKYBOX_LAYER,
+		GROUND_LAYER_0,
+		GROUND_LAYER_1,
+		GROUND_LAYER_2,
+		OBJECT_LAYER_0,
+		OBJECT_LAYER_1,
+		OBJECT_LAYER_2,
+		AIR_LAYER_0,
+		AIR_LAYER_1,
+		AIR_LAYER_2,
+		UI_LAYER_0,
+		UI_LAYER_1,
+		UI_LAYER_2,
 		TOP_LAYER
 		
 	};
@@ -44,6 +53,8 @@ namespace SXNGN::ECS::A {
 			display_string_debug_ = "";
 			draw_name_ = false;
 			draw_debug_ = true;
+			scale_x_ = 1.0;
+			scale_y_ = 1.0;
 		}
 
 		Renderable()
@@ -63,6 +74,8 @@ namespace SXNGN::ECS::A {
 		std::string display_string_debug_;
 		bool draw_name_;
 		bool draw_debug_;
+		double scale_x_;
+		double scale_y_;
 	};
 
 	//note: saving as a pre-renderable. Can't convert the texture pointer to JSON, so it will have to go back through the factory pre-render -> render to get back to its state
@@ -72,6 +85,8 @@ namespace SXNGN::ECS::A {
 			{"sprite_factory_name_", p.sprite_factory_name_},
 			{"sprite_factory_sprite_type_", p.sprite_factory_sprite_type_},
 			{"name_", p.renderable_name_},
+			{"scale_x_", p.scale_x_},
+			{"scale_y_", p.scale_y_},
 			{"render_layer_", p.render_layer_}
 		};
 		
@@ -83,6 +98,8 @@ namespace SXNGN::ECS::A {
 		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
 		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
 		j.at("name_").get_to(p.renderable_name_);
+		j.at("scale_x_").get_to(p.scale_x_);
+		j.at("scale_y_").get_to(p.scale_y_);
 		j.at("render_layer_").get_to(p.render_layer_);
 	}
 
@@ -98,18 +115,24 @@ namespace SXNGN::ECS::A {
 			render_layer_ = render_layer;
 			name_ = name;
 			component_type = ComponentTypeEnum::PRE_RENDERABLE;
+			scale_x_ = 1.0;
+			scale_y_ = 1.0;
 		}
 
 		//Need default constructor for JSON
 		Pre_Renderable()
 		{
 			component_type = ComponentTypeEnum::PRE_RENDERABLE;
+			scale_x_ = 1.0;
+			scale_y_ = 1.0;
 		}
 
 		std::string sprite_factory_name_;//path to the sprite sheet to create from
 		std::string sprite_factory_sprite_type_;//name of the sprite to use
 		std::string name_;
 		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
+		double scale_x_;
+		double scale_y_;
 	};
 
 
@@ -119,6 +142,8 @@ namespace SXNGN::ECS::A {
 			{"sprite_factory_sprite_type_",
 			p.sprite_factory_sprite_type_},
 			{"name_", p.name_},
+			{"scale_x_", p.scale_x_},
+			{"scale_y_", p.scale_y_},
 			{"render_layer_",
 			p.render_layer_}
 		};
@@ -130,6 +155,8 @@ namespace SXNGN::ECS::A {
 		j.at("sprite_factory_name_").get_to(p.sprite_factory_name_);
 		j.at("sprite_factory_sprite_type_").get_to(p.sprite_factory_sprite_type_);
 		j.at("name_").get_to(p.name_);
+		j.at("scale_x_").get_to(p.scale_x_);
+		j.at("scale_y_").get_to(p.scale_y_);
 		j.at("render_layer_").get_to(p.render_layer_);
 
 	}

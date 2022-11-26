@@ -9,7 +9,7 @@ std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
 
 SXNGN::Database::Database()
 {
-	scale_ = 3;
+	scale_ = 1;
 	max_fps_ = 120;
 	ecs_coordinator_ = nullptr;
 	collision_budget_ms_ = 1000;

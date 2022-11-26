@@ -150,10 +150,11 @@ namespace SXNGN::ECS::A {
 		//(Renders Renderables to screen)
 		SDL_Rect render_quad = { 0,0,0,0 };
 		auto it = m_actable_entities.begin();
-		std::vector<Entity> renderables_ground_layer;
-		std::vector<Entity> renderables_object_layer;
-		std::vector<Entity> renderables_air_layer;
-		std::vector<Entity> renderables_ui_layer;
+		std::vector< std::vector< Entity > > renderables_per_layer;
+		for (int i = 0; i <= (int)RenderLayer::TOP_LAYER; i++)
+		{
+			renderables_per_layer.push_back(std::vector<Entity>());
+		}
 		std::array<ECS_Component*, MAX_ENTITIES>& all_renderables = gCoordinator.CheckOutAllData(ComponentTypeEnum::RENDERABLE);
 		std::array<ECS_Component*, MAX_ENTITIES>& all_locations = gCoordinator.CheckOutAllData(ComponentTypeEnum::LOCATION);
 		//for (auto const& entity : m_actable_entities)
@@ -180,20 +181,10 @@ namespace SXNGN::ECS::A {
 				renderable_ptr->outline = false;
 			}
 
-			switch (renderable_ptr->render_layer_)
-			{
-			case RenderLayer::AIR_LAYER: renderables_air_layer.push_back(entity); break;
-			case RenderLayer::GROUND_LAYER: renderables_ground_layer.push_back(entity); break;
-			case RenderLayer::OBJECT_LAYER: renderables_object_layer.push_back(entity); break;
-			case RenderLayer::UI_LAYER: renderables_ui_layer.push_back(entity); break;
-			default:
-			{
-				printf("RenderSystem: Renderable %s has unknown RenderLayer\n", renderable_ptr->renderable_name_.c_str());
-				abort();
-			}
-			}
-			//gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
+			renderables_per_layer.at((int)renderable_ptr->render_layer_).push_back(entity);
 		}
+			//gCoordinator.CheckInComponent(ComponentTypeEnum::RENDERABLE, entity);
+		
 		
 
 		auto view_port = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
@@ -211,23 +202,15 @@ namespace SXNGN::ECS::A {
 		**/
 
 		//Order of these matters. UI should appear over ground, etc
-		for (auto renderable_entity : renderables_ground_layer)
-		{
-			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
-		}
 
-		for (auto renderable_entity : renderables_object_layer)
+		for (std::vector<Entity> entities_this_layer : renderables_per_layer)
 		{
-			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
+			for (auto renderable_entity : entities_this_layer)
+			{
+				Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
+			}
 		}
-		for (auto renderable_entity : renderables_air_layer)
-		{
-			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
-		}
-		for (auto renderable_entity : renderables_ui_layer)
-		{
-			Render(renderable_entity, all_renderables[renderable_entity], all_locations[renderable_entity], camera_ptr);
-		}
+		
 
 		SDL_Rect normalViewPort;
 		normalViewPort.x = 0;
@@ -263,8 +246,8 @@ namespace SXNGN::ECS::A {
 		SDL_FRect bounding_box;
 		bounding_box.x = render_location.x;
 		bounding_box.y = render_location.y;
-		bounding_box.w = renderable_ptr->tile_map_snip_.w;
-		bounding_box.h = renderable_ptr->tile_map_snip_.h;
+		bounding_box.w = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
+		bounding_box.h = renderable_ptr->tile_map_snip_.h * renderable_ptr->scale_y_;
 		//If the renderable is on screen (within camera lens)
 		if (ECS_Utils::object_in_view(camera, bounding_box))
 		{
@@ -389,6 +372,8 @@ namespace SXNGN::ECS::A {
 					pre_renderable.render_layer_,
 					pre_renderable.name_
 				);
+				renderable_component->scale_x_ = pre_renderable.scale_x_;
+				renderable_component->scale_y_ = pre_renderable.scale_y_;
 
 				renderable_component->render_layer_ = pre_renderable.render_layer_;
 				if (renderable_component->render_layer_ == SXNGN::ECS::A::RenderLayer::UNKNOWN)
@@ -477,6 +462,11 @@ namespace SXNGN::ECS::A {
 			{
 				line_split_results.clear();
 				w = "";
+				if(str[0] == '#')
+				{
+					//this is a comment
+					continue;
+				}
 				for (auto rem : str)
 				{
 					if (rem == delimiter)
@@ -551,19 +541,33 @@ namespace SXNGN::ECS::A {
 				}
 				case SXNGN::ECS::A::TileManifestType::TERRAIN:
 				{
-					if (manifest_entry.size() == 5)
+					if (manifest_entry.size() >= 4)
 					{
+						
+						int idx = 1;
 						std::shared_ptr<SDL_Rect> entry = std::make_shared<SDL_Rect>();
-						int x_grid = std::stoi(manifest_entry.at(1));
-						int y_grid = std::stoi(manifest_entry.at(2));
-						std::string tile_name = manifest_entry.at(3);
-						int int_to_name = std::stoi(manifest_entry.at(4));
+						int x_grid = std::stoi(manifest_entry.at(idx++));
+						int y_grid = std::stoi(manifest_entry.at(idx++));
+
+						//next could be tile name or specify an end point for tile snip, indicating this sprite is made up of multiple tiles
+						std::string tile_name = manifest_entry.at(idx++);
+						
+						int sprite_size_w = 1;
+						int sprite_size_h = 1;
+						if (manifest_entry.size() > idx)
+						{
+							sprite_size_w = std::stoi(manifest_entry.at(idx++));
+						}
+						if (manifest_entry.size() > idx)
+						{
+							sprite_size_h = std::stoi(manifest_entry.at(idx++));
+						}
 						entry->x = (int) (x_grid * tile_width);
 						entry->y = (int) (y_grid * tile_height);
-						entry->w = (int) tile_width;
-						entry->h = (int) tile_height;
+						entry->w = (int) tile_width * sprite_size_w;
+						entry->h = (int) tile_height * sprite_size_h;
 						tile_name_string_to_rect_map[tile_name] = entry;
-						tile_name_int_to_string_map[int_to_name] = tile_name;
+						
 					}
 					else
 					{
@@ -634,7 +638,7 @@ namespace SXNGN::ECS::A {
 			sprite_factory_component->sprite_factory_name_ = pre_factory.name_,
 				sprite_factory_component->tile_height_ = tile_height;
 			sprite_factory_component->tile_width_ = tile_width;
-			sprite_factory_component->tile_name_int_to_string_map_ = tile_name_int_to_string_map;
+			//sprite_factory_component->tile_name_int_to_string_map_ = tile_name_int_to_string_map;
 			sprite_factory_component->tile_name_string_to_rect_map_ = tile_name_string_to_rect_map;
 
 			auto sprite_factory_holder = SpriteFactoryHolder::get_instance();
