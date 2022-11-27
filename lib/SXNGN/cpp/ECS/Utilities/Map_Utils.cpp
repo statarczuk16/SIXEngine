@@ -222,121 +222,128 @@ namespace SXNGN::ECS::A {
 		std::vector<Location*> locations;
 		ComponentTypeEnum state = ComponentTypeEnum::OVERWORLD_STATE;
 		
-		auto dune_1 = gCoordinator->CreateEntity();
-		Pre_Renderable* pre_render_1 = nullptr;
-		Location* location_1 = nullptr;
-		Moveable* movement_common = nullptr;
 
 		InitializeWorldMap();
 
-		//put two of the same next to each other so they can scroll
-		pre_render_1 = new Pre_Renderable(tileset, "DUNES_0", RenderLayer::GROUND_LAYER_1);
-		location_1 = new Location(0, 0);
-		movement_common = new Moveable();
-		gCoordinator->AddComponent(dune_1, pre_render_1);
-		gCoordinator->AddComponent(dune_1, location_1);
-		gCoordinator->AddComponent(dune_1, movement_common);
-		gCoordinator->AddComponent(dune_1, Create_Gamestate_Component_from_Enum(state));
+		auto dune_parallax_entity = gCoordinator->CreateEntity();
+		Parallax* dune_parallax = new Parallax();
+		Moveable* dune_mover = new Moveable();
+		dune_parallax->speed_multiplier_ = 0.0;
+		dune_parallax->speed_sign_ = -1.0;
+		dune_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		gCoordinator->AddComponent(dune_parallax_entity, dune_parallax);
+		gCoordinator->AddComponent(dune_parallax_entity, Create_Gamestate_Component_from_Enum(state));
 
-		auto dune_2 = gCoordinator->CreateEntity();
-		Pre_Renderable* pre_render_2 = nullptr;
-		Location* location_2 = nullptr;
+		for (int i = 0; i < 3; i++)
+		{
+			//put two of the same next to each other so they can scroll
+			auto image_entity = gCoordinator->CreateEntity();
+			std::string sprite_name = "DUNES_";
+			sprite_name += std::to_string(i);
+			auto render = new Pre_Renderable(tileset, sprite_name, RenderLayer::GROUND_LAYER_1);
+			render->scale_x_ = 1.01;
+			auto loc = new Location(i * 1600, 0);
 
-		pre_render_2 = new Pre_Renderable(tileset, "DUNES_1", RenderLayer::GROUND_LAYER_1);
-		location_2 = new Location(1600, 0);
-		gCoordinator->AddComponent(dune_2, pre_render_2);
-		gCoordinator->AddComponent(dune_2, location_2);
-		gCoordinator->AddComponent(dune_2, movement_common);
-		gCoordinator->AddComponent(dune_2, Create_Gamestate_Component_from_Enum(state));
+			std::cout << "Creating parallax image for " << sprite_name << " at x= " << i * 1600 << std::endl;
+			gCoordinator->AddComponent(image_entity, render);
+			gCoordinator->AddComponent(image_entity, loc);
+			gCoordinator->AddComponent(image_entity, dune_mover);
+			dune_parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(image_entity));
+			gCoordinator->AddComponent(image_entity, Create_Gamestate_Component_from_Enum(state));
+
+		}
+
+		auto mtn_parallax_entity = gCoordinator->CreateEntity();
+		Parallax* mtn_parallax = new Parallax();
+		Moveable* mtn_mover = new Moveable();
+		mtn_parallax->speed_multiplier_ = 0.1;
+		mtn_parallax->speed_sign_ = -1.0;
+		mtn_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		gCoordinator->AddComponent(mtn_parallax_entity, mtn_parallax);
+		gCoordinator->AddComponent(mtn_parallax_entity, Create_Gamestate_Component_from_Enum(state));
+
+		for (int i = 0; i < 3; i++)
+		{
+			//put two of the same next to each other so they can scroll
+			auto image_entity = gCoordinator->CreateEntity();
+			std::string sprite_name = "MOUNTAINS_";
+			sprite_name += std::to_string(i);
+			auto render = new Pre_Renderable(tileset, sprite_name, RenderLayer::GROUND_LAYER_0);
+			render->scale_x_ = 1.01;
+			auto loc = new Location(i * 1600, 0);
+
+			std::cout << "Creating parallax image for " << sprite_name << " at x= " << i * 1600 << std::endl;
+			gCoordinator->AddComponent(image_entity, render);
+			gCoordinator->AddComponent(image_entity, loc);
+			gCoordinator->AddComponent(image_entity, mtn_mover);
+			mtn_parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(image_entity));
+			gCoordinator->AddComponent(image_entity, Create_Gamestate_Component_from_Enum(state));
+		}
+
+		auto sky_parallax_entity = gCoordinator->CreateEntity();
+		Parallax* sky_parallax = new Parallax();
+		sky_parallax->speed_multiplier_ = 0.1;
+		sky_parallax->speed_sign_ = 1.0;
+		sky_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		auto sky_mover = new Moveable();
+		int night_start_point = 0;
+		
+		for (int i = 0; i < 3; i++)
+		{
+			//put two of the same next to each other so they can scroll
+			auto sky_entity = gCoordinator->CreateEntity();
+			std::string sprite_name = "SKY_DAY_";
+			sprite_name += std::to_string(i);
+			auto sky_render = new Pre_Renderable(tileset, sprite_name, RenderLayer::SKYBOX_LAYER);
+			sky_render->scale_x_ = 1.01;
+
+			auto sky_loc = new Location(i*1600, 0);
+			night_start_point = i * 1600;
+			std::cout << "Creating parallax image for " << sprite_name << " at x= " << i * 1600 << std::endl;
+			gCoordinator->AddComponent(sky_entity, sky_render);
+			gCoordinator->AddComponent(sky_entity, sky_loc);
+			gCoordinator->AddComponent(sky_entity, sky_mover);
+			sky_parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(sky_entity));
+			gCoordinator->AddComponent(sky_entity, Create_Gamestate_Component_from_Enum(state));
+
+		}
+		night_start_point += 1600;
+		for (int i = 0; i < 3; i++)
+		{
+			//put two of the same next to each other so they can scroll
+			auto night_entity = gCoordinator->CreateEntity();
+			std::string sprite_name = "SKY_NIGHT_";
+			sprite_name += std::to_string(i);
+			auto sky_render = new Pre_Renderable(tileset, sprite_name, RenderLayer::SKYBOX_LAYER);
+			sky_render->scale_x_ = 1.01;
+
+			auto sky_loc = new Location(night_start_point + i * 1600, 0);
+			std::cout << "Creating parallax image for " << sprite_name << " at x= " << night_start_point + i * 1600 << std::endl;
+			gCoordinator->AddComponent(night_entity, sky_render);
+			gCoordinator->AddComponent(night_entity, sky_loc);
+			gCoordinator->AddComponent(night_entity, sky_mover);
+			sky_parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(night_entity));
+			gCoordinator->AddComponent(night_entity, Create_Gamestate_Component_from_Enum(state));
+
+		}
+		gCoordinator->AddComponent(sky_parallax_entity, sky_parallax);
+		gCoordinator->AddComponent(sky_parallax_entity, Create_Gamestate_Component_from_Enum(state));
 
 
-		auto dune_3 = gCoordinator->CreateEntity();
-		auto pre_render_dune_3 = new Pre_Renderable(tileset, "DUNES_2", RenderLayer::GROUND_LAYER_1);
-		auto location_dune_3 = new Location(1600 + 1600, 0);
-		gCoordinator->AddComponent(dune_3, pre_render_dune_3);
-		gCoordinator->AddComponent(dune_3, location_dune_3);
-		gCoordinator->AddComponent(dune_3, movement_common);
-		gCoordinator->AddComponent(dune_3, Create_Gamestate_Component_from_Enum(state));
+		
 
 
-		auto parallax_entity = gCoordinator->CreateEntity();
-		Parallax* parallax = new Parallax();
-		parallax->speed_multiplier_ = 1.0;
-		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_1));
-		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_2));
-		parallax->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_3));
-		parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
-		gCoordinator->AddComponent(parallax_entity, parallax);
-		gCoordinator->AddComponent(parallax_entity, Create_Gamestate_Component_from_Enum(state));
+		
 
-
-		//put two of the same next to each other so they can scroll
-		auto mtn_1 = gCoordinator->CreateEntity();
-		auto pre_render_3 = new Pre_Renderable(tileset, "MOUNTAINS_0", RenderLayer::GROUND_LAYER_0);
-		auto location_3 = new Location(0, 0);
-		auto movement_common_3 = new Moveable();
-		gCoordinator->AddComponent(mtn_1, pre_render_3);
-		gCoordinator->AddComponent(mtn_1, location_3);
-		gCoordinator->AddComponent(mtn_1, movement_common_3);
-		gCoordinator->AddComponent(mtn_1, Create_Gamestate_Component_from_Enum(state));
-
-		//put two of the same next to each other so they can scroll
-		auto mtn_2 = gCoordinator->CreateEntity();
-		auto pre_render_4 = new Pre_Renderable(tileset, "MOUNTAINS_1", RenderLayer::GROUND_LAYER_0);
-		auto location_4 = new Location(1600, 0);
-		gCoordinator->AddComponent(mtn_2, pre_render_4);
-		gCoordinator->AddComponent(mtn_2, location_4);
-		gCoordinator->AddComponent(mtn_2, movement_common_3);
-		gCoordinator->AddComponent(mtn_2, Create_Gamestate_Component_from_Enum(state));
-
-		auto parallax_entity_2 = gCoordinator->CreateEntity();
-		Parallax* parallax_2 = new Parallax();
-		parallax_2->speed_multiplier_ = 0.5;
-		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(mtn_1));
-		parallax_2->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(mtn_2));
-		parallax_2->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
-		gCoordinator->AddComponent(parallax_entity_2, parallax_2);
-		gCoordinator->AddComponent(parallax_entity_2, Create_Gamestate_Component_from_Enum(state));
-
-		//put two of the same next to each other so they can scroll
-		auto dune_5 = gCoordinator->CreateEntity();
-		auto pre_render_5 = new Pre_Renderable(tileset, "SKY_DAY", RenderLayer::SKYBOX_LAYER);
-		auto location_5 = new Location(0, 0);
-		auto movement_common_5 = new Moveable();
-		gCoordinator->AddComponent(dune_5, pre_render_5);
-		gCoordinator->AddComponent(dune_5, location_5);
-		gCoordinator->AddComponent(dune_5, movement_common_5);
-		gCoordinator->AddComponent(dune_5, Create_Gamestate_Component_from_Enum(state));
-
-		//put two of the same next to each other so they can scroll
-		auto dune_6 = gCoordinator->CreateEntity();
-		auto pre_render_6 = new Pre_Renderable(tileset, "SKY_NIGHT", RenderLayer::SKYBOX_LAYER);
-		auto location_6 = new Location(1600, 0);
-		gCoordinator->AddComponent(dune_6, pre_render_6);
-		gCoordinator->AddComponent(dune_6, location_6);
-		gCoordinator->AddComponent(dune_6, movement_common_5);
-		gCoordinator->AddComponent(dune_6, Create_Gamestate_Component_from_Enum(state));
-
-		auto parallax_entity_3 = gCoordinator->CreateEntity();
-		Parallax* parallax_3 = new Parallax();
-		parallax_3->speed_multiplier_ = 0.1;
-		parallax_3->speed_sign_ = -1.0;
-		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_5));
-		parallax_3->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(dune_6));
-
-
-		parallax_3->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
-		gCoordinator->AddComponent(parallax_entity_3, parallax_3);
-		gCoordinator->AddComponent(parallax_entity_3, Create_Gamestate_Component_from_Enum(state));
 
 		auto character = gCoordinator->CreateEntity();
-		pre_render_2 = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
-		location_2 = new Location(0, 16+32);
+		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
+		auto char_loc = new Location(0, 16+32);
 		auto movement_character = new Moveable();
 		movement_character->m_speed_m_s = 10.0;
 		gCoordinator->AddComponent(character, movement_character);
-		gCoordinator->AddComponent(character, pre_render_2);
-		gCoordinator->AddComponent(character, location_2);
+		gCoordinator->AddComponent(character, char_render);
+		gCoordinator->AddComponent(character, char_loc);
 		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
 		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();		
 		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);

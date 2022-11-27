@@ -304,7 +304,7 @@ int init_menus()
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
 	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 120;
-	const int OVERWORLD_STATE_HEIGHT = 460;
+	const int OVERWORLD_STATE_HEIGHT = 580;
 	// Window
 	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
@@ -763,6 +763,7 @@ int main(int argc, char* args[])
 	init_menus();
 	std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 	auto settings = gCoordinator.get_state_manager()->getGameSettings();
+	// SEE OVERWORLD_STATE_HEIGHT
 	SDL_FRect camera_lens;
 	camera_lens.h = overworld_viewport->h;
 	camera_lens.w = overworld_viewport->w;

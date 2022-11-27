@@ -127,47 +127,51 @@ namespace SXNGN::ECS::A
 					//SDL_Log("Contains image with Entity %d", image_entity);
 					if (!(gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::MOVEABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::RENDERABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::LOCATION)))
 					{
-						
+						//skip because missing components necessary for scrolling
+						//std::cout << "Cannot Parallax Scroll" << std::endl;
 					}
-					auto render_data = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::RENDERABLE);
-					if (render_data)
+					else
 					{
-						const Renderable* renderable_ptr = static_cast<const Renderable*>(render_data);
-						image_width_p = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
-						image_height_p = renderable_ptr->tile_map_snip_.h;
-						gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::RENDERABLE);
-					}
-					auto check_out_move = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::MOVEABLE);
-					if (check_out_move)
-					{
-						Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
-						moveable_ptr->m_vel_x_m_s = speed_horizontal;
-						moveable_ptr->m_vel_y_m_s = speed_vertical;
-						gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, image_entity);
-					}
 
-					auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
-					if (check_out_loc)
-					{
-						Location* location_ptr = static_cast<Location*>(check_out_loc);
 
-						//this is the first image in the queue. If the camera is further left than this image, grab the image from the back of the queue and staple it on
-						//at the new leftmost image.
-						if (location_ptr)
+						auto render_data = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::RENDERABLE);
+						if (render_data)
 						{
-							if (screen_left_bound < location_ptr->m_pos_x_m_)
-							{
-								auto current_rightmost_image = parallax_ptr->parallax_images_.back();
-								parallax_ptr->parallax_images_.pop_back();
-								parallax_ptr->parallax_images_.push_front(current_rightmost_image);
-								new_leftmost_image = gCoordinator.GetEntityFromUUID(current_rightmost_image);
-								x_to_staple_new_leftmost = location_ptr->m_pos_x_m_ - image_width_p;
-							}
-
+							const Renderable* renderable_ptr = static_cast<const Renderable*>(render_data);
+							image_width_p = renderable_ptr->tile_map_snip_.w;// *renderable_ptr->scale_x_;
+							image_height_p = renderable_ptr->tile_map_snip_.h;
+							gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::RENDERABLE);
 						}
-						gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
+						auto check_out_move = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::MOVEABLE);
+						if (check_out_move)
+						{
+							Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
+							moveable_ptr->m_vel_x_m_s = speed_horizontal;
+							moveable_ptr->m_vel_y_m_s = speed_vertical;
+							gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, image_entity);
+						}
 
+						auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
+						if (check_out_loc)
+						{
+							Location* location_ptr = static_cast<Location*>(check_out_loc);
 
+							//this is the first image in the queue. If the camera is further left than this image, grab the image from the back of the queue and staple it on
+							//at the new leftmost image.
+							if (location_ptr)
+							{
+								if (screen_left_bound < location_ptr->m_pos_x_m_)
+								{
+									auto current_rightmost_image = parallax_ptr->parallax_images_.back();
+									parallax_ptr->parallax_images_.pop_back();
+									parallax_ptr->parallax_images_.push_front(current_rightmost_image);
+									new_leftmost_image = gCoordinator.GetEntityFromUUID(current_rightmost_image);
+									x_to_staple_new_leftmost = location_ptr->m_pos_x_m_ - image_width_p;
+								}
+
+							}
+							gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
+						}
 					}
 				}
 
@@ -197,52 +201,56 @@ namespace SXNGN::ECS::A
 					//SDL_Log("Contains image with Entity %d", image_entity);
 					if (!(gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::MOVEABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::RENDERABLE) && gCoordinator.EntityHasComponent(image_entity, ComponentTypeEnum::LOCATION)))
 					{
-						
+						//skip because missing components necessary for scrolling
+						//std::cout << "Cannot Parallax Scroll" << std::endl;
 					}
-					auto render_data = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::RENDERABLE);
-					if (render_data)
+					else
 					{
-						const Renderable* renderable_ptr = static_cast<const Renderable*>(render_data);
-						image_width_p = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
-						image_height_p = renderable_ptr->tile_map_snip_.h;
-						gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::RENDERABLE);
-					}
-					auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
-					if (check_out_loc)
-					{
-						Location* location_ptr = static_cast<Location*>(check_out_loc);
-
-						//this is the last image in the queue. If the camera is further right than this image, grab the image from the front of the queue and staple it on
-						//at the new rightmost image.
-						if (location_ptr)
+						auto render_data = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::RENDERABLE);
+						if (render_data)
 						{
-							if (screen_right_bound > location_ptr->m_pos_x_m_ + image_width_p)
-							{
-								auto current_leftmost_image = parallax_ptr->parallax_images_.front();
-								parallax_ptr->parallax_images_.pop_front();
-								parallax_ptr->parallax_images_.push_back(current_leftmost_image);
-								new_rightmost_image = gCoordinator.GetEntityFromUUID(current_leftmost_image);
-								x_to_staple_new_rightmost = location_ptr->m_pos_x_m_ + image_width_p;
-							}
+							const Renderable* renderable_ptr = static_cast<const Renderable*>(render_data);
+							image_width_p = renderable_ptr->tile_map_snip_.w;// *renderable_ptr->scale_x_; disabled the scaling because want the images to overlap a bit because of a gap between
+							image_height_p = renderable_ptr->tile_map_snip_.h;
+							gCoordinator.CheckInComponent(image_entity, ComponentTypeEnum::RENDERABLE);
 						}
-						gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
+						auto check_out_loc = gCoordinator.CheckOutComponent(image_entity, ComponentTypeEnum::LOCATION);
+						if (check_out_loc)
+						{
+							Location* location_ptr = static_cast<Location*>(check_out_loc);
+
+							//this is the last image in the queue. If the camera is further right than this image, grab the image from the front of the queue and staple it on
+							//at the new rightmost image.
+							if (location_ptr)
+							{
+								if (screen_right_bound > location_ptr->m_pos_x_m_ + image_width_p)
+								{
+									auto current_leftmost_image = parallax_ptr->parallax_images_.front();
+									parallax_ptr->parallax_images_.pop_front();
+									parallax_ptr->parallax_images_.push_back(current_leftmost_image);
+									new_rightmost_image = gCoordinator.GetEntityFromUUID(current_leftmost_image);
+									x_to_staple_new_rightmost = location_ptr->m_pos_x_m_ + image_width_p;
+								}
+							}
+							gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, image_entity);
+						}
 					}
-				}
 
-				if (new_rightmost_image != -1)
-				{
-					auto check_out_loc = gCoordinator.CheckOutComponent(new_rightmost_image, ComponentTypeEnum::LOCATION);
-					Location* location_ptr = static_cast<Location*>(check_out_loc);
-					location_ptr->m_pos_x_m_ = x_to_staple_new_rightmost;
-					gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, new_rightmost_image);
+					if (new_rightmost_image != -1)
+					{
+						auto check_out_loc = gCoordinator.CheckOutComponent(new_rightmost_image, ComponentTypeEnum::LOCATION);
+						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						location_ptr->m_pos_x_m_ = x_to_staple_new_rightmost;
+						gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, new_rightmost_image);
 
-				}
-				if (new_leftmost_image != -1)
-				{
-					auto check_out_loc = gCoordinator.CheckOutComponent(new_leftmost_image, ComponentTypeEnum::LOCATION);
-					Location* location_ptr = static_cast<Location*>(check_out_loc);
-					location_ptr->m_pos_x_m_ = x_to_staple_new_leftmost;
-					gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, new_leftmost_image);
+					}
+					if (new_leftmost_image != -1)
+					{
+						auto check_out_loc = gCoordinator.CheckOutComponent(new_leftmost_image, ComponentTypeEnum::LOCATION);
+						Location* location_ptr = static_cast<Location*>(check_out_loc);
+						location_ptr->m_pos_x_m_ = x_to_staple_new_leftmost;
+						gCoordinator.CheckInComponent(ComponentTypeEnum::LOCATION, new_leftmost_image);
+					}
 				}
 
 
