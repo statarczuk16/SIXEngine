@@ -31,6 +31,7 @@ namespace SXNGN::ECS::A {
         static void merge_db(DatabaseComponent* new_db);
 
         std::map < std::string, double > settings_map;
+        std::map < std::string, sole::uuid > entity_map;
        
      
     };
@@ -38,7 +39,8 @@ namespace SXNGN::ECS::A {
 	inline void to_json(json& j, const DatabaseComponent& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::DATABASE_SINGLE]},
-			{"settings_map", p.settings_map}
+			{"settings_map", p.settings_map},
+            {"entity_map", p.entity_map}
 		};
 
 	}
@@ -47,6 +49,7 @@ namespace SXNGN::ECS::A {
 		auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 		p.component_type = component_type_enum;
 		j.at("settings_map").get_to(p.settings_map);
+        j.at("entity_map").get_to(p.entity_map);
 	}
 
 }

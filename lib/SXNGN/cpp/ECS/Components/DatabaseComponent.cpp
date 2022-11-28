@@ -47,6 +47,15 @@ namespace SXNGN::ECS::A {
             std::cout << "{" << entry.first << ", " << entry.second << "}" << std::endl;
         }
 
+        for (auto& it : new_db->entity_map) {
+            instance_->entity_map[it.first] = it.second;
+        }
+
+        for (auto const& entry : instance_->entity_map)
+        {
+            std::cout << "{" << entry.first << ", " << entry.second << "}" << std::endl;
+        }
+
         return;
     }
 

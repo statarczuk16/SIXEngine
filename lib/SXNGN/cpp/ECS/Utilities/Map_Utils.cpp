@@ -198,9 +198,17 @@ namespace SXNGN::ECS::A {
 					}
 					else if (world_location->traversal_cost_ == 1)
 					{
-						pre_render->sprite_factory_sprite_type_ = "ROAD_H_1";
-						pre_render->scale_x_ = 2.0;
-						pre_render->scale_y_ = 2.0;
+						pre_render->scale_x_ = 1.0;
+						pre_render->scale_y_ = 1.0;
+						std::vector < std::string > sprite_row;
+						for (int i = 0; i < SXNGN::OVERWORLD_PIXELS_PER_GRID; i += (pre_render->scale_x_ * 32))
+						{
+							int ran_num = 0 + (rand() % 3);
+							sprite_row.push_back("ROAD_ISO_" + std::to_string(ran_num));
+						}
+						pre_render->sprite_factory_sprite_type_ = "NONE";
+						
+						pre_render->sprite_batch_.push_back(sprite_row);
 					}
 					gCoordinator->AddComponent(location_entity, pre_render);
 					gCoordinator->AddComponent(location_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
@@ -215,22 +223,55 @@ namespace SXNGN::ECS::A {
 
 	void Map_Utils::InitializeScrollingBackground()
 	{
+
+
 		std::shared_ptr<Coordinator> gCoordinator = Database::get_coordinator();
-		//build the infinite scrolling map oregon trail style
+		
 		const std::string tileset = "OVERWORLD_MAP";
 		std::vector<Pre_Renderable*> pre_renders;
 		std::vector<Location*> locations;
 		ComponentTypeEnum state = ComponentTypeEnum::OVERWORLD_STATE;
+
+		//set up the player character sprite
+		auto character = gCoordinator->CreateEntity();
+		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
+		auto char_loc = new Location(0, 16 + 32);
+		auto movement_character = new Moveable();
+		movement_character->m_speed_m_s = 10.0;
+		gCoordinator->AddComponent(character, movement_character);
+		gCoordinator->AddComponent(character, char_render);
+		gCoordinator->AddComponent(character, char_loc);
+		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
+		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
+		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
+		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
+		input_tags_comp->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
+		input_tags_comp->property_tag_ = SXNGN::OVERWORLD_PACE;
+
+		gCoordinator->AddComponent(character, input_tags_comp);
+
+		auto camera = CameraComponent::get_instance();
+		camera->set_target(character);
+
+		auto db = DatabaseComponent::get_instance();
+
+		//db->settings_map["FOCUS_ENTITY"] = character;
+		sole::uuid character_uuid = gCoordinator->GetUUIDFromEntity(character);
+
+
+	
 		
-
+		
 		InitializeWorldMap();
-
+		//build the infinite scrolling map oregon trail style
 		auto dune_parallax_entity = gCoordinator->CreateEntity();
 		Parallax* dune_parallax = new Parallax();
 		Moveable* dune_mover = new Moveable();
 		dune_parallax->speed_multiplier_ = 0.0;
 		dune_parallax->speed_sign_ = -1.0;
 		dune_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		dune_parallax->snap_source_y_ = character_uuid;
+		dune_parallax->snap_source_y_offset_ =  (double)SXNGN::BASE_TILE_HEIGHT * -2.0;
 		gCoordinator->AddComponent(dune_parallax_entity, dune_parallax);
 		gCoordinator->AddComponent(dune_parallax_entity, Create_Gamestate_Component_from_Enum(state));
 
@@ -253,12 +294,43 @@ namespace SXNGN::ECS::A {
 
 		}
 
+		auto filler_p_entity = gCoordinator->CreateEntity();
+		Parallax* filler_p = new Parallax();
+		Moveable* filler_mover = new Moveable();
+		filler_p->speed_multiplier_ = 0.0;
+		filler_p->speed_sign_ = -1.0;
+		filler_p->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		filler_p->snap_source_y_ = character_uuid;
+		filler_p->snap_source_y_offset_ = 320 - (double)SXNGN::BASE_TILE_HEIGHT * 2.0;
+		gCoordinator->AddComponent(filler_p_entity, filler_p);
+		gCoordinator->AddComponent(filler_p_entity, Create_Gamestate_Component_from_Enum(state));
+
+		for (int i = 0; i < 3; i++)
+		{
+			//put two of the same next to each other so they can scroll
+			auto image_entity = gCoordinator->CreateEntity();
+			std::string sprite_name = "DUNES_FILL";
+			auto render = new Pre_Renderable(tileset, sprite_name, RenderLayer::GROUND_LAYER_1);
+			render->scale_x_ = 1.01;
+			auto loc = new Location(i * 1600, 0);
+
+			std::cout << "Creating parallax image for " << sprite_name << " at x= " << i * 1600 << std::endl;
+			gCoordinator->AddComponent(image_entity, render);
+			gCoordinator->AddComponent(image_entity, loc);
+			gCoordinator->AddComponent(image_entity, filler_mover);
+			filler_p->parallax_images_.push_back(gCoordinator->GetUUIDFromEntity(image_entity));
+			gCoordinator->AddComponent(image_entity, Create_Gamestate_Component_from_Enum(state));
+
+		}
+
 		auto mtn_parallax_entity = gCoordinator->CreateEntity();
 		Parallax* mtn_parallax = new Parallax();
 		Moveable* mtn_mover = new Moveable();
 		mtn_parallax->speed_multiplier_ = 0.1;
 		mtn_parallax->speed_sign_ = -1.0;
 		mtn_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		mtn_parallax->snap_source_y_ = character_uuid;
+		mtn_parallax->snap_source_y_offset_ = (double)SXNGN::BASE_TILE_HEIGHT * -2.0;
 		gCoordinator->AddComponent(mtn_parallax_entity, mtn_parallax);
 		gCoordinator->AddComponent(mtn_parallax_entity, Create_Gamestate_Component_from_Enum(state));
 
@@ -285,6 +357,8 @@ namespace SXNGN::ECS::A {
 		sky_parallax->speed_multiplier_ = 0.1;
 		sky_parallax->speed_sign_ = 1.0;
 		sky_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		sky_parallax->snap_source_y_ = character_uuid;
+		sky_parallax->snap_source_y_offset_ = (double)SXNGN::BASE_TILE_HEIGHT * -2.0;
 		auto sky_mover = new Moveable();
 		int night_start_point = 0;
 		
@@ -336,29 +410,7 @@ namespace SXNGN::ECS::A {
 		
 
 
-		auto character = gCoordinator->CreateEntity();
-		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
-		auto char_loc = new Location(0, 16+32);
-		auto movement_character = new Moveable();
-		movement_character->m_speed_m_s = 10.0;
-		gCoordinator->AddComponent(character, movement_character);
-		gCoordinator->AddComponent(character, char_render);
-		gCoordinator->AddComponent(character, char_loc);
-		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
-		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();		
-		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
-		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
-		input_tags_comp->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
-		input_tags_comp->property_tag_ = SXNGN::OVERWORLD_PACE;
 		
-		gCoordinator->AddComponent(character, input_tags_comp);
-
-		auto camera = CameraComponent::get_instance();
-		camera->set_target(character);
-
-		auto db = DatabaseComponent::get_instance();
-		
-		db->settings_map["FOCUS_ENTITY"] = character;
 					
 
 	}

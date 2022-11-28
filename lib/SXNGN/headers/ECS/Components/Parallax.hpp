@@ -29,6 +29,8 @@ namespace SXNGN::ECS::A {
 			speed_source_vertical_ = BAD_STRING_RETURN;
 			speed_sign_ = 0;
 			flip_1_delete_0 = true;
+			snap_source_y_ = SXNGN::BAD_UUID;
+			snap_source_y_offset_ = 0;
 		}
 		std::deque<sole::uuid> parallax_images_; //queue of uuids, in order, of the images to display
 		std::string speed_source_horizontal_;//database property to get scrolling speed from
@@ -37,8 +39,8 @@ namespace SXNGN::ECS::A {
 		bool init_ = false; //parallax system will init the parallax by placing all the images end to end from 0.0
 		int speed_sign_; //0 = no preference, match speed source, 1 = always positive, -1 = always negative
 		bool flip_1_delete_0; //if 1, parallax image will roll over when escaping screen bounds, otherwise entity will be removed
-		
-		
+		sole::uuid snap_source_y_; //if set, parallax will snap images in the parallax to snap_source_y_'s location + snap_source_y_offset_
+		double snap_source_y_offset_;
 
 	};
 
@@ -50,6 +52,8 @@ namespace SXNGN::ECS::A {
 			{"speed_source_vertical_", p.speed_source_vertical_},
 			{"speed_sign_", p.speed_sign_},
 			{"flip_1_delete_0", p.flip_1_delete_0},
+			{"snap_source_y_", p.snap_source_y_},
+			{"snap_source_y_offset_", p.snap_source_y_offset_},
 			{"speed_multiplier_", p.speed_multiplier_}
 		};
 
@@ -70,6 +74,8 @@ namespace SXNGN::ECS::A {
 		j.at("speed_source_vertical_").get_to(p.speed_source_vertical_);
 		j.at("speed_sign_").get_to(p.speed_sign_);
 		j.at("flip_1_delete_0").get_to(p.flip_1_delete_0);
+		j.at("snap_source_y_").get_to(p.snap_source_y_);
+		j.at("snap_source_y_offset_").get_to(p.snap_source_y_offset_);
 		j.at("speed_multiplier_").get_to(p.speed_multiplier_);
 
 

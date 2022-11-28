@@ -157,6 +157,20 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				case ComponentTypeEnum::WORLD_MAP:
+				{
+					WorldMap component = *static_cast<const WorldMap*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::WORLD_LOCATION:
+				{
+					WorldLocation component = *static_cast<const WorldLocation*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
 				default :
 				{
 					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
@@ -274,6 +288,20 @@ namespace SXNGN {
 					{
 						auto component_inst = j.get<DatabaseComponent>();
 						ECS_Component* component_ptr = new DatabaseComponent(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::WORLD_MAP:
+					{
+						auto component_inst = j.get<WorldMap>();
+						ECS_Component* component_ptr = new WorldMap(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::WORLD_LOCATION:
+					{
+						auto component_inst = j.get<WorldLocation>();
+						ECS_Component* component_ptr = new WorldLocation(component_inst);
 						return component_ptr;
 						break;
 					}

@@ -76,6 +76,9 @@ namespace SXNGN::ECS::A {
 		bool draw_debug_;
 		double scale_x_;
 		double scale_y_;
+		//to render a collection of sprites in one batch. will render from entity's location and increment render location by the FIRST entry's sprite size
+		std::vector < std::vector < std::string > > sprite_batch_;
+		std::vector < std::vector < SDL_Rect > > sprite_batch_snips_;
 	};
 
 	//note: saving as a pre-renderable. Can't convert the texture pointer to JSON, so it will have to go back through the factory pre-render -> render to get back to its state
@@ -87,6 +90,7 @@ namespace SXNGN::ECS::A {
 			{"name_", p.renderable_name_},
 			{"scale_x_", p.scale_x_},
 			{"scale_y_", p.scale_y_},
+			{"sprite_batch_", p.sprite_batch_},
 			{"render_layer_", p.render_layer_}
 		};
 		
@@ -100,6 +104,7 @@ namespace SXNGN::ECS::A {
 		j.at("name_").get_to(p.renderable_name_);
 		j.at("scale_x_").get_to(p.scale_x_);
 		j.at("scale_y_").get_to(p.scale_y_);
+		j.at("sprite_batch_").get_to(p.sprite_batch_);
 		j.at("render_layer_").get_to(p.render_layer_);
 	}
 
@@ -133,6 +138,9 @@ namespace SXNGN::ECS::A {
 		RenderLayer render_layer_ = RenderLayer::UNKNOWN;
 		double scale_x_;
 		double scale_y_;
+		//to render a collection of sprites in one batch. will render from entity's location and increment render location by the FIRST entry's sprite size
+		std::vector < std::vector < std::string > > sprite_batch_; 
+
 	};
 
 
@@ -144,8 +152,8 @@ namespace SXNGN::ECS::A {
 			{"name_", p.name_},
 			{"scale_x_", p.scale_x_},
 			{"scale_y_", p.scale_y_},
-			{"render_layer_",
-			p.render_layer_}
+			{"sprite_batch_", p.sprite_batch_},
+			{"render_layer_",p.render_layer_}
 		};
 	}
 
@@ -157,6 +165,7 @@ namespace SXNGN::ECS::A {
 		j.at("name_").get_to(p.name_);
 		j.at("scale_x_").get_to(p.scale_x_);
 		j.at("scale_y_").get_to(p.scale_y_);
+		j.at("sprite_batch_").get_to(p.sprite_batch_);
 		j.at("render_layer_").get_to(p.render_layer_);
 
 	}

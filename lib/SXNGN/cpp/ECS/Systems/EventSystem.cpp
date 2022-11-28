@@ -212,7 +212,7 @@ namespace SXNGN::ECS::A {
 		{
 			while (i >> j)
 			{
-				//std::cout << j.dump(4) << std::endl;
+				std::cout << j.dump(4) << std::endl;
 				std::shared_ptr<ExternEntity> extern_entity = gCoordinator.JSON_To_Entity(j);
 				gCoordinator.Dump_Spaced_Entity_To_ECS(extern_entity);
 			}
@@ -220,6 +220,7 @@ namespace SXNGN::ECS::A {
 		catch (const std::exception& exc)
 		{
 			std::cerr << exc.what();
+			std::cout << j.dump(4) << std::endl;
 		}
 		Event_Component load_game_state_change;
 		load_game_state_change.e.common.type = EventType::STATE_CHANGE;

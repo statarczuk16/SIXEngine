@@ -51,17 +51,7 @@ namespace SXNGN::ECS::A
 		double stop_or_go = 0.0;
 		auto db = DatabaseComponent::get_instance();
 		double focus_y = -1;
-		if (db->settings_map.count("FOCUS_ENTITY"))
-		{
-			auto focus_data = gCoordinator.CheckOutComponent(db->settings_map["FOCUS_ENTITY"], ComponentTypeEnum::LOCATION);
-			if (focus_data)
-			{
-				Location* focus_ptr = static_cast<Location*>(focus_data);
-				double offset = (double)SXNGN::BASE_TILE_HEIGHT * 2.0;
-				focus_y = focus_ptr->m_pos_y_m_ - offset;
-				gCoordinator.CheckInComponent(db->settings_map["FOCUS_ENTITY"], ComponentTypeEnum::LOCATION);
-			}
-		}
+		
 		if (properties->count(SXNGN::OVERWORLD_GO) > 0)
 		{
 			stop_or_go = properties->at(SXNGN::OVERWORLD_GO);
@@ -80,6 +70,19 @@ namespace SXNGN::ECS::A
 				std::deque<Entity> parallax_images_new_entity;
 				/// First, determine the scroll speed of the images
 				Parallax* parallax_ptr = static_cast<Parallax*>(parallax_data);
+
+				Entity snap_source_entity = gCoordinator.GetEntityFromUUID(parallax_ptr->snap_source_y_);
+				if (snap_source_entity != SXNGN::BAD_ENTITY)
+				{
+					auto focus_data = gCoordinator.CheckOutComponent(snap_source_entity, ComponentTypeEnum::LOCATION);
+					if (focus_data)
+					{
+						Location* focus_ptr = static_cast<Location*>(focus_data);
+						double offset = parallax_ptr->snap_source_y_offset_;
+						focus_y = focus_ptr->m_pos_y_m_ + offset;
+						gCoordinator.CheckInComponent(snap_source_entity, ComponentTypeEnum::LOCATION);
+					}
+				}
 
 
 				if (parallax_ptr->speed_source_horizontal_ != BAD_STRING_RETURN)

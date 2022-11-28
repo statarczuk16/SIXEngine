@@ -243,58 +243,112 @@ namespace SXNGN::ECS::A {
 		Location* location_ptr = static_cast<Location*>(location_data);
 
 		Coordinate render_location = location_ptr->GetPixelCoordinate();
-		SDL_FRect bounding_box;
-		bounding_box.x = render_location.x;
-		bounding_box.y = render_location.y;
-		bounding_box.w = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
-		bounding_box.h = renderable_ptr->tile_map_snip_.h * renderable_ptr->scale_y_;
-		//If the renderable is on screen (within camera lens)
-		if (ECS_Utils::object_in_view(camera, bounding_box))
+
+		if (renderable_ptr->sprite_batch_snips_.empty() == false)
 		{
-
-			SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
-			//get the position of this object with respect to the camera lens
-			int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
-			int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
-
-			//inefficient, but here for debug/readbility
-			SDL_Rect render_quad;
-			render_quad.x = texture_pos_wrt_cam_x;
-			render_quad.y = texture_pos_wrt_cam_y;
-			render_quad.w = bounding_box.w;
-			render_quad.h = bounding_box.h;
-
-			//SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
-
-			if (renderable_ptr->sprite_map_texture_ != nullptr)
+			int sprite_width = renderable_ptr->sprite_batch_snips_[0][0].w;
+			int sprite_height = renderable_ptr->sprite_batch_snips_[0][0].h;
+			Sint32 x = render_location.x;
+			Sint32 y = render_location.y - sprite_height;
+			for (auto sprite_row : renderable_ptr->sprite_batch_snips_)
 			{
-				renderable_ptr->sprite_map_texture_
-					->render2(render_quad, renderable_ptr->tile_map_snip_,0.0,nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
+				y += sprite_height;
+				x = render_location.x;
+				for (auto sprite : sprite_row)
+				{
+					x += sprite_width;
+					SDL_FRect bounding_box;
+					bounding_box.x = x;
+					bounding_box.y = y;
+					bounding_box.w = sprite.w * renderable_ptr->scale_x_;
+					bounding_box.h = sprite.h * renderable_ptr->scale_y_;
+					//If the renderable is on screen (within camera lens)
+					if (ECS_Utils::object_in_view(camera, bounding_box))
+					{
+
+						SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
+						//get the position of this object with respect to the camera lens
+						int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
+						int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
+
+						//inefficient, but here for debug/readbility
+						SDL_Rect render_quad;
+						render_quad.x = texture_pos_wrt_cam_x;
+						render_quad.y = texture_pos_wrt_cam_y;
+						render_quad.w = bounding_box.w;
+						render_quad.h = bounding_box.h;
+
+						//SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
+
+						if (renderable_ptr->sprite_map_texture_ != nullptr)
+						{
+							renderable_ptr->sprite_map_texture_
+								->render2(render_quad, sprite, 0.0, nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
+						}
+						else
+						{
+							SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable_ptr->renderable_name_);
+							abort();
+						}
+					}
+				}
 			}
-			else
+		}
+		else
+		{
+			SDL_FRect bounding_box;
+			bounding_box.x = render_location.x;
+			bounding_box.y = render_location.y;
+			bounding_box.w = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
+			bounding_box.h = renderable_ptr->tile_map_snip_.h * renderable_ptr->scale_y_;
+			//If the renderable is on screen (within camera lens)
+			if (ECS_Utils::object_in_view(camera, bounding_box))
 			{
-				SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable_ptr->renderable_name_);
-				abort();
-			}
 
-			if (collisionable != nullptr && collisionable->collision_shape_ == CollisionShape::CIRCLE)
-			{
-				renderable_ptr->sprite_map_texture_->render_circle(render_quad.x + collisionable->radius_, render_quad.y + collisionable->radius_, collisionable->radius_);
-			}
+				SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
+				//get the position of this object with respect to the camera lens
+				int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
+				int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
 
-			if (renderable_ptr->draw_debug_ && renderable_ptr->display_string_debug_ != "")
-			{
+				//inefficient, but here for debug/readbility
+				SDL_Rect render_quad;
+				render_quad.x = texture_pos_wrt_cam_x;
+				render_quad.y = texture_pos_wrt_cam_y;
+				render_quad.w = bounding_box.w;
+				render_quad.h = bounding_box.h;
+
+				//SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
+
+				if (renderable_ptr->sprite_map_texture_ != nullptr)
+				{
+					renderable_ptr->sprite_map_texture_
+						->render2(render_quad, renderable_ptr->tile_map_snip_, 0.0, nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
+				}
+				else
+				{
+					SDL_LogError(SDL_LOG_CATEGORY_APPLICATION, "Texture of Renderable is null! %s", renderable_ptr->renderable_name_);
+					abort();
+				}
+				if (collisionable != nullptr && collisionable->collision_shape_ == CollisionShape::CIRCLE)
+				{
+					renderable_ptr->sprite_map_texture_->render_circle(render_quad.x + collisionable->radius_, render_quad.y + collisionable->radius_, collisionable->radius_);
+				}
+
+				if (renderable_ptr->draw_debug_ && renderable_ptr->display_string_debug_ != "")
+				{
+					auto gCoordinator = SXNGN::Database::get_coordinator();
+					FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
+					int x = render_quad.x;
+					int y = render_quad.y;
+					renderable_ptr->sprite_map_texture_->render_text(x, y, debug_font, renderable_ptr->display_string_debug_);
+				}
 				auto gCoordinator = SXNGN::Database::get_coordinator();
 				FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
 				int x = render_quad.x;
 				int y = render_quad.y;
-				renderable_ptr->sprite_map_texture_->render_text(x, y, debug_font, renderable_ptr->display_string_debug_);
+				renderable_ptr->sprite_map_texture_->render_text(x, y, debug_font, "x");
+
 			}
-			auto gCoordinator = SXNGN::Database::get_coordinator();
-			FC_Font* debug_font = gCoordinator->get_texture_manager()->get_debug_font();
-			int x = render_quad.x;
-			int y = render_quad.y;
-			renderable_ptr->sprite_map_texture_->render_text(x, y, debug_font, "x");
 		}
 	}
 
@@ -353,8 +407,57 @@ namespace SXNGN::ECS::A {
 			}
 
 			
+			//if the batch is used, only use batch and ignore other fields
+			if (pre_renderable.sprite_batch_.size() > 0)
+			{
+				auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name_);
+				if (!sprite_sheet_texture)
+				{
+					printf("Sprite Factory::Texture Manager does not have texture: %s", pre_renderable.sprite_factory_name_.c_str());
+					abort();
+				}
+				std::vector < std::vector < SDL_Rect > > sprite_batch_snips_;
+				for (std::vector<std::string> sprite_row : pre_renderable.sprite_batch_)
+				{
+					std::vector<SDL_Rect> tile_map_row;
+					for (std::string sprite_name : sprite_row)
+					{
+						if (sprite_factory_component->tile_name_string_to_rect_map_.count(sprite_name) > 0)
+						{
+							auto tile_snip_box = sprite_factory_component->tile_name_string_to_rect_map_[sprite_name];
+							tile_map_row.push_back(*tile_snip_box);
+						}
+					}
+					sprite_batch_snips_.push_back(tile_map_row);
+				}
+				SDL_Rect first_snip = sprite_batch_snips_[0][0];
+				Renderable* renderable_component = new Renderable(
+					first_snip,
+					pre_renderable.sprite_factory_name_,
+					pre_renderable.sprite_factory_sprite_type_,
+					sprite_sheet_texture,
+					pre_renderable.render_layer_,
+					pre_renderable.name_
+				);
+				renderable_component->sprite_batch_ = pre_renderable.sprite_batch_;
+				renderable_component->sprite_batch_snips_ = sprite_batch_snips_;
+				renderable_component->scale_x_ = pre_renderable.scale_x_;
+				renderable_component->scale_y_ = pre_renderable.scale_y_;
+
+				renderable_component->render_layer_ = pre_renderable.render_layer_;
+				if (renderable_component->render_layer_ == SXNGN::ECS::A::RenderLayer::UNKNOWN)
+				{
+					//printf("RenderSystem:: %s has unknown RenderLayer", renderable_component->renderable_name_.c_str());
+					abort();
+				}
+
+				//Build the apocalypse map sprite factory
+
+				gCoordinator.AddComponent(entity, renderable_component);
+				gCoordinator.RemoveComponent(entity, pre_renderable.get_component_type());
+			}
 			//See if the factory has the render_data needed to process the sprite type of the Pre_Renderable
-			if (sprite_factory_component->tile_name_string_to_rect_map_.count(pre_renderable.sprite_factory_sprite_type_) > 0)
+			else if (sprite_factory_component->tile_name_string_to_rect_map_.count(pre_renderable.sprite_factory_sprite_type_) > 0)
 			{
 				auto sprite_sheet_texture = gCoordinator.get_texture_manager()->get_texture(pre_renderable.sprite_factory_name_);
 				if (!sprite_sheet_texture)

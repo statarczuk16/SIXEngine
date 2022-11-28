@@ -34,6 +34,7 @@ namespace SXNGN {
 	const double G = 9.80; //meters per second squared gravity
 
 	const sole::uuid BAD_UUID = sole::rebuild("00000000-0000-0000-0000-000000000000");
+	const std::int32_t BAD_ENTITY = -1;
 
 	const std::string DEFAULT_SPACE = "DEFAULT_SPACE";
 
