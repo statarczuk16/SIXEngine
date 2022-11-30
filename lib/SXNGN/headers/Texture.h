@@ -41,6 +41,8 @@ namespace SXNGN {
 
 		void render2(SDL_Rect bounding_box, SDL_Rect clip, double angle = 0.0, SDL_Point* center = NULL, SDL_RendererFlip flip = SDL_FLIP_NONE, bool outline = false);
 
+		void renderf(SDL_FRect bounding_box, SDL_Rect clip, double angle, SDL_FPoint* center, SDL_RendererFlip flip, bool outline);
+
 		void render_text(int x, int y, FC_Font* font, std::string string);
 		void render_circle(int32_t center_x, int32_t center_y, int32_t radius);
 		//Gets image dimensions

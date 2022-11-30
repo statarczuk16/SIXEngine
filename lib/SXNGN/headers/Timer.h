@@ -18,7 +18,7 @@ namespace SXNGN {
 		void unpause();
 
 		//Gets the timer's time
-		Uint32 getTicks();
+		Uint32 getTicksInMS();
 
 		//Checks the status of the timer
 		bool isStarted();

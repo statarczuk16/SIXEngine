@@ -152,8 +152,8 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 			}
 			else
 			{
-				moveable->m_intended_delta_x_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_x_m_s * dt);
-				moveable->m_intended_delta_y_m = SXNGN::PIXELS_TO_METERS * (moveable->m_vel_y_m_s * dt);
+				moveable->m_intended_delta_x_m = float(SXNGN::PIXELS_TO_METERS) * (moveable->m_vel_x_m_s * dt);
+				moveable->m_intended_delta_y_m = float(SXNGN::PIXELS_TO_METERS) * (moveable->m_vel_y_m_s * dt);
 			}
 					
 		}

@@ -242,18 +242,18 @@ namespace SXNGN::ECS::A {
 
 		Location* location_ptr = static_cast<Location*>(location_data);
 
-		Coordinate render_location = location_ptr->GetPixelCoordinate();
+		
 
 		if (renderable_ptr->sprite_batch_snips_.empty() == false)
 		{
 			int sprite_width = renderable_ptr->sprite_batch_snips_[0][0].w;
 			int sprite_height = renderable_ptr->sprite_batch_snips_[0][0].h;
-			Sint32 x = render_location.x;
-			Sint32 y = render_location.y - sprite_height;
+			float x = location_ptr->m_pos_x_m_;
+			float y = location_ptr->m_pos_y_m_; - sprite_height;
 			for (auto sprite_row : renderable_ptr->sprite_batch_snips_)
 			{
 				y += sprite_height;
-				x = render_location.x;
+				x = location_ptr->m_pos_x_m_;
 				for (auto sprite : sprite_row)
 				{
 					x += sprite_width;
@@ -268,11 +268,11 @@ namespace SXNGN::ECS::A {
 
 						SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
 						//get the position of this object with respect to the camera lens
-						int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
-						int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
+						float texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
+						float texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
 
 						//inefficient, but here for debug/readbility
-						SDL_Rect render_quad;
+						SDL_FRect render_quad;
 						render_quad.x = texture_pos_wrt_cam_x;
 						render_quad.y = texture_pos_wrt_cam_y;
 						render_quad.w = bounding_box.w;
@@ -283,7 +283,7 @@ namespace SXNGN::ECS::A {
 						if (renderable_ptr->sprite_map_texture_ != nullptr)
 						{
 							renderable_ptr->sprite_map_texture_
-								->render2(render_quad, sprite, 0.0, nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
+								->renderf(render_quad, sprite, 0.0, nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
 						}
 						else
 						{
@@ -297,8 +297,8 @@ namespace SXNGN::ECS::A {
 		else
 		{
 			SDL_FRect bounding_box;
-			bounding_box.x = render_location.x;
-			bounding_box.y = render_location.y;
+			bounding_box.x = location_ptr->m_pos_x_m_;
+			bounding_box.y = location_ptr->m_pos_y_m_;
 			bounding_box.w = renderable_ptr->tile_map_snip_.w * renderable_ptr->scale_x_;
 			bounding_box.h = renderable_ptr->tile_map_snip_.h * renderable_ptr->scale_y_;
 			//If the renderable is on screen (within camera lens)
@@ -307,13 +307,13 @@ namespace SXNGN::ECS::A {
 
 				SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
 				//get the position of this object with respect to the camera lens
-				int texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
-				int texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
+				float texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
+				float texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
 
 				//inefficient, but here for debug/readbility
-				SDL_Rect render_quad;
-				render_quad.x = texture_pos_wrt_cam_x;
-				render_quad.y = texture_pos_wrt_cam_y;
+				SDL_FRect render_quad;
+				render_quad.x = round(texture_pos_wrt_cam_x);
+				render_quad.y = round(texture_pos_wrt_cam_y);
 				render_quad.w = bounding_box.w;
 				render_quad.h = bounding_box.h;
 
@@ -322,7 +322,7 @@ namespace SXNGN::ECS::A {
 				if (renderable_ptr->sprite_map_texture_ != nullptr)
 				{
 					renderable_ptr->sprite_map_texture_
-						->render2(render_quad, renderable_ptr->tile_map_snip_, 0.0, nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
+						->renderf(render_quad, renderable_ptr->tile_map_snip_, 0.0, nullptr, SDL_FLIP_NONE, renderable_ptr->outline);
 				}
 				else
 				{

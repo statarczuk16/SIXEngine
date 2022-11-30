@@ -352,7 +352,8 @@ namespace SXNGN::ECS::A {
 		//auto cached_input_state = User_Input_State::get_instance();
 		//if (cached_input_state->selected_entities.size() == 0)
 		//{
-		SXNGN::Database::modify_scale(ec->e.mouse_wheel_event.y_);
+		float mod = ec->e.mouse_wheel_event.y_ / 2.0;
+		SXNGN::Database::modify_scale(mod);
 		std::cout << "Scale now: " << SXNGN::Database::get_scale() << std::endl;
 		//}
 	}

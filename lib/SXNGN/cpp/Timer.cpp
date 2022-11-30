@@ -67,7 +67,7 @@ void SXNGN::Timer::unpause()
     }
 }
 
-Uint32 SXNGN::Timer::getTicks()
+Uint32 SXNGN::Timer::getTicksInMS()
 {
     //The actual timer time
     Uint32 time = 0;

@@ -98,7 +98,7 @@ bool init()
 
 
 		//Set texture filtering to linear
-		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "1"))
+		if (!SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0"))
 		{
 			printf("Warning: Linear texture filtering not enabled!");
 		}
@@ -576,10 +576,10 @@ int main(int argc, char* args[])
 		return 0;
 	}
 	gCoordinator.Init(gRenderer);
-	
-	
+
+
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
-	
+
 
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_SPRITE_FACTORY);
@@ -610,7 +610,7 @@ int main(int argc, char* args[])
 
 
 
-	
+
 
 	//Sprite Factory Creator system looks for Pre_Sprite_Factories and uses them create Sprite_Factories
 	auto sprite_factory_creator_system = gCoordinator.RegisterSystem<Sprite_Factory_Creator_System>();
@@ -754,7 +754,7 @@ int main(int argc, char* args[])
 	gCoordinator.AddComponent(dune_map_pre_entity, dune_map_pre);
 	gCoordinator.AddComponent(dune_map_pre_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
-	
+
 	std::set<ComponentTypeEnum> active_game_states;
 	active_game_states.clear();
 	active_game_states.insert(ComponentTypeEnum::MAIN_MENU_STATE);
@@ -788,108 +788,124 @@ int main(int argc, char* args[])
 	SXNGN::Timer system_timer;//use to time each system
 	frame_timer.start();
 	system_timer.start();
+	
+
 
 	float fps_avg = 0.0;
-	float dt = 0.0;
+	float dt_seconds = 0.0;
 	float game_dt;
+	float total_seconds = 0.0;
 
 	int frame_count = 0;
 	std::vector<SDL_Event> events_this_frame;
+	float accumulated_ms = 0.0f;
 	gCoordinator.updateCollisionMap();
 	while (!quit)
 	{
-		/////////////////////////////////Frame Start
+		
 		frame_cap_timer.start();//this timer must reached ticks per frame before the next frame can start
+		accumulated_ms += frame_cap_timer.getTicksInMS();
+		
+		//std::cout << dt_seconds << " " << accumulated_ms << std::endl;
+		//if (frame_cap_timer.getTicksInMS() < SXNGN::Database::get_screen_ms_per_frame())
+		//{
+		//	SDL_Delay(SXNGN::Database::get_screen_ms_per_frame() - frame_cap_timer.getTicksInMS());
+		//}
 
-		/////////////////////////////////Handle Game State
-		//Todo game state
-		/////////////////////////////////Event Handling
-		events_this_frame.clear();
-		while (SDL_PollEvent(&e) != 0)
+		while (accumulated_ms > SXNGN::Database::get_screen_ms_per_frame())
 		{
-			events_this_frame.push_back(e);
-			//queue up and add to event component type
+			dt_seconds = accumulated_ms / 1000.0;
+			total_seconds += dt_seconds;
+			accumulated_ms -= SXNGN::Database::get_screen_ms_per_frame();
+			/////////////////////////////////Frame Start
+
+
+			/////////////////////////////////Handle Game State
+			//Todo game state
+			/////////////////////////////////Event Handling
+			events_this_frame.clear();
+			while (SDL_PollEvent(&e) != 0)
+			{
+				events_this_frame.push_back(e);
+				//queue up and add to event component type
+			}
+			system_timer.start();
+			//If any input occured, create an entity to carry them to the input_system
+			if (!events_this_frame.empty())
+			{
+
+				auto input_event = gCoordinator.CreateEntity();
+				SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
+				input_cache->events_ = events_this_frame;
+				gCoordinator.AddComponent(input_event, input_cache, true);
+				gCoordinator.AddComponent(input_event, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE), true);
+				//update event handling system
+				input_system->Update(dt_seconds);
+			}
+			strncpy(input_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+
+			/////////////////////////////////Physics/Movement
+			//Phys start
+			
+			game_dt = dt_seconds;
+			//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
+			
+
+			system_timer.start();
+			movement_system->Update(dt_seconds);
+			parallax_system->Update(dt_seconds);
+			task_scheduler_system->Update(dt_seconds);
+			move_timer.start(); //restart delta t for next frame
+			strncpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+			system_timer.start();
+			collision_system->Update(dt_seconds);
+			strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+			//Phys End
+			/////////////////////////////////Event System - respond to physics, input, etc
+			system_timer.start();
+			event_system->Update(dt_seconds);
+			strncpy(event_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+			system_timer.start();
+
+			strncpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+			/////////////////////////////////Rendering
+			//Render Setup
+			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+			SDL_RenderClear(gRenderer);
+			//System Related to Rendering but Don't Render
+			sprite_factory_creator_system->Update(dt_seconds);
+			sprite_factory_system->Update(dt_seconds);
+			//Render UI
+			//TODO add UI
+			//Render Game
+			system_timer.start();
+			renderer_system->Update(dt_seconds);
+			strncpy(render_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+			strncpy(ecs_stats_num_entities->label_->text, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(), KISS_MAX_LENGTH);
+
+			auto stopTime = std::chrono::high_resolution_clock::now();
+
+			//Render End
+			SDL_RenderPresent(gRenderer);
+
+			/////////////////////////////////Frame End
+			fps_avg = frame_count / total_seconds;
+			if (fps_avg > 2000000)
+			{
+				fps_avg = 0;
+			}
+			strncpy(debug_fps_actual->label_->text, std::to_string(fps_avg).c_str(), KISS_MAX_LENGTH);
+
+
+			++frame_count;
+
 		}
-		system_timer.start();
-		//If any input occured, create an entity to carry them to the input_system
-		if (!events_this_frame.empty())
-		{
-
-			auto input_event = gCoordinator.CreateEntity();
-			SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
-			input_cache->events_ = events_this_frame;
-			gCoordinator.AddComponent(input_event, input_cache, true);
-			gCoordinator.AddComponent(input_event, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE), true);
-			//update event handling system
-			input_system->Update(dt);
-		}
-		strncpy(input_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(), KISS_MAX_LENGTH);
-		
-
-		/////////////////////////////////Physics/Movement
-		//Phys start
-		dt = move_timer.getTicks() / 1000.f;//
-		game_dt = dt;
-		//todo - game_dt = 0.0 if paused - some systems don't operate when paused but some do
-		
-
-		system_timer.start();
-		movement_system->Update(dt);
-		parallax_system->Update(dt);
-		task_scheduler_system->Update(dt);
-		move_timer.start(); //restart delta t for next frame
-		strncpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
-
-		system_timer.start();
-		collision_system->Update(dt);
-		strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
-		
-		//Phys End
-		/////////////////////////////////Event System - respond to physics, input, etc
-		system_timer.start();
-		event_system->Update(dt);
-		strncpy(event_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
-
-		system_timer.start();
-		
-		strncpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
-		/////////////////////////////////Rendering
-		//Render Setup
-		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-		SDL_RenderClear(gRenderer);
-		//System Related to Rendering but Don't Render
-		sprite_factory_creator_system->Update(dt);
-		sprite_factory_system->Update(dt);
-		//Render UI
-		//TODO add UI
-		//Render Game
-		system_timer.start();
-		renderer_system->Update(dt);
-		strncpy(render_system_ms->label_->text, std::to_string(system_timer.getTicks() / 1000.f).c_str(),KISS_MAX_LENGTH);
-
-		strncpy(ecs_stats_num_entities->label_->text, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(),KISS_MAX_LENGTH);
-
-		auto stopTime = std::chrono::high_resolution_clock::now();
-		
-		//Render End
-		SDL_RenderPresent(gRenderer);
-		
-		/////////////////////////////////Frame End
-		fps_avg = frame_count / (frame_timer.getTicks() / 1000.f);
-		if (fps_avg > 2000000)
-		{
-			fps_avg = 0;
-		}
-		strncpy(debug_fps_actual->label_->text, std::to_string(fps_avg).c_str(),KISS_MAX_LENGTH);
-		if (frame_cap_timer.getTicks() < SXNGN::Database::get_screen_ticks_per_frame())
-		{
-			SDL_Delay(SXNGN::Database::get_screen_ticks_per_frame() - frame_cap_timer.getTicks());
-		}
-		
-		++frame_count;
-
 	}
 
-
-	return 0;
+		return 0;
 }

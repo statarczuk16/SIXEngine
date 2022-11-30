@@ -27,16 +27,16 @@ void SXNGN::Database::set_scale(float new_scale)
 	scale_ = new_scale;
 }
 
-void SXNGN::Database::modify_scale(int scale_mod)
+void SXNGN::Database::modify_scale(float scale_mod)
 {
 	scale_ += scale_mod;
-	if (scale_ < 1)
+	if (scale_ < 1.0)
 	{
-		scale_ = 1;
+		scale_ = 1.0;
 	}
-	if (scale_ > 6)
+	if (scale_ > 6.0)
 	{
-		scale_ = 6;
+		scale_ = 6.0;
 	}
 }
 
@@ -69,7 +69,7 @@ void SXNGN::Database::set_max_fps(Uint8 new_fps)
 	max_fps_ = new_fps;
  }
 
-Uint8  SXNGN::Database::get_screen_ticks_per_frame()
+float  SXNGN::Database::get_screen_ms_per_frame()
 {
 	
 	if (max_fps_ == 0)
@@ -77,7 +77,8 @@ Uint8  SXNGN::Database::get_screen_ticks_per_frame()
 		printf("Error: Database: max_fps_ is 0");
 		return 60;
 	}
-	return Uint8(1000 / max_fps_);
+	return float(1000 / max_fps_);
+	//equals seconds per frame converted to milliseconds per frame
  }
 
 Uint8 SXNGN::Database::get_collision_budget_ms()

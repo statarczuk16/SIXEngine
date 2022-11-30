@@ -39,6 +39,7 @@ bool SXNGN::Texture::loadFromFile(std::string path)
 		SDL_SetColorKey(loadedSurface, SDL_TRUE, SDL_MapRGB(loadedSurface->format, 0xFF, 0xFF, 0xFF));
 
 		//Create texture from surface pixels
+		//SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 		newTexture = SDL_CreateTextureFromSurface(renderer_, loadedSurface);
 		if (newTexture == NULL)
 		{
@@ -174,6 +175,52 @@ void SXNGN::Texture::render_circle(int32_t center_x, int32_t center_y, int32_t r
 	}
 }
 
+void SXNGN::Texture::renderf(SDL_FRect bounding_box, SDL_Rect clip, double angle, SDL_FPoint* center, SDL_RendererFlip flip, bool outline)
+{
+	//Set rendering space and render to screen
+	SDL_FRect renderQuad = bounding_box;
+
+	//Set clip rendering dimensions
+	//renderQuad.w = clip->w;
+	//renderQuad.h = clip->h;
+	clip.x += 1;
+	clip.y += 1;
+	clip.w -= 2;
+	clip.h -= 2;
+
+	float scale = SXNGN::Database::get_scale();
+	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
+	//renderQuad.x *= round(scale);
+	//renderQuad.y *= round(scale);
+	//renderQuad.w *= round(scale);
+	//renderQuad.h *= round(scale);
+	SDL_RenderSetScale(renderer_, scale, scale);
+
+	//SDL_RenderSetScale(renderer_, SXNGN::Database::get_scale(), SXNGN::Database::get_scale());
+	//SDL_RenderSetLogicalSize(renderer_, 1920, 1080);
+	//SDL_RenderSetIntegerScale(renderer_, SDL_TRUE);
+	//Render to screen
+	if (mTexture_)
+	{
+		SDL_RenderCopyExF(renderer_, mTexture_, &clip, &renderQuad, angle, center, flip);
+	}
+	else
+	{
+		//Render red filled quad
+		SDL_SetRenderDrawColor(renderer_, 0xFF, 0xCC, 0xCC, 0xFF);
+		SDL_RenderFillRectF(renderer_, &renderQuad);
+	}
+	if (outline)
+	{
+		//Render red filled quad
+		SDL_SetRenderDrawColor(renderer_, 0xAD, 0xD8, 0xE6, 0xFF);
+		SDL_RenderDrawRectF(renderer_, &renderQuad);
+	}
+	SDL_RenderSetScale(renderer_, 1, 1);
+
+
+}
+
 void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle, SDL_Point* center, SDL_RendererFlip flip, bool outline)
 {
 	//Set rendering space and render to screen
@@ -196,7 +243,6 @@ void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle,
 	//SDL_RenderSetScale(renderer_, SXNGN::Database::get_scale(), SXNGN::Database::get_scale());
 	//SDL_RenderSetLogicalSize(renderer_, 1920, 1080);
 	//SDL_RenderSetIntegerScale(renderer_, SDL_TRUE);
-	SDL_SetHint(SDL_HINT_RENDER_SCALE_QUALITY, "0");
 	//Render to screen
 	if (mTexture_)
 	{
