@@ -17,8 +17,11 @@ namespace SXNGN {
 		void pause();
 		void unpause();
 
-		//Gets the timer's time
-		Uint32 getTicksInMS();
+		//Gets the timer's time since start
+		float getMSSinceTimerStart();
+
+		//Gets the timer's time since last check
+		float getMSSinceLastCheck();
 
 		//Checks the status of the timer
 		bool isStarted();
@@ -26,10 +29,13 @@ namespace SXNGN {
 
 	private:
 		//The clock time when the timer started
-		Uint32 mStartTicks;
+		Uint64 mStartTicks;
 
 		//The ticks stored when the timer was paused
-		Uint32 mPausedTicks;
+		Uint64 mPausedTicks;
+
+		//Ticks when last checked
+		Uint64 mLastCheckTicks;
 
 		//The timer status
 		bool mPaused;

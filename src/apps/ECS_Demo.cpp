@@ -788,11 +788,12 @@ int main(int argc, char* args[])
 	SXNGN::Timer system_timer;//use to time each system
 	frame_timer.start();
 	system_timer.start();
+	frame_cap_timer.start();
 	
 
 
 	float fps_avg = 0.0;
-	float dt_seconds = 0.0;
+	//float dt_seconds = 0.0;
 	float game_dt;
 	float total_seconds = 0.0;
 
@@ -803,20 +804,26 @@ int main(int argc, char* args[])
 	while (!quit)
 	{
 		
-		frame_cap_timer.start();//this timer must reached ticks per frame before the next frame can start
-		accumulated_ms += frame_cap_timer.getTicksInMS();
+		//get ms since the last time getMSSinceLastCheck was called
+		accumulated_ms += frame_cap_timer.getMSSinceLastCheck();
+		//std::cout << "Acc: " << accumulated_ms << std::endl;
 		
 		//std::cout << dt_seconds << " " << accumulated_ms << std::endl;
-		//if (frame_cap_timer.getTicksInMS() < SXNGN::Database::get_screen_ms_per_frame())
+		//if (frame_cap_timer.getMSSinceTimerStart() < SXNGN::Database::get_screen_ms_per_frame())
 		//{
-		//	SDL_Delay(SXNGN::Database::get_screen_ms_per_frame() - frame_cap_timer.getTicksInMS());
+		//	SDL_Delay(SXNGN::Database::get_screen_ms_per_frame() - frame_cap_timer.getMSSinceTimerStart());
 		//}
+
+
 
 		while (accumulated_ms > SXNGN::Database::get_screen_ms_per_frame())
 		{
-			dt_seconds = accumulated_ms / 1000.0;
+			
+			float ms_per_frame = SXNGN::Database::get_screen_ms_per_frame();
+			float dt_seconds = ms_per_frame / 1000.0;
 			total_seconds += dt_seconds;
-			accumulated_ms -= SXNGN::Database::get_screen_ms_per_frame();
+			accumulated_ms -= ms_per_frame;
+			//std::cout << "Remaining: " << accumulated_ms << std::endl;
 			/////////////////////////////////Frame Start
 
 
@@ -842,7 +849,7 @@ int main(int argc, char* args[])
 				//update event handling system
 				input_system->Update(dt_seconds);
 			}
-			strncpy(input_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+			strncpy(input_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 
 			/////////////////////////////////Physics/Movement
@@ -857,41 +864,21 @@ int main(int argc, char* args[])
 			parallax_system->Update(dt_seconds);
 			task_scheduler_system->Update(dt_seconds);
 			move_timer.start(); //restart delta t for next frame
-			strncpy(movement_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+			strncpy(movement_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 			system_timer.start();
 			collision_system->Update(dt_seconds);
-			strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+			strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 			//Phys End
 			/////////////////////////////////Event System - respond to physics, input, etc
 			system_timer.start();
 			event_system->Update(dt_seconds);
-			strncpy(event_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
+			strncpy(event_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 			system_timer.start();
 
-			strncpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
-			/////////////////////////////////Rendering
-			//Render Setup
-			SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
-			SDL_RenderClear(gRenderer);
-			//System Related to Rendering but Don't Render
-			sprite_factory_creator_system->Update(dt_seconds);
-			sprite_factory_system->Update(dt_seconds);
-			//Render UI
-			//TODO add UI
-			//Render Game
-			system_timer.start();
-			renderer_system->Update(dt_seconds);
-			strncpy(render_system_ms->label_->text, std::to_string(system_timer.getTicksInMS() / 1000.f).c_str(), KISS_MAX_LENGTH);
-
-			strncpy(ecs_stats_num_entities->label_->text, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(), KISS_MAX_LENGTH);
-
-			auto stopTime = std::chrono::high_resolution_clock::now();
-
-			//Render End
-			SDL_RenderPresent(gRenderer);
+			strncpy(task_scheduler_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 			/////////////////////////////////Frame End
 			fps_avg = frame_count / total_seconds;
@@ -901,10 +888,29 @@ int main(int argc, char* args[])
 			}
 			strncpy(debug_fps_actual->label_->text, std::to_string(fps_avg).c_str(), KISS_MAX_LENGTH);
 
+			system_timer.start();
+			strncpy(render_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
+
+			strncpy(ecs_stats_num_entities->label_->text, std::to_string(gCoordinator.GetLivingEntityCount()).c_str(), KISS_MAX_LENGTH);
+
+			auto stopTime = std::chrono::high_resolution_clock::now();
 
 			++frame_count;
 
 		}
+
+
+		/////////////////////////////////Rendering
+		//Render Setup
+		SDL_SetRenderDrawColor(gRenderer, 0xFF, 0xFF, 0xFF, 0xFF);
+		SDL_RenderClear(gRenderer);
+		//System Related to Rendering but Don't Render
+		sprite_factory_creator_system->Update(accumulated_ms);
+		sprite_factory_system->Update(accumulated_ms);
+		//Render Game
+		renderer_system->Update(accumulated_ms);
+		//Render End
+		SDL_RenderPresent(gRenderer);
 	}
 
 		return 0;

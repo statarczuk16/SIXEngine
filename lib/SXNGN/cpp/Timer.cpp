@@ -1,4 +1,5 @@
 #include <Timer.h>
+#include <iostream>
 
 
 SXNGN::Timer::Timer()
@@ -20,8 +21,9 @@ void SXNGN::Timer::start()
     mPaused = false;
 
     //Get the current clock time
-    mStartTicks = SDL_GetTicks();
+    mStartTicks = SDL_GetPerformanceCounter();
     mPausedTicks = 0;
+    mLastCheckTicks = mStartTicks;
 }
 
 void SXNGN::Timer::stop()
@@ -46,7 +48,7 @@ void SXNGN::Timer::pause()
         mPaused = true;
 
         //Calculate the paused ticks
-        mPausedTicks = SDL_GetTicks() - mStartTicks;
+        mPausedTicks = SDL_GetPerformanceCounter() - mStartTicks;
         mStartTicks = 0;
     }
 }
@@ -60,17 +62,17 @@ void SXNGN::Timer::unpause()
         mPaused = false;
 
         //Reset the starting ticks
-        mStartTicks = SDL_GetTicks() - mPausedTicks;
+        mStartTicks = SDL_GetPerformanceCounter() - mPausedTicks;
 
         //Reset the paused ticks
         mPausedTicks = 0;
     }
 }
 
-Uint32 SXNGN::Timer::getTicksInMS()
+float SXNGN::Timer::getMSSinceTimerStart()
 {
     //The actual timer time
-    Uint32 time = 0;
+    Uint64 ticks_since_start = 0.0;
 
     //If the timer is running
     if (mStarted)
@@ -79,16 +81,48 @@ Uint32 SXNGN::Timer::getTicksInMS()
         if (mPaused)
         {
             //Return the number of ticks when the timer was paused
-            time = mPausedTicks;
+            ticks_since_start = mPausedTicks;
         }
         else
         {
             //Return the current time minus the start time
-            time = SDL_GetTicks() - mStartTicks;
+            ticks_since_start = SDL_GetPerformanceCounter() - mStartTicks;
+            
         }
     }
+    double seconds_since_start = (double)ticks_since_start / (double)SDL_GetPerformanceFrequency();
+    return (float) seconds_since_start;
+}
 
-    return time;
+float SXNGN::Timer::getMSSinceLastCheck()
+{
+    //The actual timer time
+    Uint64 ticks_since_check = 0.0;
+    Uint64 new_check_time = 0.0;
+
+    //If the timer is running
+    if (mStarted)
+    {
+        //If the timer is paused
+        if (mPaused)
+        {
+            //Return time from the last check time until the pause time
+            ticks_since_check = mPausedTicks - mLastCheckTicks;
+            //new check time is now the pause time 
+            new_check_time = mPausedTicks;
+        }
+        else
+        {
+            //Return time from last check until now
+            new_check_time = SDL_GetPerformanceCounter();
+            //new check time is now
+            ticks_since_check = new_check_time - mLastCheckTicks;
+        }
+    }
+    mLastCheckTicks = new_check_time;
+    double seconds_since_start = (double)ticks_since_check / (double)SDL_GetPerformanceFrequency();
+    //std::cout << "Accumulated: " << seconds_since_start << std::endl;
+    return (float)seconds_since_start * 1000.0;
 }
 
 bool SXNGN::Timer::isStarted()

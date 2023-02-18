@@ -183,10 +183,10 @@ void SXNGN::Texture::renderf(SDL_FRect bounding_box, SDL_Rect clip, double angle
 	//Set clip rendering dimensions
 	//renderQuad.w = clip->w;
 	//renderQuad.h = clip->h;
-	clip.x += 1;
-	clip.y += 1;
-	clip.w -= 2;
-	clip.h -= 2;
+	//clip.x += 1;
+	//clip.y += 1;
+	//clip.w -= 2;
+	//clip.h -= 2;
 
 	float scale = SXNGN::Database::get_scale();
 	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
