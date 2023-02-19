@@ -792,14 +792,14 @@ int main(int argc, char* args[])
 	
 
 
-	float fps_avg = 0.0;
+	double fps_avg = 0.0;
 	//float dt_seconds = 0.0;
-	float game_dt;
-	float total_seconds = 0.0;
+	double game_dt;
+	double total_seconds = 0.0;
 
 	int frame_count = 0;
 	std::vector<SDL_Event> events_this_frame;
-	float accumulated_ms = 0.0f;
+	double accumulated_ms = 0.0f;
 	gCoordinator.updateCollisionMap();
 	while (!quit)
 	{
@@ -809,48 +809,36 @@ int main(int argc, char* args[])
 		//std::cout << "Acc: " << accumulated_ms << std::endl;
 		
 		//std::cout << dt_seconds << " " << accumulated_ms << std::endl;
-		//if (frame_cap_timer.getMSSinceTimerStart() < SXNGN::Database::get_screen_ms_per_frame())
-		//{
-		//	SDL_Delay(SXNGN::Database::get_screen_ms_per_frame() - frame_cap_timer.getMSSinceTimerStart());
-		//}
 
+		/////////////////////////////////Event Handling
+		events_this_frame.clear();
+		while (SDL_PollEvent(&e) != 0)
+		{
+			events_this_frame.push_back(e);
+			//queue up and add to event component type
+		}
+		system_timer.start();
+		//If any input occured, create an entity to carry them to the input_system
+		if (!events_this_frame.empty())
+		{
 
+			auto input_event = gCoordinator.CreateEntity();
+			SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
+			input_cache->events_ = events_this_frame;
+			gCoordinator.AddComponent(input_event, input_cache, true);
+			gCoordinator.AddComponent(input_event, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE), true);
+			//update event handling system
+			input_system->Update(accumulated_ms);
+		}
+		strncpy(input_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 		while (accumulated_ms > SXNGN::Database::get_screen_ms_per_frame())
 		{
 			
-			float ms_per_frame = SXNGN::Database::get_screen_ms_per_frame();
-			float dt_seconds = ms_per_frame / 1000.0;
+			double ms_per_frame = SXNGN::Database::get_screen_ms_per_frame();
+			double dt_seconds = ms_per_frame / 1000.0;
 			total_seconds += dt_seconds;
 			accumulated_ms -= ms_per_frame;
-			//std::cout << "Remaining: " << accumulated_ms << std::endl;
-			/////////////////////////////////Frame Start
-
-
-			/////////////////////////////////Handle Game State
-			//Todo game state
-			/////////////////////////////////Event Handling
-			events_this_frame.clear();
-			while (SDL_PollEvent(&e) != 0)
-			{
-				events_this_frame.push_back(e);
-				//queue up and add to event component type
-			}
-			system_timer.start();
-			//If any input occured, create an entity to carry them to the input_system
-			if (!events_this_frame.empty())
-			{
-
-				auto input_event = gCoordinator.CreateEntity();
-				SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
-				input_cache->events_ = events_this_frame;
-				gCoordinator.AddComponent(input_event, input_cache, true);
-				gCoordinator.AddComponent(input_event, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE), true);
-				//update event handling system
-				input_system->Update(dt_seconds);
-			}
-			strncpy(input_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
-
 
 			/////////////////////////////////Physics/Movement
 			//Phys start

@@ -237,7 +237,7 @@ namespace SXNGN::ECS::A {
 		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
 		auto char_loc = new Location(0, 16 + 32);
 		auto movement_character = new Moveable();
-		movement_character->m_speed_m_s = 10.0;
+		//movement_character->m_speed_m_s = 10.0;
 		gCoordinator->AddComponent(character, movement_character);
 		gCoordinator->AddComponent(character, char_render);
 		gCoordinator->AddComponent(character, char_loc);
@@ -258,10 +258,6 @@ namespace SXNGN::ECS::A {
 		//db->settings_map["FOCUS_ENTITY"] = character;
 		sole::uuid character_uuid = gCoordinator->GetUUIDFromEntity(character);
 
-
-	
-		
-		
 		InitializeWorldMap();
 		//build the infinite scrolling map oregon trail style
 		auto dune_parallax_entity = gCoordinator->CreateEntity();

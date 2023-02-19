@@ -12,9 +12,9 @@ namespace SXNGN::ECS::A {
 	public:
 		virtual void Init();
 
-		void Update(float dt);
+		void Update(double dt);
 
-		void Update_Position(Moveable* moveable, Location* location, Entity moveable_id, float dt);
+		void Update_Position(Moveable* moveable, Location* location, Entity moveable_id, double dt);
 
 		void Translate_Waypoints_To_Movement(Location* location, Moveable* moveable);
 

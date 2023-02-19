@@ -11,12 +11,12 @@ namespace SXNGN {
     class Database {
     public:
         Database();
-        static float scale_;
-        static float get_scale();
-        static void set_scale(float new_scale);
+        static double scale_;
+        static double get_scale();
+        static void set_scale(double new_scale);
         static void reduce_scale();
         static void increase_scale();
-        static void modify_scale(float scale_mod);
+        static void modify_scale(double scale_mod);
        
 
         static Uint8 max_fps_;
@@ -26,7 +26,7 @@ namespace SXNGN {
         static Uint8 collision_budget_ms_;
         static Uint8 get_collision_budget_ms();
 
-        static float get_screen_ms_per_frame();
+        static double get_screen_ms_per_frame();
 
         
         static std::shared_ptr<ECS::A::Coordinator> ecs_coordinator_;

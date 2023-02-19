@@ -32,7 +32,7 @@ namespace SXNGN::ECS::A
 	/// User Input A Goals: Translate user input to components that need it
 	/// </summary>
 	/// <param name="dt"></param>
-	void Parallax_System::Update(float dt)
+	void Parallax_System::Update(double dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::vector<Entity> entities_to_cleanup;
@@ -44,8 +44,8 @@ namespace SXNGN::ECS::A
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 		auto camera = CameraComponent::get_instance();
 		auto camera_lens_unscaled = ECS_Utils::determine_camera_lens_unscaled(camera);
-		double screen_left_bound = camera_lens_unscaled.x;
-		double screen_right_bound = camera_lens_unscaled.x + camera_lens_unscaled.w;
+		float screen_left_bound = camera_lens_unscaled.x;
+		float screen_right_bound = camera_lens_unscaled.x + camera_lens_unscaled.w;
 		auto db_comp = DatabaseComponent::get_instance();
 		auto properties = &db_comp->settings_map;
 		double stop_or_go = 0.0;

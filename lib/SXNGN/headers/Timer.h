@@ -18,10 +18,10 @@ namespace SXNGN {
 		void unpause();
 
 		//Gets the timer's time since start
-		float getMSSinceTimerStart();
+		double getMSSinceTimerStart();
 
 		//Gets the timer's time since last check
-		float getMSSinceLastCheck();
+		double getMSSinceLastCheck();
 
 		//Checks the status of the timer
 		bool isStarted();

@@ -16,7 +16,7 @@ namespace SXNGN::ECS::A {
 	/// Camera's goals: Don't do much, just follow around the target.
 	/// </summary>
 	/// <param name="dt"></param>
-	void Camera_System::Update(float dt)
+	void Camera_System::Update(double dt)
 	{
 
 		auto camera = A::CameraComponent::get_instance();

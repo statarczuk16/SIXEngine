@@ -1,7 +1,7 @@
 #include <Database.h>
 #include <stdio.h>
 
-float SXNGN::Database::scale_;
+double SXNGN::Database::scale_;
 Uint8 SXNGN::Database::max_fps_;
 Uint8 SXNGN::Database::collision_budget_ms_;
 std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
@@ -10,33 +10,33 @@ std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
 SXNGN::Database::Database()
 {
 	scale_ = 1;
-	max_fps_ = 60;
+	max_fps_ = 30;
 	ecs_coordinator_ = nullptr;
 	collision_budget_ms_ = 1000;
 
 }
 
 
-float SXNGN::Database::get_scale()
+double SXNGN::Database::get_scale()
 {
-	return scale_;
+	return (scale_);
 }
 
-void SXNGN::Database::set_scale(float new_scale)
+void SXNGN::Database::set_scale(double new_scale)
 {
 	scale_ = new_scale;
 }
 
-void SXNGN::Database::modify_scale(float scale_mod)
+void SXNGN::Database::modify_scale(double scale_mod)
 {
 	scale_ += scale_mod;
 	if (scale_ < 1.0)
 	{
 		scale_ = 1.0;
 	}
-	if (scale_ > 6.0)
+	if (scale_ > 5.0)
 	{
-		scale_ = 6.0;
+		scale_ = 5.0;
 	}
 }
 
@@ -44,7 +44,7 @@ void SXNGN::Database::reduce_scale()
 {
 	if (scale_ > 1)
 	{
-		printf("Scale set to %d", scale_);
+		printf("Scale set to %p", scale_);
 		scale_--;
 	}
 }
@@ -53,7 +53,7 @@ void SXNGN::Database::increase_scale()
 {
 	if (scale_ < 10)
 	{
-		printf("Scale set to %d", scale_);
+		printf("Scale set to %p", scale_);
 		scale_++;
 	}
 }
@@ -69,7 +69,7 @@ void SXNGN::Database::set_max_fps(Uint8 new_fps)
 	max_fps_ = new_fps;
  }
 
-float  SXNGN::Database::get_screen_ms_per_frame()
+double  SXNGN::Database::get_screen_ms_per_frame()
 {
 	
 	if (max_fps_ == 0)
@@ -77,7 +77,7 @@ float  SXNGN::Database::get_screen_ms_per_frame()
 		printf("Error: Database: max_fps_ is 0");
 		return 60;
 	}
-	return float(1000 / max_fps_);
+	return double(1000 / max_fps_);
 	//equals seconds per frame converted to milliseconds per frame
  }
 

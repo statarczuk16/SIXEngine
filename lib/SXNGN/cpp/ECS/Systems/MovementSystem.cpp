@@ -18,7 +18,7 @@ void Movement_System::Init()
 //mutex check out of moveables
 //will probably need to update recursivelly for moveables
 //for now
-void Movement_System::Update(float dt)
+void Movement_System::Update(double dt)
 {
 
 	auto gCoordinator = *SXNGN::Database::get_coordinator();
@@ -100,7 +100,7 @@ void Movement_System::Translate_Waypoints_To_Movement(Location* location, Moveab
 	}
 }
 
-void Movement_System::Update_Position(Moveable * moveable, Location* location, Entity moveable_id, float dt)
+void Movement_System::Update_Position(Moveable * moveable, Location* location, Entity moveable_id, double dt)
 {
 	//First update moveable and linked components (collison box, renderable) to the potential position.
 	//intended delta is set at the bottom of this function, and then verified by collision system, such that whatever intended_delta is present at the start of this function is considered confirmed delta.
@@ -152,8 +152,8 @@ void Movement_System::Update_Position(Moveable * moveable, Location* location, E
 			}
 			else
 			{
-				moveable->m_intended_delta_x_m = float(SXNGN::PIXELS_TO_METERS) * (moveable->m_vel_x_m_s * dt);
-				moveable->m_intended_delta_y_m = float(SXNGN::PIXELS_TO_METERS) * (moveable->m_vel_y_m_s * dt);
+				moveable->m_intended_delta_x_m = double(SXNGN::PIXELS_TO_METERS) * (moveable->m_vel_x_m_s * dt);
+				moveable->m_intended_delta_y_m = double(SXNGN::PIXELS_TO_METERS) * (moveable->m_vel_y_m_s * dt);
 			}
 					
 		}

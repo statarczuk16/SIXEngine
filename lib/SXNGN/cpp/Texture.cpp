@@ -105,8 +105,6 @@ void SXNGN::Texture::render(int x, int y, SDL_Rect* clip, double angle, SDL_Poin
 	{
 		renderQuad.w = clip->w;
 		renderQuad.h = clip->h;
-
-		//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
 		renderQuad.x *= SXNGN::Database::get_scale();
 		renderQuad.y *= SXNGN::Database::get_scale();
 		renderQuad.w *= SXNGN::Database::get_scale();
@@ -188,12 +186,13 @@ void SXNGN::Texture::renderf(SDL_FRect bounding_box, SDL_Rect clip, double angle
 	//clip.w -= 2;
 	//clip.h -= 2;
 
-	float scale = SXNGN::Database::get_scale();
-	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
-	//renderQuad.x *= round(scale);
-	//renderQuad.y *= round(scale);
-	//renderQuad.w *= round(scale);
-	//renderQuad.h *= round(scale);
+	double scale = (SXNGN::Database::get_scale());
+	
+	//renderQuad.x = scale * round(renderQuad.x);
+	//renderQuad.y = scale * round(renderQuad.y);
+	//renderQuad.w = scale * round(renderQuad.w);
+	//renderQuad.h = scale * round(renderQuad.h);
+	
 	SDL_RenderSetScale(renderer_, scale, scale);
 
 	//SDL_RenderSetScale(renderer_, SXNGN::Database::get_scale(), SXNGN::Database::get_scale());
@@ -234,7 +233,6 @@ void SXNGN::Texture::render2(SDL_Rect bounding_box, SDL_Rect clip, double angle,
 	clip.w -= 2;
 	clip.h -= 2;
 
-	//SDL_RenderSetScale(renderer_, float(SXNGN::TILE_WIDTH_SCALE), float(SXNGN::TILE_HEIGHT_SCALE));
 	renderQuad.x *= SXNGN::Database::get_scale();
 	renderQuad.y *= SXNGN::Database::get_scale();
 	renderQuad.w *= (SXNGN::Database::get_scale());

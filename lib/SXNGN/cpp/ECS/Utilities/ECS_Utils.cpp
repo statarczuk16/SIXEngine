@@ -48,7 +48,7 @@ namespace SXNGN {
 				SDL_FRect return_view;
 				SDL_FRect position_actual = camera->position_actual_;
 				SDL_FRect position_scaled;
-				auto scale_ = SXNGN::Database::get_scale();
+				double scale_ = SXNGN::Database::get_scale();
 				position_scaled.x = position_actual.x * SXNGN::Database::get_scale();
 				position_scaled.y = position_actual.y * SXNGN::Database::get_scale();
 				camera->position_scaled_ = position_scaled;

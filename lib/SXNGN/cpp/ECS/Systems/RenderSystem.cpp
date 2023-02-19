@@ -127,7 +127,7 @@ namespace SXNGN::ECS::A {
 
 	
 
-	void Renderer_System::Update(float dt)
+	void Renderer_System::Update(double dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::shared_ptr<ECS_Camera> camera_ptr = ECS_Camera::get_instance();
@@ -136,10 +136,10 @@ namespace SXNGN::ECS::A {
 		if (location_data)
 		{
 			Location* location = static_cast<Location*>(location_data);
-			Coordinate camera_target_position = location->GetPixelCoordinate();
+			//Coordinate camera_target_position = location->GetPixelCoordinate();
 			SDL_FRect camera_target_position_rect;
-			camera_target_position_rect.x = camera_target_position.x;
-			camera_target_position_rect.y = camera_target_position.y;
+			camera_target_position_rect.x = location->m_pos_x_m_;
+			camera_target_position_rect.y = location->m_pos_y_m_;
 			camera_ptr->set_position_actual(camera_target_position_rect);
 			gCoordinator.CheckInComponent(camera_target, ComponentTypeEnum::LOCATION);
 		}
@@ -248,8 +248,8 @@ namespace SXNGN::ECS::A {
 		{
 			int sprite_width = renderable_ptr->sprite_batch_snips_[0][0].w;
 			int sprite_height = renderable_ptr->sprite_batch_snips_[0][0].h;
-			float x = location_ptr->m_pos_x_m_;
-			float y = location_ptr->m_pos_y_m_; - sprite_height;
+			double x = location_ptr->m_pos_x_m_;
+			double y = location_ptr->m_pos_y_m_; - sprite_height;
 			for (auto sprite_row : renderable_ptr->sprite_batch_snips_)
 			{
 				y += sprite_height;
@@ -268,8 +268,8 @@ namespace SXNGN::ECS::A {
 
 						SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
 						//get the position of this object with respect to the camera lens
-						float texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
-						float texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
+						double texture_pos_wrt_cam_x = (double) bounding_box.x - (double) camera_lens.x;
+						double texture_pos_wrt_cam_y = (double) bounding_box.y - (double) camera_lens.y;
 
 						//inefficient, but here for debug/readbility
 						SDL_FRect render_quad;
@@ -277,6 +277,7 @@ namespace SXNGN::ECS::A {
 						render_quad.y = texture_pos_wrt_cam_y;
 						render_quad.w = bounding_box.w;
 						render_quad.h = bounding_box.h;
+						
 
 						//SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
 
@@ -307,15 +308,19 @@ namespace SXNGN::ECS::A {
 
 				SDL_FRect camera_lens = ECS_Utils::determine_camera_lens_unscaled(camera);
 				//get the position of this object with respect to the camera lens
-				float texture_pos_wrt_cam_x = bounding_box.x - camera_lens.x;
-				float texture_pos_wrt_cam_y = bounding_box.y - camera_lens.y;
+				double texture_pos_wrt_cam_x =  (double) bounding_box.x - (double) camera_lens.x;
+				double texture_pos_wrt_cam_y = (double) bounding_box.y - (double) camera_lens.y;
 
 				//inefficient, but here for debug/readbility
 				SDL_FRect render_quad;
-				render_quad.x = round(texture_pos_wrt_cam_x);
-				render_quad.y = round(texture_pos_wrt_cam_y);
+				render_quad.x = (texture_pos_wrt_cam_x);
+				render_quad.y = (texture_pos_wrt_cam_y);
 				render_quad.w = bounding_box.w;
 				render_quad.h = bounding_box.h;
+				//if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::INPUT_TAGS))
+				//{
+				//	SDL_Log("Entity %d X: %f %f %f", entity, location_ptr->m_pos_x_m_, bounding_box.x, texture_pos_wrt_cam_x);
+				//}
 
 				//SDL_Log("Rendering entity %d with location %f,%f at %d,%d", entity, location_ptr->m_pos_x_m_, location_ptr->m_pos_y_m_, render_quad.x, render_quad.y);
 

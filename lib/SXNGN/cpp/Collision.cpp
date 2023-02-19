@@ -103,17 +103,17 @@ namespace SXNGN {
 
 		float xB;
 		float yB;
-		float radiusB;
+		double radiusB;
 
 		xB = circle.x;
 		yB = circle.y;
 		radiusB = circle.w;
 		
 
-		float nX = std::max(rect.x, std::min(rect.x + rect.w, xB));
-		float nY = std::max(rect.y, std::min(rect.y + rect.h, yB));
+		double nX = std::max(rect.x, std::min(rect.x + rect.w, xB));
+		double nY = std::max(rect.y, std::min(rect.y + rect.h, yB));
 
-		float magnitude = sqrt(pow((nX - xB), 2.0) + pow((nY - yB),2.0));
+		double magnitude = sqrt(pow((nX - xB), 2.0) + pow((nY - yB),2.0));
 
 		if (magnitude <= radiusB)
 		{

@@ -34,11 +34,11 @@ namespace SXNGN::ECS::A {
 
 		bool Hotkey_Handle_Events(std::shared_ptr<Coordinator> coordinator, std::vector<SDL_Event>& events);
 
-		void Update(float dt);
+		void Update(double dt);
 
-		void Update_Mouse_State(std::vector<SDL_Event> mouse_events, std::vector<SDL_Event> mouse_wheel_events, float dt);
+		void Update_Mouse_State(std::vector<SDL_Event> mouse_events, std::vector<SDL_Event> mouse_wheel_events, double dt);
 
-		void Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt);
+		void Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, double dt);
 
 		
 

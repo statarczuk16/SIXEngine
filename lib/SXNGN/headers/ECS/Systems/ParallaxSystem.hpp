@@ -22,7 +22,7 @@ namespace SXNGN::ECS::A {
 	public:
 		virtual void Init();
 
-		void Update(float dt);
+		void Update(double dt);
 
 
 	private:

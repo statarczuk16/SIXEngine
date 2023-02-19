@@ -14,7 +14,7 @@ namespace SXNGN::ECS::A {
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Event_System Init");
 	}
 
-	void Event_System::Update(float dt)
+	void Event_System::Update(double dt)
 	{
 
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
@@ -352,7 +352,7 @@ namespace SXNGN::ECS::A {
 		//auto cached_input_state = User_Input_State::get_instance();
 		//if (cached_input_state->selected_entities.size() == 0)
 		//{
-		float mod = ec->e.mouse_wheel_event.y_ / 2.0;
+		double mod = ec->e.mouse_wheel_event.y_ / 2.0;
 		SXNGN::Database::modify_scale(mod);
 		std::cout << "Scale now: " << SXNGN::Database::get_scale() << std::endl;
 		//}

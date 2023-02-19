@@ -69,7 +69,7 @@ void SXNGN::Timer::unpause()
     }
 }
 
-float SXNGN::Timer::getMSSinceTimerStart()
+double SXNGN::Timer::getMSSinceTimerStart()
 {
     //The actual timer time
     Uint64 ticks_since_start = 0.0;
@@ -91,10 +91,10 @@ float SXNGN::Timer::getMSSinceTimerStart()
         }
     }
     double seconds_since_start = (double)ticks_since_start / (double)SDL_GetPerformanceFrequency();
-    return (float) seconds_since_start;
+    return (double) seconds_since_start;
 }
 
-float SXNGN::Timer::getMSSinceLastCheck()
+double SXNGN::Timer::getMSSinceLastCheck()
 {
     //The actual timer time
     Uint64 ticks_since_check = 0.0;
@@ -122,7 +122,7 @@ float SXNGN::Timer::getMSSinceLastCheck()
     mLastCheckTicks = new_check_time;
     double seconds_since_start = (double)ticks_since_check / (double)SDL_GetPerformanceFrequency();
     //std::cout << "Accumulated: " << seconds_since_start << std::endl;
-    return (float)seconds_since_start * 1000.0;
+    return (double)seconds_since_start * 1000.0;
 }
 
 bool SXNGN::Timer::isStarted()

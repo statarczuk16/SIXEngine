@@ -15,9 +15,9 @@ namespace SXNGN::ECS::A {
 	public:
 		virtual void Init();
 
-		void Update(float dt);
+		void Update(double dt);
 
-		void Update_Position(Moveable* moveable, Entity moveable_id, float dt);
+		void Update_Position(Moveable* moveable, Entity moveable_id, double dt);
 
 		std::set<Entity> HandleCollisionEvent(Entity entity1, Collisionable* collisonable1_ptr, Entity entity2, Collisionable* collisonable2_ptr);
 
@@ -32,7 +32,6 @@ namespace SXNGN::ECS::A {
 		std::set<Entity> HandleCollisionDynamicOnStatic(Entity entity1, Collisionable* collisonable1_ptr, Entity entity2, Collisionable* collisonable2_ptr);
 		//std::pair< std::vector<const Collisionable*>, std::vector<Entity>> Load_Collision_Data(std::set<Entity> entities_with_collision);
 
-		//void Update_Position_With_Collision(Moveable* moveable, Entity moveable_id, std::vector<const Collisionable*> collisionables, std::vector<Entity> collisionable_entity_ids, float dt);
 	private:
 
 

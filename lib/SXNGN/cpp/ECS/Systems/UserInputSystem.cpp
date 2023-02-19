@@ -19,7 +19,7 @@ namespace SXNGN::ECS::A {
 	/// User Input A Goals: Translate user input to components that need it
 	/// </summary>
 	/// <param name="dt"></param>
-	void User_Input_System::Update(float dt)
+	void User_Input_System::Update(double dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		std::vector<Entity> entities_to_cleanup;
@@ -114,7 +114,7 @@ namespace SXNGN::ECS::A {
 
 	
 
-	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, float dt)
+	void User_Input_System::Translate_User_Input_To_Movement(Moveable* moveable, Entity entity, std::vector<SDL_Event> keyboard_inputs, double dt)
 	{
 
 		if (moveable)
@@ -339,7 +339,7 @@ namespace SXNGN::ECS::A {
 
 
 
-	void User_Input_System::Update_Mouse_State(std::vector<SDL_Event> mouse_events, std::vector<SDL_Event> mouse_wheel_events, float dt)
+	void User_Input_System::Update_Mouse_State(std::vector<SDL_Event> mouse_events, std::vector<SDL_Event> mouse_wheel_events, double dt)
 	{
 		auto gCoordinator = Database::get_coordinator();
 		//mutex controlled singleton

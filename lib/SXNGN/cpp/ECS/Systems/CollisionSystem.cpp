@@ -18,7 +18,7 @@ namespace SXNGN::ECS::A {
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Event_System Init");
 	}
 
-	void Collision_System::Update(float dt)
+	void Collision_System::Update(double dt)
 	{
 
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
@@ -476,12 +476,12 @@ namespace SXNGN::ECS::A {
 
 
 			//check if the intended position is valid
-			std::pair<float, float> distance;
+			std::pair<double, double> distance;
 			distance = Physics_Utils::CalculateDistanceTo(dynamic_e_position, static_e_position);
 			double xAxisTimeToCollide = dynamic_m->m_vel_x_m_s != 0.0 ? std::abs(distance.first / dynamic_m->m_vel_x_m_s) : 0;
 			double yAxisTimeToCollide = dynamic_m->m_vel_y_m_s != 0.0 ? std::abs(distance.second / dynamic_m->m_vel_y_m_s) : 0;
 
-			float shortest_time = 0.0;
+			double shortest_time = 0.0;
 			double alternate_dist = 0.0;
 			//there is a collision, velocity tells what axis it occurred on
 
