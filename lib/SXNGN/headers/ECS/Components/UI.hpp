@@ -110,6 +110,7 @@ namespace SXNGN::ECS::A {
         std::vector<Event_Component> triggered_events; //events triggered when this element is activated, if any
         std::vector<std::shared_ptr<UIContainerComponent>> child_components_;
         std::vector<std::function<void()>> callback_functions_;
+        std::string property_ = ""; //associated property. eg for progressbar to display.
 
     };
 

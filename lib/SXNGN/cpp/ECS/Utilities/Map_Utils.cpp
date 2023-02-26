@@ -246,7 +246,7 @@ namespace SXNGN::ECS::A {
 		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
 		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
 		input_tags_comp->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
-		input_tags_comp->property_tag_ = SXNGN::OVERWORLD_PACE;
+		input_tags_comp->property_tag_ = SXNGN::OVERWORLD_PACE_M_S;
 
 		gCoordinator->AddComponent(character, input_tags_comp);
 
@@ -265,7 +265,7 @@ namespace SXNGN::ECS::A {
 		Moveable* dune_mover = new Moveable();
 		dune_parallax->speed_multiplier_ = 0.0;
 		dune_parallax->speed_sign_ = -1.0;
-		dune_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		dune_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE_M_S;
 		dune_parallax->snap_source_y_ = character_uuid;
 		dune_parallax->snap_source_y_offset_ =  (double)SXNGN::BASE_TILE_HEIGHT * -2.0;
 		gCoordinator->AddComponent(dune_parallax_entity, dune_parallax);
@@ -295,7 +295,7 @@ namespace SXNGN::ECS::A {
 		Moveable* filler_mover = new Moveable();
 		filler_p->speed_multiplier_ = 0.0;
 		filler_p->speed_sign_ = -1.0;
-		filler_p->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		filler_p->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE_M_S;
 		filler_p->snap_source_y_ = character_uuid;
 		filler_p->snap_source_y_offset_ = 320 - (double)SXNGN::BASE_TILE_HEIGHT * 2.0;
 		gCoordinator->AddComponent(filler_p_entity, filler_p);
@@ -324,7 +324,7 @@ namespace SXNGN::ECS::A {
 		Moveable* mtn_mover = new Moveable();
 		mtn_parallax->speed_multiplier_ = 0.1;
 		mtn_parallax->speed_sign_ = -1.0;
-		mtn_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		mtn_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE_M_S;
 		mtn_parallax->snap_source_y_ = character_uuid;
 		mtn_parallax->snap_source_y_offset_ = (double)SXNGN::BASE_TILE_HEIGHT * -2.0;
 		gCoordinator->AddComponent(mtn_parallax_entity, mtn_parallax);
@@ -352,7 +352,7 @@ namespace SXNGN::ECS::A {
 		Parallax* sky_parallax = new Parallax();
 		sky_parallax->speed_multiplier_ = 0.1;
 		sky_parallax->speed_sign_ = 1.0;
-		sky_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE;
+		sky_parallax->speed_source_horizontal_ = SXNGN::OVERWORLD_PACE_M_S;
 		sky_parallax->snap_source_y_ = character_uuid;
 		sky_parallax->snap_source_y_offset_ = (double)SXNGN::BASE_TILE_HEIGHT * -2.0;
 		auto sky_mover = new Moveable();

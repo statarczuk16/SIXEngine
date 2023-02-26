@@ -269,8 +269,14 @@ int kiss_window_event(kiss_window *window, SDL_Event *event, int *draw)
 int kiss_label_new_uc(kiss_label* label, kiss_window* wdw, char* text,
 	int x, int y, int width, int height)
 {
-	if (!label || !text) return -1;
-	if (label->font.magic != KISS_MAGIC) label->font = kiss_textfont;
+	if (!label || !text)
+	{
+		return -1;
+	}
+	if (label->font.magic != KISS_MAGIC)
+	{
+		label->font = kiss_textfont;
+	}
 	label->textcolor = kiss_black;
 	kiss_makerect(&label->rect, x, y, width, height);
 	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
@@ -886,14 +892,48 @@ int kiss_hscrollbar_draw(kiss_hscrollbar *hscrollbar, SDL_Renderer *renderer)
 int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 	int x, int y, int w)
 {
-	if (!progressbar || w < 2 * kiss_border + 1) return -1;
+	if (!progressbar || w < 2 * kiss_border + 1)
+	{
+		return -1;
+	}
 	if (progressbar->bar.magic != KISS_MAGIC)
+	{
 		progressbar->bar = kiss_bar;
+	}
+		
 	progressbar->bg = kiss_white;
-	kiss_makerect(&progressbar->rect, x, y, w,
-		progressbar->bar.h + 2 * kiss_border);
-	kiss_makerect(&progressbar->barrect, x + kiss_border,
-		y + kiss_border, 0, progressbar->bar.h);
+	kiss_makerect(&progressbar->rect, x, y, w, progressbar->bar.h + 2 * kiss_border);
+	kiss_makerect(&progressbar->barrect, x + kiss_border, y + kiss_border, 0, progressbar->bar.h);
+	progressbar->width = w - 2 * kiss_border;
+	progressbar->fraction = 0.;
+	progressbar->step = 0.02;
+	progressbar->lasttick = 0;
+	progressbar->run = 0;
+	progressbar->visible = 1;
+	progressbar->wdw = wdw;
+	return 0;
+}
+
+int kiss_progressbar_new_uc(kiss_progressbar* progressbar, kiss_window* wdw,
+	int x, int y, int w)
+{
+	if (!progressbar || w < 2 * kiss_border + 1)
+	{
+		return -1;
+	}
+	if (progressbar->bar.magic != KISS_MAGIC)
+	{
+		progressbar->bar = kiss_bar;
+	}
+	if (progressbar->font.magic != KISS_MAGIC)
+	{
+		progressbar->font = kiss_textfont;
+	}
+	progressbar->textcolor = kiss_black;
+
+	progressbar->bg = kiss_white;
+	kiss_makerect(&progressbar->rect, x, y, w, progressbar->bar.h + 2 * kiss_border);
+	kiss_makerect(&progressbar->barrect, x + kiss_border, y + kiss_border, 0, progressbar->bar.h);
 	progressbar->width = w - 2 * kiss_border;
 	progressbar->fraction = 0.;
 	progressbar->step = 0.02;
@@ -926,20 +966,47 @@ int kiss_progressbar_event(kiss_progressbar *progressbar, SDL_Event *event,
 int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	SDL_Renderer *renderer)
 {
+	char buf[KISS_MAX_LABEL], * p;
 	SDL_Rect clip;
-
-	if (progressbar && progressbar->wdw)
-		progressbar->visible = progressbar->wdw->visible;
-	if (!progressbar || !progressbar->visible || !renderer)
+	int len, y, x;
+	int visible = progressbar->visible;
+	if (progressbar)
+	{
+		visible = progressbar->visible && progressbar->wdw->visible;
+		//pass by ref - sets button->r_rect
+		(void)determine_render_position(&progressbar->rect, progressbar->wdw, &progressbar->r_rect, progressbar->h_align, progressbar->v_align, progressbar->parent_scale, progressbar->column, progressbar->row);
+		//pass by ref - sets textx and texty
+		(void)determine_text_render_position(&progressbar->r_rect, progressbar->txt_h_align, VA_NONE, &x, &y, kiss_textwidth(progressbar->font, progressbar->text, NULL), progressbar->r_rect.h);
+	}
+	if (!progressbar || !visible || !renderer)
+	{
 		return 0;
-	kiss_fillrect(renderer, &progressbar->rect, progressbar->bg);
-	kiss_decorate(renderer, &progressbar->rect, kiss_sand_dark, kiss_edge);
-	progressbar->barrect.w = (int) (progressbar->width *
-		progressbar->fraction + 0.5);
-	kiss_makerect(&clip, 0, 0, progressbar->barrect.w,
-		progressbar->barrect.h);
-	kiss_renderimage(renderer, progressbar->bar, progressbar->barrect.x,
-		progressbar->barrect.y, &clip);
+	}
+	y = progressbar->r_rect.y + progressbar->font.spacing / 2;
+	len = (int)strlen(progressbar->text);
+	if (len > KISS_MAX_LABEL - 2)
+	{
+		progressbar->text[len - 1] = '\n';
+	}
+	else
+	{
+		strncat(progressbar->text, "\n", KISS_MAX_LENGTH);
+	}
+	for (p = progressbar->text; *p; p = strchr(p, '\n') + 1)
+	{
+		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
+		kiss_rendertext(renderer, buf, x, y,
+			progressbar->font, progressbar->textcolor);
+		y += progressbar->font.lineheight;
+	}
+	progressbar->text[len] = 0;
+
+	progressbar->fraction = progressbar->value / progressbar->max_value;
+	kiss_fillrect(renderer, &progressbar->r_rect, progressbar->bg);
+	kiss_decorate(renderer, &progressbar->r_rect, kiss_sand_dark, kiss_edge);
+	progressbar->barrect.w = (int) (progressbar->width * progressbar->fraction + 0.5);
+	kiss_makerect(&clip, 0, 0, progressbar->barrect.w, progressbar->barrect.h);
+	kiss_renderimage(renderer, progressbar->bar, progressbar->barrect.x, progressbar->barrect.y, &clip);
 	return 1;
 }
 

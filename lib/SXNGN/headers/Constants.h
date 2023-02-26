@@ -38,7 +38,7 @@ namespace SXNGN {
 
 	const std::string DEFAULT_SPACE = "DEFAULT_SPACE";
 
-	const std::string OVERWORLD_PACE = "OVERWORLD_PACE";
+	const std::string OVERWORLD_PACE_M_S = "OVERWORLD_PACE_M_S";
 	const std::string OVERWORLD_GO = "OVERWORLD_GO";
 	const std::string CACHE = "_CACHE";
 

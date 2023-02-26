@@ -63,6 +63,20 @@ namespace SXNGN::ECS::A {
 
 	}
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, std::string prop, int row = -1, int column = -1, int width = -1, int height = -1)
+	{
+		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), name, 0, 0, width, height);
+		new_kiss_progress->h_align = h_align;//label center to parent window window
+		new_kiss_progress->v_align = v_align;
+		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
+		new_kiss_progress->row = row;
+		new_kiss_progress->column = column;
+		new_kiss_progress->parent_scale = parent_scale;
+		UIContainerComponent ngl_c(parent_window, layer, UIType::LABEL);
+		ngl_c.progressbar_ = new_kiss_progress;
+		return std::make_shared<UIContainerComponent>(ngl_c);
+	}
 
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_text_entry(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
 	{

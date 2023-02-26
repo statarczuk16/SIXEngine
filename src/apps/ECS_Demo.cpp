@@ -394,6 +394,8 @@ int init_menus()
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, overworld_left_side_menu_c);
 
 
+
+
 	//************************* Bottom Side State Relevant Menu
 
 	auto bottom_side_state_menu_c = UserInputUtils::create_window_raw(nullptr, 0, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
@@ -483,10 +485,10 @@ int init_menus()
 		
 
 	//set the pace value
-	std::function<void()> set_pace_stop = std::bind(set_property, SXNGN::OVERWORLD_PACE, 0.0);
-	std::function<void()> set_pace_slow = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.0);
-	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.25);
-	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE, 1.5);
+	std::function<void()> set_pace_stop = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 0.0);
+	std::function<void()> set_pace_slow = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.0);
+	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
+	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.5);
 
 	pace_pop_up_c->child_components_.push_back(ig_pace_0);
 	pace_pop_up_c->child_components_.push_back(ig_pace_1);

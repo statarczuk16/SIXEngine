@@ -85,6 +85,16 @@ namespace SXNGN::ECS::A {
 				break;
 			}
 			case UIType::PROGRESSBAR:
+				if (component_in_layer->property_ != "")
+				{
+					auto gCoordinator = *SXNGN::Database::get_coordinator();
+					auto prop_pair = gCoordinator.getSetting(component_in_layer->property_);
+					if (prop_pair.first == true)
+					{
+						component_in_layer->progressbar_->value = prop_pair.second;
+					}
+				}
+				kiss_progressbar_draw(component_in_layer->progressbar_, gRenderer);
 			{
 				break;
 			}

@@ -36,6 +36,9 @@ namespace SXNGN::ECS::A {
 
 		static std::shared_ptr<UIContainerComponent> create_label(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row = -1, int column = -1, int width = -1, int height = -1);
 
+		static std::shared_ptr<UIContainerComponent> create_progressbar(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, std::string prop, int row = -1, int column = -1, int width = -1, int height = -1);
+
+
 		static std::shared_ptr<UIContainerComponent> create_text_entry(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row = -1, int column = -1);
 
 		static std::shared_ptr<UIContainerComponent> create_num_entry(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale,

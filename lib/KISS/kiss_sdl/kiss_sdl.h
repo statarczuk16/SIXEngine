@@ -262,15 +262,32 @@ typedef struct kiss_hscrollbar {
 typedef struct kiss_progressbar {
 	int visible;
 	SDL_Rect rect;
+	SDL_Rect r_rect; //where to actually draw (rect + parent_window)
 	SDL_Rect barrect;
 	int width;
 	double fraction;
+	double value;
+	double max_value;
 	double step;
 	SDL_Color bg;
 	unsigned int lasttick;
 	int run;
 	kiss_image bar;
 	kiss_window *wdw;
+	h_alignment h_align;
+	v_alignment v_align;
+	h_alignment txt_h_align;
+	v_alignment txt_v_align;
+	scale_to_parent_width parent_scale;
+	int row;
+	int column;
+	int text_width;
+	char* parameter;
+	kiss_font font;
+	char text[KISS_MAX_LABEL];
+	SDL_Color textcolor;
+
+
 } kiss_progressbar;
 
 typedef struct kiss_entry {
@@ -433,6 +450,8 @@ int kiss_hscrollbar_event(kiss_hscrollbar *hscrollbar, SDL_Event *event,
 int kiss_hscrollbar_draw(kiss_hscrollbar *hscrollbar,
 	SDL_Renderer *renderer);
 int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
+	int x, int y, int w);
+int kiss_progressbar_new_uc(kiss_progressbar* progressbar, kiss_window* wdw,
 	int x, int y, int w);
 int kiss_progressbar_event(kiss_progressbar *progressbar, SDL_Event *event,
 	int *draw);
