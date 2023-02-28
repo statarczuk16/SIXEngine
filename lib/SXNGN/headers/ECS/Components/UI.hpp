@@ -163,6 +163,40 @@ namespace SXNGN::ECS::A {
                 printf("UI:Add_Component:: Layer is UNKNOWN");
                 abort();
             }
+            
+            if (component_ptr->name_ == "uninit_ui_element")
+            {
+
+            }
+            else if (string_to_ui_map_.count(component_ptr->name_) == 0)
+            {
+                string_to_ui_map_[component_ptr->name_] = component_ptr;
+            }
+            else
+            {
+                printf("UI:Add_Component:: Fatal: Repeat UI Component Name %s", component_ptr->name_.c_str());
+                abort();
+            }
+            if (component_ptr->type_ == UIType::WINDOW)
+            {
+                for (auto comp : component_ptr->child_components_)
+                {
+                    if (comp->name_ == "uninit_ui_element")
+                    {
+                        continue;
+                    }
+                    if (string_to_ui_map_.count(comp->name_) == 0)
+                    {
+                        string_to_ui_map_[comp->name_] = comp;
+                    }
+                    else
+                    {
+                        printf("UI:Add_Component:: Fatal: Repeat UI Component Name %s", comp->name_.c_str());
+                        abort();
+                    }
+                }
+            }
+
             if (game_state_ui_elements_it == state_to_ui_map_.end())
             {
                 printf("UI:Add_Component::Adding new Game State : %s\n", component_type_enum_to_string().at(game_state).c_str());
@@ -239,6 +273,7 @@ namespace SXNGN::ECS::A {
        
        //unordered map first  because order does not matter, std::map for layer because order matters (need to iterate through top, then mid, then bottom, etc. when handling events)
         std::unordered_map<ComponentTypeEnum,std::map<UILayer,std::vector<std::shared_ptr<UIContainerComponent>>>> state_to_ui_map_;
+        std::unordered_map<std::string, std::shared_ptr<UIContainerComponent>> string_to_ui_map_;
         
 
        

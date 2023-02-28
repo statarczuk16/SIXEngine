@@ -25,6 +25,7 @@ namespace SXNGN::ECS::A
 		//actable entities for user input system are UserInputCache (vector of sdl events)
 		auto total = m_actable_entities.size();
 	
+		auto ui_single = UICollectionSingleton::get_instance();
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
@@ -38,11 +39,14 @@ namespace SXNGN::ECS::A
 				if (pace_setting.second && pace_go.second)
 				{
 					//if on the move, substract stamina, then health
-					if (pace_go.second)
+					if (pace_go.first)
 					{
 						auto calories_per_km = 50 * party_ptr->hands_;
-
+						
 						auto pace_m_s = pace_setting.first * pace_go.first;
+						auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
+						
+						snprintf(pace_value_label->label_->text, 100, "%g", pace_m_s);
 						auto dist_traveled_km = pace_m_s * dt * OVERWORLD_MULTIPLIER / 1000.0;
 						auto stamina_upkeep = calories_per_km * dist_traveled_km;
 						party_ptr->stamina_ -= stamina_upkeep;
@@ -53,9 +57,21 @@ namespace SXNGN::ECS::A
 						}
 					}
 					//else recharge using food
-					else
+					else if(party_ptr->stamina_ <= 100.0 && party_ptr->food_ >= 0.0)
 					{
-						double calories_per_food_unit = 200;
+						double recharge_calories_per_minute = 5.0;
+						double recharge_calories_per_second = recharge_calories_per_minute / 60.0;
+						double food_units_per_calorie = 0.1;
+						double calories_recharged = dt * OVERWORLD_MULTIPLIER * recharge_calories_per_second;
+						party_ptr->stamina_ += calories_recharged;
+						double food_used = food_units_per_calorie * calories_recharged;
+						party_ptr->food_ -= food_used;
+
+						if (party_ptr->stamina_ >= 100.0)
+						{
+							party_ptr->stamina_ = 100.0;
+						}
+
 
 
 					}

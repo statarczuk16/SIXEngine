@@ -69,6 +69,17 @@ namespace SXNGN::ECS::A {
 			}
 			case UIType::LABEL:
 			{
+				if (component_in_layer->property_ != "")
+				{
+					auto gCoordinator = *SXNGN::Database::get_coordinator();
+					auto prop_pair = gCoordinator.getSetting(component_in_layer->property_);
+					if (prop_pair.second == true)
+					{
+						
+						snprintf(component_in_layer->progressbar_->text, 100, "%s", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
+
+					}
+				}
 				kiss_label_draw(component_in_layer->label_, gRenderer);
 			}
 			case UIType::COMBOBOX:

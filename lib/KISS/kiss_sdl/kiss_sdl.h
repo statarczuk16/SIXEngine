@@ -452,7 +452,7 @@ int kiss_hscrollbar_draw(kiss_hscrollbar *hscrollbar,
 int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 	int x, int y, int w);
 int kiss_progressbar_new_uc(kiss_progressbar* progressbar, kiss_window* wdw,
-	int x, int y, int w);
+	int x, int y, int w, int h);
 int kiss_progressbar_event(kiss_progressbar *progressbar, SDL_Event *event,
 	int *draw);
 int kiss_progressbar_draw(kiss_progressbar *progressbar,

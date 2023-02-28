@@ -81,6 +81,18 @@ int kiss_textwidth(kiss_font font, char *str1, char *str2)
 	return width;
 }
 
+/* Works also with proportional fonts */
+int kiss_textheight(kiss_font font, char* str1, char* str2)
+{
+	char buf[KISS_MAX_LENGTH];
+	int height;
+
+	if (!str1 && !str2) return -1;
+	kiss_string_copy(buf, KISS_MAX_LENGTH, str1, str2);
+	TTF_SizeUTF8(font.font, buf, NULL, &height);
+	return height;
+}
+
 int kiss_renderimage(SDL_Renderer *renderer, kiss_image image,
 	int x, int y, SDL_Rect *clip)
 {

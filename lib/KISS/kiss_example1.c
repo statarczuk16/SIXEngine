@@ -300,7 +300,8 @@ int main(int argc, char **argv)
 		SDL_RenderClear(renderer);
 
 		kiss_window_draw(&window1, renderer);
-		kiss_label_draw(&label1, renderer);
+		
+		(&label1, renderer);
 		kiss_label_draw(&label2, renderer);
 		kiss_textbox_draw(&textbox1, renderer);
 		kiss_vscrollbar_draw(&vscrollbar1, renderer);

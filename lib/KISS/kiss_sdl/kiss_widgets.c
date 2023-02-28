@@ -65,8 +65,10 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 	{
 	case VA_CENTER:
 	{
-		//set y position to middle of parent window
-		*out_y = (int)(round(parent_rect->y + (parent_rect->h / 2) - (text_height / 1.5)));
+		
+		int offset_down = parent_rect->h * 0.5; //set to y to middle of parent window
+		int offset_up_text = text_height * 0.5; //offset up to account for height of font
+		*out_y = parent_rect->y + offset_down - offset_up_text;
 		break;
 	}
 	default:
@@ -340,12 +342,13 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 		//pass by ref - sets button->r_rect
 		(void)determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
 		//pass by ref - sets textx and texty
-		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_NONE, &x, &y, kiss_textwidth(label->font, label->text, NULL), label->r_rect.h);
+		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_CENTER, &x, &y, kiss_textwidth(label->font, label->text, NULL), kiss_textheight(label->font, label->text, NULL));
 	}
 	if (!label || !visible || !renderer)
 	{
 		return 0;
 	}
+	printf("Label Row %d    Y %d\n", label->row, label->r_rect.y);
 	y = label->r_rect.y + label->font.spacing / 2;
 	len = (int)strlen(label->text);
 	if (len > KISS_MAX_LABEL - 2)
@@ -356,13 +359,16 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 	{
 		strncat(label->text, "\n", KISS_MAX_LENGTH);
 	}
+	//kiss_rendertext(renderer, label->text, x, y, label->font, label->textcolor);
+
+	kiss_decorate(renderer, &label->r_rect, kiss_sand_dark, kiss_edge);
 	for (p = label->text; *p; p = strchr(p, '\n') + 1)
 	{
 		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
-		kiss_rendertext(renderer, buf, x, y,
-			label->font, label->textcolor);
+		kiss_rendertext(renderer, buf, x, y, label->font, label->textcolor);
 		y += label->font.lineheight;
 	}
+	
 	
 	label->text[len] = 0;
 	return 1;
@@ -479,6 +485,8 @@ int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 
 int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 {
+	char buf[KISS_MAX_LABEL], * p;
+	int len, y, x;
 	int visible = 0;
 	if (button)
 	{
@@ -487,13 +495,14 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 		//pass by ref - sets button->r_rect
 		(void) determine_render_position(&button->rect, button->wdw, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
 		//pass by ref - sets textx and texty
-		(void) determine_text_render_position(&button->r_rect, button->txt_h_align, button->txt_v_align, &button->textx, &button->texty, button->text_width, button->font.fontheight);
+		(void) determine_text_render_position(&button->r_rect, button->txt_h_align, button->txt_v_align, &x, &y, kiss_textwidth(button->font, button->text, NULL), kiss_textheight(button->font, button->text, NULL));
 	}
+	
 	if (!button || !visible || !renderer)
 	{
 		return 0;
 	}
-	 
+	
 	if (button->active)
 	{
 		kiss_renderimage(renderer, button->activeimg, button->r_rect.x,
@@ -509,8 +518,24 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 		kiss_renderimage(renderer, button->normalimg, button->r_rect.x,
 			button->r_rect.y, &button->r_rect);
 	}
-	kiss_rendertext(renderer, button->text, button->textx, button->texty,
-		button->font, button->textcolor);
+
+	len = (int)strlen(button->text);
+	if (len > KISS_MAX_LABEL - 2)
+	{
+		button->text[len - 1] = '\n';
+	}
+	else
+	{
+		strncat(button->text, "\n", KISS_MAX_LENGTH);
+	}
+
+	for (p = button->text; *p; p = strchr(p, '\n') + 1)
+	{
+		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
+		kiss_rendertext(renderer, buf, x, y, button->font, button->textcolor);
+		y += button->font.lineheight;
+	}
+	button->text[len] = 0;
 	//kiss_rendertext(renderer, button->text, button->r_rect.x, button->r_rect.y,
 	//	button->font, button->textcolor);
 	return 1;
@@ -915,7 +940,7 @@ int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 }
 
 int kiss_progressbar_new_uc(kiss_progressbar* progressbar, kiss_window* wdw,
-	int x, int y, int w)
+	int x, int y, int w, int h)
 {
 	if (!progressbar || w < 2 * kiss_border + 1)
 	{
@@ -932,7 +957,7 @@ int kiss_progressbar_new_uc(kiss_progressbar* progressbar, kiss_window* wdw,
 	progressbar->textcolor = kiss_black;
 
 	progressbar->bg = kiss_lightblue;
-	kiss_makerect(&progressbar->rect, x, y, w, progressbar->bar.h + 2 * kiss_border);
+	kiss_makerect(&progressbar->rect, x, y, w, h);
 	kiss_makerect(&progressbar->barrect, x + kiss_border, y + kiss_border, 0, progressbar->bar.h);
 	progressbar->width = w - 2 * kiss_border;
 	progressbar->fraction = 0.;
@@ -976,29 +1001,31 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 		//pass by ref - sets button->r_rect
 		(void)determine_render_position(&progressbar->rect, progressbar->wdw, &progressbar->r_rect, progressbar->h_align, progressbar->v_align, progressbar->parent_scale, progressbar->column, progressbar->row);
 		//pass by ref - sets textx and texty
-		(void)determine_text_render_position(&progressbar->r_rect, progressbar->txt_h_align, VA_NONE, &x, &y, kiss_textwidth(progressbar->font, progressbar->text, NULL), progressbar->r_rect.h);
+		(void)determine_text_render_position(&progressbar->r_rect, progressbar->txt_h_align, VA_CENTER, &x, &y, kiss_textwidth(progressbar->font, progressbar->text, NULL), kiss_textheight(progressbar->font, progressbar->text, NULL));
 	}
 	if (!progressbar || !visible || !renderer)
 	{
 		return 0;
 	}
-	y = progressbar->r_rect.y - progressbar->font.spacing / 2.0 + kiss_edge;
-	
+	y = progressbar->r_rect.y + progressbar->font.spacing + kiss_edge;
+	printf("Progress Row %d Y %d\n", progressbar->row, progressbar->r_rect.y);
 
+	
+	progressbar->barrect.x = progressbar->r_rect.x + kiss_edge;
+	progressbar->barrect.y = progressbar->r_rect.y + kiss_edge;
+	progressbar->barrect.h = progressbar->r_rect.h - 2 * kiss_edge;
+	progressbar->barrect.w = progressbar->r_rect.w - 2 *  kiss_edge;
+	
 	progressbar->fraction = progressbar->value / progressbar->max_value;
 	if (progressbar->fraction < 0.0)
 	{
 		progressbar->fraction = 0.0;
 	}
-	progressbar->barrect.w = (int)(progressbar->r_rect.w * progressbar->fraction);
+	progressbar->barrect.w = (int)(progressbar->barrect.w * progressbar->fraction);
 	if (progressbar->barrect.w < 0)
 	{
 		progressbar->barrect.w = 0.0;
 	}
-	progressbar->barrect.x = progressbar->r_rect.x + kiss_edge;
-	progressbar->barrect.y = progressbar->r_rect.y + kiss_edge;
-	progressbar->barrect.h = progressbar->r_rect.h - 2 * kiss_edge;
-	progressbar->barrect.w = progressbar->r_rect.w - 2 *  kiss_edge;
 	
 	kiss_fillrect(renderer, &progressbar->barrect, progressbar->bg);
 	kiss_decorate(renderer, &progressbar->r_rect, kiss_sand_dark, kiss_edge);
@@ -1017,6 +1044,7 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	{
 		strncat(progressbar->text, "\n", KISS_MAX_LENGTH);
 	}
+
 	for (p = progressbar->text; *p; p = strchr(p, '\n') + 1)
 	{
 		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);

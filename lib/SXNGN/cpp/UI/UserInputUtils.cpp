@@ -64,11 +64,11 @@ namespace SXNGN::ECS::A {
 	}
 
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_callback(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::function<double()> callback, int row, int column, int width, int height1)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_callback(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::function<double()> callback, int row, int column, int width, int height)
 	{
 		//TODO
 		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
-		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width);
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width, height);
 		new_kiss_progress->h_align = h_align;//label center to parent window window
 		new_kiss_progress->v_align = v_align;
 		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
@@ -85,7 +85,7 @@ namespace SXNGN::ECS::A {
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_property(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::string prop, int row, int column, int width, int height)
 	{
 		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
-		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width);
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width, height);
 		new_kiss_progress->h_align = h_align;//label center to parent window window
 		new_kiss_progress->v_align = v_align;
 		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
