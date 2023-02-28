@@ -982,7 +982,29 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	{
 		return 0;
 	}
-	y = progressbar->r_rect.y + progressbar->font.spacing / 2;
+	y = progressbar->r_rect.y - progressbar->font.spacing / 3;
+	
+
+	kiss_fillrect(renderer, &progressbar->r_rect, progressbar->bg);
+	kiss_decorate(renderer, &progressbar->r_rect, kiss_sand_dark, kiss_edge);
+
+	progressbar->fraction = progressbar->value / progressbar->max_value;
+	if (progressbar->fraction < 0.0)
+	{
+		progressbar->fraction = 0.0;
+	}
+	progressbar->barrect.w = (int)(progressbar->r_rect.w * progressbar->fraction);
+	if (progressbar->barrect.w < 0)
+	{
+		progressbar->barrect.w = 0.0;
+	}
+	progressbar->barrect.x = progressbar->r_rect.x + 1;
+	progressbar->barrect.y = progressbar->r_rect.y + 6;
+	kiss_makerect(&clip, 0, 0, progressbar->barrect.w, progressbar->barrect.h);
+	kiss_renderimage(renderer, progressbar->bar, progressbar->barrect.x, progressbar->barrect.y, &clip);
+
+	
+	snprintf(progressbar->text, 8, "%2.4f", progressbar->fraction);
 	len = (int)strlen(progressbar->text);
 	if (len > KISS_MAX_LABEL - 2)
 	{
@@ -995,18 +1017,10 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	for (p = progressbar->text; *p; p = strchr(p, '\n') + 1)
 	{
 		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
-		kiss_rendertext(renderer, buf, x, y,
-			progressbar->font, progressbar->textcolor);
+		kiss_rendertext(renderer, buf, x, y, progressbar->font, progressbar->textcolor);
 		y += progressbar->font.lineheight;
 	}
 	progressbar->text[len] = 0;
-
-	progressbar->fraction = progressbar->value / progressbar->max_value;
-	kiss_fillrect(renderer, &progressbar->r_rect, progressbar->bg);
-	kiss_decorate(renderer, &progressbar->r_rect, kiss_sand_dark, kiss_edge);
-	progressbar->barrect.w = (int) (progressbar->width * progressbar->fraction + 0.5);
-	kiss_makerect(&clip, 0, 0, progressbar->barrect.w, progressbar->barrect.h);
-	kiss_renderimage(renderer, progressbar->bar, progressbar->barrect.x, progressbar->barrect.y, &clip);
 	return 1;
 }
 

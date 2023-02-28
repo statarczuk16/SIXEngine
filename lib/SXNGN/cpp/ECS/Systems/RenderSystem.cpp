@@ -89,9 +89,9 @@ namespace SXNGN::ECS::A {
 				{
 					auto gCoordinator = *SXNGN::Database::get_coordinator();
 					auto prop_pair = gCoordinator.getSetting(component_in_layer->property_);
-					if (prop_pair.first == true)
+					if (prop_pair.second == true)
 					{
-						component_in_layer->progressbar_->value = prop_pair.second;
+						component_in_layer->progressbar_->value = prop_pair.first;
 					}
 				}
 				kiss_progressbar_draw(component_in_layer->progressbar_, gRenderer);

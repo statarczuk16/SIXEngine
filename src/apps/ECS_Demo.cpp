@@ -27,6 +27,7 @@
 #include <ECS/Systems/TaskSchedulerSystem.hpp>
 #include <string.h>
 #include <ECS/Systems/ParallaxSystem.hpp>
+#include <ECS/Systems/PartySystem.hpp>
 
 
 
@@ -391,6 +392,12 @@ int init_menus()
 	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "OVERWORLD", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(debug_fps_l);
 
+
+
+	std::shared_ptr<UIContainerComponent> stamina_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_STAMINA, 1, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	stamina_progress_bar_c->progressbar_->max_value = 100.0;
+	overworld_left_side_menu_c->child_components_.push_back(stamina_progress_bar_c);
+
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, overworld_left_side_menu_c);
 
 
@@ -594,6 +601,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::COLLISION);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TILE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PARALLAX);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::PARTY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_MENU_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
@@ -723,6 +731,16 @@ int main(int argc, char* args[])
 	}
 	task_scheduler_system->Init();
 
+	//Task Scheduler System assigns workers to tasks
+	auto party_system = gCoordinator.RegisterSystem<Party_System>();
+	{
+		Signature signature;
+		//ACTS on Parties
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::PARTY));
+		gCoordinator.SetSystemSignatureActable<Party_System>(signature);
+	}
+	party_system->Init();
+
 
 
 	SDL_Event e;
@@ -851,6 +869,7 @@ int main(int argc, char* args[])
 
 			system_timer.start();
 			movement_system->Update(dt_seconds);
+			party_system->Update(dt_seconds);
 			parallax_system->Update(dt_seconds);
 			task_scheduler_system->Update(dt_seconds);
 			move_timer.start(); //restart delta t for next frame

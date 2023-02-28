@@ -237,10 +237,12 @@ namespace SXNGN::ECS::A {
 		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
 		auto char_loc = new Location(0, 16 + 32);
 		auto movement_character = new Moveable();
+		auto party = new Party();
 		//movement_character->m_speed_m_s = 10.0;
 		gCoordinator->AddComponent(character, movement_character);
 		gCoordinator->AddComponent(character, char_render);
 		gCoordinator->AddComponent(character, char_loc);
+		gCoordinator->AddComponent(character, party);
 		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
 		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
 		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
@@ -398,16 +400,6 @@ namespace SXNGN::ECS::A {
 		}
 		gCoordinator->AddComponent(sky_parallax_entity, sky_parallax);
 		gCoordinator->AddComponent(sky_parallax_entity, Create_Gamestate_Component_from_Enum(state));
-
-
-		
-
-
-		
-
-
-		
-					
 
 	}
 

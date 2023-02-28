@@ -16,7 +16,13 @@ namespace SXNGN::ECS::A {
 	{
 		Party()
 		{
-
+			component_type = ComponentTypeEnum::PARTY;
+			health_ = 100.0;
+			stamina_ = 100.0;
+			food_ = 100.0;
+			water_ = 100.0;
+			hands_ = 1.0;
+			muscle_ = 0.0;
 		}
 		
 		std::vector<sole::uuid> character_ids_; //uuuid of unique characters who have their own entities

@@ -63,18 +63,38 @@ namespace SXNGN::ECS::A {
 
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, std::string prop, int row = -1, int column = -1, int width = -1, int height = -1)
+
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_callback(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::function<double()> callback, int row, int column, int width, int height1)
 	{
+		//TODO
 		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
-		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), name, 0, 0, width, height);
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width);
 		new_kiss_progress->h_align = h_align;//label center to parent window window
 		new_kiss_progress->v_align = v_align;
 		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
 		new_kiss_progress->row = row;
 		new_kiss_progress->column = column;
 		new_kiss_progress->parent_scale = parent_scale;
-		UIContainerComponent ngl_c(parent_window, layer, UIType::LABEL);
+		UIContainerComponent ngl_c(parent_window, layer, UIType::PROGRESSBAR);
 		ngl_c.progressbar_ = new_kiss_progress;
+		ngl_c.property_ = "";
+		return std::make_shared<UIContainerComponent>(ngl_c);
+	}
+
+
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_property(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::string prop, int row, int column, int width, int height)
+	{
+		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width);
+		new_kiss_progress->h_align = h_align;//label center to parent window window
+		new_kiss_progress->v_align = v_align;
+		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
+		new_kiss_progress->row = row;
+		new_kiss_progress->column = column;
+		new_kiss_progress->parent_scale = parent_scale;
+		UIContainerComponent ngl_c(parent_window, layer, UIType::PROGRESSBAR);
+		ngl_c.progressbar_ = new_kiss_progress;
+		ngl_c.property_ = prop;
 		return std::make_shared<UIContainerComponent>(ngl_c);
 	}
 

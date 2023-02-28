@@ -133,7 +133,7 @@ typedef struct kiss_font {
 	TTF_Font *font;
 	int magic;
 	int fontheight;
-	int spacing;
+	double spacing;
 	int lineheight;
 	int advance;
 	int ascent;

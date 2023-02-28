@@ -176,7 +176,7 @@ int kiss_font_new(kiss_font *font, char *fname, kiss_array *a, int size)
 	}
 	if (a) kiss_array_append(a, FONT_TYPE, font->font);
 	font->fontheight = TTF_FontHeight(font->font);
-	font->spacing = (int) kiss_spacing * font->fontheight;
+	font->spacing = (double) kiss_spacing * font->fontheight;
 	font->lineheight = font->fontheight + font->spacing;
 	font->ascent = TTF_FontAscent(font->font);
 	TTF_GlyphMetrics(font->font, 'W', NULL, NULL, NULL, NULL,

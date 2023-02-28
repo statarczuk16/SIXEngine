@@ -49,6 +49,10 @@ namespace SXNGN::ECS::A
 					}
 					
 				}
+				gCoordinator.setSetting(SXNGN::PARTY_STAMINA, party_ptr->stamina_);
+				gCoordinator.setSetting(SXNGN::PARTY_FOOD, party_ptr->food_);
+				gCoordinator.setSetting(SXNGN::PARTY_HEALTH, party_ptr->health_);
+
 			}
 			gCoordinator.CheckInComponent(entity_actable, ComponentTypeEnum::PARTY);
 			
