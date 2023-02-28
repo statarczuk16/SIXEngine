@@ -34,19 +34,32 @@ namespace SXNGN::ECS::A
 			{
 				Party* party_ptr = static_cast<Party*>(party_data);
 				auto pace_setting = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
-				if (pace_setting.second)
+				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+				if (pace_setting.second && pace_go.second)
 				{
-					auto calories_per_km = 50 * party_ptr->hands_;
-
-					auto pace_m_s = pace_setting.first;
-					auto dist_traveled_km = pace_m_s * dt / 1000.0;
-					auto stamina_upkeep = calories_per_km * dist_traveled_km;
-					party_ptr->stamina_ -= stamina_upkeep;
-					if (party_ptr->stamina_ <= 0.0)
+					//if on the move, substract stamina, then health
+					if (pace_go.second)
 					{
-						party_ptr->stamina_ = 0.0;
-						party_ptr->health_ -= stamina_upkeep;
+						auto calories_per_km = 50 * party_ptr->hands_;
+
+						auto pace_m_s = pace_setting.first * pace_go.first;
+						auto dist_traveled_km = pace_m_s * dt * OVERWORLD_MULTIPLIER / 1000.0;
+						auto stamina_upkeep = calories_per_km * dist_traveled_km;
+						party_ptr->stamina_ -= stamina_upkeep;
+						if (party_ptr->stamina_ <= 0.0)
+						{
+							party_ptr->stamina_ = 0.0;
+							party_ptr->health_ -= stamina_upkeep;
+						}
 					}
+					//else recharge using food
+					else
+					{
+						double calories_per_food_unit = 200;
+
+
+					}
+					
 					
 				}
 				gCoordinator.setSetting(SXNGN::PARTY_STAMINA, party_ptr->stamina_);

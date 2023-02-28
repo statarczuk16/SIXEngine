@@ -901,7 +901,7 @@ int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 		progressbar->bar = kiss_bar;
 	}
 		
-	progressbar->bg = kiss_white;
+	progressbar->bg = kiss_blue;
 	kiss_makerect(&progressbar->rect, x, y, w, progressbar->bar.h + 2 * kiss_border);
 	kiss_makerect(&progressbar->barrect, x + kiss_border, y + kiss_border, 0, progressbar->bar.h);
 	progressbar->width = w - 2 * kiss_border;
@@ -931,7 +931,7 @@ int kiss_progressbar_new_uc(kiss_progressbar* progressbar, kiss_window* wdw,
 	}
 	progressbar->textcolor = kiss_black;
 
-	progressbar->bg = kiss_white;
+	progressbar->bg = kiss_lightblue;
 	kiss_makerect(&progressbar->rect, x, y, w, progressbar->bar.h + 2 * kiss_border);
 	kiss_makerect(&progressbar->barrect, x + kiss_border, y + kiss_border, 0, progressbar->bar.h);
 	progressbar->width = w - 2 * kiss_border;
@@ -982,11 +982,8 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	{
 		return 0;
 	}
-	y = progressbar->r_rect.y - progressbar->font.spacing / 3;
+	y = progressbar->r_rect.y - progressbar->font.spacing / 2.0 + kiss_edge;
 	
-
-	kiss_fillrect(renderer, &progressbar->r_rect, progressbar->bg);
-	kiss_decorate(renderer, &progressbar->r_rect, kiss_sand_dark, kiss_edge);
 
 	progressbar->fraction = progressbar->value / progressbar->max_value;
 	if (progressbar->fraction < 0.0)
@@ -998,13 +995,19 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	{
 		progressbar->barrect.w = 0.0;
 	}
-	progressbar->barrect.x = progressbar->r_rect.x + 1;
-	progressbar->barrect.y = progressbar->r_rect.y + 6;
-	kiss_makerect(&clip, 0, 0, progressbar->barrect.w, progressbar->barrect.h);
-	kiss_renderimage(renderer, progressbar->bar, progressbar->barrect.x, progressbar->barrect.y, &clip);
-
+	progressbar->barrect.x = progressbar->r_rect.x + kiss_edge;
+	progressbar->barrect.y = progressbar->r_rect.y + kiss_edge;
+	progressbar->barrect.h = progressbar->r_rect.h - 2 * kiss_edge;
+	progressbar->barrect.w = progressbar->r_rect.w - 2 *  kiss_edge;
 	
-	snprintf(progressbar->text, 8, "%2.4f", progressbar->fraction);
+	kiss_fillrect(renderer, &progressbar->barrect, progressbar->bg);
+	kiss_decorate(renderer, &progressbar->r_rect, kiss_sand_dark, kiss_edge);
+	//
+	//kiss_makerect(&clip, 0, 0, progressbar->barrect.w, progressbar->barrect.h);
+	//kiss_renderimage(renderer, progressbar->bar, progressbar->barrect.x, progressbar->barrect.y, &clip);
+
+	//char c[100] = "%%";
+	//snprintf(progressbar->text, 8, "%2g %s", round(progressbar->fraction * 100.0), c);
 	len = (int)strlen(progressbar->text);
 	if (len > KISS_MAX_LABEL - 2)
 	{

@@ -389,14 +389,29 @@ int init_menus()
 
 	//************************* Left Side State Relevant Menu
 	auto overworld_left_side_menu_c = UserInputUtils::create_window_raw(nullptr, 0, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
-	std::shared_ptr<UIContainerComponent> debug_fps_l = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "OVERWORLD", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	overworld_left_side_menu_c->child_components_.push_back(debug_fps_l);
-
-
+	std::shared_ptr<UIContainerComponent> stamina_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "STAMINA", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(stamina_label_c);
 
 	std::shared_ptr<UIContainerComponent> stamina_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_STAMINA, 1, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	stamina_progress_bar_c->progressbar_->max_value = 100.0;
 	overworld_left_side_menu_c->child_components_.push_back(stamina_progress_bar_c);
+
+	std::shared_ptr<UIContainerComponent> health_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "HEALTH", 2, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(health_label_c);
+
+	std::shared_ptr<UIContainerComponent> health_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_HEALTH, 3, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	health_progress_bar_c->progressbar_->max_value = 100.0;
+	overworld_left_side_menu_c->child_components_.push_back(health_progress_bar_c);
+
+	std::shared_ptr<UIContainerComponent> food_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FOOD", 4, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(food_label_c);
+
+	std::shared_ptr<UIContainerComponent> food_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_FOOD, 5, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	food_progress_bar_c->progressbar_->max_value = 100.0;
+	overworld_left_side_menu_c->child_components_.push_back(food_progress_bar_c);
+
+
+	
 
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, overworld_left_side_menu_c);
 

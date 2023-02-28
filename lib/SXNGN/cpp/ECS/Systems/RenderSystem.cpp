@@ -93,6 +93,8 @@ namespace SXNGN::ECS::A {
 					{
 						component_in_layer->progressbar_->value = prop_pair.first;
 					}
+					snprintf(component_in_layer->progressbar_->text, 8, "%2g/%2g", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
+
 				}
 				kiss_progressbar_draw(component_in_layer->progressbar_, gRenderer);
 			{
