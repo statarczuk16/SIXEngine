@@ -21,16 +21,41 @@ namespace SXNGN::ECS::A {
 		MOUSE_WHEEL,
 		SELECTION,
 		ORDER,
-		SPAWN
+		SPAWN,
+		PARTY
 	};
 
-	
+	enum class PartyEventType : Uint8
+	{
+		UNKNOWN,
+		BAD_BOOTS,
+		BAD_LOST,
+		BAD_WEATHER,
+		BAD_ROBBER,
+		BAD_SICK
+	};
 
+	enum class EventSeverity : Uint8
+	{
+		UNKNOWN,
+		MILD,
+		MEDIUM,
+		SPICY,
+		EXTREME
+	};
 
 	struct SXNGN_Common
 	{
 		EventType type;
 		Uint32 timestamp;
+	};
+
+	struct SXNGN_Party
+	{
+		sole::uuid party_id;
+		std::string event_name;
+		PartyEventType party_event_type;
+		EventSeverity severity;
 	};
 
 	struct SXNGN_SaveEvent

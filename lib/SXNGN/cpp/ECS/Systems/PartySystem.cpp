@@ -57,7 +57,7 @@ namespace SXNGN::ECS::A
 						}
 					}
 					//else recharge using food
-					else if(party_ptr->stamina_ <= 100.0 && party_ptr->food_ >= 0.0)
+					else if(party_ptr->stamina_ < 100.0 && party_ptr->food_ >= 0.0)
 					{
 						double recharge_calories_per_minute = 5.0;
 						double recharge_calories_per_second = recharge_calories_per_minute / 60.0;
@@ -71,12 +71,7 @@ namespace SXNGN::ECS::A
 						{
 							party_ptr->stamina_ = 100.0;
 						}
-
-
-
 					}
-					
-					
 				}
 				gCoordinator.setSetting(SXNGN::PARTY_STAMINA, party_ptr->stamina_);
 				gCoordinator.setSetting(SXNGN::PARTY_FOOD, party_ptr->food_);
