@@ -190,7 +190,7 @@ namespace SXNGN::ECS {
 		COMBOBOX
 	};
 
-	enum class UILayer { //order matters - layer with precedence for mouse clicks must be at the top/closest to 0
+	enum class UILayer : int { //order matters - layer with precedence for mouse clicks must be at the top/closest to 0
 		UNKNOWN,
 		BOTTOM,
 		MID,

@@ -64,6 +64,16 @@ namespace SXNGN::ECS
 					director_ptr->event_tick_s_ = 0.0;
 					auto generated_event = director_ptr->event_table_.generate_event(&director_ptr->event_table_);
 					std::cout << "Generating event " << generated_event->to_std_string() << std::endl;
+					Event_Component* event_component = new Event_Component();
+					SXNGN_Party party_event;
+					party_event.party_event_type = generated_event->value;
+					party_event.party_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+					party_event.severity = EventSeverity::MEDIUM;
+					event_component->e.party_event = party_event;
+					event_component->e.common.type = EventType::PARTY;
+					Entity event_entity = gCoordinator.CreateEntity();
+					gCoordinator.AddComponent(event_entity, event_component);
+					gCoordinator.AddComponent(event_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
 				}
 			}
 			gCoordinator.CheckInComponent(entity_actable, ComponentTypeEnum::DIRECTOR);

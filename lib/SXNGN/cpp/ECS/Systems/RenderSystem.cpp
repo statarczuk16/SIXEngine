@@ -136,14 +136,28 @@ namespace SXNGN::ECS {
 	{
 		auto coordinator = Database::get_coordinator();
 		SDL_Renderer* gRenderer = coordinator->Get_Renderer();
-		std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>>::iterator it = layer_to_components.begin();
-		while( it != layer_to_components.end())
+		std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>>::iterator layer_it = layer_to_components.begin();
+		while(layer_it != layer_to_components.end())
 		{
-			for (auto component_in_layer : it->second)
+			auto component_vector = layer_it->second;
+			auto component_it = component_vector.begin();
+			while (component_it != component_vector.end())
 			{
-				Draw_GUI_Component(gRenderer, component_in_layer);
+				std::shared_ptr<UIContainerComponent> component_in_layer = *component_it;
+				if (component_in_layer->cleanup)
+				{
+					component_it = component_vector.erase(component_it);
+					component_in_layer->ClearUIContainerComponent();
+					//fixme remove from lookup map too
+				}
+				else
+				{
+					Draw_GUI_Component(gRenderer, component_in_layer);
+					component_it++;
+				}
+				
 			}
-			it++;
+			layer_it++;
 		}
 
 	}

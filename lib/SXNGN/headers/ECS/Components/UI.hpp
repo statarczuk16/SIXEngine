@@ -37,11 +37,19 @@ namespace SXNGN::ECS {
             combobox_ = nullptr;
             label_ = nullptr;
             name_ = name;
+            cleanup = false;
+        }
+
+        ~UIContainerComponent()
+        {
+            //ClearUIContainerComponent();
         }
 
         
         void ClearUIContainerComponent()
         {
+            cleanup = true;
+            
             if (button_ != nullptr)
             {
                 delete button_;
@@ -111,6 +119,7 @@ namespace SXNGN::ECS {
         std::vector<std::shared_ptr<UIContainerComponent>> child_components_;
         std::vector<std::function<void()>> callback_functions_;
         std::string property_ = ""; //associated property. eg for progressbar to display.
+        bool cleanup = false; //when true, RenderSystem will delete this component
 
     };
 

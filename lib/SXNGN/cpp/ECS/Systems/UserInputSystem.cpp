@@ -264,7 +264,7 @@ namespace SXNGN::ECS {
 			}
 			case UIType::BUTTON:
 			{
-				if (kiss_button_event(component_in_layer->button_, e, &draw_ui))
+				if (component_in_layer->button_ != NULL && kiss_button_event(component_in_layer->button_, e, &draw_ui))
 				{
 					//SDL_LogDebug(SDL_LOG_CATEGORY_APPLICATION, "GUI_HandleEvents: Button: %s activated", component_in_layer->name_.c_str());
 					for (Event_Component triggered_event : component_in_layer->triggered_events)

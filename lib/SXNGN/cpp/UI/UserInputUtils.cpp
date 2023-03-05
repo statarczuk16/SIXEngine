@@ -1,5 +1,6 @@
 #include <UI/UserInputUtils.hpp>
 #include <vector>
+#include <ECS/Core/Coordinator.hpp>
 #include <ECS/Components/Components.hpp>
 
 namespace SXNGN::ECS {
@@ -16,7 +17,7 @@ namespace SXNGN::ECS {
 		new_kiss_button->parent_scale = parent_scale;
 		UIContainerComponent new_ui_container(parent_window, layer, UIType::BUTTON);
 		new_ui_container.button_ = new_kiss_button;
-		new_ui_container.name_ = name;
+		//new_ui_container.name_ = name;
 		Event_Component back_state_event_ng;
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
@@ -37,8 +38,50 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(std::shared_ptr<kiss_window> parent_window, std::string title, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<Event_Component*> option_events)
+	{
+		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
+		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+		int window_layer_int = (int)layer;
+		int window_item_layer_int = window_layer_int++;
+		UILayer window_item_layer = (UILayer)window_item_layer_int;
+		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
+		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
+		auto message_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, layer);
+		int column = 0;
+		int row = 0;
+		char* title_str = title.data();
+		std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, title_str, row, -1, 50, 50);
+		message_window_c->child_components_.push_back(title_label_c);
+
+
+		row = 3;
+		column = 0;
+		for (int i = 0; i < option_strings.size(); i++)
+		{
+			column = i;
+			char* button_str = option_strings[i].data();
+			std::shared_ptr<UIContainerComponent> button_c = UserInputUtils::create_button(message_window_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, button_str, row, column, 50, 50);
+			std::function<void(std::shared_ptr<UIContainerComponent> component)> kill_ui = [](std::shared_ptr<UIContainerComponent> uicc)
+			{
+				uicc->cleanup = true;
+			};
+			auto kill_button = std::bind(kill_ui, message_window_c);
+			button_c->callback_functions_.push_back(kill_button);
+			message_window_c->child_components_.push_back(button_c);
+		}
+		
+
+
+		return message_window_c;
+
+	}
+
+
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_window_raw(std::shared_ptr<kiss_window> parent_window, int x, int y, int w, int h, UILayer layer)
 	{
+
+		
 		std::shared_ptr<kiss_window> new_kiss_window = std::make_shared<kiss_window>();
 		kiss_window_new(new_kiss_window.get(), parent_window.get(), 1, x, y, w, h);
 		new_kiss_window->visible = true;

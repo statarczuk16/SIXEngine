@@ -114,6 +114,13 @@ namespace SXNGN::ECS {
 					break;
 
 				}
+				case EventType::PARTY:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Party Event");
+					Handle_Party_Event(event_ptr);
+					break;
+
+				}
 				case EventType::SELECTION:
 				{
 					//todo max number of selected entities
@@ -372,6 +379,80 @@ namespace SXNGN::ECS {
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
 		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::STATIC, "spawned_block");
+	}
+
+	void Event_System::Handle_Party_Event(Event_Component* ec)
+	{
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		sole::uuid party_id = ec->e.party_event.party_id;
+		Entity party_entity = gCoordinator.GetEntityFromUUID(party_id);
+		auto party_component = gCoordinator.CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+		std::cout << "Handling event: " << party_event_type_enum_to_string()[ec->e.party_event.party_event_type] << std::endl;
+		switch (ec->e.party_event.party_event_type)
+		{
+		case PartyEventType::BAD_BOOTS:
+		{
+			auto ui = UICollectionSingleton::get_instance();
+			std::vector<std::string> options_list_text;
+			options_list_text.push_back("Ok");
+			std::vector<Event_Component*> options_list_events;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+
+			break;
+		}
+		case PartyEventType::BAD_LOST:
+		{
+			auto ui = UICollectionSingleton::get_instance();
+			std::vector<std::string> options_list_text;
+			options_list_text.push_back("Ok");
+			std::vector<Event_Component*> options_list_events;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost the road!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+			break;
+		}
+		case PartyEventType::BAD_ROBBER:
+		{
+			auto ui = UICollectionSingleton::get_instance();
+			std::vector<std::string> options_list_text;
+			options_list_text.push_back("Ok");
+			std::vector<Event_Component*> options_list_events;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "A bandit appears!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+			break;
+		}
+		case PartyEventType::BAD_SICK:
+		{
+			auto ui = UICollectionSingleton::get_instance();
+			std::vector<std::string> options_list_text;
+			options_list_text.push_back("Ok");
+			std::vector<Event_Component*> options_list_events;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+			break;
+		}
+		case PartyEventType::BAD_WEATHER:
+		{
+			auto ui = UICollectionSingleton::get_instance();
+			std::vector<std::string> options_list_text;
+			options_list_text.push_back("Ok");
+			std::vector<Event_Component*> options_list_events;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+			break;
+		}
+		case PartyEventType::NONE:
+		{
+			break;
+		}
+		default:
+		{
+			std::cout << "Error: Unimplemented event type: " << ec->e.party_event.party_event_type << std::endl;
+			abort();
+			break;
+		}
+		}
+		gCoordinator.CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)
