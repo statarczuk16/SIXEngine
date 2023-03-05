@@ -3,7 +3,7 @@
 #include <sstream>
 #include <fstream>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 	std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>> Map_Utils::CreateTileMap(int tile_chunks_width, int tile_chunks_height, std::string tileset, std::string base_tile)
 	{
 		std::vector<Pre_Renderable*> pre_renders;
@@ -29,7 +29,7 @@ namespace SXNGN::ECS::A {
 				Location* location = nullptr;
 				if (h == 0 || h == tiles_high - 1 || w == 0 || w == tiles_wide - 1)
 				{
-					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", A::RenderLayer::GROUND_LAYER_0);
+					pre_render = new Pre_Renderable(tileset, "BLACK_BORDER", RenderLayer::GROUND_LAYER_0);
 					collision = new Collisionable(SXNGN::BASE_TILE_WIDTH, SXNGN::BASE_TILE_HEIGHT, CollisionType::STATIC, -1);
 					location = new Location(x_pixels, y_pixels);
 					tile = new Tile(-1);
@@ -38,7 +38,7 @@ namespace SXNGN::ECS::A {
 				}
 				else
 				{
-					pre_render = new Pre_Renderable(tileset, base_tile, A::RenderLayer::GROUND_LAYER_0);
+					pre_render = new Pre_Renderable(tileset, base_tile, RenderLayer::GROUND_LAYER_0);
 					tile = new Tile(1);
 					location = new Location(x_pixels, y_pixels);
 					//collision = Entity_Builder_Utils::Create_Collisionable(collision_box,  CollisionType::NONE);
@@ -234,6 +234,7 @@ namespace SXNGN::ECS::A {
 
 		//set up the player character sprite
 		auto character = gCoordinator->CreateEntity();
+		gCoordinator->setUUID(SXNGN::OVERWORLD_PLAYER_UUID, gCoordinator->GetUUIDFromEntity(character));
 		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
 		auto char_loc = new Location(0, 16 + 32);
 		auto movement_character = new Moveable();
@@ -470,6 +471,13 @@ namespace SXNGN::ECS::A {
 		gCoordinator->AddComponent(db_entity, db.get());
 		//CreateTacticalMap();
 		InitializeScrollingBackground();
+
+		auto director = gCoordinator->CreateEntity();
+		auto director_comp = new Director();
+
+		gCoordinator->AddComponent(director, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
+		//movement_character->m_speed_m_s = 10.0;
+		gCoordinator->AddComponent(director, director_comp);
 
 	}
 
@@ -740,9 +748,9 @@ namespace SXNGN::ECS::A {
 		}
 	}
 
-	std::pair<double, double>  Map_Utils::GetVector(SXNGN::ECS::A::Coordinate start, SXNGN::ECS::A::Coordinate end)
+	std::pair<double, double>  Map_Utils::GetVector(SXNGN::ECS::Coordinate start, SXNGN::ECS::Coordinate end)
 	{
-		double distance = ECS::A::Map_Utils::GetDistance(ECS::A::NAVIGATION_TYPE::MANHATTAN, start, end);
+		double distance = ECS::Map_Utils::GetDistance(ECS::NAVIGATION_TYPE::MANHATTAN, start, end);
 		if (distance == 0)
 		{
 			return std::make_pair(0, 0);

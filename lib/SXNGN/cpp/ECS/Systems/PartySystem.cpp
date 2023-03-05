@@ -6,7 +6,7 @@
 
 
 
-namespace SXNGN::ECS::A 
+namespace SXNGN::ECS
 {
 
 	void Party_System::Init()
@@ -24,7 +24,7 @@ namespace SXNGN::ECS::A
 		auto it_act = m_actable_entities.begin();
 		//actable entities for user input system are UserInputCache (vector of sdl events)
 		auto total = m_actable_entities.size();
-	
+		
 		auto ui_single = UICollectionSingleton::get_instance();
 		while (it_act != m_actable_entities.end())
 		{
@@ -34,6 +34,7 @@ namespace SXNGN::ECS::A
 			if (party_data)
 			{
 				Party* party_ptr = static_cast<Party*>(party_data);
+				
 				auto pace_setting = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
 				if (pace_setting.second && pace_go.second)
@@ -41,7 +42,7 @@ namespace SXNGN::ECS::A
 					//if on the move, substract stamina, then health
 					if (pace_go.first)
 					{
-						auto calories_per_km = 50 * party_ptr->hands_;
+						auto calories_per_km = 25 * party_ptr->hands_;
 						
 						auto pace_m_s = pace_setting.first * pace_go.first;
 						auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
@@ -57,25 +58,33 @@ namespace SXNGN::ECS::A
 						}
 					}
 					//else recharge using food
-					else if(party_ptr->stamina_ < 100.0 && party_ptr->food_ >= 0.0)
+					else if(party_ptr->stamina_ < party_ptr->stamina_max_ && party_ptr->food_ >= 0.0)
 					{
 						double recharge_calories_per_minute = 5.0;
-						double recharge_calories_per_second = recharge_calories_per_minute / 60.0;
+						double recharge_calories_per_second = recharge_calories_per_minute / OVERWORLD_MULTIPLIER;
 						double food_units_per_calorie = 0.1;
 						double calories_recharged = dt * OVERWORLD_MULTIPLIER * recharge_calories_per_second;
 						party_ptr->stamina_ += calories_recharged;
 						double food_used = food_units_per_calorie * calories_recharged;
 						party_ptr->food_ -= food_used;
 
-						if (party_ptr->stamina_ >= 100.0)
+						if (party_ptr->stamina_ >= party_ptr->stamina_max_)
 						{
-							party_ptr->stamina_ = 100.0;
+							party_ptr->stamina_ = party_ptr->stamina_max_;
 						}
 					}
 				}
-				gCoordinator.setSetting(SXNGN::PARTY_STAMINA, party_ptr->stamina_);
-				gCoordinator.setSetting(SXNGN::PARTY_FOOD, party_ptr->food_);
-				gCoordinator.setSetting(SXNGN::PARTY_HEALTH, party_ptr->health_);
+
+				auto stamina_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_stamina"];
+				stamina_progress_bar->progressbar_->value = party_ptr->stamina_;
+				stamina_progress_bar->progressbar_->max_value = party_ptr->stamina_max_;
+				auto health_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_health"];
+				health_progress_bar->progressbar_->value = party_ptr->health_;
+				health_progress_bar->progressbar_->max_value = party_ptr->health_;
+				auto food_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_food"];
+				food_progress_bar->progressbar_->value = party_ptr->food_;
+				food_progress_bar->progressbar_->max_value = party_ptr->food_;
+				
 
 			}
 			gCoordinator.CheckInComponent(entity_actable, ComponentTypeEnum::PARTY);

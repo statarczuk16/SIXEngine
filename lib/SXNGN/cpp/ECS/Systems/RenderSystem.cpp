@@ -10,16 +10,16 @@
 #include <Collision.h>
 
 
-using Pre_Sprite_Factory = SXNGN::ECS::A::Pre_Sprite_Factory;
-using Sprite_Factory = SXNGN::ECS::A::Sprite_Factory;
-using Pre_Renderable = SXNGN::ECS::A::Pre_Renderable;
-using Renderable = SXNGN::ECS::A::Renderable;
-using ECS_Camera = SXNGN::ECS::A::CameraComponent;
+using Pre_Sprite_Factory = SXNGN::ECS::Pre_Sprite_Factory;
+using Sprite_Factory = SXNGN::ECS::Sprite_Factory;
+using Pre_Renderable = SXNGN::ECS::Pre_Renderable;
+using Renderable = SXNGN::ECS::Renderable;
+using ECS_Camera = SXNGN::ECS::CameraComponent;
 using Gameutils = SXNGN::Gameutils;
 
-using RenderLayer = SXNGN::ECS::A::RenderLayer;
+using RenderLayer = SXNGN::ECS::RenderLayer;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 	void Renderer_System::Init()
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "Renderer_System Init");
@@ -104,9 +104,9 @@ namespace SXNGN::ECS::A {
 					{
 						component_in_layer->progressbar_->value = prop_pair.first;
 					}
-					snprintf(component_in_layer->progressbar_->text, 8, "%2g/%2g", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
 
 				}
+				snprintf(component_in_layer->progressbar_->text, 8, "%2g/%2g", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
 				kiss_progressbar_draw(component_in_layer->progressbar_, gRenderer);
 			{
 				break;
@@ -473,7 +473,7 @@ namespace SXNGN::ECS::A {
 				renderable_component->scale_y_ = pre_renderable.scale_y_;
 
 				renderable_component->render_layer_ = pre_renderable.render_layer_;
-				if (renderable_component->render_layer_ == SXNGN::ECS::A::RenderLayer::UNKNOWN)
+				if (renderable_component->render_layer_ == SXNGN::ECS::RenderLayer::UNKNOWN)
 				{
 					//printf("RenderSystem:: %s has unknown RenderLayer", renderable_component->renderable_name_.c_str());
 					abort();
@@ -507,7 +507,7 @@ namespace SXNGN::ECS::A {
 				renderable_component->scale_y_ = pre_renderable.scale_y_;
 
 				renderable_component->render_layer_ = pre_renderable.render_layer_;
-				if (renderable_component->render_layer_ == SXNGN::ECS::A::RenderLayer::UNKNOWN)
+				if (renderable_component->render_layer_ == SXNGN::ECS::RenderLayer::UNKNOWN)
 				{
 					//printf("RenderSystem:: %s has unknown RenderLayer", renderable_component->renderable_name_.c_str());
 					abort();
@@ -633,10 +633,10 @@ namespace SXNGN::ECS::A {
 				}
 				std::string manifest_entry_type_str = manifest_entry.at(0);
 				SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, " Read Type: %s", manifest_entry_type_str.c_str());
-				SXNGN::ECS::A::TileManifestType manifest_tile_type;
-				if (SXNGN::ECS::A::manifest_string_to_type_map_().count(manifest_entry_type_str) > 0)
+				SXNGN::ECS::TileManifestType manifest_tile_type;
+				if (SXNGN::ECS::manifest_string_to_type_map_().count(manifest_entry_type_str) > 0)
 				{
-					manifest_tile_type = SXNGN::ECS::A::manifest_string_to_type_map_().at(manifest_entry_type_str);
+					manifest_tile_type = SXNGN::ECS::manifest_string_to_type_map_().at(manifest_entry_type_str);
 				}
 				else
 				{
@@ -646,7 +646,7 @@ namespace SXNGN::ECS::A {
 
 				switch (manifest_tile_type)
 				{
-				case SXNGN::ECS::A::TileManifestType::META_HEIGHT:
+				case SXNGN::ECS::TileManifestType::META_HEIGHT:
 				{
 					if (manifest_entry.size() == 2)
 					{
@@ -658,7 +658,7 @@ namespace SXNGN::ECS::A {
 					}
 					break;
 				}
-				case SXNGN::ECS::A::TileManifestType::META_WIDTH:
+				case SXNGN::ECS::TileManifestType::META_WIDTH:
 				{
 					if (manifest_entry.size() == 2)
 					{
@@ -670,7 +670,7 @@ namespace SXNGN::ECS::A {
 					}
 					break;
 				}
-				case SXNGN::ECS::A::TileManifestType::TERRAIN:
+				case SXNGN::ECS::TileManifestType::TERRAIN:
 				{
 					if (manifest_entry.size() >= 4)
 					{
@@ -706,7 +706,7 @@ namespace SXNGN::ECS::A {
 					}
 					break;
 				}
-				case SXNGN::ECS::A::TileManifestType::UNIT:
+				case SXNGN::ECS::TileManifestType::UNIT:
 				{
 					if (manifest_entry.size() == 4)
 					{
@@ -726,7 +726,7 @@ namespace SXNGN::ECS::A {
 					}
 					break;
 				}
-				case SXNGN::ECS::A::TileManifestType::META_SPRITE_SHEET_SOURCE:
+				case SXNGN::ECS::TileManifestType::META_SPRITE_SHEET_SOURCE:
 				{
 					if (manifest_entry.size() == 2)
 					{
@@ -765,7 +765,7 @@ namespace SXNGN::ECS::A {
 
 			//Destroy the Pre_Sprite_Factory Entity
 			//Add the created Sprite_Factory to the Singleton SpriteFactoryHolder
-			std::shared_ptr<SXNGN::ECS::A::Sprite_Factory> sprite_factory_component = std::make_shared<Sprite_Factory>();
+			std::shared_ptr<SXNGN::ECS::Sprite_Factory> sprite_factory_component = std::make_shared<Sprite_Factory>();
 			sprite_factory_component->sprite_factory_name_ = pre_factory.name_,
 				sprite_factory_component->tile_height_ = tile_height;
 			sprite_factory_component->tile_width_ = tile_width;

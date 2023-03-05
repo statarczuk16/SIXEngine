@@ -2,7 +2,7 @@
 #include <vector>
 #include <ECS/Components/Components.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)

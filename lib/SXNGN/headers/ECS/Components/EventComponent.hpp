@@ -5,9 +5,9 @@
 #include <UI/UserInputUtils.hpp>
 
 
-using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
+using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	enum class EventType : Uint8
@@ -25,15 +25,53 @@ namespace SXNGN::ECS::A {
 		PARTY
 	};
 
-	enum class PartyEventType : Uint8
+	enum PartyEventType 
 	{
-		UNKNOWN,
+		BAD, //order is important group bad, good, together
 		BAD_BOOTS,
 		BAD_LOST,
 		BAD_WEATHER,
 		BAD_ROBBER,
-		BAD_SICK
+		BAD_SICK,
+		GOOD,
+		NEUTRAL,
+		NONE
 	};
+
+	//convert enum to string for json purposes
+	inline std::unordered_map<PartyEventType, std::string>& party_event_type_enum_to_string() {
+		static std::unordered_map<PartyEventType, std::string> party_event_type_enum_to_string =
+		{
+			{PartyEventType::BAD,"BAD"},
+			{PartyEventType::BAD_BOOTS,"BAD_BOOTS"},
+			{PartyEventType::BAD_LOST,"BAD_LOST"},
+			{PartyEventType::BAD_WEATHER,"BAD_WEATHER"},
+			{PartyEventType::BAD_ROBBER,"BAD_ROBBER"},
+			{PartyEventType::BAD_SICK,"BAD_SICK"},
+			{PartyEventType::GOOD,"GOOD"},
+			{PartyEventType::NEUTRAL,"NEUTRAL"},
+			{PartyEventType::NONE,"NONE"}
+		};
+		return party_event_type_enum_to_string;
+	}
+
+	//convert string to enum for json purposes
+	inline std::unordered_map<std::string, PartyEventType>& party_event_type_string_to_enum() {
+		static std::unordered_map<std::string, PartyEventType> party_event_type_string_to_enum =
+		{
+			{"BAD",PartyEventType::BAD},
+			{"BAD_BOOTS",PartyEventType::BAD_BOOTS},
+			{"BAD_LOST",PartyEventType::BAD_LOST},
+			{"BAD_WEATHER",PartyEventType::BAD_WEATHER},
+			{"BAD_ROBBER",PartyEventType::BAD_ROBBER},
+			{"BAD_SICK",PartyEventType::BAD_SICK},
+			{"GOOD",PartyEventType::GOOD},
+			{"NEUTRAL",PartyEventType::NEUTRAL},
+			{"NONE",PartyEventType::NONE}
+		};
+		return party_event_type_string_to_enum;
+	}
+
 
 	enum class EventSeverity : Uint8
 	{
@@ -135,6 +173,7 @@ namespace SXNGN::ECS::A {
 		SXNGN_Selection select_event;
 		SXNGN_Order order_event;
 		SXNGN_SpawnEvent spawn_event;
+		SXNGN_Party party_event;
 	};
 
 	struct Event_Component : ECS_Component

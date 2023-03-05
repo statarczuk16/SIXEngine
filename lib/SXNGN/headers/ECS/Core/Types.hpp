@@ -47,7 +47,7 @@ using EventId = std::uint32_t;
 using ParamId = std::uint32_t;
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	struct Event_Component;
 	
@@ -118,7 +118,7 @@ namespace SXNGN::ECS::A {
 		Coordinate location_;//places where work is to be done
 		Uint16 skill_level_required_;//skill level required at each location
 		//std::function<void()> result_function_;//functions called when task completed
-		//std::shared_ptr<SXNGN::ECS::A::Event_Component> result_event_; //events that fire when task completed
+		//std::shared_ptr<SXNGN::ECS::Event_Component> result_event_; //events that fire when task completed
 	};
 
 

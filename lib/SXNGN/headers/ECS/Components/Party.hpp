@@ -8,9 +8,9 @@
 #include <Constants.h>
 using nlohmann::json;
 
-using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
+using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	struct Party : ECS_Component
 	{
@@ -18,8 +18,12 @@ namespace SXNGN::ECS::A {
 		{
 			component_type = ComponentTypeEnum::PARTY;
 			health_ = 100.0;
-			stamina_ = 100.0;
-			food_ = 100.0;
+			health_max_ = 100.0;
+
+			stamina_ = 1000.0;
+			stamina_max_ = stamina_;
+			food_ = 2000.0;
+			food_max_ = food_;
 			water_ = 100.0;
 			hands_ = 1.0;
 			muscle_ = 0.0;
@@ -32,6 +36,12 @@ namespace SXNGN::ECS::A {
 		double water_;
 		double hands_;
 		double muscle_;
+
+		double health_max_;
+		double stamina_max_;
+		double food_max_;
+
+
 
 
 	};

@@ -1,7 +1,6 @@
 #include <ECS/Utilities/Physics_Utils.hpp>
 namespace SXNGN {
     namespace ECS {
-        namespace A {
             std::pair<float, float> Physics_Utils::CalculateDistanceTo(SDL_Rect e1, SDL_Rect e2)
             {
                 float dx = 0;
@@ -55,4 +54,3 @@ namespace SXNGN {
             }
         }
     }
-}

@@ -67,7 +67,7 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 	{
 		
 		int offset_down = parent_rect->h * 0.5; //set to y to middle of parent window
-		int offset_up_text = text_height * 0.5; //offset up to account for height of font
+		int offset_up_text = text_height * 0.6; //offset up to account for height of font
 		*out_y = parent_rect->y + offset_down - offset_up_text;
 		break;
 	}
@@ -348,8 +348,8 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 	{
 		return 0;
 	}
-	printf("Label Row %d    Y %d\n", label->row, label->r_rect.y);
-	y = label->r_rect.y + label->font.spacing / 2;
+	//printf("Label Row %d    Y %d\n", label->row, label->r_rect.y);
+	//y = label->r_rect.y + label->font.spacing / 2;
 	len = (int)strlen(label->text);
 	if (len > KISS_MAX_LABEL - 2)
 	{
@@ -1007,8 +1007,8 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	{
 		return 0;
 	}
-	y = progressbar->r_rect.y + progressbar->font.spacing + kiss_edge;
-	printf("Progress Row %d Y %d\n", progressbar->row, progressbar->r_rect.y);
+	//y = progressbar->r_rect.y + progressbar->font.spacing + kiss_edge;
+	//printf("Progress Row %d Y %d\n", progressbar->row, progressbar->r_rect.y);
 
 	
 	progressbar->barrect.x = progressbar->r_rect.x + kiss_edge;

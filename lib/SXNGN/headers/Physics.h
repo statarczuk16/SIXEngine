@@ -2,7 +2,7 @@
 #include <climits>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 	struct Coordinate;
 }
 

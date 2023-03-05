@@ -18,8 +18,7 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
-			using ECS_Component = A::ECS_Component;
+			using ECS_Component = ECS_Component;
 
 
 			class Coordinator
@@ -205,10 +204,27 @@ namespace SXNGN {
 						return std::make_pair(settings_component->settings_map.at(setting), true);
 					}
 				}
+				sole::uuid getUUID(std::string entity)
+				{
+					auto settings_component = DatabaseComponent::get_instance();
+					if (settings_component->entity_map.count(entity) == 0)
+					{
+						return SXNGN::BAD_UUID;
+					}
+					else
+					{
+						return settings_component->entity_map.at(entity);
+					}
+				}
 				void setSetting(std::string setting, double value)
 				{
 					auto settings_component = DatabaseComponent::get_instance();
 					settings_component->settings_map[setting] = value;
+				}
+				void setUUID(std::string setting, sole::uuid uuid)
+				{
+					auto settings_component = DatabaseComponent::get_instance();
+					settings_component->entity_map[setting] = uuid;
 				}
 
 				const GameSettings* getGameSettings()
@@ -550,7 +566,7 @@ namespace SXNGN {
 				/// </summary>
 				/// <param name="entity_to_store"></param>
 				/// <param name="state_to_store_in"></param>
-				void Space_Extern_Entity(std::shared_ptr<A::ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
+				void Space_Extern_Entity(std::shared_ptr<ExternEntity> entity_to_store, std::string state_to_store_in = "Temp")
 				{
 					mStateManager->cacheEntityInSpace(entity_to_store, state_to_store_in);
 				}
@@ -637,8 +653,8 @@ namespace SXNGN {
 						return nullptr;
 					}
 					std::string component_type_str = *component_type;
-					auto find_type = ECS::A::component_type_string_to_enum().find(component_type_str);
-					if (find_type == ECS::A::component_type_string_to_enum().end())
+					auto find_type = ECS::component_type_string_to_enum().find(component_type_str);
+					if (find_type == ECS::component_type_string_to_enum().end())
 					{
 						return nullptr;
 					}
@@ -700,4 +716,3 @@ namespace SXNGN {
 
 		}
 	}
-}

@@ -3,25 +3,6 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
-
-
-			/**
-			Coordinate ECS_Utils::GetEntityPixelCoordinate(Entity entity)
-			{
-				auto gCoordinator = *SXNGN::Database::get_coordinator();
-				if (gCoordinator.EntityHasComponent(entity, ComponentTypeEnum::LOCATION))
-				{
-					auto location_data = gCoordinator.GetComponentReadOnly(entity, ComponentTypeEnum::LOCATION);
-					if (location_data)
-					{
-						const Location* location = static_cast<const Location*>(location_data);
-						return Coordinate(location->m_pos_x_m_, location->m_pos_y_m_);
-					}
-				}
-				return nullptr;
-			 }
-			 **/
 
 			
 
@@ -140,4 +121,3 @@ namespace SXNGN {
 			}
 		}
 	}
-}

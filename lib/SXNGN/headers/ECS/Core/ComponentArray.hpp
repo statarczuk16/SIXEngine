@@ -18,8 +18,8 @@ public:
 };
 **/
 
-using ECS_Component = SXNGN::ECS::A::ECS_Component;
-using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
+using ECS_Component = SXNGN::ECS::ECS_Component;
+using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
 
 class ComponentArray// : public IComponentArray
 {

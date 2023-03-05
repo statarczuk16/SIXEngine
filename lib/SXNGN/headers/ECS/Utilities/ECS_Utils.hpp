@@ -6,10 +6,9 @@
 #include <ECS/Components/Components.hpp>
 #include <ECS/Core/Coordinator.hpp>
 #include <ECS/Components/CameraComponent.hpp>
-using ECS_Camera = SXNGN::ECS::A::CameraComponent;
+using ECS_Camera = SXNGN::ECS::CameraComponent;
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
 			class ECS_Utils
 			{
 			public:
@@ -32,4 +31,3 @@ namespace SXNGN {
 			};
 		}
 	}
-}

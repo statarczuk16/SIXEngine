@@ -9,9 +9,9 @@
 #include <Texture.h>
 using nlohmann::json;
 
-using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
+using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	enum class RenderLayer
@@ -40,7 +40,7 @@ namespace SXNGN::ECS::A {
 	/// </summary>
 	struct Renderable : ECS_Component
 	{
-		Renderable(SDL_Rect tile_map_snip, std::string sprite_factory_name, std::string sprite_factory_sprite_type, std::shared_ptr<Texture> sprite_map_texture, A::RenderLayer render_layer, std::string renderable_name = "Nameless Renderable")
+		Renderable(SDL_Rect tile_map_snip, std::string sprite_factory_name, std::string sprite_factory_sprite_type, std::shared_ptr<Texture> sprite_map_texture, RenderLayer render_layer, std::string renderable_name = "Nameless Renderable")
 		{
 			component_type = ComponentTypeEnum::RENDERABLE;
 			tile_map_snip_ = tile_map_snip;
@@ -113,7 +113,7 @@ namespace SXNGN::ECS::A {
 	/// </summary>
 	struct Pre_Renderable : ECS_Component
 	{
-		Pre_Renderable(std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer, std::string name = "Unnamed Renderable")
+		Pre_Renderable(std::string sprite_sheet, std::string sprite_name, RenderLayer render_layer, std::string name = "Unnamed Renderable")
 		{
 			sprite_factory_name_ = sprite_sheet;
 			sprite_factory_sprite_type_ = sprite_name;

@@ -1,6 +1,0 @@
-{"map": {
- "tiles_width" : 20,
- "tiles_height" : 20,
- "default_tileset" : "APOCALYPSE_MAP",
- "default_tile" : "ROCK_GROUND"
-}}

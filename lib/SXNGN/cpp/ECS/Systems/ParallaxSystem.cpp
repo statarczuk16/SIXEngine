@@ -6,7 +6,7 @@
 
 
 
-namespace SXNGN::ECS::A
+namespace SXNGN::ECS
 {
 
 	void Parallax_System::Init()

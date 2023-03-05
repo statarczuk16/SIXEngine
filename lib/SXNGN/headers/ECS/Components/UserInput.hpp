@@ -7,7 +7,7 @@
 #include <UI/UserInputUtils.hpp>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	enum class User_Input_Tags
 	{

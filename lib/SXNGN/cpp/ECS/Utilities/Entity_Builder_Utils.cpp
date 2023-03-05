@@ -4,14 +4,13 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
 
-			Entity Entity_Builder_Utils::Create_Tile(Coordinator coordinator, ComponentTypeEnum game_state, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, A::CollisionType collision_type, std::string name)
+			Entity Entity_Builder_Utils::Create_Tile(Coordinator coordinator, ComponentTypeEnum game_state, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, CollisionType collision_type, std::string name)
 			{
 				auto tile_entity = coordinator.CreateEntity();
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
 				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
-				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::GROUND_LAYER_0, name);
+				SXNGN::ECS::Pre_Renderable* pre_renderable = new SXNGN::ECS::Pre_Renderable(sprite_sheet, sprite_name, RenderLayer::GROUND_LAYER_0, name);
 				coordinator.AddComponent(tile_entity, pre_renderable);
 
 				SDL_Rect collision_box;
@@ -38,13 +37,13 @@ namespace SXNGN {
 				return tile_entity;
 			}
 
-			Entity Entity_Builder_Utils::Create_Person(A::Coordinator coordinator, ComponentTypeEnum game_state, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, bool player_controlled, std::string name)
+			Entity Entity_Builder_Utils::Create_Person(Coordinator coordinator, ComponentTypeEnum game_state, Sint32 x_grid, Sint32 y_grid, std::string sprite_sheet, std::string sprite_name, bool player_controlled, std::string name)
 			{
 				auto person_entity = coordinator.CreateEntity();
 				SDL_LogDebug(1, "Created Person Entity: %s: ID: %d", name.c_str(), person_entity);
 				Sint32 x_pixels = x_grid * SXNGN::BASE_TILE_WIDTH;
 				Sint32 y_pixels = y_grid * SXNGN::BASE_TILE_HEIGHT;
-				Pre_Renderable* pre_renderable = new SXNGN::ECS::A::Pre_Renderable(sprite_sheet, sprite_name, A::RenderLayer::OBJECT_LAYER_0, name);
+				Pre_Renderable* pre_renderable = new SXNGN::ECS::Pre_Renderable(sprite_sheet, sprite_name, RenderLayer::OBJECT_LAYER_0, name);
 				coordinator.AddComponent(person_entity, pre_renderable);
 
 
@@ -58,7 +57,7 @@ namespace SXNGN {
 				coordinator.AddComponent(person_entity, location);
 
 
-				SXNGN::ECS::A::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
+				SXNGN::ECS::User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
 				input_tags_comp->input_tags_.insert(User_Input_Tags::MOUSE_CONTROL);
 				if (player_controlled)
 				{
@@ -197,9 +196,9 @@ namespace SXNGN {
 
 
 			/**
-			A::Pre_Renderable* Entity_Builder_Utils::Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer)
+			Pre_Renderable* Entity_Builder_Utils::Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, RenderLayer render_layer)
 			{
-				SXNGN::ECS::A::Pre_Renderable* pre_renderable = new A::Pre_Renderable();
+				SXNGN::ECS::Pre_Renderable* pre_renderable = new Pre_Renderable();
 				pre_renderable->sprite_factory_name_ = sprite_sheet;
 				pre_renderable->sprite_factory_sprite_type_ = sprite_name;
 				pre_renderable->render_layer_ = render_layer;
@@ -209,9 +208,9 @@ namespace SXNGN {
 				return pre_renderable;
 			}
 			
-			A::Moveable* Entity_Builder_Utils::Create_Moveable(double pos_x_m, double pos_y_m, Sint32 speed_m_s, A::MoveableType movement_type)
+			Moveable* Entity_Builder_Utils::Create_Moveable(double pos_x_m, double pos_y_m, Sint32 speed_m_s, MoveableType movement_type)
 			{
-				SXNGN::ECS::A::Moveable* moveable = new A::Moveable();
+				SXNGN::ECS::Moveable* moveable = new Moveable();
 				moveable->UpdatePosition(pos_x_m, pos_y_m);
 				moveable->m_intended_delta_x_m = 0;
 				moveable->m_intended_delta_y_m = 0;
@@ -220,7 +219,7 @@ namespace SXNGN {
 				return moveable;
 			}
 
-			Collisionable* Entity_Builder_Utils::Create_Collisionable_Square(int width, int height, A::CollisionType collision_type, CollisionTag collision_tag)
+			Collisionable* Entity_Builder_Utils::Create_Collisionable_Square(int width, int height, CollisionType collision_type, CollisionTag collision_tag)
 			{
 				Collisionable* collision = new Collisionable();
 				collision->width_ = width;
@@ -230,9 +229,9 @@ namespace SXNGN {
 				return collision;
 			}
 
-			A::Tile* Entity_Builder_Utils::Create_Tile(Sint32 x_grid, Sint32 y_grid)
+			Tile* Entity_Builder_Utils::Create_Tile(Sint32 x_grid, Sint32 y_grid)
 			{
-				A::Tile* tile = new A::Tile(x_grid, y_grid);
+				Tile* tile = new Tile(x_grid, y_grid);
 				return tile;
 			}
 			**/
@@ -240,4 +239,3 @@ namespace SXNGN {
 			
 		}
 	}
-}

@@ -7,7 +7,7 @@
 #include <fstream>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	void Event_System::Init()
 	{
@@ -53,6 +53,16 @@ namespace SXNGN::ECS::A {
 					{
 						active_states.erase(as);
 						active_states.insert(as);
+					}
+					if (active_states.count(ComponentTypeEnum::OVERWORLD_STATE))
+					{
+						auto camera = CameraComponent::get_instance();
+						auto overworld_player_uuid = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+						if (overworld_player_uuid != SXNGN::BAD_UUID)
+						{
+							auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
+							camera->set_target(overworld_player_entity);
+						}
 					}
 					gCoordinator.GameStateChanged(active_states, true);
 					break;

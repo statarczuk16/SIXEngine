@@ -4,6 +4,7 @@
 #include "ECS/Core/Coordinator.hpp"
 #include "ECS/Systems/RenderSystem.hpp"
 #include "ECS/Systems/MovementSystem.hpp"
+#include "ECS/Systems/DirectorSystem.hpp"
 #include "ECS/Systems/UserInputSystem.hpp"
 #include <ECS/Components/Components.hpp>
 #include <ECS/Utilities/Entity_Builder_Utils.hpp>
@@ -31,7 +32,7 @@
 
 
 
-SXNGN::ECS::A::Coordinator gCoordinator;
+SXNGN::ECS::Coordinator gCoordinator;
 
 
 static bool quit = false;
@@ -48,12 +49,12 @@ SXNGN::Database g_database; //static can be accessed anywhere, but must intializ
 
 using Gameutils = SXNGN::Gameutils;
 using nlohmann::json;
-using entity_builder = SXNGN::ECS::A::Entity_Builder_Utils;
+using entity_builder = SXNGN::ECS::Entity_Builder_Utils;
 
 
-using Movement_System = SXNGN::ECS::A::Movement_System;
+using Movement_System = SXNGN::ECS::Movement_System;
 
-using namespace SXNGN::ECS::A;
+using namespace SXNGN::ECS;
 
 std::shared_ptr<UIContainerComponent> debug_fps_actual;
  
@@ -387,32 +388,47 @@ int init_menus()
 
 	int left_row = 0;
 	auto overworld_left_side_menu_c = UserInputUtils::create_window_raw(nullptr, 0, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
-	std::shared_ptr<UIContainerComponent> stamina_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "STAMINA", left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	std::shared_ptr<UIContainerComponent> clock_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "TIME", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(clock_label_c);
+
+	std::shared_ptr<UIContainerComponent> clock_value_date_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "-", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	clock_value_date_c->name_ = "OVERWORLD_date_value";
+	overworld_left_side_menu_c->child_components_.push_back(clock_value_date_c);
+
+	std::shared_ptr<UIContainerComponent> clock_value_time_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "-", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	clock_value_time_c->name_ = "OVERWORLD_time_value";
+	overworld_left_side_menu_c->child_components_.push_back(clock_value_time_c);
+
+	std::shared_ptr<UIContainerComponent> stamina_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "STAMINA", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(stamina_label_c);
 
-	std::shared_ptr<UIContainerComponent> stamina_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_STAMINA, left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> stamina_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	stamina_progress_bar_c->progressbar_->max_value = 100.0;
+	stamina_progress_bar_c->name_ = "OVERWORLD_progress_stamina";
 	overworld_left_side_menu_c->child_components_.push_back(stamina_progress_bar_c);
 
-	std::shared_ptr<UIContainerComponent> health_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "HEALTH", left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> health_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "HEALTH", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(health_label_c);
 
-	std::shared_ptr<UIContainerComponent> health_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_HEALTH, left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> health_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	health_progress_bar_c->progressbar_->max_value = 100.0;
+	health_progress_bar_c->name_ = "OVERWORLD_progress_health";
 	overworld_left_side_menu_c->child_components_.push_back(health_progress_bar_c);
 
-	std::shared_ptr<UIContainerComponent> food_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "FOOD", left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> food_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "FOOD", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(food_label_c);
 
-	std::shared_ptr<UIContainerComponent> food_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, SXNGN::PARTY_FOOD, left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> food_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	food_progress_bar_c->progressbar_->max_value = 100.0;
+	food_progress_bar_c->name_ = "OVERWORLD_progress_food";
 	overworld_left_side_menu_c->child_components_.push_back(food_progress_bar_c);
 
-	std::shared_ptr<UIContainerComponent> pace_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "PACE", left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> pace_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "PACE", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	
 	overworld_left_side_menu_c->child_components_.push_back(pace_label_c);
 
-	std::shared_ptr<UIContainerComponent> pace_value_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "0.0", left_row++, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	std::shared_ptr<UIContainerComponent> pace_value_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "0.0", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	pace_value_c->name_ = "OVERWORLD_label_pace";
 	overworld_left_side_menu_c->child_components_.push_back(pace_value_c);
 
@@ -610,7 +626,7 @@ int main(int argc, char* args[])
 
 	SXNGN::Database::set_coordinator(std::make_shared<Coordinator>(gCoordinator));
 
-
+	gCoordinator.RegisterComponent(ComponentTypeEnum::DIRECTOR);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_SPRITE_FACTORY);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::PRE_RENDERABLE);
@@ -752,7 +768,7 @@ int main(int argc, char* args[])
 	}
 	task_scheduler_system->Init();
 
-	//Task Scheduler System assigns workers to tasks
+	//Party System handles UI and events for parties
 	auto party_system = gCoordinator.RegisterSystem<Party_System>();
 	{
 		Signature signature;
@@ -761,6 +777,16 @@ int main(int argc, char* args[])
 		gCoordinator.SetSystemSignatureActable<Party_System>(signature);
 	}
 	party_system->Init();
+
+	//Director system handles game time and sending events to parties
+	auto director_system = gCoordinator.RegisterSystem<Director_System>();
+	{
+		Signature signature;
+		//ACTS on Parties
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::DIRECTOR));
+		gCoordinator.SetSystemSignatureActable<Director_System>(signature);
+	}
+	director_system->Init();
 
 
 
@@ -818,7 +844,7 @@ int main(int argc, char* args[])
 	camera_position.h = 0;
 
 	//singleton, used by world creation utility to lock camera onto main character
-	auto main_camera_comp = SXNGN::ECS::A::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
+	auto main_camera_comp = SXNGN::ECS::CameraComponent::init_instance(camera_lens, camera_position, settings->resolution);
 	main_camera_comp->bounded_horizontal_ = false;
 	main_camera_comp->bounded_vertical_ = false;
 
@@ -864,7 +890,7 @@ int main(int argc, char* args[])
 		{
 
 			auto input_event = gCoordinator.CreateEntity();
-			SXNGN::ECS::A::User_Input_Cache* input_cache = new User_Input_Cache();
+			SXNGN::ECS::User_Input_Cache* input_cache = new User_Input_Cache();
 			input_cache->events_ = events_this_frame;
 			gCoordinator.AddComponent(input_event, input_cache, true);
 			gCoordinator.AddComponent(input_event, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE), true);
@@ -891,6 +917,7 @@ int main(int argc, char* args[])
 			system_timer.start();
 			movement_system->Update(dt_seconds);
 			party_system->Update(dt_seconds);
+			director_system->Update(dt_seconds);
 			parallax_system->Update(dt_seconds);
 			task_scheduler_system->Update(dt_seconds);
 			move_timer.start(); //restart delta t for next frame

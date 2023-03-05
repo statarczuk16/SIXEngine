@@ -5,7 +5,7 @@
 #include <sole.hpp>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 

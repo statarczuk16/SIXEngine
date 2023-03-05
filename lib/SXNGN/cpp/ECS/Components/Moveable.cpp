@@ -1,7 +1,7 @@
 #include <ECS/Components/Moveable.hpp>
 #include <ECS/Utilities/Map_Utils.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 	
 	Moveable::Moveable()
 	{

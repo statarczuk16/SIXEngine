@@ -4,7 +4,7 @@
 double SXNGN::Database::scale_;
 Uint8 SXNGN::Database::max_fps_;
 Uint8 SXNGN::Database::collision_budget_ms_;
-std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::ecs_coordinator_;
+std::shared_ptr<SXNGN::ECS::Coordinator> SXNGN::Database::ecs_coordinator_;
 
 
 SXNGN::Database::Database()
@@ -30,6 +30,7 @@ void SXNGN::Database::set_scale(double new_scale)
 void SXNGN::Database::modify_scale(double scale_mod)
 {
 	scale_ += scale_mod;
+	
 	if (scale_ < 1.0)
 	{
 		scale_ = 1.0;
@@ -38,6 +39,7 @@ void SXNGN::Database::modify_scale(double scale_mod)
 	{
 		scale_ = 5.0;
 	}
+	
 }
 
 void SXNGN::Database::reduce_scale()
@@ -86,12 +88,12 @@ Uint8 SXNGN::Database::get_collision_budget_ms()
 	return collision_budget_ms_;
 }
 
-std::shared_ptr<SXNGN::ECS::A::Coordinator> SXNGN::Database::get_coordinator()
+std::shared_ptr<SXNGN::ECS::Coordinator> SXNGN::Database::get_coordinator()
 {
 	return ecs_coordinator_;
 }
 
- void SXNGN::Database::set_coordinator(std::shared_ptr<SXNGN::ECS::A::Coordinator> ecs_coordinator)
+ void SXNGN::Database::set_coordinator(std::shared_ptr<SXNGN::ECS::Coordinator> ecs_coordinator)
 {
 	ecs_coordinator_ = ecs_coordinator;
 }

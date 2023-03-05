@@ -38,12 +38,12 @@ int main(int argc, char* args[])
 		}
 	}
 
-	SXNGN::ECS::A::Coordinator gCoordinator;
+	SXNGN::ECS::Coordinator gCoordinator;
 	gCoordinator.InitStateManager();
 	gCoordinator.Init(gRenderer);
 
 
-	SXNGN::Database::set_coordinator(std::make_shared<SXNGN::ECS::A::Coordinator>(gCoordinator));
+	SXNGN::Database::set_coordinator(std::make_shared<SXNGN::ECS::Coordinator>(gCoordinator));
 
 	auto settings = gCoordinator.get_state_manager()->getGameSettings();
 	gCoordinator.RegisterComponent(ComponentTypeEnum::COLLISION);
@@ -57,11 +57,11 @@ int main(int argc, char* args[])
 	collision_box.y = y_pixels;
 	collision_box.w = SXNGN::BASE_TILE_WIDTH;
 	collision_box.h = SXNGN::BASE_TILE_HEIGHT;
-	SXNGN::ECS::A::Collisionable* collision;
-	//SXNGN::ECS::A::Tile* tile;
+	SXNGN::ECS::Collisionable* collision;
+	//SXNGN::ECS::Tile* tile;
 	
-	//collision = SXNGN::ECS::A::Entity_Builder_Utils::Create_Collisionable(collision_box, SXNGN::ECS::A::CollisionType::IMMOVEABLE);
-	//tile = SXNGN::ECS::A::Entity_Builder_Utils::Create_Tile(w, h);
+	//collision = SXNGN::ECS::Entity_Builder_Utils::Create_Collisionable(collision_box, SXNGN::ECS::CollisionType::IMMOVEABLE);
+	//tile = SXNGN::ECS::Entity_Builder_Utils::Create_Tile(w, h);
 
 	auto map_tile_entity_1 = gCoordinator.CreateEntity();
 	gCoordinator.AddComponent(map_tile_entity_1, collision);

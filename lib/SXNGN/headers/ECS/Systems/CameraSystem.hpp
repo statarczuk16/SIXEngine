@@ -4,7 +4,7 @@
 #include <memory>
 
  
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	class Event;
 	class Camera_System : public System

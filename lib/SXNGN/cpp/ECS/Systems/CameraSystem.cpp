@@ -5,7 +5,7 @@
 #include <ECS/Components/Renderable.hpp>
 #include <ECS/Systems/CameraSystem.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	void Camera_System::Init()
 	{
@@ -19,7 +19,7 @@ namespace SXNGN::ECS::A {
 	void Camera_System::Update(double dt)
 	{
 
-		auto camera = A::CameraComponent::get_instance();
+		auto camera = CameraComponent::get_instance();
 		if (camera == nullptr)
 		{
 			return;
@@ -39,7 +39,7 @@ namespace SXNGN::ECS::A {
 		{
 			return;
 		}
-		auto target_location = gCoordinator.GetComponentReadOnly(camera_target, A::ComponentTypeEnum::LOCATION);
+		auto target_location = gCoordinator.GetComponentReadOnly(camera_target, ComponentTypeEnum::LOCATION);
 
 		if (target_location == nullptr)
 		{

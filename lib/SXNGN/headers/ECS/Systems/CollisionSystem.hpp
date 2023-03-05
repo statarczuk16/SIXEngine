@@ -7,8 +7,8 @@
 #include <ECS/Components/Collision.hpp>
 #include <ECS/Components/Renderable.hpp>
 
-namespace SXNGN::ECS::A {
-	//using Collisionable = SXNGN::ECS::A::Collisionable;
+namespace SXNGN::ECS {
+	//using Collisionable = SXNGN::ECS::Collisionable;
 
 	class Collision_System : public System
 	{

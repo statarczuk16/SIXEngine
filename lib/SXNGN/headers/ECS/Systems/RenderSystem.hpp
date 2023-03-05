@@ -9,9 +9,9 @@
 
 
 class Event;
-using ECS_Camera = SXNGN::ECS::A::CameraComponent;
-using Renderable = SXNGN::ECS::A::Renderable;
-namespace SXNGN::ECS::A {
+using ECS_Camera = SXNGN::ECS::CameraComponent;
+using Renderable = SXNGN::ECS::Renderable;
+namespace SXNGN::ECS {
 
 	class Renderer_System : public System
 	{

@@ -6,7 +6,7 @@
 #include <stack>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	struct TaskPair
 	{

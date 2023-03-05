@@ -6,7 +6,7 @@
 #include <ECS/Utilities/ECS_Utils.hpp>
 #include <ECS/Utilities/Map_Utils.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 void Movement_System::Init()
 {

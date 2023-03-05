@@ -6,7 +6,7 @@
 #include <ECS/Components/DatabaseComponent.hpp>
 #include <iostream>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
     std::shared_ptr<DatabaseComponent> DatabaseComponent::instance_;//have to define static privates in cpp as well as h
 

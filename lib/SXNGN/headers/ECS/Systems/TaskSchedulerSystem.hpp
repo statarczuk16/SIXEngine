@@ -6,7 +6,7 @@
 #include <ECS/Components/TaskComponent.hpp>
 #include <ECS/Components/TaskWorkerComponent.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	class Task_Scheduler_System : public System
 	{

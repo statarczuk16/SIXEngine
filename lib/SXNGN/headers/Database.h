@@ -6,7 +6,7 @@
 
 namespace SXNGN {
 
-    namespace ECS::A { class Coordinator; }
+    namespace ECS { class Coordinator; }
 
     class Database {
     public:
@@ -29,9 +29,9 @@ namespace SXNGN {
         static double get_screen_ms_per_frame();
 
         
-        static std::shared_ptr<ECS::A::Coordinator> ecs_coordinator_;
-        static std::shared_ptr<ECS::A::Coordinator> get_coordinator();
-        static void set_coordinator(std::shared_ptr<ECS::A::Coordinator> ecs_coordinator);
+        static std::shared_ptr<ECS::Coordinator> ecs_coordinator_;
+        static std::shared_ptr<ECS::Coordinator> get_coordinator();
+        static void set_coordinator(std::shared_ptr<ECS::Coordinator> ecs_coordinator);
        
     };
 }

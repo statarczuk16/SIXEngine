@@ -7,7 +7,7 @@
 #include <unordered_map>
 #include <SDL.h>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 	class SystemManager
 	{
 	public:

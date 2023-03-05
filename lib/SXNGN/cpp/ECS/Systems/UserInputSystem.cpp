@@ -8,7 +8,7 @@
 #include <Physics.h>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	void User_Input_System::Init()
 	{

@@ -6,7 +6,7 @@
 using nlohmann::json;
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	/// <summary>

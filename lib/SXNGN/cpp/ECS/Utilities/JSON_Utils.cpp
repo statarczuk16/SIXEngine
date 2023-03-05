@@ -7,7 +7,6 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
 			std::tuple<std::vector<Pre_Renderable*>, std::vector<Collisionable*>, std::vector<Location*>, std::vector<Tile*>>
 				JSON_Utils::json_to_tile_batch(nlohmann::json jf)
 			{
@@ -171,6 +170,20 @@ namespace SXNGN {
 					return js;
 					break;
 				}
+				case ComponentTypeEnum::PARTY:
+				{
+					Party component = *static_cast<const Party*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
+				case ComponentTypeEnum::DIRECTOR:
+				{
+					Director component = *static_cast<const Director*>(component_ptr);
+					js = component;
+					return js;
+					break;
+				}
 				default :
 				{
 					std::string component_type_str = "Component type_ not in component_type_enum_to_string";
@@ -194,8 +207,8 @@ namespace SXNGN {
 					return nullptr;
 				}
 				std::string component_type_str = *component_type;
-				 auto find_type = ECS::A::component_type_string_to_enum().find(component_type_str);
-				 if (find_type == ECS::A::component_type_string_to_enum().end())
+				 auto find_type = ECS::component_type_string_to_enum().find(component_type_str);
+				 if (find_type == ECS::component_type_string_to_enum().end())
 				 {
 					 return nullptr;
 				 }
@@ -305,6 +318,20 @@ namespace SXNGN {
 						return component_ptr;
 						break;
 					}
+					case ComponentTypeEnum::PARTY:
+					{
+						auto component_inst = j.get<Party>();
+						ECS_Component* component_ptr = new Party(component_inst);
+						return component_ptr;
+						break;
+					}
+					case ComponentTypeEnum::DIRECTOR:
+					{
+						auto component_inst = j.get<Director>();
+						ECS_Component* component_ptr = new Director(component_inst);
+						return component_ptr;
+						break;
+					}
 					default:
 					{
 						SDL_LogWarn(1, "JSON_Utils::json_to_component: type: %s is not implemented.", find_type);
@@ -314,4 +341,3 @@ namespace SXNGN {
 			}
 		}
 	}
-}

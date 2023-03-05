@@ -7,9 +7,9 @@
 #include <unordered_map>
 #include <queue>
 
-//using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
+//using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	enum class MoveableType
@@ -65,7 +65,6 @@ namespace SXNGN::ECS::A {
 	inline void to_json(json& j, const Moveable& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::MOVEABLE]},
-
 			{"m_intended_delta_x_m", p.m_intended_delta_x_m},
 			{"m_intended_delta_y_m", p.m_intended_delta_y_m},
 			{"m_vel_x_m_s", p.m_vel_x_m_s},
@@ -74,9 +73,8 @@ namespace SXNGN::ECS::A {
 			{"moveable_type_", p.moveable_type_},
 			{"navigation_type_", p.navigation_type_},
 			{"destination_", p.destination_},
-
 			{"new_destination_", p.new_destination_},
-			{"at_destination_", p.at_destination_},
+			{"at_destination_", p.at_destination_}
 			//{"waypoints_", p.waypoints_},
 		};
 	}

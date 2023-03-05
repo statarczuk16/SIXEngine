@@ -6,9 +6,9 @@
 namespace SXNGN {  
 	class Tile;
 
-	namespace ECS { namespace A {
+	namespace ECS {
 		struct Collisionable;
-	} } 
+	}
 	
 
 	class CollisionChecks

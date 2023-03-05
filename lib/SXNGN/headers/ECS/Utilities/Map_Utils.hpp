@@ -9,7 +9,7 @@
 #include <climits>
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
+		
 
 			struct A_Star_Node
 			{
@@ -119,6 +119,5 @@ namespace SXNGN {
 				static std::pair<double, double> GetVector(Coordinate start, Coordinate end);
 
 			};
-		}
 	}
 }

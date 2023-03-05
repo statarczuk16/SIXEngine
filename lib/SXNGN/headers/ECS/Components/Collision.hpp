@@ -5,7 +5,7 @@
 #include <nlohmann/json.hpp>
 using nlohmann::json;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	//dont fuck with this order will break saves fixme 

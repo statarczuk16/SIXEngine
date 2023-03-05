@@ -10,7 +10,7 @@ namespace SXNGN {
 	const size_t BASE_TILE_HEIGHT = 16;
 
 	const size_t PIXELS_TO_METERS = 16;
-	const size_t OVERWORLD_MULTIPLIER = 60;
+	const size_t OVERWORLD_MULTIPLIER = 60; //for time and distance (1 second = 60 seconds in game, 1 m = 60 m in game)
 	const double OVERWORLD_PIXELS_TO_METERS = double(PIXELS_TO_METERS) / OVERWORLD_MULTIPLIER; 
 	const double OVERWORLD_METERS_TO_PIXEL = double(OVERWORLD_MULTIPLIER) / double(PIXELS_TO_METERS);
 	const double OVERWORLD_PIXELS_TO_KM = OVERWORLD_PIXELS_TO_METERS * 1000.0;
@@ -40,6 +40,7 @@ namespace SXNGN {
 
 	const std::string OVERWORLD_PACE_M_S = "OVERWORLD_PACE_M_S";
 	const std::string OVERWORLD_GO = "OVERWORLD_GO";
+	const std::string OVERWORLD_PLAYER_UUID = "OVERWORLD_PLAYER_UUID";
 
 	const std::string PARTY_STAMINA = "PARTY_STAMINA";
 	const std::string PARTY_HEALTH = "PARTY_HEALTH";

@@ -5,9 +5,9 @@
 #include <nlohmann/json.hpp>
 using nlohmann::json;
 
-using ComponentTypeEnum = SXNGN::ECS::A::ComponentTypeEnum;
+using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	/// <summary>

@@ -6,7 +6,7 @@
 #include <SDL.h>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	enum class SystemTypeEnum : Uint8
 	{

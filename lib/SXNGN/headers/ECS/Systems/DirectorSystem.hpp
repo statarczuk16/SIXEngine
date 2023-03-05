@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ECS/Core/System.hpp>
+#include <ECS/Components/Director.hpp>
 #include <Database.h>
 #include <memory>
 #include <vector>
@@ -13,7 +14,9 @@ namespace SXNGN::ECS {
 	public:
 		virtual void Init();
 
-		void Update(float dt);
+		void Update(double dt);
+
+		DropEntry<PartyEventType> GenerateEventTable();
 
 
 	private:

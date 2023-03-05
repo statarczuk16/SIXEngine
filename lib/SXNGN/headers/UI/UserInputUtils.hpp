@@ -8,7 +8,7 @@
 
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	//clicking a button twice in one button = double cl ick

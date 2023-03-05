@@ -7,7 +7,6 @@
 
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
 			class Entity_Builder_Utils
 			{
 			public:
@@ -27,7 +26,7 @@ namespace SXNGN {
 
 				static Entity Create_Spawn_Event(Coordinator coordinator, ComponentTypeEnum game_state, int pixel_x, int pixel_y);
 
-				//static A::Pre_Renderable* Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, A::RenderLayer render_layer);
+				//static Pre_Renderable* Create_Pre_Renderable(Sint32 x, Sint32 y, std::string sprite_sheet, std::string sprite_name, RenderLayer render_layer);
 
 				//static Moveable* Create_Moveable(double pos_x_m, double pos_y_m, Sint32 speed_m_s = 7, MoveableType movement_type = MoveableType::VELOCITY);
 
@@ -38,4 +37,3 @@ namespace SXNGN {
 			};
 		}
 	}
-}

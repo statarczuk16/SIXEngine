@@ -4,7 +4,7 @@
 #include <ECS/Core/Component.hpp>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 
 	/// <summary>

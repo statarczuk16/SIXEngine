@@ -7,12 +7,13 @@
 #include <nlohmann/json.hpp>
 using nlohmann::json;
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	enum class ComponentTypeEnum : Uint8
 {
 	UNKNOWN,
 	LOCATION,
+	DIRECTOR,
 	RENDERABLE,
 	RENDERABLE_BATCH,
 	PRE_RENDERABLE,
@@ -57,6 +58,8 @@ namespace SXNGN::ECS::A {
 		{
 			{ComponentTypeEnum::UNKNOWN,"UNKNOWN"},
 			{ComponentTypeEnum::LOCATION,"LOCATION"},
+			{ComponentTypeEnum::DIRECTOR,"DIRECTOR"},
+			{ComponentTypeEnum::PARTY,"PARTY"},
 			{ComponentTypeEnum::RENDERABLE,"RENDERABLE"},
 			{ComponentTypeEnum::RENDERABLE_BATCH,"RENDERABLE_BATCH"},
 			{ComponentTypeEnum::PRE_RENDERABLE,"PRE_RENDERABLE"},
@@ -96,6 +99,8 @@ namespace SXNGN::ECS::A {
 		static std::unordered_map<std::string, ComponentTypeEnum> component_type_string_to_enum =
 		{
 			{"UNKNOWN",ComponentTypeEnum::UNKNOWN},
+			{"DIRECTOR",ComponentTypeEnum::DIRECTOR},
+			{"PARTY",ComponentTypeEnum::PARTY},
 			{"LOCATION",ComponentTypeEnum::LOCATION},
 			{"RENDERABLE",ComponentTypeEnum::RENDERABLE},
 			{"RENDERABLE_BATCH",ComponentTypeEnum::RENDERABLE_BATCH},

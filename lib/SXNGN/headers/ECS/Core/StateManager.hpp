@@ -6,7 +6,7 @@
 #include <queue>
 #include <SDL.h>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	//Chunks are 16x16 tiles
 	
@@ -125,7 +125,7 @@ namespace SXNGN::ECS::A {
 			if (spaces.count(state) == 0)
 			{
 				printf("stateManager: Creating new space: %s", state.c_str());
-				std::vector< std::shared_ptr<A::ExternEntity>> new_entity_array = { entity_to_store };
+				std::vector< std::shared_ptr<ExternEntity>> new_entity_array = { entity_to_store };
 				Space new_state(state, new_entity_array);
 				spaces[state] = new_state;
 			

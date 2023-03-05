@@ -5,7 +5,6 @@
 #include <climits>
 namespace SXNGN {
 	namespace ECS {
-		namespace A {
 
 			class Physics_Utils
 			{
@@ -19,4 +18,3 @@ namespace SXNGN {
 
 		}
 	}
-}

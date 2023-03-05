@@ -11,7 +11,7 @@
 #include <v2d_generic.h>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	void Collision_System::Init()
 	{

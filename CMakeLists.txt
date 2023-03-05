@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 if(MSVC)  
 	message("Setting hints for MSVC")
 	set(SDL_HINT_END "include/")
-	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)
+	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)  
 	#add_compile_options(/WX)
     #add_link_options(/WX)
 elseif (MINGW)
@@ -127,7 +127,7 @@ add_executable(system_tests "src/tests/system_tests.cpp" ${SXNGN_SOURCES} ${OLC_
 target_link_libraries(system_tests SDL2::Main SDL2::Image SDL2::TTF)
 
 add_executable(unit_tests "src/tests/unit_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
-target_link_libraries(unit_tests SDL2::Main SDL2::Image SDL2::TTF)
+target_link_libraries(unit_tests SDL2::Main SDL2::Image SDL2::TTF) 
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

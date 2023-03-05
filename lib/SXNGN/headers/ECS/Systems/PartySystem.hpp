@@ -6,7 +6,7 @@
 #include <vector>
 
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	class Party_System : public System
 	{

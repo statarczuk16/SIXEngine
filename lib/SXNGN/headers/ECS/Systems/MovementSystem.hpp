@@ -5,7 +5,7 @@
 #include <SDL.h>
 #include <ECS/Components/Components.hpp>
 
-namespace SXNGN::ECS::A {
+namespace SXNGN::ECS {
 
 	class Movement_System : public System
 	{

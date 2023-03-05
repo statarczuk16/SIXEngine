@@ -21,3 +21,4 @@
 #include <ECS/Components/DatabaseComponent.hpp>
 #include <ECS/Components/WorldMap.hpp>
 #include <ECS/Components/Party.hpp>
+#include <ECS/Components/Director.hpp>
