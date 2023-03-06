@@ -55,7 +55,7 @@ namespace SXNGN::ECS {
 		{
 			case UIType::WINDOW:
 			{
-				kiss_window_draw(component_in_layer->window_.get(), gRenderer);
+				kiss_window_draw(component_in_layer->window_, gRenderer);
 				for (auto component_in_window : component_in_layer->child_components_)
 				{
 					Draw_GUI_Component(gRenderer, component_in_window);

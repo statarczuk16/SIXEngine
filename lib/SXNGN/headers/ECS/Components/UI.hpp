@@ -21,7 +21,7 @@ namespace SXNGN::ECS {
 
         }
 
-        UIContainerComponent(std::shared_ptr<kiss_window> parent_window, UILayer layer, UIType type, std::string name = "uninit_ui_element")
+        UIContainerComponent(kiss_window* parent_window, UILayer layer, UIType type, std::string name = "uninit_ui_element")
         {
             parent_window_ = parent_window;
             window_ = nullptr;
@@ -49,6 +49,12 @@ namespace SXNGN::ECS {
         void ClearUIContainerComponent()
         {
             cleanup = true;
+
+            if (window_ != nullptr)
+            {
+                delete window_;
+                window_ = nullptr;
+            }
             
             if (button_ != nullptr)
             {
@@ -103,8 +109,8 @@ namespace SXNGN::ECS {
 
         UIType type_ = UIType::UNKNOWN;
         std::string name_ = "uninit_ui_element";
-        std::shared_ptr<kiss_window> parent_window_ = nullptr;
-        std::shared_ptr<kiss_window> window_ = nullptr;
+        kiss_window* parent_window_ = nullptr;
+        kiss_window* window_ = nullptr;
         kiss_button* button_ = nullptr;
         kiss_selectbutton* selectbutton_ = nullptr;
         kiss_vscrollbar* vscrollbar_ = nullptr;

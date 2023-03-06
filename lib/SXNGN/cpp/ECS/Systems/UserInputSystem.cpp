@@ -247,7 +247,7 @@ namespace SXNGN::ECS {
 			}
 			case UIType::WINDOW:
 			{
-				if (kiss_window_event(component_in_layer->window_.get(), e, &draw_ui))
+				if (kiss_window_event(component_in_layer->window_, e, &draw_ui))
 				{
 					event_handled = true;
 				}

@@ -396,7 +396,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			options_list_text.push_back("Ok");
 			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 
 			break;
@@ -407,7 +407,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			options_list_text.push_back("Ok");
 			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost the road!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost the road!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -417,7 +417,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			options_list_text.push_back("Ok");
 			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "A bandit appears!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "A bandit appears!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -427,7 +427,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			options_list_text.push_back("Ok");
 			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -437,7 +437,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			options_list_text.push_back("Ok");
 			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", 500, 300, UILayer::TOP, options_list_text, options_list_events);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}

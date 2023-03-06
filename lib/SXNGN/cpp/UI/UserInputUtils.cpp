@@ -6,10 +6,10 @@
 namespace SXNGN::ECS {
 
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_button(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_button* new_kiss_button = new kiss_button();
-		kiss_button_new_uc(new_kiss_button, parent_window.get(), name, 40, 0, width, height);
+		kiss_button_new_uc(new_kiss_button, parent_window, name, 40, 0, width, height);
 		new_kiss_button->h_align = h_align;
 		new_kiss_button->v_align = v_align;
 		new_kiss_button->row = row;
@@ -22,10 +22,10 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_select_button(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_select_button(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_selectbutton* new_kiss_toggle = new kiss_selectbutton();
-		kiss_selectbutton_new_uc(new_kiss_toggle, parent_window.get(), 40, 0, width, height);
+		kiss_selectbutton_new_uc(new_kiss_toggle, parent_window, 40, 0, width, height);
 		new_kiss_toggle->h_align = h_align;
 		new_kiss_toggle->v_align = v_align;
 		new_kiss_toggle->row = row;
@@ -38,12 +38,12 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(std::shared_ptr<kiss_window> parent_window, std::string title, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<Event_Component*> option_events)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(kiss_window* parent_window, std::string title, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<Event_Component*> option_events)
 	{
 		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 		int window_layer_int = (int)layer;
-		int window_item_layer_int = window_layer_int++;
+		int window_item_layer_int = window_layer_int;
 		UILayer window_item_layer = (UILayer)window_item_layer_int;
 		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
 		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
@@ -78,22 +78,22 @@ namespace SXNGN::ECS {
 	}
 
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_window_raw(std::shared_ptr<kiss_window> parent_window, int x, int y, int w, int h, UILayer layer)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_window_raw(kiss_window* parent_window, int x, int y, int w, int h, UILayer layer)
 	{
 
 		
-		std::shared_ptr<kiss_window> new_kiss_window = std::make_shared<kiss_window>();
-		kiss_window_new(new_kiss_window.get(), parent_window.get(), 1, x, y, w, h);
+		kiss_window* new_kiss_window = new kiss_window();
+		kiss_window_new(new_kiss_window, parent_window, 1, x, y, w, h);
 		new_kiss_window->visible = true;
 		UIContainerComponent mmw_container(parent_window, layer, UIType::WINDOW);
 		mmw_container.window_ = new_kiss_window;
 		return std::make_shared<UIContainerComponent>(mmw_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_label(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_label(kiss_window* parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_label* new_kiss_label = new kiss_label();
-		kiss_label_new_uc(new_kiss_label, parent_window.get(), name, 0, 0, width, height);
+		kiss_label_new_uc(new_kiss_label, parent_window, name, 0, 0, width, height);
 		new_kiss_label->h_align = h_align;//label center to parent window window
 		new_kiss_label->v_align = v_align;
 		new_kiss_label->txt_h_align = txt_h_align;//text center to this label
@@ -107,11 +107,11 @@ namespace SXNGN::ECS {
 	}
 
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_callback(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::function<double()> callback, int row, int column, int width, int height)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_callback(kiss_window* parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::function<double()> callback, int row, int column, int width, int height)
 	{
 		//TODO
 		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
-		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width, height);
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window, 0, 0, width, height);
 		new_kiss_progress->h_align = h_align;//label center to parent window window
 		new_kiss_progress->v_align = v_align;
 		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
@@ -125,10 +125,10 @@ namespace SXNGN::ECS {
 	}
 
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_property(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::string prop, int row, int column, int width, int height)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_progressbar_from_property(kiss_window* parent_window, h_alignment h_align, h_alignment txt_h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, std::string prop, int row, int column, int width, int height)
 	{
 		kiss_progressbar* new_kiss_progress = new kiss_progressbar();
-		kiss_progressbar_new_uc(new_kiss_progress, parent_window.get(), 0, 0, width, height);
+		kiss_progressbar_new_uc(new_kiss_progress, parent_window, 0, 0, width, height);
 		new_kiss_progress->h_align = h_align;//label center to parent window window
 		new_kiss_progress->v_align = v_align;
 		new_kiss_progress->txt_h_align = txt_h_align;//text center to this label
@@ -141,10 +141,10 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(ngl_c);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_text_entry(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_text_entry(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column)
 	{
 		kiss_entry* new_kiss_entry = new kiss_entry();
-		kiss_entry_new(new_kiss_entry, parent_window.get(), 1, "", 0, 0, 400);
+		kiss_entry_new(new_kiss_entry, parent_window, 1, "", 0, 0, 400);
 		new_kiss_entry->h_align = h_align;
 		new_kiss_entry->v_align = v_align;
 		new_kiss_entry->row = row;
@@ -161,7 +161,7 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_num_entry(std::shared_ptr<kiss_window> parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale,
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_num_entry(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale,
 		UILayer layer, char* name, double lower_bound, double upper_bound, text_entry_type entry_type, double default_val, int row, int column)
 	{
 		auto new_container = UserInputUtils::create_text_entry(parent_window, h_align, v_align, parent_scale, layer, name, row, column);

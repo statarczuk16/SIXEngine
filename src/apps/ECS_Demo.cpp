@@ -337,7 +337,7 @@ int init_menus()
 	//************************* Pop Up Game Menu
 	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, POP_UP_GAME_MENU_X, POP_UP_GAME_MENU_Y, POP_UP_GAME_MENU_W, POP_UP_GAME_MENU_H, UILayer::MID);
 	ig_ui_window_pop_up_c->window_->visible = false;
-	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, ig_ui_window_pop_up_c);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
 	//Callback function to toggle menu visiblility 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_menu = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
@@ -464,15 +464,15 @@ int init_menus()
 
 	auto pace_label_box = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Select Pace", 0, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 
-	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOPPER, "Slow", 1, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Slow", 1, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 	auto pace_label_0 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Slow", 1, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 
 
-	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOPPER, "Medium", 2, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Medium", 2, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 	auto pace_label_1 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Medium", 2, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 	
 
-	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOPPER, "Fast", 3, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Fast", 3, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 	auto pace_label_2 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Fast", 3, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 
 

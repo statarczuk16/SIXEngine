@@ -195,7 +195,9 @@ namespace SXNGN::ECS {
 		BOTTOM,
 		MID,
 		TOP,
-		TOPPER
+		TOP_2,
+		TOP_3,
+		TOP_4
 	};
 
 }
