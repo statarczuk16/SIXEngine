@@ -56,6 +56,15 @@ namespace SXNGN::ECS {
             std::cout << "{" << entry.first << ", " << entry.second << "}" << std::endl;
         }
 
+        for (auto& it : new_db->event_map) {
+            instance_->event_map[it.first] = it.second;
+        }
+
+        for (auto const& entry : instance_->entity_map)
+        {
+            std::cout << "{" << entry.first << ", " << "event" << "}" << std::endl;
+        }
+
         return;
     }
 

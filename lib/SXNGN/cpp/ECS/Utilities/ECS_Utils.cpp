@@ -119,5 +119,31 @@ namespace SXNGN {
 				return world_position;
 
 			}
+
+			void ECS_Utils::pause_game()
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				auto pause_game_event_pair = gCoordinator->getEvent(SXNGN::PAUSE);
+				if (pause_game_event_pair.second)
+				{
+					for (auto func : pause_game_event_pair.first.e.func_event.callbacks)
+					{
+						func();
+					}
+				}
+			}
+
+			void ECS_Utils::unpause_game()
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				auto pause_game_event_pair = gCoordinator->getEvent(SXNGN::UNPAUSE);
+				if (pause_game_event_pair.second)
+				{
+					for (auto func : pause_game_event_pair.first.e.func_event.callbacks)
+					{
+						func();
+					}
+				}
+			}
 		}
 	}

@@ -493,6 +493,14 @@ int init_menus()
 		gCoordinator.setSetting(property, new_value);
 	};
 
+	std::function<void()> update_pace = []()
+	{
+		auto pair_pace = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
+		auto pair_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+		double pace_value = pair_go.first * pair_pace.first;
+		gCoordinator.setSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S, pace_value);
+	};
+
 	std::function<void(std::string property, double new_value)> cache_and_replace_property = [](std::string property, double new_value)
 	{
 		std::string property_cache = property + SXNGN::CACHE;
@@ -521,11 +529,28 @@ int init_menus()
 	stop_button_c->callback_functions_.push_back(stop_function);
 	stop_button_c->callback_functions_.push_back(toggle_stop_visible);
 	stop_button_c->callback_functions_.push_back(toggle_go_visible);
+	stop_button_c->callback_functions_.push_back(update_pace);
 	go_button_c->callback_functions_.push_back(go_function);
 	go_button_c->callback_functions_.push_back(toggle_stop_visible);
 	go_button_c->callback_functions_.push_back(toggle_go_visible);
+	go_button_c->callback_functions_.push_back(update_pace);
 	bottom_side_state_menu_c->child_components_.push_back(stop_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(go_button_c);
+
+	Event_Component pause_game_event;
+	pause_game_event.e.func_event.callbacks.push_back(stop_function);
+	pause_game_event.e.func_event.callbacks.push_back(toggle_stop_visible);
+	pause_game_event.e.func_event.callbacks.push_back(toggle_go_visible);
+	pause_game_event.e.func_event.callbacks.push_back(update_pace);
+
+	Event_Component unpause_game_event;
+	unpause_game_event.e.func_event.callbacks.push_back(go_function);
+	unpause_game_event.e.func_event.callbacks.push_back(toggle_stop_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(toggle_go_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
+
+	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
+	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
 		
 
 	//set the pace value

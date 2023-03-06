@@ -3,6 +3,7 @@
 #include <SDL.h>
 #include <Database.h>
 #include <ECS/Core/Component.hpp>
+#include <ECS/Components/Components.hpp>
 #include <ECS/Core/Types.hpp>
 #include <memory>
 
@@ -32,6 +33,7 @@ namespace SXNGN::ECS {
 
         std::map < std::string, double > settings_map;
         std::map < std::string, sole::uuid > entity_map;
+        std::map < std::string, Event_Component > event_map;
        
      
     };
@@ -40,7 +42,8 @@ namespace SXNGN::ECS {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::DATABASE_SINGLE]},
 			{"settings_map", p.settings_map},
-            {"entity_map", p.entity_map}
+            {"entity_map", p.entity_map},
+            {"event_map", p.entity_map}
 		};
 
 	}
@@ -50,6 +53,7 @@ namespace SXNGN::ECS {
 		p.component_type = component_type_enum;
 		j.at("settings_map").get_to(p.settings_map);
         j.at("entity_map").get_to(p.entity_map);
+        j.at("event_map").get_to(p.event_map);
 	}
 
 }

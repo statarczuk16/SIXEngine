@@ -39,15 +39,16 @@ namespace SXNGN::ECS
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
 				if (pace_setting.second && pace_go.second)
 				{
+					auto pace_m_s = pace_setting.first * pace_go.first;
+					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
+
+					snprintf(pace_value_label->label_->text, 100, "%g", pace_m_s);
 					//if on the move, substract stamina, then health
 					if (pace_go.first)
 					{
 						auto calories_per_km = 25 * party_ptr->hands_;
 						
-						auto pace_m_s = pace_setting.first * pace_go.first;
-						auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
 						
-						snprintf(pace_value_label->label_->text, 100, "%g", pace_m_s);
 						auto dist_traveled_km = pace_m_s * dt * OVERWORLD_MULTIPLIER / 1000.0;
 						auto stamina_upkeep = calories_per_km * dist_traveled_km;
 						party_ptr->stamina_ -= stamina_upkeep;

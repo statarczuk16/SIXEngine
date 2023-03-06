@@ -22,7 +22,8 @@ namespace SXNGN::ECS {
 		SELECTION,
 		ORDER,
 		SPAWN,
-		PARTY
+		PARTY,
+		FUNCTION
 	};
 
 	enum PartyEventType 
@@ -161,6 +162,11 @@ namespace SXNGN::ECS {
 		int y_ = 0;
 		bool spawn_1_despawn_0;
 	};
+
+	struct SXNGN_FunctionEvent
+	{
+		std::vector< std::function<void()> > callbacks;
+	};
 	
 	struct SXNGN_Event
 	{
@@ -174,6 +180,7 @@ namespace SXNGN::ECS {
 		SXNGN_Order order_event;
 		SXNGN_SpawnEvent spawn_event;
 		SXNGN_Party party_event;
+		SXNGN_FunctionEvent func_event;
 	};
 
 	struct Event_Component : ECS_Component

@@ -46,6 +46,15 @@ void Movement_System::Update(double dt)
 			Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
 
 			Location* location_ptr = static_cast<Location*>(check_out_location);
+
+			if (moveable_ptr->prop_for_m_vel_x_m_s != "")
+			{
+				auto pace_pair = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S);
+				if (pace_pair.second)
+				{
+					moveable_ptr->m_vel_x_m_s = pace_pair.first;
+				}
+			}
 			//update position
 			Update_Position(moveable_ptr, location_ptr, entity_actable, dt);
 			//check data back in

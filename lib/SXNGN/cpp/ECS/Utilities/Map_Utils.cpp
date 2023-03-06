@@ -238,6 +238,7 @@ namespace SXNGN::ECS {
 		auto char_render = new Pre_Renderable("APOCALYPSE_MAP", "GUNMAN_2", RenderLayer::OBJECT_LAYER_2);
 		auto char_loc = new Location(0, 16 + 32);
 		auto movement_character = new Moveable();
+		movement_character->prop_for_m_vel_x_m_s = SXNGN::OVERWORLD_PACE_TOTAL_M_S;
 		auto party = new Party();
 		//movement_character->m_speed_m_s = 10.0;
 		gCoordinator->AddComponent(character, movement_character);
@@ -248,8 +249,7 @@ namespace SXNGN::ECS {
 		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
 		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
 		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);
-		input_tags_comp->input_tags_.insert(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT);
-		input_tags_comp->property_tag_ = SXNGN::OVERWORLD_PACE_M_S;
+
 
 		gCoordinator->AddComponent(character, input_tags_comp);
 

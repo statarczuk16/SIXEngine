@@ -45,6 +45,12 @@ namespace SXNGN::ECS
 					director_ptr->has_event_table_ = true;
 				}
 
+				auto pause = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+				if (pause.first <= 0)
+				{
+					dt = 0;
+				}
+
 				int inc = dt * OVERWORLD_MULTIPLIER;
 				director_ptr->game_clock_ += inc;
 				auto date_value = ui_single->string_to_ui_map_["OVERWORLD_date_value"];

@@ -216,6 +216,21 @@ namespace SXNGN {
 						return settings_component->entity_map.at(entity);
 					}
 				}
+				std::pair<Event_Component, bool> getEvent(std::string setting)
+				{
+					auto settings_component = DatabaseComponent::get_instance();
+					
+					if (settings_component->event_map.count(setting) == 0)
+					{
+
+						return std::make_pair(Event_Component(), false);
+					}
+					else
+					{
+						return std::make_pair(settings_component->event_map.at(setting), true);
+					}
+				}
+
 				void setSetting(std::string setting, double value)
 				{
 					auto settings_component = DatabaseComponent::get_instance();
@@ -225,6 +240,11 @@ namespace SXNGN {
 				{
 					auto settings_component = DatabaseComponent::get_instance();
 					settings_component->entity_map[setting] = uuid;
+				}
+				void setEvent(std::string setting, Event_Component event_component)
+				{
+					auto settings_component = DatabaseComponent::get_instance();
+					settings_component->event_map[setting] = event_component;
 				}
 
 				const GameSettings* getGameSettings()

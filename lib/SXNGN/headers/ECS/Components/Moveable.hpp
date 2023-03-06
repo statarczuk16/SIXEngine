@@ -40,6 +40,8 @@ namespace SXNGN::ECS {
 			bool new_destination_ = false;
 			bool at_destination_ = false;
 			std::queue<Coordinate> waypoints_;
+			std::string prop_for_m_vel_x_m_s = "";
+			
 
 			Moveable();
 
@@ -74,7 +76,8 @@ namespace SXNGN::ECS {
 			{"navigation_type_", p.navigation_type_},
 			{"destination_", p.destination_},
 			{"new_destination_", p.new_destination_},
-			{"at_destination_", p.at_destination_}
+			{"at_destination_", p.at_destination_},
+			{"prop_for_m_vel_x_m_s", p.prop_for_m_vel_x_m_s}
 			//{"waypoints_", p.waypoints_},
 		};
 	}
@@ -93,6 +96,7 @@ namespace SXNGN::ECS {
 
 		j.at("new_destination_").get_to(p.new_destination_);
 		j.at("at_destination_").get_to(p.at_destination_);
+		j.at("prop_for_m_vel_x_m_s").get_to(p.prop_for_m_vel_x_m_s);
 		//j.at("waypoints_").get_to(p.waypoints_);
 		
 	}

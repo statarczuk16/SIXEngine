@@ -78,6 +78,7 @@ namespace SXNGN::ECS {
 							}
 						}
 					}
+					/**
 					if (input_tags.input_tags_.count(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT))
 					{
 						auto db_comp = DatabaseComponent::get_instance();
@@ -98,6 +99,7 @@ namespace SXNGN::ECS {
 							}
 						}
 					}
+					**/
 				}
 				
 				
