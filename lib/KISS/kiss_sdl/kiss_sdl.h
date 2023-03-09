@@ -470,6 +470,7 @@ int kiss_combobox_new(kiss_combobox *combobox, kiss_window *wdw,
 int kiss_combobox_event(kiss_combobox *combobox, SDL_Event *event,
 	int *draw);
 int kiss_combobox_draw(kiss_combobox *combobox, SDL_Renderer *renderer);
+int substring_length(char str[], int start, int end);
 
 #ifdef __cplusplus
 }

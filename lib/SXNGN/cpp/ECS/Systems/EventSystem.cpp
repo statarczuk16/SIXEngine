@@ -394,10 +394,10 @@ namespace SXNGN::ECS {
 
 	void Event_System::Handle_Party_Event(Event_Component* ec)
 	{
-		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		auto gCoordinator = SXNGN::Database::get_coordinator();
 		sole::uuid party_id = ec->e.party_event.party_id;
-		Entity party_entity = gCoordinator.GetEntityFromUUID(party_id);
-		auto party_component = gCoordinator.CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+		Entity party_entity = gCoordinator->GetEntityFromUUID(party_id);
+		
 		std::cout << "Handling event: " << party_event_type_enum_to_string()[ec->e.party_event.party_event_type] << std::endl;
 		switch (ec->e.party_event.party_event_type)
 		{
@@ -405,9 +405,26 @@ namespace SXNGN::ECS {
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
+			
+			std::vector<std::function<void()>> options_list_events;
+			std::string detail = "Every step will hurt until you find new footwear!";
+
+			std::function<void()> set_bad_boots = [gCoordinator, party_entity]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				party_ptr->footwear_ -= 1;
+				if (party_ptr->footwear_ < 0)
+				{
+					party_ptr->footwear_ = 0;
+				}
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+			};
+			
 			options_list_text.push_back("Ok");
-			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			options_list_events.push_back(set_bad_boots);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -416,9 +433,33 @@ namespace SXNGN::ECS {
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
+			
+			std::vector<std::function<void()>> options_list_events;
+			
+			
+			std::string detail = "The path is nowhere in sight.";
+			
+			switch (ec->e.party_event.severity)
+			{
+			case EventSeverity::MILD: detail = "[MILD] You looked away for a moment, now the road is nowhere in sight! It must be just over the next dune..."; break;
+			case EventSeverity::MEDIUM: detail = "[MEDIUM] A terrible gust of wind forced you away from the road. Now it is nowhere in sight."; break;
+			case EventSeverity::EXTREME: detail = "[EXTREME] What you thought had been the road for the past few hours turned out not to be. Where could you be now?"; break;
+			case EventSeverity::SPICY: detail = "[Spicy!!!] In a thirty stupor, you followed a mirage for an unknowable amount of time. You've come to in an unknown land."; break;
+			}
+			double severity = (double)ec->e.party_event.severity;
+			double lost_counter_inc = severity * LOST_BASE_MINUTES_GM;
+
+			std::function<void()> set_lost = [gCoordinator, party_entity, lost_counter_inc]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				party_ptr->lost_counter_ += lost_counter_inc;
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+			};
 			options_list_text.push_back("Ok");
-			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost the road!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			options_list_events.push_back(set_lost);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -427,9 +468,30 @@ namespace SXNGN::ECS {
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
+			
+			std::string detail = "Bandits!";
+			switch (ec->e.party_event.severity)
+			{
+			case EventSeverity::MILD: detail = "[MILD] A lone, skinny man in tattered rags brandishes a broken machete."; break;
+			case EventSeverity::MEDIUM: detail = "[MEDIUM] A pair of gunslingers draw their pistols."; break;
+			case EventSeverity::EXTREME: detail = "[EXTREME] A band of marauders bear their rifles."; break;
+			case EventSeverity::SPICY: detail = "[Spicy!!!] An army of vagrants demand your wears or your life."; break;
+			}
+
+
+			std::function<void()> bandits_func = [gCoordinator, party_entity]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				
+				party_ptr->food_ -= 500;
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+			};
+			std::vector<std::function<void()>> options_list_events;
 			options_list_text.push_back("Ok");
-			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "A bandit appears!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			options_list_events.push_back(bandits_func);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Bandits", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -438,9 +500,34 @@ namespace SXNGN::ECS {
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
+
+			std::string detail = "Sick.";
+			switch (ec->e.party_event.severity)
+			{
+			case EventSeverity::UNKNOWN: break;
+			case EventSeverity::MILD: detail = "[MILD] Feeling a little under the weather."; break;
+			case EventSeverity::MEDIUM: detail = "[MEDIUM] Something has definitely upset your stomache."; break;
+			case EventSeverity::EXTREME: detail = "[EXTREME] You've come down with a fever. It's hard to even move."; break;
+			case EventSeverity::SPICY: detail = "[Spicy!!!] You feel like death."; break;
+			
+			}
+			double severity = (double)ec->e.party_event.severity;
+			double sick_counter_inc = severity * SICK_BASE_MINUTES_GM;
+
+			std::function<void()> sick_func = [gCoordinator, party_entity, sick_counter_inc]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+
+				party_ptr->sick_counter_ += sick_counter_inc;
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+			};
+			std::vector<std::function<void()>> options_list_events;
 			options_list_text.push_back("Ok");
-			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			options_list_events.push_back(sick_func);
+
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -449,9 +536,31 @@ namespace SXNGN::ECS {
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
+			
+			std::string detail = "Weather.";
+			switch (ec->e.party_event.severity)
+			{
+			case EventSeverity::MILD: detail = "[MILD] A small sandstorm whips up. It will string to walk in this."; break;
+			case EventSeverity::MEDIUM: detail = "[MEDIUM] A sandstorm blows in. It will last for some time. Walking in this would be dangerous."; break;
+			case EventSeverity::EXTREME: detail = "[EXTREME] A massive sandstorm is whipping up. Only a fool would travel into this."; break;
+			case EventSeverity::SPICY: detail = "[Spicy!!!] The horizon is engulfed in a sandstorm. Traveling on would be suicide."; break;
+			}
+			double severity = (double)ec->e.party_event.severity;
+			double weather_counter_inc = severity * WEATHER_BASE_MINUTES_GM;
+
+			std::function<void()> weather_func = [gCoordinator, party_entity, weather_counter_inc]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+
+				party_ptr->weather_counter_ += weather_counter_inc;
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+			};
+			std::vector<std::function<void()>> options_list_events;
+			options_list_events.push_back(weather_func);
 			options_list_text.push_back("Ok");
-			std::vector<Event_Component*> options_list_events;
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -467,7 +576,7 @@ namespace SXNGN::ECS {
 			break;
 		}
 		}
-		gCoordinator.CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+		
 	}
 
 	void Event_System::Handle_Order_Event(Event_Component* ec)

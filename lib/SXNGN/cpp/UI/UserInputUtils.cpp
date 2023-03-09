@@ -38,7 +38,7 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(kiss_window* parent_window, std::string title, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<Event_Component*> option_events)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks)
 	{
 		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
@@ -51,8 +51,11 @@ namespace SXNGN::ECS {
 		int column = 0;
 		int row = 0;
 		char* title_str = title.data();
-		std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, title_str, row, -1, 50, 50);
+		std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, title_str, row++, -1, 50, 50);
+		char* detail_str = detail.data();
+		std::shared_ptr<UIContainerComponent> detail_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, detail_str, row++, -1, 50, 50);
 		message_window_c->child_components_.push_back(title_label_c);
+		message_window_c->child_components_.push_back(detail_label_c);
 
 
 		row = 3;
@@ -68,6 +71,7 @@ namespace SXNGN::ECS {
 			};
 			auto kill_button = std::bind(kill_ui, message_window_c);
 			button_c->callback_functions_.push_back(kill_button);
+			button_c->callback_functions_.push_back(option_callbacks[i]);
 			message_window_c->child_components_.push_back(button_c);
 		}
 		

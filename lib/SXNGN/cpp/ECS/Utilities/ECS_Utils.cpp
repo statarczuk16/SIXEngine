@@ -145,5 +145,13 @@ namespace SXNGN {
 					}
 				}
 			}
+
+			void ECS_Utils::send_event(ECS_Component* event_component)
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				Entity entity = gCoordinator->CreateEntity();
+				gCoordinator->AddComponent(entity, event_component);
+				gCoordinator->AddComponent(entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
+			}
 		}
 	}

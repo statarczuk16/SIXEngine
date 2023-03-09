@@ -76,11 +76,11 @@ namespace SXNGN::ECS {
 
 	enum class EventSeverity : Uint8
 	{
-		UNKNOWN,
-		MILD,
-		MEDIUM,
-		SPICY,
-		EXTREME
+		UNKNOWN = 0,
+		MILD = 1,
+		MEDIUM = 2,
+		SPICY = 3,
+		EXTREME = 4
 	};
 
 	struct SXNGN_Common

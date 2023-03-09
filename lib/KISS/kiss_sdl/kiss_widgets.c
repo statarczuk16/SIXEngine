@@ -331,35 +331,80 @@ int kiss_window_draw(kiss_window* window, SDL_Renderer* renderer)
 	return 1;
 }
 
+int substring_length(char str[], int start, int end)
+{
+	int length = end - start + 1;
+	char sub[KISS_MAX_LABEL];
+	strncpy(sub, str + start, length);
+	sub[length] = '\0';
+	return strnlen(sub, KISS_MAX_LABEL);
+}
+
 int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 {
 	char buf[KISS_MAX_LABEL], *p;
 	int len, y, x;
 	int visible = label->visible;
+	int text_width;
+
 	if (label)
 	{
+		//get the width in units of the label text
+		//if it has line breaks, get the width until the first line break
+		char* first_line_break_pos = strchr(label->text, '\n');
+		if (first_line_break_pos != NULL)
+		{
+			//get index of first line break pos subtracting address of label (eg, FF) from address of line break (eg, FF+7)
+			int first_line_break_index = (int) (first_line_break_pos - label->text);
+			char buffer[KISS_MAX_LABEL];
+			//make a substring of the label up until first line break
+			strncpy(buffer, first_line_break_pos, KISS_MAX_LABEL);
+			//get width of the text up until the first line break
+			text_width = kiss_textwidth(label->font, buffer, NULL);
+		}
+		else
+		{
+			text_width = kiss_textwidth(label->font, label->text, NULL);
+		}
+		
 		visible = label->visible && label->wdw->visible;
 		//pass by ref - sets button->r_rect
 		(void)determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
 		//pass by ref - sets textx and texty
-		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_CENTER, &x, &y, kiss_textwidth(label->font, label->text, NULL), kiss_textheight(label->font, label->text, NULL));
+		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_CENTER, &x, &y, text_width, kiss_textheight(label->font, label->text, NULL));
 	}
 	if (!label || !visible || !renderer)
 	{
 		return 0;
 	}
-	//printf("Label Row %d    Y %d\n", label->row, label->r_rect.y);
-	//y = label->r_rect.y + label->font.spacing / 2;
-	len = (int)strlen(label->text);
-	if (len > KISS_MAX_LABEL - 2)
+	
+	
+	//if the text is too wide to fit in the label, insert line breaks
+	//note text_width variable is only as wide as text until first line break
+	if (text_width > label->r_rect.w)
 	{
-		label->text[len - 1] = '\n';
+		char* test = 'O';
+		int one_char_width = kiss_textwidth(label->font, test, NULL);
+		int text_width_temp = text_width;
+		char buffer[500];
+		int label_width_chars = label->r_rect.w / one_char_width;
+		int split_location = 0;
+		size_t label_text_width = strnlen(label->text, KISS_MAX_LABEL);
+		while (text_width_temp > label->r_rect.w)
+		{
+			split_location += text_width_temp;
+			if (split_location < label_text_width)
+			{
+				while (label->text[split_location] != ' ')
+			}
+		}
 	}
-	else
+	
+	int text_width_temp = text_width;
+	if (text_width > label->r_rect.w)
 	{
-		strncat(label->text, "\n", KISS_MAX_LENGTH);
+		int split_location = text_width / one_char_width;
 	}
-	//kiss_rendertext(renderer, label->text, x, y, label->font, label->textcolor);
 
 	kiss_decorate(renderer, &label->r_rect, kiss_sand_dark, kiss_edge);
 	for (p = label->text; *p; p = strchr(p, '\n') + 1)

@@ -74,7 +74,7 @@ namespace SXNGN::ECS
 					SXNGN_Party party_event;
 					party_event.party_event_type = generated_event->value;
 					party_event.party_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
-					party_event.severity = EventSeverity::MEDIUM;
+					party_event.severity = EventSeverity::MILD;
 					event_component->e.party_event = party_event;
 					event_component->e.common.type = EventType::PARTY;
 					Entity event_entity = gCoordinator.CreateEntity();

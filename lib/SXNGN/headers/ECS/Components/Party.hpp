@@ -19,7 +19,6 @@ namespace SXNGN::ECS {
 			component_type = ComponentTypeEnum::PARTY;
 			health_ = 100.0;
 			health_max_ = 100.0;
-
 			stamina_ = 1000.0;
 			stamina_max_ = stamina_;
 			food_ = 2000.0;
@@ -27,6 +26,9 @@ namespace SXNGN::ECS {
 			water_ = 100.0;
 			hands_ = 1.0;
 			muscle_ = 0.0;
+			footwear_ = 1;
+			lost_counter_ = 0.0;
+			sick_counter_ = 0.0;
 		}
 		
 		std::vector<sole::uuid> character_ids_; //uuuid of unique characters who have their own entities
@@ -40,6 +42,11 @@ namespace SXNGN::ECS {
 		double health_max_;
 		double stamina_max_;
 		double food_max_;
+		int footwear_;
+		
+		double lost_counter_; //party will make no progress until counter hits 0
+		double sick_counter_; //stamina regeneration halved until counter hits 0
+		double weather_counter_; //stamina regeneration halved until counter hits 0
 
 
 

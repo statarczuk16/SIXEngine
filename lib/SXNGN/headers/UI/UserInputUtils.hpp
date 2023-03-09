@@ -46,7 +46,7 @@ namespace SXNGN::ECS {
 		static std::shared_ptr<UIContainerComponent> create_num_entry(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale,
 			UILayer layer, char* name, double lower_bound, double upper_bound, text_entry_type entry_type, double default_val = 0, int row = -1, int column = -1);
 
-		static std::shared_ptr<UIContainerComponent> create_message_box(kiss_window* parent_window, std::string title, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<Event_Component*> option_events);
+		static std::shared_ptr<UIContainerComponent> create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks);
 
 
 		

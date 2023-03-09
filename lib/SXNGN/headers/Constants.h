@@ -53,6 +53,10 @@ namespace SXNGN {
 
 	const std::string CACHE = "_CACHE";
 
+	const double LOST_BASE_MINUTES_GM = 20.0; //game time minutes to be lost for when lost event happens
+	const double SICK_BASE_MINUTES_GM = 60.0 * 2; //game time minutes to be sick for when sick event happens
+	const double WEATHER_BASE_MINUTES_GM = 60.0; //game time minutes for sandstorm/weather to last
+
 	
 
 }
