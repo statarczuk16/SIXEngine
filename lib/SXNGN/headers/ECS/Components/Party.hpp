@@ -43,10 +43,85 @@ namespace SXNGN::ECS {
 		double stamina_max_;
 		double food_max_;
 		int footwear_;
+		int batteries_;
+		int ammo_;
+		int guns_;
+		int medkits_;
+
+		bool have_gps_;
 		
 		double lost_counter_; //party will make no progress until counter hits 0
 		double sick_counter_; //stamina regeneration halved until counter hits 0
 		double weather_counter_; //stamina regeneration halved until counter hits 0
+
+		bool can_use_gps()
+		{
+			return batteries_ > 0 && have_gps_;
+		}
+
+		bool can_use_medit()
+		{
+			return medkits_ > 0;
+		}
+
+		bool have_footwear()
+		{
+			return footwear_ >= hands_;
+		}
+
+		int hands_without_footwear()
+		{
+			//10 guys and 3 boots = 7 without boots
+			//10 guys and 12 boots = -2 without boots
+			int temp = hands_ - footwear_;
+			if (temp > 0)
+			{
+				return temp;
+			}
+			else
+			{
+				return 0;
+			}
+		}
+
+		int get_fighting_strength()
+		{
+			//hand with a gun = 10 strength
+			//hand with no gun = 2 strength
+			//gun needs at least 1 bullet per combat round to fight
+
+			int strength;
+			int guns_temp;
+
+			if (ammo_ > guns_)
+			{
+				//if more ammo than guns, all guns operational
+				guns_temp = guns_;
+			}
+			else
+			{
+				//else if we have say 5 bullets and 10 guns, there are really only 5 guns available
+				guns_temp = ammo_;
+			}
+			if (guns_temp >= hands_)
+			{
+				//all hands have guns, 
+				strength += hands_ * 10;
+			}
+			else if (hands_ > guns_temp)
+			{
+				//if not enough guns to go around
+				//add 10 for every person with a gun
+				int temp = hands_;
+				strength += guns_temp * 10;
+				temp -= guns_temp;
+				//add 2 for the rest without guns
+				strength += temp * 2;
+			}
+			return strength;
+		}
+
+
 
 
 

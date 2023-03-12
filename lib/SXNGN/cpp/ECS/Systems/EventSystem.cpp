@@ -407,7 +407,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			
 			std::vector<std::function<void()>> options_list_events;
-			std::string detail = "Every step will hurt until you find new footwear!";
+			std::string detail = "A hole has worn in your boots. Walking without footwear will hurt.";
 
 			std::function<void()> set_bad_boots = [gCoordinator, party_entity]()
 			{
@@ -457,8 +457,16 @@ namespace SXNGN::ECS {
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};
+			std::function<void()> use_gps = [gCoordinator, party_entity]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				party_ptr->lost_counter_ += lost_counter_inc;
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+			};
 			options_list_text.push_back("Ok");
 			options_list_events.push_back(set_lost);
+			options_list_text.push_back("Use GPS");
 			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
