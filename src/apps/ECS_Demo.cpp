@@ -29,6 +29,7 @@
 #include <string.h>
 #include <ECS/Systems/ParallaxSystem.hpp>
 #include <ECS/Systems/PartySystem.hpp>
+#include <ECS/Utilities/ECS_Utils.hpp>
 
 
 
@@ -442,43 +443,6 @@ int init_menus()
 
 	//************************* Bottom Side State Relevant Menu
 
-	auto bottom_side_state_menu_c = UserInputUtils::create_window_raw(nullptr, 0, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
-	
-
-	auto pace_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Pace", 0, 0, BUTTON_WIDTH, BUTTON_HEIGHT);
-	auto go_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Go", 0, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
-	
-	auto stop_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Stop", 0, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
-	stop_button_c->button_->visible = false;
-	/// Pace Selector Pop Up
-	auto pace_pop_up_c = UserInputUtils::create_window_raw(bottom_side_state_menu_c->window_, 0, 0 - BUTTON_HEIGHT * 5, BUTTON_WIDTH*1.5, BUTTON_HEIGHT*5, UILayer::MID);
-	pace_pop_up_c->window_->h_align = HA_CENTER;
-	pace_pop_up_c->window_->visible = false;
-	std::function<void()> mg_toggle_pace_visible = std::bind(toggle_menu, pace_pop_up_c);
-	pace_button_c->callback_functions_.push_back(mg_toggle_pace_visible);
-
-
-
-	bottom_side_state_menu_c->child_components_.push_back(pace_button_c);
-	
-
-	auto pace_label_box = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Select Pace", 0, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-
-	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Slow", 1, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto pace_label_0 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Slow", 1, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-
-
-	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Medium", 2, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto pace_label_1 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Medium", 2, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	
-
-	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Fast", 3, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto pace_label_2 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Fast", 3, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-
-
-	bottom_side_state_menu_c->child_components_.push_back(pace_pop_up_c);
-	
-	
 	std::function<void(std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)> exclusive_select = [](std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)
 	{
 		for (auto select : all_buttons)
@@ -486,7 +450,7 @@ int init_menus()
 			select->selectbutton_->selected = false;
 		}
 		all_buttons[selected_button]->selectbutton_->selected = true;
-		
+
 	};
 	std::function<void(std::string property, double new_value)> set_property = [](std::string property, double new_value)
 	{
@@ -520,12 +484,81 @@ int init_menus()
 	{
 		uicc->button_->visible = !uicc->button_->visible;
 	};
+
+
+	auto bottom_side_state_menu_c = UserInputUtils::create_window_raw(nullptr, 0, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	
+	int button_column = 0;
+	auto pause_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Pause", 0, button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto unpause_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Resume", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	pause_button_c->button_->visible = false;
+	unpause_button_c->button_->visible = true;
+
+	auto go_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Go", 0, button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto stop_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Rest", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	stop_button_c->button_->visible = false;
+	/// Pace Selector Pop Up
+	/**
+	auto pace_pop_up_c = UserInputUtils::create_window_raw(bottom_side_state_menu_c->window_, 0, 0 - BUTTON_HEIGHT * 5, BUTTON_WIDTH*1.5, BUTTON_HEIGHT*5, UILayer::MID);
+	pace_pop_up_c->window_->h_align = HA_CENTER;
+	pace_pop_up_c->window_->visible = false;
+	std::function<void()> mg_toggle_pace_visible = std::bind(toggle_menu, pace_pop_up_c);
+	auto pace_label_box = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Select Pace", 0, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Slow", 1, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto pace_label_0 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Slow", 1, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+
+
+	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Medium", 2, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto pace_label_1 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Medium", 2, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+
+
+	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Fast", 3, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	auto pace_label_2 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Fast", 3, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+
+
+	bottom_side_state_menu_c->child_components_.push_back(pace_pop_up_c);
+	**/
+
+	std::function<void()> toggle_pause_visible = std::bind(toggle_button_visible, pause_button_c);
+	std::function<void()> toggle_unpause_visible = std::bind(toggle_button_visible, unpause_button_c);
+
+	std::function<void()> pause_function = std::bind(set_property, SXNGN::PAUSE, 1.0);
+	std::function<void()> unpause_function = std::bind(set_property, SXNGN::PAUSE, 0.0);
+
+	Event_Component pause_game_event;
+	pause_game_event.e.func_event.callbacks.push_back(pause_function);
+	pause_game_event.e.func_event.callbacks.push_back(toggle_pause_visible);
+	pause_game_event.e.func_event.callbacks.push_back(toggle_unpause_visible);
+	pause_game_event.e.func_event.callbacks.push_back(update_pace);
+
+	Event_Component unpause_game_event;
+	unpause_game_event.e.func_event.callbacks.push_back(unpause_function);
+	unpause_game_event.e.func_event.callbacks.push_back(toggle_pause_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(toggle_unpause_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
+
+	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
+	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
+
+	pause_button_c->callback_functions_.push_back(ECS_Utils::pause_game);
+
+	unpause_button_c->callback_functions_.push_back(ECS_Utils::unpause_game);
+	ECS_Utils::unpause_game();
+
+
 	
 	std::function<void()> toggle_stop_visible = std::bind(toggle_button_visible, stop_button_c);
 	std::function<void()> toggle_go_visible = std::bind(toggle_button_visible, go_button_c);
+	
 
 	std::function<void()> stop_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 0.0);
 	std::function<void()> go_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 1.0);
+
+	
+	bottom_side_state_menu_c->child_components_.push_back(pause_button_c);
+	bottom_side_state_menu_c->child_components_.push_back(unpause_button_c);
+
 	stop_button_c->callback_functions_.push_back(stop_function);
 	stop_button_c->callback_functions_.push_back(toggle_stop_visible);
 	stop_button_c->callback_functions_.push_back(toggle_go_visible);
@@ -537,26 +570,15 @@ int init_menus()
 	bottom_side_state_menu_c->child_components_.push_back(stop_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(go_button_c);
 
-	Event_Component pause_game_event;
-	pause_game_event.e.func_event.callbacks.push_back(stop_function);
-	pause_game_event.e.func_event.callbacks.push_back(toggle_stop_visible);
-	pause_game_event.e.func_event.callbacks.push_back(toggle_go_visible);
-	pause_game_event.e.func_event.callbacks.push_back(update_pace);
-
-	Event_Component unpause_game_event;
-	unpause_game_event.e.func_event.callbacks.push_back(go_function);
-	unpause_game_event.e.func_event.callbacks.push_back(toggle_stop_visible);
-	unpause_game_event.e.func_event.callbacks.push_back(toggle_go_visible);
-	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
-
-	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
-	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
+	
 		
-
+	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
+	set_pace_medium();
+	/**
 	//set the pace value
 	std::function<void()> set_pace_stop = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 0.0);
 	std::function<void()> set_pace_slow = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.0);
-	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
+	
 	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.5);
 
 	pace_pop_up_c->child_components_.push_back(ig_pace_0);
@@ -587,6 +609,7 @@ int init_menus()
 	{
 		f();
 	}
+	**/
 
 
 
@@ -898,6 +921,11 @@ int main(int argc, char* args[])
 		
 		//get ms since the last time getMSSinceLastCheck was called
 		accumulated_ms += frame_cap_timer.getMSSinceLastCheck();
+		auto pause = gCoordinator.getSetting(SXNGN::PAUSE);
+		if (pause.first == 1.0)
+		{
+			accumulated_ms = 0;
+		}
 		//std::cout << "Acc: " << accumulated_ms << std::endl;
 		
 		//std::cout << dt_seconds << " " << accumulated_ms << std::endl;
@@ -953,10 +981,7 @@ int main(int argc, char* args[])
 			strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 			//Phys End
-			/////////////////////////////////Event System - respond to physics, input, etc
-			system_timer.start();
-			event_system->Update(dt_seconds);
-			strncpy(event_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
+			
 
 			system_timer.start();
 
@@ -991,6 +1016,10 @@ int main(int argc, char* args[])
 		sprite_factory_system->Update(accumulated_ms);
 		//Render Game
 		renderer_system->Update(accumulated_ms);
+		/////////////////////////////////Event System - respond to physics, input, etc
+		system_timer.start();
+		event_system->Update(accumulated_ms);
+		strncpy(event_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 		//Render End
 		SDL_RenderPresent(gRenderer);
 	}

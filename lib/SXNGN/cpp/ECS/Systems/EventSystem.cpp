@@ -540,7 +540,7 @@ namespace SXNGN::ECS {
 			std::string detail = "Weather.";
 			switch (ec->e.party_event.severity)
 			{
-			case EventSeverity::MILD: detail = "[MILD] A small sandstorm whips up. It will string to walk in this."; break;
+			case EventSeverity::MILD: detail = "[MILD] A small sandstorm whips up. It will sting to walk in this."; break;
 			case EventSeverity::MEDIUM: detail = "[MEDIUM] A sandstorm blows in. It will last for some time. Walking in this would be dangerous."; break;
 			case EventSeverity::EXTREME: detail = "[EXTREME] A massive sandstorm is whipping up. Only a fool would travel into this."; break;
 			case EventSeverity::SPICY: detail = "[Spicy!!!] The horizon is engulfed in a sandstorm. Traveling on would be suicide."; break;

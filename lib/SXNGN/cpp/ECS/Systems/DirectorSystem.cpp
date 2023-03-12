@@ -45,12 +45,6 @@ namespace SXNGN::ECS
 					director_ptr->has_event_table_ = true;
 				}
 
-				auto pause = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
-				if (pause.first <= 0)
-				{
-					dt = 0;
-				}
-
 				int inc = dt * OVERWORLD_MULTIPLIER;
 				director_ptr->game_clock_ += inc;
 				auto date_value = ui_single->string_to_ui_map_["OVERWORLD_date_value"];
@@ -64,7 +58,12 @@ namespace SXNGN::ECS
 				std::strftime(buffer, sizeof(buffer), time_format.c_str(), std::localtime(&director_ptr->game_clock_));  // format the time as a string
 				snprintf(time_value->label_->text, 100, "%s", buffer);
 
-				director_ptr->event_tick_s_ += dt;
+				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+				if (pace_go.first > 0.0)
+				{
+					director_ptr->event_tick_s_ += dt;
+				}
+				
 				if (director_ptr->event_tick_s_ >= director_ptr->event_gauge_s_)
 				{
 					director_ptr->event_tick_s_ = 0.0;

@@ -41,6 +41,7 @@ namespace SXNGN {
 	const std::string OVERWORLD_PACE_M_S = "OVERWORLD_PACE_M_S";
 	const std::string OVERWORLD_GO = "OVERWORLD_GO";
 	const std::string OVERWORLD_PACE_TOTAL_M_S = "OVERWORLD_PACE_TOTAL_M_S";
+	const std::string OVERWORLD_PAUSE = "OVERWORLD_PAUSE";
 
 	const std::string OVERWORLD_PLAYER_UUID = "OVERWORLD_PLAYER_UUID";
 

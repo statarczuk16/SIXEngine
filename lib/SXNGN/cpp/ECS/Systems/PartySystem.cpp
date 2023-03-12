@@ -34,7 +34,7 @@ namespace SXNGN::ECS
 			if (party_data)
 			{
 				Party* party_ptr = static_cast<Party*>(party_data);
-				
+			
 				auto pace_setting = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
 				if (pace_setting.second && pace_go.second)
