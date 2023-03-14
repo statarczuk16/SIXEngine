@@ -59,7 +59,7 @@ namespace SXNGN::ECS
 						}
 					}
 					//else recharge using food
-					else if(party_ptr->stamina_ < party_ptr->stamina_max_ && party_ptr->food_ >= 0.0)
+					else if(party_ptr->stamina_ < party_ptr->stamina_max_ && party_ptr->inventory_[ItemType::FOOD] >= 0.0)
 					{
 						double recharge_calories_per_minute = 5.0;
 						double recharge_calories_per_second = recharge_calories_per_minute / OVERWORLD_MULTIPLIER;
@@ -67,7 +67,7 @@ namespace SXNGN::ECS
 						double calories_recharged = dt * OVERWORLD_MULTIPLIER * recharge_calories_per_second;
 						party_ptr->stamina_ += calories_recharged;
 						double food_used = food_units_per_calorie * calories_recharged;
-						party_ptr->food_ -= food_used;
+						party_ptr->remove_item(ItemType::FOOD, food_used);
 
 						if (party_ptr->stamina_ >= party_ptr->stamina_max_)
 						{
@@ -83,8 +83,24 @@ namespace SXNGN::ECS
 				health_progress_bar->progressbar_->value = party_ptr->health_;
 				health_progress_bar->progressbar_->max_value = party_ptr->health_;
 				auto food_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_food"];
-				food_progress_bar->progressbar_->value = party_ptr->food_;
-				food_progress_bar->progressbar_->max_value = party_ptr->food_;
+				food_progress_bar->progressbar_->value = party_ptr->inventory_[ItemType::FOOD];
+				food_progress_bar->progressbar_->max_value = party_ptr->food_max_;
+
+				int column = 2;
+				for (int i = ItemType::UNKNOWN + 1; i != ItemType::END; i++)
+				{
+					ItemType item_type = static_cast<ItemType>(i);
+					std::string item_name_str = item_type_to_string()[item_type];
+					std::string ui_label_name = "OVERWORLD_amount_" + item_name_str;
+					auto label = ui_single->string_to_ui_map_[ui_label_name];
+					if (party_ptr->inventory_.count(item_type))
+					{
+						double amount = party_ptr->inventory_[item_type];
+						snprintf(label->label_->text, 100, "%.2f", amount);
+						//label->label_->text[amount.size()] = '\0';
+					}
+				}
+				
 				
 
 			}

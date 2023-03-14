@@ -516,6 +516,7 @@ int kiss_button_new_uc(kiss_button* button, kiss_window* wdw, char* text,
 	button->column = 0;
 	button->txt_v_align = VA_CENTER;
 	button->txt_h_align = HA_CENTER;
+	button->enabled = 1;
 	return 0;
 }
 
@@ -525,6 +526,10 @@ int kiss_button_event(kiss_button *button, SDL_Event *event, int *draw)
 	int visible = 0;
 	visible = (button->wdw->visible && button->visible);
 	if (!visible || !event) return 0;
+	if (button->enabled == 0)
+	{
+		return 0;
+	}
 	if (event->type == SDL_WINDOWEVENT &&
 		event->window.event == SDL_WINDOWEVENT_EXPOSED)
 		*draw = 1;
@@ -580,7 +585,7 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 		return 0;
 	}
 	
-	if (button->active)
+	if (button->active || button->enabled == 0)
 	{
 		kiss_renderimage(renderer, button->activeimg, button->r_rect.x,
 			button->r_rect.y, &button->r_rect);
@@ -661,6 +666,7 @@ int kiss_selectbutton_new_uc(kiss_selectbutton* selectbutton, kiss_window* wdw,
 	selectbutton->column = 0;
 	selectbutton->txt_v_align = VA_CENTER;
 	selectbutton->txt_h_align = HA_CENTER;
+	selectbutton->enabled = 1;
 	return 0;
 }
 

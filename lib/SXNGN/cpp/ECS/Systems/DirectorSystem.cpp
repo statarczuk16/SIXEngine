@@ -61,7 +61,7 @@ namespace SXNGN::ECS
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
 				if (pace_go.first > 0.0)
 				{
-					director_ptr->event_tick_s_ += dt;
+					director_ptr->event_tick_s_ += dt * 10;
 				}
 				
 				if (director_ptr->event_tick_s_ >= director_ptr->event_gauge_s_)

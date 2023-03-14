@@ -25,6 +25,8 @@ namespace SXNGN::ECS {
 
 		void Handle_Party_Event(Event_Component* ec);
 
+		void Handle_Choice_Event(Event_Component* ec);
+
 		void Handle_Mouse_Event(Event_Component* ec, Entity entity);
 
 		void Handle_Mouse_Wheel_Event(Event_Component* ec);

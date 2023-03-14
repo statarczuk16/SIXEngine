@@ -23,7 +23,8 @@ namespace SXNGN::ECS {
 		ORDER,
 		SPAWN,
 		PARTY,
-		FUNCTION
+		FUNCTION,
+		CHOICE
 	};
 
 	enum PartyEventType 
@@ -167,6 +168,18 @@ namespace SXNGN::ECS {
 	{
 		std::vector< std::function<void()> > callbacks;
 	};
+
+	//spawn choice window
+	struct SXNGN_ChoiceEvent
+	{
+		bool pause; //pause the game if true
+		std::string title; //title of choice
+		std::string detail; //details
+		std::vector <std::string> options_text; //text on the choice buttons per button
+		std::vector <std::function<void()> > options_callbacks;//functions that the buttons do when clicked
+		//std::vector <std::function<void()> > options_enables;//must return true or the button will be disabled
+		std::vector <bool> option_enables; //must be true of button will be disabled (this has higher priority over option_enables)
+	};
 	
 	struct SXNGN_Event
 	{
@@ -181,6 +194,7 @@ namespace SXNGN::ECS {
 		SXNGN_SpawnEvent spawn_event;
 		SXNGN_Party party_event;
 		SXNGN_FunctionEvent func_event;
+		SXNGN_ChoiceEvent choice_event;
 	};
 
 	struct Event_Component : ECS_Component

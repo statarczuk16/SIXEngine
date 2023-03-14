@@ -306,7 +306,8 @@ int init_menus()
 
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
-	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 120;
+	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 140;
+	const int MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH = 200;
 	const int OVERWORLD_STATE_HEIGHT = 580;
 	// Window
 	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
@@ -569,7 +570,7 @@ int init_menus()
 	go_button_c->callback_functions_.push_back(update_pace);
 	bottom_side_state_menu_c->child_components_.push_back(stop_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(go_button_c);
-
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);
 	
 		
 	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
@@ -611,10 +612,26 @@ int init_menus()
 	}
 	**/
 
+	auto inventory_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	std::shared_ptr<UIContainerComponent> inv_label_c = UserInputUtils::create_label(inventory_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "Inventory", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	int inv_row = 2;
+	for (int i = ItemType::UNKNOWN + 1; i != ItemType::END; i++)
+	{
+		ItemType item_type = static_cast<ItemType>(i);
+		std::string item_name_str = item_type_to_string()[item_type];
+		std::shared_ptr<UIContainerComponent> label_inv_item = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, item_name_str.data(), inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+		std::shared_ptr<UIContainerComponent> label_inv_amount = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+		label_inv_amount->name_ = "OVERWORLD_amount_" + item_name_str;
+		inv_row++;
+		inventory_window_c->child_components_.push_back(label_inv_item);
+		inventory_window_c->child_components_.push_back(label_inv_amount);
+
+	}
+	inventory_window_c->child_components_.push_back(inv_label_c);
 
 
 
-	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, inventory_window_c);
 	//************************* Debug Overlay
 	auto debug_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_SIDE_MENU_WIDTH, resolution.h - 2* MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	std::shared_ptr<UIContainerComponent> side_menu_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "FPS", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
@@ -622,9 +639,6 @@ int init_menus()
 
 	debug_fps_actual = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 1, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(debug_fps_actual);
-
-
-
 	input_system_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "INPUT", 2, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	debug_window_c->child_components_.push_back(input_system_label);
 	task_scheduler_label = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "TASK", 4, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
@@ -655,7 +669,7 @@ int init_menus()
 	 ecs_stats_num_entities = UserInputUtils::create_label(debug_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::TOP, "N/A", 15, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	 debug_window_c->child_components_.push_back(ecs_stats_num_entities);
 
-	 ui->add_ui_element(ComponentTypeEnum::CORE_BG_GAME_STATE, debug_window_c);
+	 //ui->add_ui_element(ComponentTypeEnum::CORE_BG_GAME_STATE, debug_window_c);
 
 
 

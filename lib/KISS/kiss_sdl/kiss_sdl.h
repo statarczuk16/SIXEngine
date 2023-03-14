@@ -195,6 +195,7 @@ typedef struct kiss_button {
 	int row;
 	int column;
 	int text_width;
+	int enabled;//otherwise grayed out
 	
 } kiss_button;
 
@@ -218,6 +219,7 @@ typedef struct kiss_selectbutton {
 	int column;
 	int text_width;
 	char* parameter;
+	int enabled;
 
 } kiss_selectbutton;
 

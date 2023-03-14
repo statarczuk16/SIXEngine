@@ -38,7 +38,7 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks, std::vector<bool> option_enables)
 	{
 		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
@@ -60,11 +60,30 @@ namespace SXNGN::ECS {
 
 		row = 3;
 		column = 0;
+		scale_to_parent_width button_width = SP_HALF;
+		h_alignment h_align = HA_COLUMN;
+		switch (option_strings.size())
+		{
+		case 1: button_width = SP_FILL_WITH_BUFFER; h_align = HA_CENTER; break;
+		case 2: button_width = SP_HALF; break;
+		case 3: button_width = SP_THIRD; break;
+		case 4: button_width = SP_FOURTH; break;
+		default: button_width = SP_FOURTH; break;
+		}
 		for (int i = 0; i < option_strings.size(); i++)
 		{
-			column = i;
+			column = i % 4;
 			char* button_str = option_strings[i].data();
-			std::shared_ptr<UIContainerComponent> button_c = UserInputUtils::create_button(message_window_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, button_str, row, column, 50, 50);
+			std::shared_ptr<UIContainerComponent> button_c = UserInputUtils::create_button(message_window_c->window_, h_align, VA_ROW, button_width, window_item_layer, button_str, row, column, 50, 50);
+
+			//set button to disabled if does not pass the test passed in
+			if (option_enables.size() > i)
+			{
+				if (!option_enables[i])
+				{
+					button_c->button_->enabled = false;
+				}
+			}
 			std::function<void(std::shared_ptr<UIContainerComponent> component)> kill_ui = [](std::shared_ptr<UIContainerComponent> uicc)
 			{
 				uicc->cleanup = true;
@@ -73,6 +92,7 @@ namespace SXNGN::ECS {
 			button_c->callback_functions_.push_back(kill_button);
 			button_c->callback_functions_.push_back(option_callbacks[i]);
 			message_window_c->child_components_.push_back(button_c);
+		
 		}
 		
 

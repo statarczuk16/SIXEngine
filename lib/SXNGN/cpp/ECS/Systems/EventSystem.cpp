@@ -132,6 +132,12 @@ namespace SXNGN::ECS {
 					break;
 
 				}
+				case EventType::CHOICE:
+				{
+					SDL_LogInfo(1, "Event_System::Update:: Got Choice Event");
+					Handle_Choice_Event(event_ptr);
+					break;
+				}
 				case EventType::SELECTION:
 				{
 					//todo max number of selected entities
@@ -392,6 +398,19 @@ namespace SXNGN::ECS {
 		Entity_Builder_Utils::Create_Tile(gCoordinator, ComponentTypeEnum::MAIN_GAME_STATE, ec->e.spawn_event.x_ / SXNGN::BASE_TILE_WIDTH, ec->e.spawn_event.y_ / SXNGN::BASE_TILE_HEIGHT, "APOCALYPSE_MAP", "BLACK_BORDER", CollisionType::STATIC, "spawned_block");
 	}
 
+	void Event_System::Handle_Choice_Event(Event_Component* ec)
+	{
+		auto ui = UICollectionSingleton::get_instance();
+		auto gCoordinator = *SXNGN::Database::get_coordinator();
+		
+		auto message_box_c = UserInputUtils::create_message_box(nullptr, ec->e.choice_event.title, ec->e.choice_event.detail, 500, 300, UILayer::BOTTOM, ec->e.choice_event.options_text, ec->e.choice_event.options_callbacks, ec->e.choice_event.option_enables);
+		if (ec->e.choice_event.pause)
+		{
+			ECS_Utils::pause_game();
+		}
+		ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+	}
+
 	void Event_System::Handle_Party_Event(Event_Component* ec)
 	{
 		auto gCoordinator = SXNGN::Database::get_coordinator();
@@ -413,18 +432,15 @@ namespace SXNGN::ECS {
 			{
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
-				party_ptr->footwear_ -= 1;
-				if (party_ptr->footwear_ < 0)
-				{
-					party_ptr->footwear_ = 0;
-				}
+				party_ptr->remove_item(ItemType::FOOTWEAR, 1);
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};
 			
 			options_list_text.push_back("Ok");
 			options_list_events.push_back(set_bad_boots);
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			std::vector<bool> option_enables;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -461,13 +477,40 @@ namespace SXNGN::ECS {
 			{
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
-				party_ptr->lost_counter_ += lost_counter_inc;
+				std::string result = "";
+				int success = party_ptr->use_gps(result);
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 			};
 			options_list_text.push_back("Ok");
-			options_list_events.push_back(set_lost);
 			options_list_text.push_back("Use GPS");
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			options_list_events.push_back(set_lost);
+			options_list_events.push_back(use_gps);
+			std::vector<bool> option_enables;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Lost!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
+
+			auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+			auto party_ptr = static_cast<Party*>(party_component);
+			for (auto option_button : message_box_c->child_components_)
+			{
+				if (option_button->type_ != UIType::BUTTON)
+				{
+					continue;
+				}
+				if (strcmp(option_button->button_->text, "Use GPS") == 0)
+				{
+					std::string reason_str = "";
+					bool button_enabled = party_ptr->can_use_gps(reason_str);
+					if (!button_enabled)
+					{
+						std::string new_button_text = "Use GPS (" + reason_str + ")";
+						option_button->button_->enabled = 0;
+						new_button_text.copy(option_button->button_->text, new_button_text.size());
+						option_button->button_->text[new_button_text.size()] = '\0';
+						
+					}
+				}
+			}
+			gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -487,19 +530,103 @@ namespace SXNGN::ECS {
 			}
 
 
-			std::function<void()> bandits_func = [gCoordinator, party_entity]()
+			std::function<void()> yield_func = [gCoordinator, party_entity]()
+			{
+				
+				
+				Event_Component* yield_event_choice = new Event_Component();
+				yield_event_choice->e.common.type = EventType::CHOICE;
+				yield_event_choice->e.choice_event.title = "Demands";
+
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				bool can_give_food = party_ptr->inventory_[ItemType::FOOD] >= 500;
+				bool can_give_batteries = party_ptr->inventory_[ItemType::BATTERY] > 0;
+				bool can_give_medkit = party_ptr->inventory_[ItemType::MEDKIT] > 0;
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+				yield_event_choice->e.choice_event.detail = "The bandits demand 500 food, a medkit, or 3 batteries.";
+
+				yield_event_choice->e.choice_event.options_text.push_back("500 food");
+				std::function<void()> give_food_func = [gCoordinator, party_entity]()
+				{
+					auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+					auto party_ptr = static_cast<Party*>(party_component);
+					party_ptr->remove_item(ItemType::FOOD, 500.0);
+					gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+				};
+				yield_event_choice->e.choice_event.options_callbacks.push_back(give_food_func);
+				yield_event_choice->e.choice_event.option_enables.push_back(can_give_food);
+
+				yield_event_choice->e.choice_event.options_text.push_back("1 medkit");
+				std::function<void()> give_medkit_func = [gCoordinator, party_entity]()
+				{
+					auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+					auto party_ptr = static_cast<Party*>(party_component);
+					party_ptr->remove_item(ItemType::MEDKIT, 1);
+					gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+				};
+				yield_event_choice->e.choice_event.options_callbacks.push_back(give_medkit_func);
+				yield_event_choice->e.choice_event.option_enables.push_back(can_give_medkit);
+
+				yield_event_choice->e.choice_event.options_text.push_back("1 battery");
+				std::function<void()> give_battery_func = [gCoordinator, party_entity]()
+				{
+					auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+					auto party_ptr = static_cast<Party*>(party_component);
+					party_ptr->remove_item(ItemType::BATTERY, 1);
+					gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+				};
+				yield_event_choice->e.choice_event.options_callbacks.push_back(give_battery_func);
+				yield_event_choice->e.choice_event.option_enables.push_back(can_give_batteries);
+
+				Entity yield_event_entity = gCoordinator->CreateEntity();
+				gCoordinator->AddComponent(yield_event_entity, yield_event_choice);
+				gCoordinator->AddComponent(yield_event_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
+
+			};
+			std::function<void()> fight_func = [gCoordinator, party_entity, yield_func]()
 			{
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
-				
-				party_ptr->food_ -= 500;
-				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+				
+				yield_func();
+				
 			};
 			std::vector<std::function<void()>> options_list_events;
-			options_list_text.push_back("Ok");
-			options_list_events.push_back(bandits_func);
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Bandits", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			options_list_text.push_back("Yield");
+			options_list_text.push_back("Fight");
+			options_list_events.push_back(yield_func);
+			options_list_events.push_back(fight_func);
+			std::vector<bool> option_enables;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Bandits", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
+
+			auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+			auto party_ptr = static_cast<Party*>(party_component);
+			for (auto option_button : message_box_c->child_components_)
+			{
+				if (option_button->type_ != UIType::BUTTON)
+				{
+					continue;
+				}
+				if (strcmp(option_button->button_->text, "Fight") == 0)
+				{
+					std::string reason_str = "";
+					int strength = party_ptr->get_fighting_strength(reason_str);
+					
+					std::string new_button_text = "Fight (Strength: " + std::to_string(strength) + ")";// + "\n" + reason_str + ")";
+					new_button_text.copy(option_button->button_->text, new_button_text.size());
+					option_button->button_->text[new_button_text.size()] = '\0';
+				}
+			}
+			gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -531,11 +658,48 @@ namespace SXNGN::ECS {
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};
+			std::function<void()> use_medkit = [gCoordinator, party_entity]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				std::string reason = "";
+				if (party_ptr->can_use_medit(reason))
+				{
+					party_ptr->remove_item(ItemType::MEDKIT, 1);
+				}
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+
+			};
 			std::vector<std::function<void()>> options_list_events;
 			options_list_text.push_back("Ok");
+			options_list_text.push_back("Use Medicine");
 			options_list_events.push_back(sick_func);
+			options_list_events.push_back(use_medkit);
+			std::vector<bool> option_enables;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
 
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Feeling sick...", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+			auto party_ptr = static_cast<Party*>(party_component);
+			for (auto option_button : message_box_c->child_components_)
+			{
+				if (option_button->type_ != UIType::BUTTON)
+				{
+					continue;
+				}
+				if (strcmp(option_button->button_->text, "Use Medicine") == 0)
+				{
+					std::string reason_str = "";
+					bool button_enabled = party_ptr->can_use_medit(reason_str);
+					if (!button_enabled)
+					{
+						std::string new_button_text = "Use Medicine (" + reason_str + ")";
+						option_button->button_->enabled = 0;
+						new_button_text.copy(option_button->button_->text, new_button_text.size());
+						option_button->button_->text[new_button_text.size()] = '\0';
+					}
+				}
+			}
+			gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
@@ -568,7 +732,8 @@ namespace SXNGN::ECS {
 			std::vector<std::function<void()>> options_list_events;
 			options_list_events.push_back(weather_func);
 			options_list_text.push_back("Ok");
-			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events);
+			std::vector<bool> option_enables;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
 			ECS_Utils::pause_game();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;

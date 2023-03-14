@@ -6,6 +6,7 @@
 #include <sole.hpp>
 #include <queue>
 #include <Constants.h>
+#include <ECS/Core/Item.hpp>
 using nlohmann::json;
 
 using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
@@ -21,59 +22,166 @@ namespace SXNGN::ECS {
 			health_max_ = 100.0;
 			stamina_ = 1000.0;
 			stamina_max_ = stamina_;
-			food_ = 2000.0;
-			food_max_ = food_;
-			water_ = 100.0;
+			food_max_ = 1000.0;
+
 			hands_ = 1.0;
 			muscle_ = 0.0;
-			footwear_ = 1;
+			
+
 			lost_counter_ = 0.0;
 			sick_counter_ = 0.0;
+			weather_counter_ = 0.0;
+
+
+
+			inventory_[ItemType::AMMO] = 6;
+			inventory_[ItemType::BATTERY] = 1;
+			inventory_[ItemType::FOOD] = 750.0;
+			inventory_[ItemType::FOOTWEAR] = 1;
+			inventory_[ItemType::GPS] = 0;
+			inventory_[ItemType::GUN] = 1;
+			inventory_[ItemType::MEDKIT] = 1;
+			inventory_[ItemType::WATER] = 10;
+
 		}
 		
 		std::vector<sole::uuid> character_ids_; //uuuid of unique characters who have their own entities
 		double health_;
 		double stamina_;
-		double food_;
-		double water_;
 		double hands_;
 		double muscle_;
 
 		double health_max_;
 		double stamina_max_;
 		double food_max_;
-		int footwear_;
-		int batteries_;
-		int ammo_;
-		int guns_;
-		int medkits_;
 
-		bool have_gps_;
+		std::map<ItemType, double> inventory_;
 		
 		double lost_counter_; //party will make no progress until counter hits 0
 		double sick_counter_; //stamina regeneration halved until counter hits 0
 		double weather_counter_; //stamina regeneration halved until counter hits 0
 
-		bool can_use_gps()
+		void add_item(ItemType item, double amount)
 		{
-			return batteries_ > 0 && have_gps_;
+			if (inventory_.count(item) > 0)
+			{
+				inventory_[item] += amount;
+			}
+			else
+			{
+				inventory_[item] = amount;
+			}
 		}
 
-		bool can_use_medit()
+		void remove_item(ItemType item, double amount)
 		{
-			return medkits_ > 0;
+			if (inventory_.count(item) > 0)
+			{
+				inventory_[item] -= amount;
+				if (inventory_[item] < 0)
+				{
+					inventory_.erase(item);
+				}
+			}
+			
 		}
 
-		bool have_footwear()
+		bool can_use_gps(std::string& result)
 		{
-			return footwear_ >= hands_;
+			if (inventory_[ItemType::BATTERY] > 0 && inventory_[ItemType::GPS] > 0)
+			{
+				
+				result = "Success";
+				return true;
+			}
+			else if (inventory_[ItemType::GPS] < 1)
+			{
+				result = "No GPS";
+			}
+			else
+			{
+				result = "Need batteries";
+			}
+			return false;
+			
 		}
 
-		int hands_without_footwear()
+		int use_gps(std::string& result)
+		{
+
+			if (can_use_gps(result))
+			{
+				if (lost_counter_ > 0.0)
+				{
+					lost_counter_ = 0.0;
+					remove_item(ItemType::BATTERY, 1);
+					result = "Success";
+					return 0;
+				}
+				else
+				{
+					result = "Not Lost";
+					return 1;
+				}
+			}
+			else
+			{
+				//result already filled in from can_use_gps
+				return 1;
+			}
+		}
+
+		int use_medkit(std::string& result)
+		{
+			if (can_use_medit(result))
+			{
+				if (sick_counter_ > 0.0)
+				{
+					result = "Cured sickness with medkit.";
+					sick_counter_ = 0.0;
+					remove_item(ItemType::MEDKIT, 1);
+					return 0;
+				}
+				else if (health_ < health_max_)
+				{
+					health_ = health_max_;
+					remove_item(ItemType::MEDKIT, 1);
+					result = "Recovered health with medkit.";
+					return 0;
+				}
+			}
+			else
+			{
+				//result filled in from can_use_medkit
+				return 1;
+			}
+			
+		}
+
+		bool can_use_medit(std::string& result)
+		{
+			if (inventory_[ItemType::MEDKIT] > 0)
+			{
+				result = "Success";
+				return true;
+			}
+			else
+			{
+				result = "No Medkits";
+				return false;
+			}
+		}
+
+		bool have_footwear(std::string& result)
+		{
+			return inventory_[ItemType::FOOTWEAR] >= hands_;
+		}
+
+		int hands_without_footwear(std::string& result)
 		{
 			//10 guys and 3 boots = 7 without boots
 			//10 guys and 12 boots = -2 without boots
-			int temp = hands_ - footwear_;
+			int temp = hands_ - inventory_[ItemType::FOOTWEAR];
 			if (temp > 0)
 			{
 				return temp;
@@ -84,32 +192,36 @@ namespace SXNGN::ECS {
 			}
 		}
 
-		int get_fighting_strength()
+		int get_fighting_strength(std::string& result)
 		{
 			//hand with a gun = 10 strength
 			//hand with no gun = 2 strength
 			//gun needs at least 1 bullet per combat round to fight
 
-			int strength;
-			int guns_temp;
-
-			if (ammo_ > guns_)
+			int strength = 0;
+			int guns_temp = 0;
+			result = "Fighting Strength\n";
+			if (inventory_[ItemType::AMMO] > inventory_[ItemType::GUN])
 			{
+				result += "Ammo for all guns.\n";
 				//if more ammo than guns, all guns operational
-				guns_temp = guns_;
+				guns_temp = inventory_[ItemType::GUN];
 			}
 			else
 			{
 				//else if we have say 5 bullets and 10 guns, there are really only 5 guns available
-				guns_temp = ammo_;
+				result += "Ammo for " + std::to_string(inventory_[ItemType::AMMO]) + " guns.\n";
+				guns_temp = inventory_[ItemType::AMMO];
 			}
 			if (guns_temp >= hands_)
 			{
 				//all hands have guns, 
+				result += "Guns for all hands.\n";
 				strength += hands_ * 10;
 			}
 			else if (hands_ > guns_temp)
 			{
+				result += "Guns for " + std::to_string(guns_temp) + " hands\n";
 				//if not enough guns to go around
 				//add 10 for every person with a gun
 				int temp = hands_;
@@ -134,10 +246,9 @@ namespace SXNGN::ECS {
 			{"character_ids_",p.character_ids_},
 			{"health_",p.health_},
 			{"stamina_",p.stamina_},
-			{"food_",p.food_},
-			{"water_",p.water_},
 			{"hands_",p.hands_},
-			{"muscle_",p.muscle_}
+			{"muscle_",p.muscle_},
+			{"inventory_",p.inventory_}
 
 		};
 
@@ -149,10 +260,9 @@ namespace SXNGN::ECS {
 		j.at("character_ids_").get_to(p.character_ids_);
 		j.at("health_").get_to(p.health_);
 		j.at("stamina_").get_to(p.stamina_);
-		j.at("food_").get_to(p.food_);
-		j.at("water_").get_to(p.water_);
 		j.at("hands_").get_to(p.hands_);
 		j.at("muscle_").get_to(p.muscle_);
+		j.at("inventory_").get_to(p.inventory_);
 
 	}
 

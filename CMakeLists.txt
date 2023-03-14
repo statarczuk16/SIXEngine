@@ -26,7 +26,7 @@ elseif (MINGW)
 	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8) #64 bit systems have length 8 words
 		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/x86_64-w64-mingw32/)
 	else()
-		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/)
+		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/) 
 	endif()
 else()
 	message("Linux")   
