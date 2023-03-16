@@ -16,6 +16,7 @@ namespace SXNGN {
 	const double OVERWORLD_PIXELS_TO_KM = OVERWORLD_PIXELS_TO_METERS * 1000.0;
 	const double OVERWORLD_METERS_PER_GRID = 1000.0;
 	const double OVERWORLD_PIXELS_PER_GRID = OVERWORLD_PIXELS_TO_METERS * OVERWORLD_METERS_PER_GRID;
+	const double OVERWORLD_GRIDS_PER_PIXEL = 1 / OVERWORLD_PIXELS_PER_GRID;
 
 	const size_t DEFAULT_WORLD_HEIGHT_CHUNKS = 4;
 	const size_t DEFAULT_WORLD_WIDTH_CHUNKS = 4;
@@ -53,6 +54,8 @@ namespace SXNGN {
 	const std::string UNPAUSE = "UNPAUSE";
 
 	const std::string CACHE = "_CACHE";
+
+	const std::string WORLD_MAP = "WORLD_MAP";
 
 	const double LOST_BASE_MINUTES_GM = 20.0; //game time minutes to be lost for when lost event happens
 	const double SICK_BASE_MINUTES_GM = 60.0 * 2; //game time minutes to be sick for when sick event happens

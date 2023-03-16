@@ -67,6 +67,18 @@ namespace SXNGN::ECS
 				if (director_ptr->event_tick_s_ >= director_ptr->event_gauge_s_)
 				{
 					director_ptr->event_tick_s_ = 0.0;
+
+
+					auto overworld_player_uuid = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+					if (overworld_player_uuid != SXNGN::BAD_UUID)
+					{
+						auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
+						auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+						auto party_ptr = static_cast<Party*>(party_component);
+						PruneEvents(director_ptr, party_ptr);
+						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+					}
+					
 					auto generated_event = director_ptr->event_table_.generate_event(&director_ptr->event_table_);
 					std::cout << "Generating event " << generated_event->to_std_string() << std::endl;
 					Event_Component* event_component = new Event_Component();
@@ -84,6 +96,41 @@ namespace SXNGN::ECS
 			gCoordinator.CheckInComponent(entity_actable, ComponentTypeEnum::DIRECTOR);
 			
 			
+		}
+	}
+
+
+	DropEntry<PartyEventType>* Director_System::FindEventByType(Director* director_ptr, PartyEventType search_val)
+	{
+		if (director_ptr->event_table_cache_.count(search_val))
+		{
+			if (director_ptr->event_table_cache_[search_val] != nullptr)
+			{
+				return director_ptr->event_table_cache_[search_val];
+			}
+		}
+		DropEntry<PartyEventType>*  search_result = director_ptr->event_table_.find_event_by_type(search_val);
+		if (search_result != nullptr)
+		{
+			if (search_result->value == search_val)
+			{
+				director_ptr->event_table_cache_[search_val] = search_result;
+				return search_result;
+			}
+			else
+			{
+				SDL_LogError(1, "Bad Value in FindEventByType");
+			}
+		}
+		return nullptr;
+	}
+
+	void Director_System::PruneEvents(Director* director_ptr, Party* party_ptr)
+	{
+		if (party_ptr->inventory_[ItemType::FOOTWEAR] < 1)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_BOOTS);
+			event_ptr->weight = 0;
 		}
 	}
 

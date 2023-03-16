@@ -4,6 +4,8 @@
 /cmake-build*/
 /vclib/
 /.idea/
+/CMakeFiles/
+CMakeSettings.json
 
 # Prerequisites
 *.d

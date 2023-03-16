@@ -34,6 +34,31 @@ namespace SXNGN::ECS
 			if (party_data)
 			{
 				Party* party_ptr = static_cast<Party*>(party_data);
+
+
+				//Handle Location in World
+
+				auto world_map_uuid = gCoordinator.getUUID(SXNGN::WORLD_MAP);
+				auto world_map_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(world_map_uuid), ComponentTypeEnum::WORLD_MAP);
+				const WorldMap* worldmap_ptr = static_cast<const WorldMap*>(world_map_data);
+				
+				auto location_data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::LOCATION);
+				const Location* location_ptr = static_cast<const Location*>(location_data);
+
+				int world_map_grid_x = round(location_ptr->m_pos_x_m_ * SXNGN::OVERWORLD_GRIDS_PER_PIXEL);
+				int world_map_grid_y = round(location_ptr->m_pos_y_m_ * SXNGN::OVERWORLD_GRIDS_PER_PIXEL);
+
+				std::vector<sole::uuid> party_map_location_uuids;
+				if (worldmap_ptr->world_locations_.size() > world_map_grid_x)
+				{
+					if (worldmap_ptr->world_locations_.at(world_map_grid_x).size() > world_map_grid_y)
+					{
+						party_map_location_uuids = worldmap_ptr->world_locations_[world_map_grid_x][world_map_grid_y];
+					}
+				}
+				
+
+				// Handle Pace
 			
 				auto pace_setting = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);

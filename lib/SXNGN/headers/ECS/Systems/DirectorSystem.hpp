@@ -16,6 +16,11 @@ namespace SXNGN::ECS {
 
 		void Update(double dt);
 
+		//Adjust values for drop events. IE dont spawn BAD_BOOTS event if player already has no boots.
+		void PruneEvents(Director* director_ptr, Party* party_ptr);
+
+		DropEntry<PartyEventType>* FindEventByType(Director* director_ptr, PartyEventType search_val);
+
 		DropEntry<PartyEventType> GenerateEventTable();
 
 

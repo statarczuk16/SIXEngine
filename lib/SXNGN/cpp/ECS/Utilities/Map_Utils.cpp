@@ -219,6 +219,7 @@ namespace SXNGN::ECS {
 			world_map_component->world_locations_.push_back(uuids_this_row);
 		}
 		gCoordinator->AddComponent(world_map_entity, world_map_component);
+		gCoordinator->setUUID(SXNGN::WORLD_MAP, gCoordinator->GetUUIDFromEntity(world_map_entity));
 	}
 
 	void Map_Utils::InitializeScrollingBackground()

@@ -35,6 +35,25 @@ namespace SXNGN::ECS {
 		std::vector<DropEntry> children;
 		T value;
 
+		DropEntry* find_event_by_type(T search_value)
+		{
+			DropEntry* ret_val = nullptr;
+			if (value == search_value)
+			{
+				return this;
+			}
+			for (int i = 0; i < this->children.size(); i++)
+			{
+				ret_val = this->children.at(i).find_event_by_type(search_value);
+				if (ret_val != nullptr)
+				{
+					break;
+				}
+			}
+			return ret_val;
+
+		}
+
 		/// <summary>
 		/// generate_event
 		/// Recursive function that traverses the DropEntry's children (self inclusive) and chooses a DropEntry to return based on its probability weight.
@@ -188,6 +207,7 @@ namespace SXNGN::ECS {
 		double event_tick_s_;
 		DropEntry<PartyEventType> event_table_;
 		bool has_event_table_;
+		std::unordered_map<PartyEventType, DropEntry<PartyEventType>* > event_table_cache_;
 
 
 	};

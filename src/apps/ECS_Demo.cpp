@@ -486,6 +486,16 @@ int init_menus()
 		uicc->button_->visible = !uicc->button_->visible;
 	};
 
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_button_invisible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->button_->visible = 0;
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_button_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->button_->visible = 1;
+	};
+
 
 	auto bottom_side_state_menu_c = UserInputUtils::create_window_raw(nullptr, 0, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	
@@ -521,22 +531,25 @@ int init_menus()
 	bottom_side_state_menu_c->child_components_.push_back(pace_pop_up_c);
 	**/
 
-	std::function<void()> toggle_pause_visible = std::bind(toggle_button_visible, pause_button_c);
-	std::function<void()> toggle_unpause_visible = std::bind(toggle_button_visible, unpause_button_c);
+	std::function<void()> set_pause_visible = std::bind(set_button_visible, pause_button_c);
+	std::function<void()> set_unpause_visible = std::bind(set_button_visible, unpause_button_c);
+
+	std::function<void()> set_pause_invisible = std::bind(set_button_invisible, pause_button_c);
+	std::function<void()> set_unpause_invisible = std::bind(set_button_invisible, unpause_button_c);
 
 	std::function<void()> pause_function = std::bind(set_property, SXNGN::PAUSE, 1.0);
 	std::function<void()> unpause_function = std::bind(set_property, SXNGN::PAUSE, 0.0);
 
 	Event_Component pause_game_event;
 	pause_game_event.e.func_event.callbacks.push_back(pause_function);
-	pause_game_event.e.func_event.callbacks.push_back(toggle_pause_visible);
-	pause_game_event.e.func_event.callbacks.push_back(toggle_unpause_visible);
+	pause_game_event.e.func_event.callbacks.push_back(set_pause_invisible);
+	pause_game_event.e.func_event.callbacks.push_back(set_unpause_visible);
 	pause_game_event.e.func_event.callbacks.push_back(update_pace);
 
 	Event_Component unpause_game_event;
 	unpause_game_event.e.func_event.callbacks.push_back(unpause_function);
-	unpause_game_event.e.func_event.callbacks.push_back(toggle_pause_visible);
-	unpause_game_event.e.func_event.callbacks.push_back(toggle_unpause_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(set_pause_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(set_unpause_invisible);
 	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
 
 	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
