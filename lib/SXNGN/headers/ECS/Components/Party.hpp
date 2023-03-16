@@ -34,6 +34,8 @@ namespace SXNGN::ECS {
 
 
 
+			bool at_ruins_ = false;
+			bool at_settlement_ = false;
 			inventory_[ItemType::AMMO] = 6;
 			inventory_[ItemType::BATTERY] = 1;
 			inventory_[ItemType::FOOD] = 750.0;
@@ -46,6 +48,7 @@ namespace SXNGN::ECS {
 		}
 		
 		std::vector<sole::uuid> character_ids_; //uuuid of unique characters who have their own entities
+		std::vector<sole::uuid> world_location_ids_; //uuids of world locations character can access
 		double health_;
 		double stamina_;
 		double hands_;

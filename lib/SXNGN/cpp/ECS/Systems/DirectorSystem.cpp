@@ -45,6 +45,7 @@ namespace SXNGN::ECS
 					director_ptr->has_event_table_ = true;
 				}
 
+				//Update the date and time
 				int inc = dt * OVERWORLD_MULTIPLIER;
 				director_ptr->game_clock_ += inc;
 				auto date_value = ui_single->string_to_ui_map_["OVERWORLD_date_value"];
@@ -57,6 +58,64 @@ namespace SXNGN::ECS
 				std::string time_format = "%H:%M";  // define the format string
 				std::strftime(buffer, sizeof(buffer), time_format.c_str(), std::localtime(&director_ptr->game_clock_));  // format the time as a string
 				snprintf(time_value->label_->text, 100, "%s", buffer);
+
+				//Get data about overworld locations player can touch
+				auto overworld_player_uuid = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+				bool at_settlement = false;
+				bool at_ruins = false;
+				auto ui = UICollectionSingleton::get_instance();
+				if (overworld_player_uuid != SXNGN::BAD_UUID)
+				{
+					auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
+					auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+					auto party_ptr = static_cast<Party*>(party_component);
+					for (auto id : party_ptr->world_location_ids_)
+					{
+						auto world_location_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(id), ComponentTypeEnum::WORLD_LOCATION);
+						const WorldLocation* ptr = static_cast<const WorldLocation*>(world_location_data);
+						if (ptr->has_ruins_)
+						{
+							at_ruins = true;
+							auto ruins_name_label = ui->string_to_ui_map_["OVERWORLD_ruins_name"];
+							snprintf(ruins_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
+
+						}
+						if (ptr->has_settlement_)
+						{
+							at_settlement = true;
+							auto settlement_name_label = ui->string_to_ui_map_["OVERWORLD_settlement_name"];
+							snprintf(settlement_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
+						}
+					}
+
+					gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+				}
+				if (at_ruins)
+				{
+					auto scavenge_button = ui->string_to_ui_map_["OVERWORLD_scavenge_button"];
+					scavenge_button->button_->enabled = true;
+				}
+				else
+				{
+					auto ruins_name_label = ui->string_to_ui_map_["OVERWORLD_ruins_name"];
+					snprintf(ruins_name_label->label_->text, KISS_MAX_LABEL, "None");
+					auto scavenge_button = ui->string_to_ui_map_["OVERWORLD_scavenge_button"];
+					scavenge_button->button_->enabled = false;
+				}
+
+				if (at_settlement)
+				{
+					auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
+					trade_button->button_->enabled = true;
+				}
+				else
+				{
+					auto settlement_name_label = ui->string_to_ui_map_["OVERWORLD_settlement_name"];
+					snprintf(settlement_name_label->label_->text, KISS_MAX_LABEL,"None");
+					auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
+					trade_button->button_->enabled = false;
+				}
+
 
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
 				if (pace_go.first > 0.0)
@@ -76,6 +135,8 @@ namespace SXNGN::ECS
 						auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 						auto party_ptr = static_cast<Party*>(party_component);
 						PruneEvents(director_ptr, party_ptr);
+
+
 						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 					}
 					

@@ -56,6 +56,7 @@ namespace SXNGN::ECS
 						party_map_location_uuids = worldmap_ptr->world_locations_[world_map_grid_x][world_map_grid_y];
 					}
 				}
+				party_ptr->world_location_ids_ = party_map_location_uuids;
 				
 
 				// Handle Pace
