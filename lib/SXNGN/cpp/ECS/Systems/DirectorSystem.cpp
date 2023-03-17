@@ -117,10 +117,10 @@ namespace SXNGN::ECS
 				}
 
 
-				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S);
 				if (pace_go.first > 0.0)
 				{
-					director_ptr->event_tick_s_ += dt * 10;
+					director_ptr->event_tick_s_ += dt;
 				}
 				
 				if (director_ptr->event_tick_s_ >= director_ptr->event_gauge_s_)
@@ -193,6 +193,21 @@ namespace SXNGN::ECS
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_BOOTS);
 			event_ptr->weight = 0;
 		}
+		if (party_ptr->sick_counter_ > 0.0)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_SICK);
+			event_ptr->weight = 0;
+		}
+		if (party_ptr->lost_counter_ > 0.0)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_LOST);
+			event_ptr->weight = 0;
+		}
+		if (party_ptr->weather_counter_ > 0.0)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_WEATHER);
+			event_ptr->weight = 0;
+		}
 	}
 
 	DropEntry<PartyEventType> Director_System::GenerateEventTable()
@@ -245,6 +260,11 @@ namespace SXNGN::ECS
 			event_entry.value = event_type;
 			neutral_events.children.push_back(event_entry);
 		}
+
+		//disable robber for until combat implemented
+		DropEntry<PartyEventType>* event_ptr = bad_events.find_event_by_type(PartyEventType::BAD_ROBBER);
+		event_ptr->max_weight = 0.0;
+		event_ptr->weight = 0.0;
 
 
 		event_table.children.push_back(bad_events);

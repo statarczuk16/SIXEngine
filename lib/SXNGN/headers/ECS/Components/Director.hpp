@@ -107,6 +107,10 @@ namespace SXNGN::ECS {
 				}
 				else
 				{
+					if (node->children[i].value == PartyEventType::BAD_ROBBER)
+					{
+						std::cout << "Robber";
+					}
 					node->children[i].weight += node->children[i].accumulation; //make children that were not chosen more likely to be chosen in the future
 					node->children[i].weight = std::clamp(node->children[i].weight, node->children[i].min_weight, node->children[i].max_weight);
 				}

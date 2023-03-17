@@ -426,7 +426,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			
 			std::vector<std::function<void()>> options_list_events;
-			std::string detail = "A hole has worn in your boots. Walking without footwear will hurt.";
+			std::string detail = "A hole has worn in a pair of boots. Pace will be slowed without footwear.";
 
 			std::function<void()> set_bad_boots = [gCoordinator, party_entity]()
 			{
@@ -463,13 +463,15 @@ namespace SXNGN::ECS {
 			case EventSeverity::SPICY: detail = "[Spicy!!!] In a thirty stupor, you followed a mirage for an unknowable amount of time. You've come to in an unknown land."; break;
 			}
 			double severity = (double)ec->e.party_event.severity;
-			double lost_counter_inc = severity * LOST_BASE_MINUTES_GM;
+			double lost_counter_inc = severity * LOST_BASE_KM_GM;
 
 			std::function<void()> set_lost = [gCoordinator, party_entity, lost_counter_inc]()
 			{
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
-				party_ptr->lost_counter_ += lost_counter_inc;
+				party_ptr->lost_counter_ = lost_counter_inc;
+				party_ptr->lost_counter_max_ = lost_counter_inc;
+				ECS_Utils::update_pace();
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};
@@ -654,7 +656,8 @@ namespace SXNGN::ECS {
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
 
-				party_ptr->sick_counter_ += sick_counter_inc;
+				party_ptr->sick_counter_ = sick_counter_inc;
+				party_ptr->sick_counter_max_ = sick_counter_inc;
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};
@@ -726,6 +729,7 @@ namespace SXNGN::ECS {
 				auto party_ptr = static_cast<Party*>(party_component);
 
 				party_ptr->weather_counter_ += weather_counter_inc;
+				party_ptr->weather_counter_max_ += weather_counter_inc;
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};

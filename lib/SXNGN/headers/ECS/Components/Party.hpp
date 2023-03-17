@@ -25,15 +25,15 @@ namespace SXNGN::ECS {
 			food_max_ = 1000.0;
 
 			hands_ = 1.0;
-			muscle_ = 0.0;
-			
-
 			lost_counter_ = 0.0;
 			sick_counter_ = 0.0;
 			weather_counter_ = 0.0;
+			lost_counter_max_ = 0.0;
+			sick_counter_max_ = 0.0;
+			weather_counter_max_ = 0.0;
 
 
-
+			
 			bool at_ruins_ = false;
 			bool at_settlement_ = false;
 			inventory_[ItemType::AMMO] = 6;
@@ -44,6 +44,7 @@ namespace SXNGN::ECS {
 			inventory_[ItemType::GUN] = 1;
 			inventory_[ItemType::MEDKIT] = 1;
 			inventory_[ItemType::WATER] = 10;
+			update_encumbrance();
 
 		}
 		
@@ -63,6 +64,33 @@ namespace SXNGN::ECS {
 		double lost_counter_; //party will make no progress until counter hits 0
 		double sick_counter_; //stamina regeneration halved until counter hits 0
 		double weather_counter_; //stamina regeneration halved until counter hits 0
+		double lost_counter_max_; //party will make no progress until counter hits 0
+		double sick_counter_max_; //stamina regeneration halved until counter hits 0
+		double weather_counter_max_; //stamina regeneration halved until counter hits 0
+		double encumbrance_kg;
+		double weight_capacity_kg;
+		double overencumbered_mild_thresh_kg_; //if encumbrance is greater than this val, pace slows 
+		double overencumbered_medium_thresh_kg_;
+		double overencumbered_extreme_thresh_kg_;
+
+		void update_encumbrance()
+		{
+			encumbrance_kg = 0.0;
+			weight_capacity_kg = hands_ * PARTY_WEIGHT_CAPACITY_PER_HAND_KG;
+			for (auto item_i : inventory_)
+			{
+				double item_weight = item_type_to_weight_kg()[item_i.first];
+				encumbrance_kg += item_i.second * item_weight;
+			}
+			update_encumbrance_threshs();
+		}
+
+		void update_encumbrance_threshs()
+		{
+			overencumbered_mild_thresh_kg_ = encumbrance_kg * 0.70;
+			overencumbered_medium_thresh_kg_ = encumbrance_kg * 0.85;
+			overencumbered_extreme_thresh_kg_ = encumbrance_kg;
+		}
 
 		void add_item(ItemType item, double amount)
 		{
@@ -74,6 +102,7 @@ namespace SXNGN::ECS {
 			{
 				inventory_[item] = amount;
 			}
+			encumbrance_kg += amount * item_type_to_weight_kg()[item];
 		}
 
 		void remove_item(ItemType item, double amount)
@@ -85,6 +114,7 @@ namespace SXNGN::ECS {
 				{
 					inventory_.erase(item);
 				}
+				encumbrance_kg -= amount * item_type_to_weight_kg()[item];
 			}
 			
 		}

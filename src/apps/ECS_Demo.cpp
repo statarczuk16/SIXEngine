@@ -426,6 +426,30 @@ int init_menus()
 	food_progress_bar_c->name_ = "OVERWORLD_progress_food";
 	overworld_left_side_menu_c->child_components_.push_back(food_progress_bar_c);
 
+	std::shared_ptr<UIContainerComponent> lost_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "LOST", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(lost_label_c);
+
+	std::shared_ptr<UIContainerComponent> lost_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	lost_progress_bar_c->progressbar_->max_value = 100.0;
+	lost_progress_bar_c->name_ = "OVERWORLD_progress_lost";
+	overworld_left_side_menu_c->child_components_.push_back(lost_progress_bar_c);
+
+	std::shared_ptr<UIContainerComponent> sick_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "SICK", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(sick_label_c);
+
+	std::shared_ptr<UIContainerComponent> sick_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	sick_progress_bar_c->progressbar_->max_value = 100.0;
+	sick_progress_bar_c->name_ = "OVERWORLD_progress_sick";
+	overworld_left_side_menu_c->child_components_.push_back(sick_progress_bar_c);
+
+	std::shared_ptr<UIContainerComponent> encumber_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "WEIGHT", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(encumber_label_c);
+
+	std::shared_ptr<UIContainerComponent> encumber_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	encumber_progress_bar_c->progressbar_->max_value = 100.0;
+	encumber_progress_bar_c->name_ = "OVERWORLD_progress_encumber";
+	overworld_left_side_menu_c->child_components_.push_back(encumber_progress_bar_c);
+
 	std::shared_ptr<UIContainerComponent> pace_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "PACE", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	
 	overworld_left_side_menu_c->child_components_.push_back(pace_label_c);
@@ -462,7 +486,12 @@ int init_menus()
 	{
 		auto pair_pace = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
 		auto pair_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
-		double pace_value = pair_go.first * pair_pace.first;
+		auto pair_lost = gCoordinator.getSetting(SXNGN::OVERWORLD_LOST);
+		double pace_value = pair_go.first * pair_pace.first; 
+		if (pair_lost.second && pair_lost.first)
+		{
+			pace_value *= 0.0;
+		}
 		gCoordinator.setSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S, pace_value);
 	};
 
@@ -565,6 +594,10 @@ int init_menus()
 	unpause_game_event.e.func_event.callbacks.push_back(set_unpause_invisible);
 	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
 
+	Event_Component update_pace_event;
+	update_pace_event.e.func_event.callbacks.push_back(update_pace);
+
+	gCoordinator.setEvent(SXNGN::UPDATE_PACE, update_pace_event);
 	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
 	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
 
@@ -646,7 +679,14 @@ int init_menus()
 	auto inventory_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	inventory_window_c->name_  = "OVERWORLD_inventory";
 	std::shared_ptr<UIContainerComponent> inv_label_c = UserInputUtils::create_label(inventory_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL, UILayer::TOP, "Inventory", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	
+	std::shared_ptr<UIContainerComponent> label_inv_item = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Hands", 1, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> label_inv_amount = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", 1, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	label_inv_amount->name_ = "OVERWORLD_amount_hands";
+	inventory_window_c->child_components_.push_back(label_inv_item);
+	inventory_window_c->child_components_.push_back(label_inv_amount);
 	int inv_row = 2;
+	
 	for (int i = ItemType::UNKNOWN + 1; i != ItemType::END; i++)
 	{
 		ItemType item_type = static_cast<ItemType>(i);
@@ -657,7 +697,6 @@ int init_menus()
 		inv_row++;
 		inventory_window_c->child_components_.push_back(label_inv_item);
 		inventory_window_c->child_components_.push_back(label_inv_amount);
-
 	}
 	inventory_window_c->child_components_.push_back(inv_label_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, inventory_window_c);
