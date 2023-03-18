@@ -155,8 +155,8 @@ namespace SXNGN::ECS
 				food_progress_bar->progressbar_->value = party_ptr->inventory_[ItemType::FOOD];
 				food_progress_bar->progressbar_->max_value = party_ptr->food_max_;
 				auto weight_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_encumber"];
-				weight_progress_bar->progressbar_->value = party_ptr->encumbrance_kg;
-				weight_progress_bar->progressbar_->max_value = party_ptr->weight_capacity_kg;
+				weight_progress_bar->progressbar_->value = party_ptr->encumbrance_kg_;
+				weight_progress_bar->progressbar_->max_value = party_ptr->weight_capacity_kg_;
 				auto lost_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_lost"];
 				lost_progress_bar->progressbar_->value = party_ptr->lost_counter_;
 				lost_progress_bar->progressbar_->max_value = party_ptr->lost_counter_max_;

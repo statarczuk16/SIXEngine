@@ -36,21 +36,21 @@ namespace SXNGN::ECS {
 
 	void Party::update_encumbrance()
 	{
-		encumbrance_kg = 0.0;
-		weight_capacity_kg = hands_ * PARTY_WEIGHT_CAPACITY_PER_HAND_KG;
+		encumbrance_kg_ = 0.0;
+		weight_capacity_kg_ = hands_ * PARTY_WEIGHT_CAPACITY_PER_HAND_KG;
 		for (auto item_i : inventory_)
 		{
 			double item_weight = item_type_to_weight_kg()[item_i.first];
-			encumbrance_kg += item_i.second * item_weight;
+			encumbrance_kg_ += item_i.second * item_weight;
 		}
 		update_encumbrance_threshs();
 	}
 
 	void Party::update_encumbrance_threshs()
 	{
-		overencumbered_mild_thresh_kg_ = encumbrance_kg * 0.70;
-		overencumbered_medium_thresh_kg_ = encumbrance_kg * 0.85;
-		overencumbered_extreme_thresh_kg_ = encumbrance_kg;
+		overencumbered_mild_thresh_kg_ = encumbrance_kg_ * 0.70;
+		overencumbered_medium_thresh_kg_ = encumbrance_kg_ * 0.85;
+		overencumbered_extreme_thresh_kg_ = encumbrance_kg_;
 	}
 
 	void Party::add_item(ItemType item, double amount)
@@ -63,7 +63,7 @@ namespace SXNGN::ECS {
 		{
 			inventory_[item] = amount;
 		}
-		encumbrance_kg += amount * item_type_to_weight_kg()[item];
+		encumbrance_kg_ += amount * item_type_to_weight_kg()[item];
 	}
 
 	void Party::remove_item(ItemType item, double amount)
@@ -75,7 +75,7 @@ namespace SXNGN::ECS {
 			{
 				inventory_.erase(item);
 			}
-			encumbrance_kg -= amount * item_type_to_weight_kg()[item];
+			encumbrance_kg_ -= amount * item_type_to_weight_kg()[item];
 		}
 
 	}
