@@ -728,8 +728,8 @@ namespace SXNGN::ECS {
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
 
-				party_ptr->weather_counter_ += weather_counter_inc;
-				party_ptr->weather_counter_max_ += weather_counter_inc;
+				party_ptr->weather_counter_ = weather_counter_inc;
+				party_ptr->weather_counter_max_ = weather_counter_inc;
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};

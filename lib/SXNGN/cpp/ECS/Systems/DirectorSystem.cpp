@@ -8,7 +8,7 @@
 
 namespace SXNGN::ECS
 {
-
+	
 	void Director_System::Init()
 	{
 		std::srand(std::time(nullptr));
@@ -279,8 +279,10 @@ namespace SXNGN::ECS
 	}
 			
 
-		
-		
+	
+	
 		
 
 }
+
+

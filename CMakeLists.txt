@@ -8,7 +8,7 @@ add_definitions(-DNOMINMAX) #disable stupid windows.h thing intefering with std:
 
 set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 #put external libraries on path
-list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")
+list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/") 
 #put the cmake sdl tools on the path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2) 
 
@@ -16,7 +16,7 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 if(MSVC)  
 	message("Setting hints for MSVC")
 	set(SDL_HINT_END "include/")
-	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)  
+	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)   
 	#add_compile_options(/WX)
     #add_link_options(/WX)
 elseif (MINGW)
