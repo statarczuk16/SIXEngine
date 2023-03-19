@@ -10,6 +10,7 @@ namespace SXNGN::ECS {
 		stamina_ = 1000.0;
 		stamina_max_ = stamina_;
 		food_max_ = 1000.0;
+		pace_abs_ = 0.0;
 
 		hands_ = 1.0;
 		lost_counter_ = 0.0;
@@ -51,6 +52,18 @@ namespace SXNGN::ECS {
 		overencumbered_mild_thresh_kg_ = encumbrance_kg_ * 0.70;
 		overencumbered_medium_thresh_kg_ = encumbrance_kg_ * 0.85;
 		overencumbered_extreme_thresh_kg_ = encumbrance_kg_;
+		if (encumbrance_kg_ > overencumbered_mild_thresh_kg_)
+		{
+			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_MILD;
+		}
+		if (encumbrance_kg_ > overencumbered_medium_thresh_kg_)
+		{
+			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_MEDIUM;
+		}
+		if (encumbrance_kg_ > overencumbered_extreme_thresh_kg_)
+		{
+			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_EXTREME;
+		}
 	}
 
 	void Party::add_item(ItemType item, double amount)
@@ -64,6 +77,7 @@ namespace SXNGN::ECS {
 			inventory_[item] = amount;
 		}
 		encumbrance_kg_ += amount * item_type_to_weight_kg()[item];
+		update_encumbrance_threshs();
 	}
 
 	void Party::remove_item(ItemType item, double amount)
@@ -76,6 +90,7 @@ namespace SXNGN::ECS {
 				inventory_.erase(item);
 			}
 			encumbrance_kg_ -= amount * item_type_to_weight_kg()[item];
+			update_encumbrance_threshs();
 		}
 
 	}

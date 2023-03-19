@@ -63,32 +63,37 @@ namespace SXNGN::ECS
 				auto overworld_player_uuid = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
 				bool at_settlement = false;
 				bool at_ruins = false;
+				double traversal_cost_penalty_m_s_ = 0.0;
 				auto ui = UICollectionSingleton::get_instance();
 				if (overworld_player_uuid != SXNGN::BAD_UUID)
 				{
 					auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
 					auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
-					auto party_ptr = static_cast<Party*>(party_component);
-					for (auto id : party_ptr->world_location_ids_)
+					if (party_component)
 					{
-						auto world_location_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(id), ComponentTypeEnum::WORLD_LOCATION);
-						const WorldLocation* ptr = static_cast<const WorldLocation*>(world_location_data);
-						if (ptr->has_ruins_)
+						auto party_ptr = static_cast<Party*>(party_component);
+						for (auto id : party_ptr->world_location_ids_)
 						{
-							at_ruins = true;
-							auto ruins_name_label = ui->string_to_ui_map_["OVERWORLD_ruins_name"];
-							snprintf(ruins_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
+							auto world_location_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(id), ComponentTypeEnum::WORLD_LOCATION);
+							const WorldLocation* ptr = static_cast<const WorldLocation*>(world_location_data);
+							if (ptr->has_ruins_)
+							{
+								at_ruins = true;
+								auto ruins_name_label = ui->string_to_ui_map_["OVERWORLD_ruins_name"];
+								snprintf(ruins_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
 
+							}
+							if (ptr->has_settlement_)
+							{
+								at_settlement = true;
+								auto settlement_name_label = ui->string_to_ui_map_["OVERWORLD_settlement_name"];
+								snprintf(settlement_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
+							}
+							traversal_cost_penalty_m_s_ += ptr->traversal_cost_m_s_;
 						}
-						if (ptr->has_settlement_)
-						{
-							at_settlement = true;
-							auto settlement_name_label = ui->string_to_ui_map_["OVERWORLD_settlement_name"];
-							snprintf(settlement_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
-						}
+
+						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 					}
-
-					gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 				}
 				if (at_ruins)
 				{
@@ -115,6 +120,8 @@ namespace SXNGN::ECS
 					auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
 					trade_button->button_->enabled = false;
 				}
+				gCoordinator.setSetting(OVERWORLD_PACE_PENALTY_M_S, traversal_cost_penalty_m_s_);
+
 
 
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S);

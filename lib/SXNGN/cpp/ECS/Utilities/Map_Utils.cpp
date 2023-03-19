@@ -102,7 +102,7 @@ namespace SXNGN::ECS {
 				if (str.find('r') != std::string::npos)
 				{
 					WorldLocation* loc = new WorldLocation();
-					loc->traversal_cost_ = 1;
+					loc->traversal_cost_m_s_ = WORLD_ROAD_PENALTY_PACE_M_S;
 					loc->location_name_ = "a road";
 					loc->map_layer_ = RenderLayer::OBJECT_LAYER_0;
 					loc->map_grid_x_ = x;
@@ -113,7 +113,7 @@ namespace SXNGN::ECS {
 				if (str.find('s') != std::string::npos)
 				{
 					WorldLocation* loc = new WorldLocation();
-					loc->traversal_cost_ = 0;
+					loc->traversal_cost_m_s_ = WORLD_NONE_PENALTY_PACE_M_S;
 					loc->location_name_ = "a settlement";
 					loc->has_settlement_ = true;
 					loc->map_layer_ = RenderLayer::OBJECT_LAYER_2;
@@ -124,7 +124,7 @@ namespace SXNGN::ECS {
 				if (str.find('x') != std::string::npos)
 				{
 					WorldLocation* loc = new WorldLocation();
-					loc->traversal_cost_ = 0;
+					loc->traversal_cost_m_s_ = WORLD_NONE_PENALTY_PACE_M_S;
 					loc->location_name_ = "ruins";
 					loc->has_ruins_ = true;
 					loc->map_layer_ = RenderLayer::TOP_LAYER;
@@ -196,7 +196,7 @@ namespace SXNGN::ECS {
 					{
 						pre_render->sprite_factory_sprite_type_ = "SHRINE";
 					}
-					else if (world_location->traversal_cost_ == 1)
+					else if (world_location->traversal_cost_m_s_ == 1)
 					{
 						pre_render->scale_x_ = 1.0;
 						pre_render->scale_y_ = 1.0;

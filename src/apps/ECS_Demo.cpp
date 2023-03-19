@@ -405,7 +405,7 @@ int init_menus()
 	std::shared_ptr<UIContainerComponent> stamina_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "STAMINA", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(stamina_label_c);
 
-	std::shared_ptr<UIContainerComponent> stamina_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> stamina_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	stamina_progress_bar_c->progressbar_->max_value = 100.0;
 	stamina_progress_bar_c->name_ = "OVERWORLD_progress_stamina";
 	overworld_left_side_menu_c->child_components_.push_back(stamina_progress_bar_c);
@@ -413,23 +413,25 @@ int init_menus()
 	std::shared_ptr<UIContainerComponent> health_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "HEALTH", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(health_label_c);
 
-	std::shared_ptr<UIContainerComponent> health_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> health_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	health_progress_bar_c->progressbar_->max_value = 100.0;
 	health_progress_bar_c->name_ = "OVERWORLD_progress_health";
 	overworld_left_side_menu_c->child_components_.push_back(health_progress_bar_c);
 
-	std::shared_ptr<UIContainerComponent> food_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "FOOD", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	overworld_left_side_menu_c->child_components_.push_back(food_label_c);
+	//std::shared_ptr<UIContainerComponent> food_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "FOOD", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	//overworld_left_side_menu_c->child_components_.push_back(food_label_c);
 
+	/**
 	std::shared_ptr<UIContainerComponent> food_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	food_progress_bar_c->progressbar_->max_value = 100.0;
 	food_progress_bar_c->name_ = "OVERWORLD_progress_food";
 	overworld_left_side_menu_c->child_components_.push_back(food_progress_bar_c);
+	**/
 
 	std::shared_ptr<UIContainerComponent> lost_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "LOST", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(lost_label_c);
 
-	std::shared_ptr<UIContainerComponent> lost_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> lost_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	lost_progress_bar_c->progressbar_->max_value = 100.0;
 	lost_progress_bar_c->name_ = "OVERWORLD_progress_lost";
 	overworld_left_side_menu_c->child_components_.push_back(lost_progress_bar_c);
@@ -437,7 +439,7 @@ int init_menus()
 	std::shared_ptr<UIContainerComponent> sick_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "SICK", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(sick_label_c);
 
-	std::shared_ptr<UIContainerComponent> sick_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> sick_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	sick_progress_bar_c->progressbar_->max_value = 100.0;
 	sick_progress_bar_c->name_ = "OVERWORLD_progress_sick";
 	overworld_left_side_menu_c->child_components_.push_back(sick_progress_bar_c);
@@ -445,7 +447,7 @@ int init_menus()
 	std::shared_ptr<UIContainerComponent> weather_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "SANDSTORM", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(weather_label_c);
 
-	std::shared_ptr<UIContainerComponent> weather_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> weather_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	weather_progress_bar_c->progressbar_->max_value = 100.0;
 	weather_progress_bar_c->name_ = "OVERWORLD_progress_weather";
 	overworld_left_side_menu_c->child_components_.push_back(weather_progress_bar_c);
@@ -453,7 +455,7 @@ int init_menus()
 	std::shared_ptr<UIContainerComponent> encumber_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "WEIGHT", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(encumber_label_c);
 
-	std::shared_ptr<UIContainerComponent> encumber_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> encumber_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	encumber_progress_bar_c->progressbar_->max_value = 100.0;
 	encumber_progress_bar_c->name_ = "OVERWORLD_progress_encumber";
 	overworld_left_side_menu_c->child_components_.push_back(encumber_progress_bar_c);

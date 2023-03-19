@@ -71,11 +71,15 @@ namespace SXNGN::ECS
 					gCoordinator.setSetting(OVERWORLD_LOST, 0.0);
 				}
 
+				double pace_base = PARTY_PACE_NOMINAL_M_S;
+
 				auto pace_setting = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+				auto pace_penalty_overworld = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_PENALTY_M_S);
 
-				if (pace_setting.second && pace_go.second)
+				if (pace_setting.second && pace_go.second && pace_penalty_overworld.second)
 				{
+					double pace = PARTY_PACE_NOMINAL_M_S + pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
 					auto pace_m_s = pace_setting.first * pace_go.first;
 					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
 					std::string pace_display = "";
@@ -87,10 +91,10 @@ namespace SXNGN::ECS
 					//if on the move, substract stamina, then health
 					if (pace_go.first)
 					{
-						auto calories_per_km = 25 * party_ptr->hands_;
+						auto calories_per_km = HANDS_BASE_CALORIES_PER_KM * party_ptr->hands_;
 						
 						oss << std::fixed << std::setprecision(2) << pace_m_s;
-						auto dist_traveled_km = pace_m_s * dt * OVERWORLD_MULTIPLIER / 1000.0;
+						auto dist_traveled_km = pace_m_s * dt * OVERWORLD_MULTIPLIER * 0.0001;
 						if (party_ptr->lost_counter_ > 0.0)
 						{
 							party_ptr->lost_counter_ -= dist_traveled_km;
@@ -110,7 +114,7 @@ namespace SXNGN::ECS
 						}
 					}
 					//else recharge using food
-					else if((party_ptr->stamina_ < party_ptr->stamina_max_  || party_ptr->sick_counter_ > 0.0)&& party_ptr->inventory_[ItemType::FOOD] >= 0.0)
+					else if(party_ptr->stamina_ < party_ptr->stamina_max_ && party_ptr->inventory_[ItemType::FOOD] >= 0.0)
 					{
 						double recharge_calories_per_minute = SXNGN::PARTY_RECHARGE_CALORIES_PER_MINUTE;
 						double recharge_calories_per_second = recharge_calories_per_minute / OVERWORLD_MULTIPLIER;
@@ -151,9 +155,9 @@ namespace SXNGN::ECS
 				auto health_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_health"];
 				health_progress_bar->progressbar_->value = party_ptr->health_;
 				health_progress_bar->progressbar_->max_value = party_ptr->health_;
-				auto food_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_food"];
-				food_progress_bar->progressbar_->value = party_ptr->inventory_[ItemType::FOOD];
-				food_progress_bar->progressbar_->max_value = party_ptr->food_max_;
+				//auto food_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_food"];
+				//food_progress_bar->progressbar_->value = party_ptr->inventory_[ItemType::FOOD];
+				//food_progress_bar->progressbar_->max_value = party_ptr->food_max_;
 				auto weight_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_encumber"];
 				weight_progress_bar->progressbar_->value = party_ptr->encumbrance_kg_;
 				weight_progress_bar->progressbar_->max_value = party_ptr->weight_capacity_kg_;

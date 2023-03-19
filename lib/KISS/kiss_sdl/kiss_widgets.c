@@ -47,16 +47,21 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 	}
 	case HA_COLUMN:
 	{
-		
+		break;
+	}
+	case HA_LEFT:
+	{
+		*out_x = parent_rect->x + parent_rect->w / 10;
+		break;
 	}
 	case HA_NONE:
 	{
-		
+		break;
 	}
 	default:
 	{
 		//offset ui rect by the position of parent window
-		*out_x = parent_rect->x + text_width / 10;
+		*out_x = parent_rect->x + parent_rect->w / 10;
 		break;
 	}
 	}
@@ -183,6 +188,12 @@ int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect 
 		{
 			//return_rect->x = temp_parent.x + 15 + (((return_rect->w) + 10) * column);
 			return_rect->x = temp_parent.x + 15 + (((return_rect->w) + 10) * column);
+			break;
+		}
+		case HA_LEFT:
+		{
+			//return_rect->x = temp_parent.x + 15 + (((return_rect->w) + 10) * column);
+			return_rect->x = ui_rect->x + temp_parent.x;
 			break;
 		}
 		case HA_NONE:

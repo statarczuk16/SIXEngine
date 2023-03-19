@@ -87,7 +87,8 @@ typedef DIR kiss_dir;
 typedef enum h_alignment {
 	HA_NONE,
 	HA_CENTER,
-	HA_COLUMN
+	HA_COLUMN,
+	HA_LEFT
 } h_alignment;
 
 typedef enum v_alignment {

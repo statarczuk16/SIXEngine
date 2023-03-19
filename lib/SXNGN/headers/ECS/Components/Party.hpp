@@ -22,6 +22,7 @@ namespace SXNGN::ECS {
 		double health_;
 		double stamina_;
 		double hands_;
+		double pace_abs_;
 		double encumbrance_kg_;
 		double health_max_;
 		double stamina_max_;
@@ -40,6 +41,7 @@ namespace SXNGN::ECS {
 		double overencumbered_mild_thresh_kg_; //if encumbrance is greater than this val, pace slows 
 		double overencumbered_medium_thresh_kg_;
 		double overencumbered_extreme_thresh_kg_;
+		double encumbrance_penalty_m_s_;
 
 		void update_encumbrance();
 
@@ -71,6 +73,7 @@ namespace SXNGN::ECS {
 			{"character_ids_",p.character_ids_},
 			{"world_location_ids_",p.world_location_ids_},
 			{"health_",p.health_},
+			{"pace_abs_",p.pace_abs_},
 			{"stamina_",p.stamina_},
 			{"hands_",p.hands_},
 			{"encumbrance_kg_",p.encumbrance_kg_},
@@ -87,7 +90,9 @@ namespace SXNGN::ECS {
 			{"weight_capacity_kg_",p.weight_capacity_kg_},
 			{"overencumbered_mild_thresh_kg_",p.overencumbered_mild_thresh_kg_},
 			{"overencumbered_medium_thresh_kg_",p.overencumbered_medium_thresh_kg_},
-			{"overencumbered_extreme_thresh_kg_",p.overencumbered_extreme_thresh_kg_}
+			{"overencumbered_extreme_thresh_kg_",p.overencumbered_extreme_thresh_kg_},
+			{"encumbrance_penalty_m_s_",p.encumbrance_penalty_m_s_},
+
 		};
 
 	}
@@ -98,6 +103,7 @@ namespace SXNGN::ECS {
 		j.at("character_ids_").get_to(p.character_ids_);
 		j.at("world_location_ids_").get_to(p.world_location_ids_);
 		j.at("health_").get_to(p.health_);
+		j.at("pace_abs_").get_to(p.pace_abs_);
 		j.at("stamina_").get_to(p.stamina_);
 		j.at("hands_").get_to(p.hands_);
 		j.at("encumbrance_kg_").get_to(p.encumbrance_kg_);
@@ -115,6 +121,7 @@ namespace SXNGN::ECS {
 		j.at("overencumbered_mild_thresh_kg_").get_to(p.overencumbered_mild_thresh_kg_);
 		j.at("overencumbered_medium_thresh_kg_").get_to(p.overencumbered_medium_thresh_kg_);
 		j.at("overencumbered_extreme_thresh_kg_").get_to(p.overencumbered_extreme_thresh_kg_);
+		j.at("encumbrance_penalty_m_s_").get_to(p.encumbrance_penalty_m_s_);
 		
 
 	}

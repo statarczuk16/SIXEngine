@@ -18,13 +18,13 @@ namespace SXNGN::ECS {
 		{
 			component_type = ComponentTypeEnum::WORLD_LOCATION;
 			location_name_ = "unremarkable desert";
-			traversal_cost_ = 3;
+			traversal_cost_m_s_ = 3;
 			has_settlement_ = false;
 			has_ruins_ = false;
 			map_layer_ = RenderLayer::OBJECT_LAYER_0;
 		}
 		std::string location_name_;
-		int traversal_cost_;
+		double traversal_cost_m_s_;
 		bool has_settlement_;
 		bool has_ruins_;
 		RenderLayer map_layer_;
@@ -38,7 +38,7 @@ namespace SXNGN::ECS {
 	inline void to_json(json& j, const WorldLocation& p) {
 		j = json{
 			{"component_type",component_type_enum_to_string()[ComponentTypeEnum::WORLD_LOCATION]},
-			{"traversal_cost_", p.traversal_cost_},
+			{"traversal_cost_m_s_", p.traversal_cost_m_s_},
 			{"map_layer_", p.map_layer_},
 			{"map_grid_x_", p.map_grid_x_},
 			{"map_grid_y_", p.map_grid_y_}
@@ -48,7 +48,7 @@ namespace SXNGN::ECS {
 		inline void from_json(const json & j, WorldLocation & p) {
 			auto component_type_enum = component_type_string_to_enum().at(j.at("component_type"));
 			p.component_type = component_type_enum;
-			j.at("traversal_cost_").get_to(p.traversal_cost_);
+			j.at("traversal_cost_m_s_").get_to(p.traversal_cost_m_s_);
 			j.at("map_layer_").get_to(p.map_layer_);
 			j.at("map_grid_x_").get_to(p.map_grid_x_);
 			j.at("map_grid_y_").get_to(p.map_grid_y_);

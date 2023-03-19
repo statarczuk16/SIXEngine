@@ -58,7 +58,11 @@ namespace SXNGN {
 	const std::string CACHE = "_CACHE";
 
 	const std::string WORLD_MAP = "WORLD_MAP";
+	const std::string OVERWORLD_PACE_PENALTY_M_S = "OVERWORLD_PACE_PENALTY_M_S";
 
+	
+
+	const double HANDS_BASE_CALORIES_PER_KM = 25.0;
 	const double LOST_BASE_KM_GM = 0.5; //game time minutes to be lost for when lost event happens
 	const double SICK_BASE_MINUTES_GM = 60.0 * 2; //game time minutes to be sick for when sick event happens
 	const double WEATHER_BASE_MINUTES_GM = 60.0; //game time minutes for sandstorm/weather to last
@@ -66,20 +70,28 @@ namespace SXNGN {
 	const double FOOD_UNITS_PER_CALORIES = 0.1;
 	const double FOOD_CALORIES_PER_UNIT = 1 / FOOD_UNITS_PER_CALORIES;
 
+	const double WORLD_ROAD_PENALTY_PACE_M_S = -0.5; //road bonus
+	const double WORLD_DESERT_PENALTY_PACE_M_S = 0.1; //offroading penalty
+	const double WORLD_NONE_PENALTY_PACE_M_S = 0.0; //offroading penalty
 	const double PARTY_PACE_NOMINAL_M_S = 1.5; //no health or weight problems 
-	const double PARTY_PACE_ROAD_BONUS_M_S = 0.5; //no health or weight problems 
 	const double PARTY_PACE_BOOTS_PENALTY_MILD = 0.5;
+
 	const double PARTY_PACE_WEIGHT_PENALTY_MILD = 0.2;
 	const double PARTY_PACE_WEIGHT_PENALTY_MEDIUM = 0.3;
 	const double PARTY_PACE_WEIGHT_PENALTY_EXTREME = 1.4;
 
 	const double PARTY_WEIGHT_CAPACITY_PER_HAND_KG = 100.0;
 
-	//Moving while sick and encumbered drains health
-	const double PARTY_SICK_HP_DRAIN_PER_HOUR_ENCUMBER_NONE = 0;
-	const double PARTY_SICK_HP_DRAIN_PER_HOUR_ENCUMBER_MILD = 10;
-	const double PARTY_SICK_HP_DRAIN_PER_HOUR_ENCUMBER_MEDIUM = 20;
-	const double PARTY_SICK_HP_DRAIN_PER_HOUR_ENCUMBER_EXTREME = 40;
+	//Moving while sick takes more stamina
+	const double PARTY_SICK_ENCUMBER_MULTIPLY_MILD = 0.10;
+	const double PARTY_SICK_ENCUMBER_MULTIPLY_MED = 0.20;
+	const double PARTY_SICK_ENCUMBER_MULTIPLY_EXT = 0.40;
+
+	//Moving in bad weather drains health
+	const double PARTY_WEATHER_HP_DRAIN_PER_HOUR_MILD = 20;
+	const double PARTY_WEATHER_HP_DRAIN_PER_HOUR_MILD = 40;
+	const double PARTY_WEATHER_HP_DRAIN_PER_HOUR_MILD = 80;
+
 
 	//Recharge stamina at half rate when sick
 	const double PARTY_SICK_STAMINA_RECOVER_PENALTY = 0.5;

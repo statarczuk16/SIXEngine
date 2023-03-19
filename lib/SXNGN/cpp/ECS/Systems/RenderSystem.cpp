@@ -72,13 +72,6 @@ namespace SXNGN::ECS {
 				if (component_in_layer->property_ != "")
 				{
 					auto gCoordinator = *SXNGN::Database::get_coordinator();
-					auto prop_pair = gCoordinator.getSetting(component_in_layer->property_);
-					if (prop_pair.second == true)
-					{
-						
-						snprintf(component_in_layer->progressbar_->text, 100, "%s", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
-
-					}
 				}
 				kiss_label_draw(component_in_layer->label_, gRenderer);
 			}
@@ -106,7 +99,7 @@ namespace SXNGN::ECS {
 					}
 
 				}
-				snprintf(component_in_layer->progressbar_->text, 8, "%2g/%2g", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
+				snprintf(component_in_layer->progressbar_->text, 100, "%.0f/%.0f", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
 				kiss_progressbar_draw(component_in_layer->progressbar_, gRenderer);
 			{
 				break;
