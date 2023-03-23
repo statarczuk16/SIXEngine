@@ -99,7 +99,7 @@ namespace SXNGN::ECS {
 					}
 
 				}
-				snprintf(component_in_layer->progressbar_->text, 100, "%.0f/%.0f", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
+				snprintf(component_in_layer->progressbar_->text, 100, "%.1f/%.1f", round(component_in_layer->progressbar_->value), component_in_layer->progressbar_->max_value);
 				kiss_progressbar_draw(component_in_layer->progressbar_, gRenderer);
 			{
 				break;

@@ -463,7 +463,7 @@ namespace SXNGN::ECS {
 			case EventSeverity::SPICY: detail = "[Spicy!!!] In a thirty stupor, you followed a mirage for an unknowable amount of time. You've come to in an unknown land."; break;
 			}
 			double severity = (double)ec->e.party_event.severity;
-			double lost_counter_inc = severity * LOST_BASE_KM_GM;
+			double lost_counter_inc = severity * LOST_BASE_KM;
 
 			std::function<void()> set_lost = [gCoordinator, party_entity, lost_counter_inc]()
 			{
@@ -649,15 +649,18 @@ namespace SXNGN::ECS {
 			
 			}
 			double severity = (double)ec->e.party_event.severity;
-			double sick_counter_inc = severity * SICK_BASE_MINUTES_GM;
+			EventSeverity severity_enum = (EventSeverity)ec->e.party_event.severity;
+			double sick_counter_inc = severity * SICK_BASE_MINUTES_GM * 60.0;
 
-			std::function<void()> sick_func = [gCoordinator, party_entity, sick_counter_inc]()
+			std::function<void()> sick_func = [gCoordinator, party_entity, sick_counter_inc, severity_enum]()
 			{
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
 
-				party_ptr->sick_counter_ = sick_counter_inc;
+				party_ptr->sick_counter_s_ = sick_counter_inc;
 				party_ptr->sick_counter_max_ = sick_counter_inc;
+				party_ptr->sick_level_ = severity_enum;
+				party_ptr->update_encumbrance();
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};
@@ -721,15 +724,18 @@ namespace SXNGN::ECS {
 			case EventSeverity::SPICY: detail = "[Spicy!!!] The horizon is engulfed in a sandstorm. Traveling on would be suicide."; break;
 			}
 			double severity = (double)ec->e.party_event.severity;
-			double weather_counter_inc = severity * WEATHER_BASE_MINUTES_GM;
+			EventSeverity severity_enum = (EventSeverity)ec->e.party_event.severity;
+			double weather_counter_inc = severity * WEATHER_BASE_MINUTES_GM * 60.0;
 
-			std::function<void()> weather_func = [gCoordinator, party_entity, weather_counter_inc]()
+			std::function<void()> weather_func = [gCoordinator, party_entity, weather_counter_inc, severity_enum]()
 			{
 				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
 				auto party_ptr = static_cast<Party*>(party_component);
 
-				party_ptr->weather_counter_ = weather_counter_inc;
+				party_ptr->weather_counter_s_ = weather_counter_inc;
 				party_ptr->weather_counter_max_ = weather_counter_inc;
+				party_ptr->weather_level_ = severity_enum;
+				party_ptr->update_encumbrance();
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 			};

@@ -428,6 +428,24 @@ int init_menus()
 	overworld_left_side_menu_c->child_components_.push_back(food_progress_bar_c);
 	**/
 
+
+	std::shared_ptr<UIContainerComponent> encumber_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "WEIGHT", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	overworld_left_side_menu_c->child_components_.push_back(encumber_label_c);
+
+	std::shared_ptr<UIContainerComponent> encumber_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	encumber_progress_bar_c->progressbar_->max_value = 100.0;
+	encumber_progress_bar_c->name_ = "OVERWORLD_progress_encumber";
+	overworld_left_side_menu_c->child_components_.push_back(encumber_progress_bar_c);
+
+	std::shared_ptr<UIContainerComponent> pace_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "PACE", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	
+	overworld_left_side_menu_c->child_components_.push_back(pace_label_c);
+
+	std::shared_ptr<UIContainerComponent> pace_value_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "0.0", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	pace_value_c->name_ = "OVERWORLD_label_pace";
+	overworld_left_side_menu_c->child_components_.push_back(pace_value_c);
+
+
 	std::shared_ptr<UIContainerComponent> lost_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "LOST", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	overworld_left_side_menu_c->child_components_.push_back(lost_label_c);
 
@@ -451,22 +469,6 @@ int init_menus()
 	weather_progress_bar_c->progressbar_->max_value = 100.0;
 	weather_progress_bar_c->name_ = "OVERWORLD_progress_weather";
 	overworld_left_side_menu_c->child_components_.push_back(weather_progress_bar_c);
-
-	std::shared_ptr<UIContainerComponent> encumber_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "WEIGHT", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	overworld_left_side_menu_c->child_components_.push_back(encumber_label_c);
-
-	std::shared_ptr<UIContainerComponent> encumber_progress_bar_c = UserInputUtils::create_progressbar_from_property(overworld_left_side_menu_c->window_, HA_CENTER, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	encumber_progress_bar_c->progressbar_->max_value = 100.0;
-	encumber_progress_bar_c->name_ = "OVERWORLD_progress_encumber";
-	overworld_left_side_menu_c->child_components_.push_back(encumber_progress_bar_c);
-
-	std::shared_ptr<UIContainerComponent> pace_label_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "PACE", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	
-	overworld_left_side_menu_c->child_components_.push_back(pace_label_c);
-
-	std::shared_ptr<UIContainerComponent> pace_value_c = UserInputUtils::create_label(overworld_left_side_menu_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "0.0", left_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	pace_value_c->name_ = "OVERWORLD_label_pace";
-	overworld_left_side_menu_c->child_components_.push_back(pace_value_c);
 
 
 	
@@ -560,6 +562,7 @@ int init_menus()
 	auto settlement_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Settlement", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto ruins_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Ruins", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto inv_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Inventory", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto status_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Status", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	stop_button_c->button_->visible = false;
 	/// Pace Selector Pop Up
 	/**
@@ -642,6 +645,8 @@ int init_menus()
 	bottom_side_state_menu_c->child_components_.push_back(settlement_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(ruins_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(inv_button_c);
+	bottom_side_state_menu_c->child_components_.push_back(status_button_c);
+	
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);
 	
 
@@ -686,16 +691,43 @@ int init_menus()
 	}
 	**/
 
+	//************************* Right Side Status Menus
+
+
+	// Inventory
+	int inv_row = 0;
 	auto inventory_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	inventory_window_c->name_  = "OVERWORLD_inventory";
-	std::shared_ptr<UIContainerComponent> inv_label_c = UserInputUtils::create_label(inventory_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL, UILayer::TOP, "Inventory", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> inv_label_c = UserInputUtils::create_label(inventory_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Inventory", inv_row++, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	
-	std::shared_ptr<UIContainerComponent> label_inv_item = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Hands", 1, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	std::shared_ptr<UIContainerComponent> label_inv_amount = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", 1, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> label_inv_weight = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Weight", inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> label_inv_weight_val = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row++, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	inventory_window_c->child_components_.push_back(label_inv_weight);
+	inventory_window_c->child_components_.push_back(label_inv_weight_val);
+	label_inv_weight->name_ = "OVERWORLD_inventory_weight";
+	label_inv_weight_val->name_ = "OVERWORLD_inventoryweight_value";
+
+	std::shared_ptr<UIContainerComponent> label_inv_weight_real = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Adjusted", inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> label_inv_weight_val_real = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row++, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	inventory_window_c->child_components_.push_back(label_inv_weight_real);
+	inventory_window_c->child_components_.push_back(label_inv_weight_val_real);
+	label_inv_weight_real->name_ = "OVERWORLD_inventory_weight_real";
+	label_inv_weight_val_real->name_ = "OVERWORLD_inventoryweight_value_real";
+	
+	std::shared_ptr<UIContainerComponent> label_inv_penalty = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Penalty", inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> label_inv_penalty_val = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row++, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	inventory_window_c->child_components_.push_back(label_inv_penalty);
+	inventory_window_c->child_components_.push_back(label_inv_penalty_val);
+	label_inv_penalty->name_ = "OVERWORLD_inventory_penalty";
+	label_inv_penalty_val->name_ = "OVERWORLD_inventory_penalty_value";
+	inv_row++;
+
+	std::shared_ptr<UIContainerComponent> label_inv_item = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "HANDS", inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	std::shared_ptr<UIContainerComponent> label_inv_amount = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row++, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	label_inv_amount->name_ = "OVERWORLD_amount_hands";
 	inventory_window_c->child_components_.push_back(label_inv_item);
 	inventory_window_c->child_components_.push_back(label_inv_amount);
-	int inv_row = 2;
+	
 	
 	for (int i = ItemType::UNKNOWN + 1; i != ItemType::END; i++)
 	{
@@ -711,6 +743,7 @@ int init_menus()
 	inventory_window_c->child_components_.push_back(inv_label_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, inventory_window_c);
 
+	// Settlement
 	auto settlement_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	std::shared_ptr<UIContainerComponent> settlement_label_c = UserInputUtils::create_label(settlement_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Settlement", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	settlement_window_c->child_components_.push_back(settlement_label_c);
@@ -726,7 +759,7 @@ int init_menus()
 	settlement_window_c->window_->visible = false;
 	settlement_window_c->name_ = "OVERWORLD_settlement";
 
-
+	// Ruins
 	auto ruins_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	std::shared_ptr<UIContainerComponent> ruins_label_c = UserInputUtils::create_label(ruins_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Ruins", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	ruins_window_c->child_components_.push_back(ruins_label_c);
@@ -743,25 +776,45 @@ int init_menus()
 	ruins_window_c->child_components_.push_back(scavenge_button_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, ruins_window_c);
 
+
+	// Party Status
+
+	auto status_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
+	std::shared_ptr<UIContainerComponent> status_label_c = UserInputUtils::create_label(status_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Status", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	status_window_c->child_components_.push_back(status_label_c);
+
+	int status_row = 2;
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, status_window_c);
+
 	std::function<void()> set_inv_visible = std::bind(set_window_visible, inventory_window_c);
 	std::function<void()> set_settle_visible = std::bind(set_window_visible, settlement_window_c);
 	std::function<void()> set_ruins_visible = std::bind(set_window_visible, ruins_window_c);
+	std::function<void()> set_status_visible = std::bind(set_window_visible, status_window_c);
 
 	std::function<void()> set_inv_invisible = std::bind(set_window_invisible, inventory_window_c);
 	std::function<void()> set_settle_invisible = std::bind(set_window_invisible, settlement_window_c);
 	std::function<void()> set_ruins_invisible = std::bind(set_window_invisible, ruins_window_c);
+	std::function<void()> set_status_invisible = std::bind(set_window_invisible, status_window_c);
 
 	settlement_button_c->callback_functions_.push_back(set_settle_visible);
 	settlement_button_c->callback_functions_.push_back(set_inv_invisible);
 	settlement_button_c->callback_functions_.push_back(set_ruins_invisible);
+	settlement_button_c->callback_functions_.push_back(set_status_invisible);
 
 	ruins_button_c->callback_functions_.push_back(set_ruins_visible);
 	ruins_button_c->callback_functions_.push_back(set_settle_invisible);
 	ruins_button_c->callback_functions_.push_back(set_inv_invisible);
+	ruins_button_c->callback_functions_.push_back(set_status_invisible);
 
 	inv_button_c->callback_functions_.push_back(set_inv_visible);
 	inv_button_c->callback_functions_.push_back(set_ruins_invisible);
 	inv_button_c->callback_functions_.push_back(set_settle_invisible);
+	inv_button_c->callback_functions_.push_back(set_status_invisible);
+	
+	status_button_c->callback_functions_.push_back(set_status_visible);
+	status_button_c->callback_functions_.push_back(set_ruins_invisible);
+	status_button_c->callback_functions_.push_back(set_inv_invisible);
+	status_button_c->callback_functions_.push_back(set_settle_invisible);
 
 	
 	

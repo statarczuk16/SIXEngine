@@ -1,4 +1,5 @@
 #include <ECS/Components/Party.hpp>
+#include <ECS/Components/UI.hpp>
 
 namespace SXNGN::ECS {
 
@@ -14,11 +15,14 @@ namespace SXNGN::ECS {
 
 		hands_ = 1.0;
 		lost_counter_ = 0.0;
-		sick_counter_ = 0.0;
-		weather_counter_ = 0.0;
+		sick_counter_s_ = 0.0;
+		weather_counter_s_ = 0.0;
 		lost_counter_max_ = 0.0;
 		sick_counter_max_ = 0.0;
 		weather_counter_max_ = 0.0;
+		sick_level_ = EventSeverity::UNKNOWN;
+		weather_level_ = EventSeverity::UNKNOWN;
+		encumbrance_penalty_m_s_ = 0.0;
 
 
 
@@ -49,21 +53,53 @@ namespace SXNGN::ECS {
 
 	void Party::update_encumbrance_threshs()
 	{
-		overencumbered_mild_thresh_kg_ = encumbrance_kg_ * 0.70;
-		overencumbered_medium_thresh_kg_ = encumbrance_kg_ * 0.85;
-		overencumbered_extreme_thresh_kg_ = encumbrance_kg_;
-		if (encumbrance_kg_ > overencumbered_mild_thresh_kg_)
+		auto ui = UICollectionSingleton::get_instance();
+		overencumbered_mild_thresh_kg_ = weight_capacity_kg_ * 0.70;
+		overencumbered_medium_thresh_kg_ = weight_capacity_kg_ * 0.85;
+		overencumbered_extreme_thresh_kg_ = weight_capacity_kg_;
+		double encumb_temp = encumbrance_kg_;
+
+		if (sick_level_ == EventSeverity::UNKNOWN)
+		{
+			encumb_temp = encumb_temp;
+		}
+		else if (sick_level_ == EventSeverity::MILD)
+		{
+			encumb_temp += encumb_temp * PARTY_SICK_ENCUMBER_MULTIPLY_MILD;
+		}
+		else if (sick_level_ == EventSeverity::MEDIUM)
+		{
+			encumb_temp += encumb_temp * PARTY_SICK_ENCUMBER_MULTIPLY_MED;
+		}
+		else if (sick_level_ == EventSeverity::EXTREME)
+		{
+			encumb_temp += encumb_temp * PARTY_SICK_ENCUMBER_MULTIPLY_EXT;
+		}
+		else if (sick_level_ == EventSeverity::SPICY)
+		{
+			encumb_temp += encumb_temp * PARTY_SICK_ENCUMBER_MULTIPLY_SPICY;
+		}
+		
+		if (encumb_temp > overencumbered_mild_thresh_kg_)
 		{
 			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_MILD;
 		}
-		if (encumbrance_kg_ > overencumbered_medium_thresh_kg_)
+		if (encumb_temp > overencumbered_medium_thresh_kg_)
 		{
 			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_MEDIUM;
 		}
-		if (encumbrance_kg_ > overencumbered_extreme_thresh_kg_)
+		if (encumb_temp > overencumbered_extreme_thresh_kg_)
 		{
 			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_EXTREME;
 		}
+		auto ui_single = UICollectionSingleton::get_instance();
+		auto weight_val_real = ui->string_to_ui_map_["OVERWORLD_inventoryweight_value_real"];
+		auto weight_val = ui->string_to_ui_map_["OVERWORLD_inventoryweight_value"];
+		auto weight_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_encumber"];
+		weight_progress_bar->progressbar_->value = encumb_temp;
+		weight_progress_bar->progressbar_->max_value = weight_capacity_kg_;
+		snprintf(weight_val_real->label_->text, 100, "%.2f", encumb_temp);
+		snprintf(weight_val->label_->text, 100, "%.2f", encumbrance_kg_);
 	}
 
 	void Party::add_item(ItemType item, double amount)
@@ -144,10 +180,10 @@ namespace SXNGN::ECS {
 	{
 		if (can_use_medit(result))
 		{
-			if (sick_counter_ > 0.0)
+			if (sick_counter_s_ > 0.0)
 			{
 				result = "Cured sickness with medkit.";
-				sick_counter_ = 0.0;
+				sick_counter_s_ = 0.0;
 				remove_item(ItemType::MEDKIT, 1);
 				return 0;
 			}

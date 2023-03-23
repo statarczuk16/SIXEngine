@@ -7,6 +7,7 @@
 #include <queue>
 #include <Constants.h>
 #include <ECS/Core/Item.hpp>
+#include <ECS/Components/EventComponent.hpp>
 using nlohmann::json;
 
 using ComponentTypeEnum = SXNGN::ECS::ComponentTypeEnum;
@@ -31,17 +32,21 @@ namespace SXNGN::ECS {
 		std::map<ItemType, double> inventory_;
 		
 		double lost_counter_; //party will make no progress until counter hits 0
-		double sick_counter_; //stamina regeneration halved until counter hits 0
-		double weather_counter_; //stamina regeneration halved until counter hits 0
+		double sick_counter_s_; //encumbrance multiplied until counter hits 0
+		double weather_counter_s_; //take damage until hits 0
 		double lost_counter_max_; //party will make no progress until counter hits 0
 		double sick_counter_max_; //stamina regeneration halved until counter hits 0
 		double weather_counter_max_; //stamina regeneration halved until counter hits 0
+
+		EventSeverity sick_level_;
+		EventSeverity weather_level_;
+
 		
 		double weight_capacity_kg_;
 		double overencumbered_mild_thresh_kg_; //if encumbrance is greater than this val, pace slows 
 		double overencumbered_medium_thresh_kg_;
 		double overencumbered_extreme_thresh_kg_;
-		double encumbrance_penalty_m_s_;
+		double encumbrance_penalty_m_s_ = 0.0;
 
 		void update_encumbrance();
 
@@ -82,11 +87,13 @@ namespace SXNGN::ECS {
 			{"food_max_",p.food_max_},
 			{"inventory_",p.inventory_},
 			{"lost_counter_",p.lost_counter_},
-			{"sick_counter_",p.sick_counter_},
-			{"weather_counter_",p.weather_counter_},
+			{"sick_counter_s_",p.sick_counter_s_},
+			{"weather_counter_s_",p.weather_counter_s_},
 			{"lost_counter_max_",p.lost_counter_max_},
 			{"sick_counter_max_",p.sick_counter_max_},
 			{"weather_counter_max_",p.weather_counter_max_},
+			{"sick_level_",p.sick_level_},
+			{"weather_level_",p.weather_level_},
 			{"weight_capacity_kg_",p.weight_capacity_kg_},
 			{"overencumbered_mild_thresh_kg_",p.overencumbered_mild_thresh_kg_},
 			{"overencumbered_medium_thresh_kg_",p.overencumbered_medium_thresh_kg_},
@@ -112,11 +119,13 @@ namespace SXNGN::ECS {
 		j.at("food_max_").get_to(p.food_max_);
 		j.at("inventory_").get_to(p.inventory_);
 		j.at("lost_counter_").get_to(p.lost_counter_);
-		j.at("sick_counter_").get_to(p.sick_counter_);
-		j.at("weather_counter_").get_to(p.weather_counter_);
+		j.at("sick_counter_s_").get_to(p.sick_counter_s_);
+		j.at("weather_counter_s_").get_to(p.weather_counter_s_);
 		j.at("lost_counter_max_").get_to(p.lost_counter_max_);
 		j.at("sick_counter_max_").get_to(p.sick_counter_max_);
 		j.at("weather_counter_max_").get_to(p.weather_counter_max_);
+		j.at("sick_level_").get_to(p.sick_level_);
+		j.at("weather_level_").get_to(p.weather_level_);
 		j.at("weight_capacity_kg_").get_to(p.weight_capacity_kg_);
 		j.at("overencumbered_mild_thresh_kg_").get_to(p.overencumbered_mild_thresh_kg_);
 		j.at("overencumbered_medium_thresh_kg_").get_to(p.overencumbered_medium_thresh_kg_);

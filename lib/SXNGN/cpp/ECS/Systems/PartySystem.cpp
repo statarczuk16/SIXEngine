@@ -73,35 +73,87 @@ namespace SXNGN::ECS
 
 				double pace_base = PARTY_PACE_NOMINAL_M_S;
 
-				auto pace_setting = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
+				
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
 				auto pace_penalty_overworld = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_PENALTY_M_S);
 
-				if (pace_setting.second && pace_go.second && pace_penalty_overworld.second)
+				if (pace_go.second && pace_penalty_overworld.second)
 				{
-					double pace = PARTY_PACE_NOMINAL_M_S + pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
-					auto pace_m_s = pace_setting.first * pace_go.first;
+					double pace_m_s = pace_go.first * PARTY_PACE_NOMINAL_M_S + pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
+					gCoordinator.setSetting(OVERWORLD_PACE_M_S, pace_m_s);
+					double game_seconds_passed = dt * OVERWORLD_MULTIPLIER;
 					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
+
+					auto pace_penalty_value_label = ui_single->string_to_ui_map_["OVERWORLD_inventory_penalty_value"];
+					snprintf(pace_penalty_value_label->label_->text, 100, "%.1f M/S", party_ptr->encumbrance_penalty_m_s_);
 					std::string pace_display = "";
 
 						
 					std::ostringstream oss;
 					
+					bool moving = pace_go.first;
+					bool sick = party_ptr->sick_counter_s_ > 0.0;
+					bool lost = party_ptr->lost_counter_ > 0.0;
+					bool have_food = party_ptr->inventory_[ItemType::FOOD] >= 0.0;
+					bool max_stamina = party_ptr->stamina_ >= party_ptr->stamina_max_;
+					bool sandstorm = party_ptr->weather_counter_s_ > 0.0;
 					
+					if (sick)
+					{
+						double sick_time_recovered_s = game_seconds_passed;
+						if (!moving)
+						{
+							sick_time_recovered_s *= 2;
+						}
+						party_ptr->sick_counter_s_ -= sick_time_recovered_s;
+						if (party_ptr->sick_counter_s_ < 0)
+						{
+							party_ptr->sick_counter_s_ = 0.0;
+							party_ptr->sick_level_ = EventSeverity::UNKNOWN;
+						}
+					}
+
+					if (moving && sandstorm)
+					{
+						double hp_drain = 0.0;
+						if (party_ptr->weather_level_ == EventSeverity::MILD)
+						{
+							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MILD;
+						}
+						else if (party_ptr->weather_level_ == EventSeverity::MEDIUM)
+						{
+							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MED;
+						}
+						else if (party_ptr->weather_level_ == EventSeverity::EXTREME)
+						{
+							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_EXT;
+						}
+						party_ptr->health_ -= hp_drain;
+						
+					}
+					if (sandstorm)
+					{
+						party_ptr->weather_counter_s_ -= game_seconds_passed;
+						if (party_ptr->weather_counter_s_ < 0)
+						{
+							party_ptr->weather_counter_s_ = 0.0;
+							party_ptr->weather_level_ = EventSeverity::UNKNOWN;
+						}
+					}
+
 					//if on the move, substract stamina, then health
-					if (pace_go.first)
+					if (moving)
 					{
 						auto calories_per_km = HANDS_BASE_CALORIES_PER_KM * party_ptr->hands_;
 						
 						oss << std::fixed << std::setprecision(2) << pace_m_s;
-						auto dist_traveled_km = pace_m_s * dt * OVERWORLD_MULTIPLIER * 0.0001;
-						if (party_ptr->lost_counter_ > 0.0)
+						auto dist_traveled_km = pace_m_s * game_seconds_passed * 0.001;
+						if (lost)
 						{
 							party_ptr->lost_counter_ -= dist_traveled_km;
 							if (party_ptr->lost_counter_ <= 0.0)
 							{
 								party_ptr->lost_counter_ = 0.0;
-								ECS_Utils::update_pace();
 							}
 							oss << "(LOST)";
 						}
@@ -114,35 +166,27 @@ namespace SXNGN::ECS
 						}
 					}
 					//else recharge using food
-					else if(party_ptr->stamina_ < party_ptr->stamina_max_ && party_ptr->inventory_[ItemType::FOOD] >= 0.0)
+					else
 					{
-						double recharge_calories_per_minute = SXNGN::PARTY_RECHARGE_CALORIES_PER_MINUTE;
-						double recharge_calories_per_second = recharge_calories_per_minute / OVERWORLD_MULTIPLIER;
-						
-						double calories_recharged = dt * OVERWORLD_MULTIPLIER * recharge_calories_per_second;
-						double food_used = FOOD_UNITS_PER_CALORIES * calories_recharged;
-						if (party_ptr->sick_counter_ > 0.0)
+						if (!max_stamina)
 						{
-							
-							calories_recharged = calories_recharged * PARTY_SICK_STAMINA_RECOVER_PENALTY;
-							double sick_time_recovered_s = dt * OVERWORLD_MULTIPLIER;
-							party_ptr->sick_counter_ -= (sick_time_recovered_s / 60.0);
-							if (party_ptr->sick_counter_ < 0)
-							{
-								party_ptr->sick_counter_ = 0.0;
-							}
-						}
-						
-						party_ptr->stamina_ += calories_recharged;
-						
-						party_ptr->remove_item(ItemType::FOOD, food_used);
+							double recharge_calories_per_minute = SXNGN::PARTY_RECHARGE_CALORIES_PER_MINUTE;
+							double recharge_calories_per_second = recharge_calories_per_minute / OVERWORLD_MULTIPLIER;
 
-						if (party_ptr->stamina_ >= party_ptr->stamina_max_)
-						{
-							party_ptr->stamina_ = party_ptr->stamina_max_;
+							double calories_recharged = dt * OVERWORLD_MULTIPLIER * recharge_calories_per_second;
+							double food_used = FOOD_UNITS_PER_CALORIES * calories_recharged;
+							party_ptr->stamina_ += calories_recharged;
+
+							party_ptr->remove_item(ItemType::FOOD, food_used);
+
+							if (party_ptr->stamina_ >= party_ptr->stamina_max_)
+							{
+								party_ptr->stamina_ = party_ptr->stamina_max_;
+							}
 						}
 					}
 
+					oss << " M/S";
 					auto str = oss.str();
 					snprintf(pace_value_label->label_->text, 100, "%s", str.data());
 				}
@@ -158,15 +202,16 @@ namespace SXNGN::ECS
 				//auto food_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_food"];
 				//food_progress_bar->progressbar_->value = party_ptr->inventory_[ItemType::FOOD];
 				//food_progress_bar->progressbar_->max_value = party_ptr->food_max_;
-				auto weight_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_encumber"];
-				weight_progress_bar->progressbar_->value = party_ptr->encumbrance_kg_;
-				weight_progress_bar->progressbar_->max_value = party_ptr->weight_capacity_kg_;
+				
 				auto lost_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_lost"];
-				lost_progress_bar->progressbar_->value = party_ptr->lost_counter_;
-				lost_progress_bar->progressbar_->max_value = party_ptr->lost_counter_max_;
+				lost_progress_bar->progressbar_->value = party_ptr->lost_counter_ * 1000.0;
+				lost_progress_bar->progressbar_->max_value = party_ptr->lost_counter_max_ * 1000.0;
 				auto sick_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_sick"];
-				sick_progress_bar->progressbar_->value = party_ptr->sick_counter_;
-				sick_progress_bar->progressbar_->max_value = party_ptr->sick_counter_max_;
+				sick_progress_bar->progressbar_->value = party_ptr->sick_counter_s_ / 60.0;
+				sick_progress_bar->progressbar_->max_value = party_ptr->sick_counter_max_ / 60.0;
+				auto weather_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_weather"];
+				weather_progress_bar->progressbar_->value = party_ptr->weather_counter_s_ / 60.0;
+				weather_progress_bar->progressbar_->max_value = party_ptr->weather_counter_max_ / 60.0;
 
 				//Update UI for party inventory
 				int column = 2;

@@ -188,6 +188,7 @@ namespace SXNGN::ECS {
 					Pre_Renderable* pre_render = new Pre_Renderable();
 					pre_render->render_layer_ = world_location->map_layer_;
 					pre_render->sprite_factory_name_ = "APOCALYPSE_MAP";
+					pre_render->sprite_factory_sprite_type_ = "UNINIT";
 					if (world_location->has_ruins_)
 					{
 						pre_render->sprite_factory_sprite_type_ = "RUIN_CAR";
@@ -196,7 +197,7 @@ namespace SXNGN::ECS {
 					{
 						pre_render->sprite_factory_sprite_type_ = "SHRINE";
 					}
-					else if (world_location->traversal_cost_m_s_ == 1)
+					else if (world_location->traversal_cost_m_s_ == WORLD_ROAD_PENALTY_PACE_M_S)
 					{
 						pre_render->scale_x_ = 1.0;
 						pre_render->scale_y_ = 1.0;
@@ -209,6 +210,11 @@ namespace SXNGN::ECS {
 						pre_render->sprite_factory_sprite_type_ = "NONE";
 						
 						pre_render->sprite_batch_.push_back(sprite_row);
+					}
+					else
+					{
+						SDL_LogError(1, "Bad Map");
+						abort();
 					}
 					gCoordinator->AddComponent(location_entity, pre_render);
 					gCoordinator->AddComponent(location_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));

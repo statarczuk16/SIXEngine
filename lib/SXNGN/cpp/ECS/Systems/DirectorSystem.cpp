@@ -200,7 +200,7 @@ namespace SXNGN::ECS
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_BOOTS);
 			event_ptr->weight = 0;
 		}
-		if (party_ptr->sick_counter_ > 0.0)
+		if (party_ptr->sick_counter_s_ > 0.0)
 		{
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_SICK);
 			event_ptr->weight = 0;
@@ -210,7 +210,7 @@ namespace SXNGN::ECS
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_LOST);
 			event_ptr->weight = 0;
 		}
-		if (party_ptr->weather_counter_ > 0.0)
+		if (party_ptr->weather_counter_s_ > 0.0)
 		{
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_WEATHER);
 			event_ptr->weight = 0;
