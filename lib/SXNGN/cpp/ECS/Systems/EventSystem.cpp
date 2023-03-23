@@ -420,7 +420,7 @@ namespace SXNGN::ECS {
 		std::cout << "Handling event: " << party_event_type_enum_to_string()[ec->e.party_event.party_event_type] << std::endl;
 		switch (ec->e.party_event.party_event_type)
 		{
-		case PartyEventType::BAD_BOOTS:
+		case PartyEventType::ROAD_BAD_BOOTS:
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
@@ -445,7 +445,7 @@ namespace SXNGN::ECS {
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
-		case PartyEventType::BAD_LOST:
+		case PartyEventType::ROAD_BAD_LOST:
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
@@ -517,7 +517,7 @@ namespace SXNGN::ECS {
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
-		case PartyEventType::BAD_ROBBER:
+		case PartyEventType::ROAD_BAD_ROBBER:
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
@@ -633,7 +633,7 @@ namespace SXNGN::ECS {
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
-		case PartyEventType::BAD_SICK:
+		case PartyEventType::ROAD_BAD_SICK:
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
@@ -710,7 +710,7 @@ namespace SXNGN::ECS {
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
-		case PartyEventType::BAD_WEATHER:
+		case PartyEventType::ROAD_BAD_WEATHER:
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;

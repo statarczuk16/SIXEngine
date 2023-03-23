@@ -29,30 +29,83 @@ namespace SXNGN::ECS {
 
 	enum PartyEventType 
 	{
-		BAD, //order is important group bad, good, together
-		BAD_BOOTS,
-		BAD_LOST,
-		BAD_WEATHER,
-		BAD_ROBBER,
-		BAD_SICK,
-		GOOD,
-		NEUTRAL,
-		NONE
+		NONE,
+		ROAD,
+		ROAD_START,
+		ROAD_BAD, //order is important group bad, good, together
+		ROAD_BAD_BOOTS,
+		ROAD_BAD_LOST,
+		ROAD_BAD_ROBBER,
+		ROAD_BAD_SICK,
+		ROAD_GOOD,
+		ROAD_GOOD_LOOT,
+		ROAD_NEUTRAL,
+		ROAD_END,
+		RUINS,
+		RUINS_START,
+		RUINS_BAD,
+		RUINS_BAD_ROBBER,
+		RUINS_BAD_COLLAPSE,
+		RUINS_GOOD,
+		RUINS_GOOD_LOOT,
+		RUINS_NEUTRAL,
+		RUINS_END,
+		SETTLEMENT,
+		SETTLEMENT_START,
+		SETTLEMENT_BAD,
+		SETTLEMENT_BAD_PICKPOCKET,
+		SETTLEMENT_BAD_ROBBER,
+		SETTLEMENT_GOOD,
+		SETTLEMENT_GOOD_LOOT,
+		SETTLMENT_GOOD_RUMOR,
+		SETTLEMENT_NEUTRAL,
+		SETTLEMENT_END,
+		ANY,
+		ANY_START,
+		ANY_BAD,
+		ANY_BAD_WEATHER,
+		ANY_GOOD,
+		ANY_NEUTRAL,
+		ANY_END,
 	};
 
 	//convert enum to string for json purposes
 	inline std::unordered_map<PartyEventType, std::string>& party_event_type_enum_to_string() {
 		static std::unordered_map<PartyEventType, std::string> party_event_type_enum_to_string =
 		{
-			{PartyEventType::BAD,"BAD"},
-			{PartyEventType::BAD_BOOTS,"BAD_BOOTS"},
-			{PartyEventType::BAD_LOST,"BAD_LOST"},
-			{PartyEventType::BAD_WEATHER,"BAD_WEATHER"},
-			{PartyEventType::BAD_ROBBER,"BAD_ROBBER"},
-			{PartyEventType::BAD_SICK,"BAD_SICK"},
-			{PartyEventType::GOOD,"GOOD"},
-			{PartyEventType::NEUTRAL,"NEUTRAL"},
-			{PartyEventType::NONE,"NONE"}
+
+		{PartyEventType::NONE,"NONE"},
+		{PartyEventType::ROAD_START,"ROAD_START"},
+		{PartyEventType::ROAD,"ROAD"},
+		{PartyEventType::ROAD_BAD,"ROAD_BAD"}, //order is important group bad, good, together
+		{PartyEventType::ROAD_BAD_BOOTS,"ROAD_BAD_BOOTS"},
+		{PartyEventType::ROAD_BAD_LOST,"ROAD_BAD_LOST"},
+		{PartyEventType::ROAD_BAD_ROBBER,"ROAD_BAD_ROBBER"},
+		{PartyEventType::ROAD_BAD_SICK,"ROAD_BAD_SICK"},
+		{PartyEventType::ROAD_GOOD,"ROAD_GOOD"},
+		{PartyEventType::ROAD_GOOD_LOOT,"ROAD_GOOD_LOOT"},
+		{PartyEventType::ROAD_NEUTRAL,"ROAD_NEUTRAL"},
+		{PartyEventType::ROAD_END,"ROAD_END"},
+		{PartyEventType::RUINS_START,"RUINS_START"},
+		{PartyEventType::RUINS,"RUINS"},
+		{PartyEventType::RUINS_BAD,"RUINS_BAD"},
+		{PartyEventType::RUINS_GOOD,"RUINS_GOOD"},
+		{PartyEventType::RUINS_GOOD_LOOT,"RUINS_GOOD_LOOT"},
+		{PartyEventType::RUINS_NEUTRAL,"RUINS_NEUTRAL"},
+		{PartyEventType::RUINS_END,"RUINS_END"},
+		{PartyEventType::SETTLEMENT_START,"SETTLEMENT_START"},
+		{PartyEventType::SETTLEMENT,"SETTLEMENT"},
+		{PartyEventType::SETTLEMENT_BAD,"SETTLEMENT_BAD"},
+		{PartyEventType::SETTLEMENT_GOOD,"SETTLEMENT_GOOD"},
+		{PartyEventType::SETTLEMENT_GOOD_LOOT,"SETTLEMENT_GOOD_LOOT"},
+		{PartyEventType::SETTLEMENT_NEUTRAL,"SETTLEMENT_NEUTRAL"},
+		{PartyEventType::SETTLEMENT_END,"SETTLEMENT_END"},
+		{PartyEventType::ANY_START,"ANY_START"},
+		{PartyEventType::ANY,"ANY"},
+		{PartyEventType::ANY_BAD,"ANY_BAD"},
+		{PartyEventType::ANY_GOOD,"ANY_GOOD"},
+		{PartyEventType::ANY_NEUTRAL,"ANY_NEUTRAL"},
+		{PartyEventType::ANY_END,"ANY_END"}
 		};
 		return party_event_type_enum_to_string;
 	}
@@ -61,15 +114,39 @@ namespace SXNGN::ECS {
 	inline std::unordered_map<std::string, PartyEventType>& party_event_type_string_to_enum() {
 		static std::unordered_map<std::string, PartyEventType> party_event_type_string_to_enum =
 		{
-			{"BAD",PartyEventType::BAD},
-			{"BAD_BOOTS",PartyEventType::BAD_BOOTS},
-			{"BAD_LOST",PartyEventType::BAD_LOST},
-			{"BAD_WEATHER",PartyEventType::BAD_WEATHER},
-			{"BAD_ROBBER",PartyEventType::BAD_ROBBER},
-			{"BAD_SICK",PartyEventType::BAD_SICK},
-			{"GOOD",PartyEventType::GOOD},
-			{"NEUTRAL",PartyEventType::NEUTRAL},
-			{"NONE",PartyEventType::NONE}
+		{"NONE", PartyEventType::NONE},
+		{"ROAD_START",PartyEventType::ROAD_START},
+		{"ROAD",PartyEventType::ROAD},
+		{"ROAD_BAD",PartyEventType::ROAD_BAD}, //order is important group bad, good, together
+		{"ROAD_BAD_BOOTS",PartyEventType::ROAD_BAD_BOOTS},
+		{"ROAD_BAD_LOST",PartyEventType::ROAD_BAD_LOST},
+		{"ROAD_BAD_WEATHER",PartyEventType::ROAD_BAD_WEATHER},
+		{"ROAD_BAD_ROBBER",PartyEventType::ROAD_BAD_ROBBER},
+		{"ROAD_BAD_SICK",PartyEventType::ROAD_BAD_SICK},
+		{"ROAD_GOOD",PartyEventType::ROAD_GOOD},
+		{"ROAD_GOOD_LOOT",PartyEventType::ROAD_GOOD_LOOT},
+		{"ROAD_NEUTRAL",PartyEventType::ROAD_NEUTRAL},
+		{"ROAD_END",PartyEventType::ROAD_END},
+		{"RUINS_START",PartyEventType::RUINS_START},
+		{"RUINS",PartyEventType::RUINS},
+		{"RUINS_BAD",PartyEventType::RUINS_BAD},
+		{"RUINS_GOOD",PartyEventType::RUINS_GOOD},
+		{"RUINS_GOOD_LOOT",PartyEventType::RUINS_GOOD_LOOT},
+		{"RUINS_NEUTRAL",PartyEventType::RUINS_NEUTRAL},
+		{"RUINS_END",PartyEventType::RUINS_END},
+		{"SETTLEMENT_START",PartyEventType::SETTLEMENT_START},
+		{"SETTLEMENT",PartyEventType::SETTLEMENT},
+		{"SETTLEMENT_BAD",PartyEventType::SETTLEMENT_BAD},
+		{"SETTLEMENT_GOOD",PartyEventType::SETTLEMENT_GOOD},
+		{"SETTLEMENT_GOOD_LOOT",PartyEventType::SETTLEMENT_GOOD_LOOT},
+		{"SETTLEMENT_NEUTRAL",PartyEventType::SETTLEMENT_NEUTRAL},
+		{"SETTLEMENT_END",PartyEventType::SETTLEMENT_END},
+		{"ANY_START",PartyEventType::ANY_START},
+		{"ANY",PartyEventType::ANY},
+		{"ANY_BAD",PartyEventType::ANY_BAD},
+		{"ANY_GOOD",PartyEventType::ANY_GOOD},
+		{"ANY_NEUTRAL",PartyEventType::ANY_NEUTRAL},
+		{"ANY_END",PartyEventType::ANY_END}
 		};
 		return party_event_type_string_to_enum;
 	}

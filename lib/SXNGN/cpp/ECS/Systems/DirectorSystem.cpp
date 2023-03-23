@@ -125,7 +125,10 @@ namespace SXNGN::ECS
 
 
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S);
-				if (pace_go.first > 0.0)
+				bool moving = pace_go.first > 0.0;
+				bool scavenging = false;
+				bool towning = false;
+				if (moving || scavenging || towning)
 				{
 					director_ptr->event_tick_s_ += dt;
 				}
@@ -141,14 +144,15 @@ namespace SXNGN::ECS
 						auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
 						auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 						auto party_ptr = static_cast<Party*>(party_component);
-						PruneEvents(director_ptr, party_ptr);
+						PruneEvents(director_ptr, party_ptr, at_settlement, at_ruins, moving);
 
 
 						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 					}
 					
 					auto generated_event = director_ptr->event_table_.generate_event(&director_ptr->event_table_);
-					std::cout << "Generating event " << generated_event->to_std_string() << std::endl;
+					std::cout << "Generated event " << generated_event->to_std_string() << std::endl;
+					director_ptr->event_table_.print_event_table(director_ptr->event_table_);
 					Event_Component* event_component = new Event_Component();
 					SXNGN_Party party_event;
 					party_event.party_event_type = generated_event->value;
@@ -193,26 +197,58 @@ namespace SXNGN::ECS
 		return nullptr;
 	}
 
-	void Director_System::PruneEvents(Director* director_ptr, Party* party_ptr)
+	void Director_System::PruneEvents(Director* director_ptr, Party* party_ptr, bool at_settlement, bool at_ruins, bool party_moving)
 	{
 		if (party_ptr->inventory_[ItemType::FOOTWEAR] < 1)
 		{
-			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_BOOTS);
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD_BAD_BOOTS);
 			event_ptr->weight = 0;
 		}
 		if (party_ptr->sick_counter_s_ > 0.0)
 		{
-			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_SICK);
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD_BAD_SICK);
 			event_ptr->weight = 0;
 		}
 		if (party_ptr->lost_counter_ > 0.0)
 		{
-			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_LOST);
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD_BAD_LOST);
 			event_ptr->weight = 0;
 		}
 		if (party_ptr->weather_counter_s_ > 0.0)
 		{
-			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::BAD_WEATHER);
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD_BAD_WEATHER);
+			event_ptr->weight = 0;
+		}
+		if (at_settlement)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::SETTLEMENT);
+			event_ptr->weight = 100;
+		}
+		else
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::SETTLEMENT);
+			event_ptr->weight = 0;
+		}
+
+		if (at_ruins)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::RUINS);
+			event_ptr->weight = 100;
+		}
+		else
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::RUINS);
+			event_ptr->weight = 0;
+		}
+
+		if (party_moving)
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD);
+			event_ptr->weight = 100;
+		}
+		else
+		{
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD);
 			event_ptr->weight = 0;
 		}
 	}
@@ -228,58 +264,224 @@ namespace SXNGN::ECS
 		none_event.accumulation = 50;
 		none_event.value = PartyEventType::NONE;
 
-		SXNGN::ECS::DropEntry<PartyEventType> good_events;
-		good_events.weight = 0;
-		good_events.accumulation = 0;
-		good_events.value = PartyEventType::GOOD;
-		good_events.children.push_back(none_event);
-		DropEntry<PartyEventType> bad_events;
-		bad_events.weight = 50;
-		bad_events.value = PartyEventType::BAD;
-		//bad_events.children.push_back(none_event);
-		DropEntry<PartyEventType> neutral_events;
-		neutral_events.weight = 0;
-		neutral_events.accumulation = 0;
-		neutral_events.value = PartyEventType::NEUTRAL;
-		neutral_events.children.push_back(none_event);
 
-		for (int i = PartyEventType::BAD + 1; i != PartyEventType::GOOD; i++)
+
+		
+
+		
+
+		for (int i = PartyEventType::NONE + 1; i != PartyEventType::ANY_END; i++)
 		{
 			PartyEventType event_type = static_cast<PartyEventType>(i);
-			DropEntry<PartyEventType> event_entry;
-			event_entry.weight = i * 3;
-			event_entry.value = event_type;
-			bad_events.children.push_back(event_entry);
+			
+			if (i == ROAD)
+			{
+				DropEntry<PartyEventType> road_event_tree;
+				road_event_tree.value = PartyEventType::ROAD;
+				road_event_tree.weight = 0;
+				road_event_tree.accumulation = 0;
+				event_table.children.push_back(road_event_tree);
+			}
+			else if (i > ROAD_START && i < ROAD_END)
+			{
+				DropEntry<PartyEventType>* road_event_tree = event_table.find_event_by_type(PartyEventType::ROAD);
+
+				if (i == ROAD_BAD || i == ROAD_NEUTRAL || i == ROAD_GOOD)
+				{
+					DropEntry<PartyEventType> event_tree;
+					event_tree.value = event_type;
+					road_event_tree->children.push_back(event_tree);
+				}
+				else if (i > ROAD_BAD && i < ROAD_GOOD)
+				{
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ROAD_BAD);
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					et->children.push_back(pe);
+				}
+				else if (i > ROAD_GOOD && i < ROAD_NEUTRAL)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ROAD_GOOD);
+					et->children.push_back(pe);
+				}
+				else if (i > ROAD_NEUTRAL && i < ROAD_END)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ROAD_NEUTRAL);
+					et->children.push_back(pe);
+				}
+				
+			}
+			else if (i == RUINS)
+			{
+				DropEntry<PartyEventType> event_tree;
+				event_tree.value = PartyEventType::RUINS;
+				event_tree.weight = 0;
+				event_tree.accumulation = 0;
+				event_table.children.push_back(event_tree);
+			}
+			else if (i > RUINS_START && i < RUINS_END)
+			{
+				
+				DropEntry<PartyEventType>* ruins_event_tree = event_table.find_event_by_type(PartyEventType::RUINS);
+
+				if (i == RUINS_BAD || i == RUINS_NEUTRAL || i == RUINS_GOOD)
+				{
+					DropEntry<PartyEventType> event_tree;
+					event_tree.value = event_type;
+					ruins_event_tree->children.push_back(event_tree);
+				}
+				else if (i > RUINS_BAD && i < RUINS_GOOD)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::RUINS_BAD);
+					et->children.push_back(pe);
+				}
+				else if (i > RUINS_GOOD && i < RUINS_NEUTRAL)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::RUINS_GOOD);
+					et->children.push_back(pe);
+				}
+				else if (i > RUINS_NEUTRAL && i < RUINS_END)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::RUINS_NEUTRAL);
+					et->children.push_back(pe);
+				}
+				
+			}
+			else if (i == SETTLEMENT)
+			{
+				DropEntry<PartyEventType> event_tree;
+				event_tree.value = PartyEventType::SETTLEMENT;
+				event_tree.weight = 0;
+				event_tree.accumulation = 0;
+				event_table.children.push_back(event_tree);
+			}
+			else if (i > SETTLEMENT_START && i < SETTLEMENT_END)
+			{
+				DropEntry<PartyEventType>* settlement_event_tree = event_table.find_event_by_type(PartyEventType::SETTLEMENT);
+				if (i == SETTLEMENT_BAD || i == SETTLEMENT_NEUTRAL || i == SETTLEMENT_GOOD)
+				{
+					DropEntry<PartyEventType> event_tree;
+					event_tree.value = event_type;
+					settlement_event_tree->children.push_back(event_tree);
+				}
+				else if (i > SETTLEMENT_BAD && i < SETTLEMENT_GOOD)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::SETTLEMENT_BAD);
+					et->children.push_back(pe);
+				}
+				else if (i > SETTLEMENT_GOOD && i < SETTLEMENT_NEUTRAL)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::SETTLEMENT_GOOD);
+					et->children.push_back(pe);
+				}
+				else if (i > SETTLEMENT_NEUTRAL && i < SETTLEMENT_END)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::SETTLEMENT_NEUTRAL);
+					et->children.push_back(pe);
+				}
+				
+			}
+			else if (i == ANY)
+			{
+			DropEntry<PartyEventType> event_tree;
+			event_tree.value = PartyEventType::ANY;
+			event_tree.weight = 0;
+			event_tree.accumulation = 0;
+			event_table.children.push_back(event_tree);
+			}
+			else if (i > ANY_START && i < ANY_END)
+			{
+				DropEntry<PartyEventType>* any_event_tree = event_table.find_event_by_type(PartyEventType::ANY);
+				if (i == ANY_BAD || i == ANY_NEUTRAL || i == ANY_GOOD)
+				{
+					DropEntry<PartyEventType> event_tree;
+					event_tree.value = event_type;
+					any_event_tree->children.push_back(event_tree);
+				}
+				else if (i > ANY_BAD && i < ANY_GOOD)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_BAD);
+					et->children.push_back(pe);
+				}
+				else if (i > ANY_GOOD && i < ANY_NEUTRAL)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_GOOD);
+					et->children.push_back(pe);
+				}
+				else if (i > ANY_NEUTRAL && i < ANY_END)
+				{
+					DropEntry<PartyEventType> pe;
+					pe.value = event_type;
+					pe.weight = 0;
+					pe.accumulation = 10;
+					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_NEUTRAL);
+					et->children.push_back(pe);
+				}
+				
+			}
 		}
-		for (int i = PartyEventType::GOOD + 1; i != PartyEventType::NEUTRAL; i++)
-		{
-			PartyEventType event_type = static_cast<PartyEventType>(i);
-			DropEntry<PartyEventType> event_entry;
-			event_entry.weight = 10;
-			event_entry.value = event_type;
-			good_events.children.push_back(event_entry);
-		}
-		for (int i = PartyEventType::NEUTRAL + 1; i != PartyEventType::NONE; i++)
-		{
-			PartyEventType event_type = static_cast<PartyEventType>(i);
-			DropEntry<PartyEventType> event_entry;
-			event_entry.weight = 10;
-			event_entry.value = event_type;
-			neutral_events.children.push_back(event_entry);
-		}
+
 
 		//disable robber for until combat implemented
-		DropEntry<PartyEventType>* event_ptr = bad_events.find_event_by_type(PartyEventType::BAD_ROBBER);
+		DropEntry<PartyEventType>* event_ptr = event_table.find_event_by_type(PartyEventType::ROAD_BAD_ROBBER);
 		event_ptr->max_weight = 0.0;
 		event_ptr->weight = 0.0;
+	
+		DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_NEUTRAL);
+		et->children.push_back(none_event);
 
+		et = event_table.find_event_by_type(PartyEventType::ROAD_NEUTRAL);
+		et->children.push_back(none_event);
 
-		event_table.children.push_back(bad_events);
-		event_table.children.push_back(good_events);
-		event_table.children.push_back(neutral_events);
-		event_table.children.push_back(none_event);
-		event_table.weight = 1;
+		et = event_table.find_event_by_type(PartyEventType::SETTLEMENT_NEUTRAL);
+		et->children.push_back(none_event);
 
+		et = event_table.find_event_by_type(PartyEventType::RUINS_NEUTRAL);
+		et->children.push_back(none_event);
+
+	
 		event_table.print_event_table(event_table);
 
 		return event_table;

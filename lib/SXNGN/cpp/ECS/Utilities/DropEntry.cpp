@@ -100,7 +100,7 @@
 		{
 			std::cout << prefix;
 			std::cout << (last_child ? "L--" : "|--");
-			std::cout << party_event_type_enum_to_string()[node.value] << "-" << node.weight << std::endl;
+			std::cout << "[" << party_event_type_enum_to_string()[node.value] << "]{" << node.weight  << "/" << node.max_weight << "+" << node.accumulation << "}" << std::endl;
 
 			for (int i = 0; i < node.children.size(); i++)
 			{
@@ -120,7 +120,9 @@
 	template<typename T>
 	void SXNGN::ECS::DropEntry<T>::print_event_table(DropEntry<T> node)
 	{
+		std::cout << "Event Table Start" << std::endl;
 		print_event_table("", node, false);
+		std::cout << "Event Table End " << std::endl;
 	}
 
 	template<typename T>
