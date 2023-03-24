@@ -61,7 +61,7 @@ namespace SXNGN {
 	const std::string OVERWORLD_PACE_PENALTY_M_S = "OVERWORLD_PACE_PENALTY_M_S";
 
 	
-
+	const double SECONDS_TO_HOURS = (1 / 60) * (1 / 60);
 	const double HANDS_BASE_CALORIES_PER_KM = 100.0;
 	const double LOST_BASE_KM = 1; //
 	const double SICK_BASE_MINUTES_GM = 60.0 * 2; //game time minutes to be sick for when sick event happens

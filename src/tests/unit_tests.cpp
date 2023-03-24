@@ -132,24 +132,44 @@ int test_3()
 
 int test_4()
 {
-
+	std::vector<std::string > fails;
 	for (int i = PartyEventType::NONE; i != PartyEventType::ANY_END; i++)
 	{
 		PartyEventType event_type = static_cast<PartyEventType>(i);
-		assert(party_event_type_enum_to_string().count(event_type) == 1);
+		//assert(party_event_type_enum_to_string().count(event_type) == 1);
+		if (party_event_type_enum_to_string().count(event_type) != 1)
+		{
+			fails.push_back("party_event_type_enum_to_string missing " + std::to_string(event_type));
+			continue;
+		}
 		std::string str = party_event_type_enum_to_string()[event_type];
-		assert(party_event_type_string_to_enum().count(str) == 1);
+		//assert(party_event_type_string_to_enum().count(str) == 1);
+		if (party_event_type_string_to_enum().count(str) != 1)
+		{
+			fails.push_back("party_event_type_string_to_enum missing " + std::to_string(event_type));
+			continue;
+		}
 		PartyEventType test = party_event_type_string_to_enum()[str];
-		assert(event_type == test);
+		if (event_type != test)
+		{
+			fails.push_back("bad conversion for " + std::to_string(event_type));
+			continue;
+		}
+		
 	}
+	for (auto fail : fails)
+	{
+		std::cout << fail << std::endl;
+	}
+	assert(fails.empty());
 
 	for (Uint8 i = static_cast<Uint8>(ComponentTypeEnum::UNKNOWN); i != static_cast<Uint8>(ComponentTypeEnum::NUM_COMPONENT_TYPES); i++)
 	{
-		PartyEventType event_type = static_cast<PartyEventType>(i);
-		assert(party_event_type_enum_to_string().count(event_type) == 1);
-		std::string str = party_event_type_enum_to_string()[event_type];
-		assert(party_event_type_string_to_enum().count(str) == 1);
-		PartyEventType test = party_event_type_string_to_enum()[str];
+		ComponentTypeEnum event_type = static_cast<ComponentTypeEnum>(i);
+		assert(component_type_enum_to_string().count(event_type) == 1);
+		std::string str = component_type_enum_to_string()[event_type];
+		assert(component_type_string_to_enum().count(str) == 1);
+		ComponentTypeEnum test = component_type_string_to_enum()[str];
 		assert(event_type == test);
 	}
 	return 0;
@@ -162,6 +182,7 @@ int main(int argc, char* args[])
 	tests.push_back(test_1);
 	tests.push_back(test_2);
 	tests.push_back(test_3);
+	tests.push_back(test_4);
 
 	for (auto test : tests)
 	{

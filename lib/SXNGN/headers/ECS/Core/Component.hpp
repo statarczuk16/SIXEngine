@@ -59,6 +59,7 @@ namespace SXNGN::ECS {
 			{ComponentTypeEnum::UNKNOWN,"UNKNOWN"},
 			{ComponentTypeEnum::LOCATION,"LOCATION"},
 			{ComponentTypeEnum::DIRECTOR,"DIRECTOR"},
+			{ComponentTypeEnum::EVENT,"EVENT"},
 			{ComponentTypeEnum::PARTY,"PARTY"},
 			{ComponentTypeEnum::RENDERABLE,"RENDERABLE"},
 			{ComponentTypeEnum::RENDERABLE_BATCH,"RENDERABLE_BATCH"},
@@ -79,6 +80,7 @@ namespace SXNGN::ECS {
 			{ComponentTypeEnum::WORLD_LOCATION,"WORLD_LOCATION"},
 			{ComponentTypeEnum::PARALLAX,"PARALLAX"},
 			{ComponentTypeEnum::UUID,"UUID"},
+			{ComponentTypeEnum::UI_SINGLE,"UI_SINGLE"},
 			{ComponentTypeEnum::SELECTABLE,"SELECTABLE"},
 			{ComponentTypeEnum::JSON_ENTITY,"JSON_ENTITY"},
 			{ComponentTypeEnum::EXTERN_ENTITY,"EXTERN_ENTITY"},
@@ -88,7 +90,8 @@ namespace SXNGN::ECS {
 			{ComponentTypeEnum::MAIN_SETTINGS_STATE,"MAIN_SETTINGS_STATE"},
 			{ComponentTypeEnum::TACTICAL_STATE,"TACTICAL_STATE"},
 			{ComponentTypeEnum::OVERWORLD_STATE,"OVERWORLD_STATE"},
-			{ComponentTypeEnum::NEW_GAME_STATE,"NEW_GAME_STATE"}
+			{ComponentTypeEnum::NEW_GAME_STATE,"NEW_GAME_STATE"},
+			{ComponentTypeEnum::GAME_STATE_START_HERE,"GAME_STATE_START_HERE"}
 
 		};
 		return component_type_enum_to_string;
@@ -100,6 +103,7 @@ namespace SXNGN::ECS {
 		{
 			{"UNKNOWN",ComponentTypeEnum::UNKNOWN},
 			{"DIRECTOR",ComponentTypeEnum::DIRECTOR},
+			{"EVENT",ComponentTypeEnum::EVENT},
 			{"PARTY",ComponentTypeEnum::PARTY},
 			{"LOCATION",ComponentTypeEnum::LOCATION},
 			{"RENDERABLE",ComponentTypeEnum::RENDERABLE},
@@ -118,6 +122,7 @@ namespace SXNGN::ECS {
 			{"TASK_WORKER",ComponentTypeEnum::TASK_WORKER},
 			{"TILE",ComponentTypeEnum::TILE},
 			{"PARALLAX",ComponentTypeEnum::PARALLAX},
+			{"UI_SINGLE",ComponentTypeEnum::UI_SINGLE},
 			{"UUID",ComponentTypeEnum::UUID},
 			{"SELECTABLE",ComponentTypeEnum::SELECTABLE},
 			{"WORLD_MAP",ComponentTypeEnum::WORLD_MAP},
@@ -130,7 +135,8 @@ namespace SXNGN::ECS {
 			{"MAIN_SETTINGS_STATE",ComponentTypeEnum::MAIN_SETTINGS_STATE},
 			{"TACTICAL_STATE",ComponentTypeEnum::TACTICAL_STATE},
 			{"OVERWORLD_STATE",ComponentTypeEnum::OVERWORLD_STATE},
-			{"NEW_GAME_STATE",ComponentTypeEnum::NEW_GAME_STATE}
+			{"NEW_GAME_STATE",ComponentTypeEnum::NEW_GAME_STATE},
+			{"GAME_STATE_START_HERE",ComponentTypeEnum::GAME_STATE_START_HERE},
 		};
 		return component_type_string_to_enum;
 	}

@@ -35,7 +35,7 @@ namespace SXNGN::ECS
 			{
 				ECS_Utils::update_pace();
 				Party* party_ptr = static_cast<Party*>(party_data);
-
+				std::ostringstream party_status_oss;
 
 				//Handle Location in World
 
@@ -65,6 +65,7 @@ namespace SXNGN::ECS
 				if (party_ptr->lost_counter_ > 0.0)
 				{
 					gCoordinator.setSetting(OVERWORLD_LOST, 1.0);
+					party_status_oss << "Lost for " << std::fixed << std::setprecision(2) << party_ptr->lost_counter_ << " KM" << std::endl;
 				}
 				else
 				{
@@ -80,6 +81,9 @@ namespace SXNGN::ECS
 				if (pace_go.second && pace_penalty_overworld.second)
 				{
 					double pace_m_s = pace_go.first * PARTY_PACE_NOMINAL_M_S + pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
+					party_status_oss << "Traveling at " << std::fixed << std::setprecision(2) << pace_m_s << " M/S" << std::endl;
+					party_status_oss << "   From terrain: " << std::fixed << std::setprecision(2) << pace_penalty_overworld.first << " M/S" << std::endl;
+					party_status_oss << "   From weight: " << std::fixed << std::setprecision(2) << party_ptr->encumbrance_penalty_m_s_ << " M/S" << std::endl;
 					gCoordinator.setSetting(OVERWORLD_PACE_M_S, pace_m_s);
 					double game_seconds_passed = dt * OVERWORLD_MULTIPLIER;
 					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
@@ -101,6 +105,7 @@ namespace SXNGN::ECS
 					if (sick)
 					{
 						double sick_time_recovered_s = game_seconds_passed;
+						party_status_oss << "Sick for: " << std::fixed << std::setprecision(2) << party_ptr->sick_counter_s_ * SXNGN::SECONDS_TO_HOURS << " Hours" << std::endl;
 						if (!moving)
 						{
 							sick_time_recovered_s *= 2;
@@ -129,16 +134,16 @@ namespace SXNGN::ECS
 							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_EXT;
 						}
 						party_ptr->health_ -= hp_drain;
+						party_status_oss << "Losing health to sandstorm " << std::endl;
+
 						
 					}
-					if (sandstorm)
+					std::string res = "";
+					if(moving && !party_ptr->have_footwear(res))
 					{
-						party_ptr->weather_counter_s_ -= game_seconds_passed;
-						if (party_ptr->weather_counter_s_ < 0)
-						{
-							party_ptr->weather_counter_s_ = 0.0;
-							party_ptr->weather_level_ = EventSeverity::UNKNOWN;
-						}
+						double hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MILD;
+						party_ptr->health_ -= hp_drain;
+						party_status_oss << "Losing health because no footwear " << std::endl;
 					}
 
 					//if on the move, substract stamina, then health
@@ -191,7 +196,9 @@ namespace SXNGN::ECS
 					snprintf(pace_value_label->label_->text, 100, "%s", str.data());
 				}
 
-
+				auto party_str = party_status_oss.str();
+				auto status_text = ui_single->string_to_ui_map_["OVERWORLD_status_text"];
+				snprintf(status_text->label_->text, 100, "%s", party_str.data());
 				//Update UI for progress bars
 				auto stamina_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_stamina"];
 				stamina_progress_bar->progressbar_->value = party_ptr->stamina_;

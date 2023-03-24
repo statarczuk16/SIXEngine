@@ -780,10 +780,16 @@ int init_menus()
 	// Party Status
 
 	auto status_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
-	std::shared_ptr<UIContainerComponent> status_label_c = UserInputUtils::create_label(status_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Status", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
-	status_window_c->child_components_.push_back(status_label_c);
+	//std::shared_ptr<UIContainerComponent> status_label_c = UserInputUtils::create_label(status_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Status", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+	//status_window_c->child_components_.push_back(status_label_c);
+
+	std::shared_ptr<UIContainerComponent> status_text_c = UserInputUtils::create_label(status_window_c->window_, HA_LEFT, HA_LEFT, VA_NONE, SP_FILL_WITH_BUFFER, UILayer::TOP, "Status", -1, -1, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT);
+	status_text_c->name_ = "OVERWORLD_status_text";
+	status_window_c->child_components_.push_back(status_text_c);
 
 	int status_row = 2;
+
+
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, status_window_c);
 
 	std::function<void()> set_inv_visible = std::bind(set_window_visible, inventory_window_c);

@@ -426,7 +426,7 @@ namespace SXNGN::ECS {
 			std::vector<std::string> options_list_text;
 			
 			std::vector<std::function<void()>> options_list_events;
-			std::string detail = "A hole has worn in a pair of boots. Pace will be slowed without footwear.";
+			std::string detail = "A hole has worn in a pair of boots. It will hurt to walk without footwear!";
 
 			std::function<void()> set_bad_boots = [gCoordinator, party_entity]()
 			{
@@ -710,7 +710,7 @@ namespace SXNGN::ECS {
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
-		case PartyEventType::ROAD_BAD_WEATHER:
+		case PartyEventType::ANY_BAD_WEATHER:
 		{
 			auto ui = UICollectionSingleton::get_instance();
 			std::vector<std::string> options_list_text;
@@ -755,7 +755,7 @@ namespace SXNGN::ECS {
 		default:
 		{
 			std::cout << "Error: Unimplemented event type: " << ec->e.party_event.party_event_type << std::endl;
-			abort();
+			//abort();
 			break;
 		}
 		}

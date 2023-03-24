@@ -216,7 +216,7 @@ namespace SXNGN::ECS
 		}
 		if (party_ptr->weather_counter_s_ > 0.0)
 		{
-			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD_BAD_WEATHER);
+			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ANY_BAD_WEATHER);
 			event_ptr->weight = 0;
 		}
 		if (at_settlement)
