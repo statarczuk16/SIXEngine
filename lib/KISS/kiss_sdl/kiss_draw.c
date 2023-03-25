@@ -77,7 +77,45 @@ int kiss_textwidth(kiss_font font, char *str1, char *str2)
 
 	if (!str1 && !str2) return -1;
 	kiss_string_copy(buf, KISS_MAX_LENGTH, str1, str2);
+
 	TTF_SizeUTF8(font.font, buf, &width, NULL);
+	return width;
+}
+
+/* Works also with proportional fonts */
+int kiss_charwidth(kiss_font font, char character)
+{
+	char buf[KISS_MAX_LENGTH];
+	buf[0] = character;
+	buf[1] = 0;
+	int width;
+	TTF_SizeUTF8(font.font, buf, &width, NULL);
+	return width;
+}
+
+/* Get the width of string up until first line break */
+int kiss_textwidth_first_line(kiss_font font, char* str)
+{
+	char buf1[KISS_MAX_LENGTH];
+	int width;
+
+	char* first_line_break_pos = strchr(str, '\n');
+	if (first_line_break_pos != NULL)
+	{
+		//get index of first line break pos subtracting address of label (eg, FF) from address of line break (eg, FF+7)
+		int first_line_break_index = (int)(first_line_break_pos - str);
+		char buf2[KISS_MAX_LABEL];
+		//make a substring of the label up until first line break
+		strncpy(buf2, str, first_line_break_index);
+		buf2[first_line_break_index] = '\0';
+		//get width of the text up until the first line break
+		width = kiss_textwidth(font, buf2, NULL);
+	}
+	else
+	{
+		width = kiss_textwidth(font, str, NULL);
+	}
+
 	return width;
 }
 
@@ -119,6 +157,36 @@ int kiss_rendertext(SDL_Renderer *renderer, char *text, int x, int y,
 	{
 		return 0;
 	}
+	SDL_Surface* surface;
+	kiss_image image;
+
+	if (!text || !renderer || !font.font) return -1;
+	surface = TTF_RenderUTF8_Blended(font.font, text, color);
+	image.image = SDL_CreateTextureFromSurface(renderer, surface);
+	SDL_QueryTexture(image.image, NULL, NULL, &image.w, &image.h);
+	if (surface) SDL_FreeSurface(surface);
+	kiss_renderimage(renderer, image, x, y, NULL);
+	SDL_DestroyTexture(image.image);
+	return 0;
+	
+	
+	//FC_Draw(fc_font, renderer, x, y, text);
+	//return 0;
+}
+
+int kiss_rendertext_wrapped(SDL_Renderer* renderer, char* text, int x, int y, int width_pixels,
+	kiss_font font, SDL_Color color)
+{
+	//SDL_Surface *surface;
+	//kiss_image image;
+
+	if (!text || !renderer || !font.font) return -1;
+	if (strnlen(text, 2) == 0)
+	{
+		return 0;
+	}
+	int len = (int)strlen(text);
+	text[len] = 0;
 	/**
 	surface = TTF_RenderUTF8_Blended(font.font, text, color);
 	image.image = SDL_CreateTextureFromSurface(renderer, surface);
@@ -127,8 +195,83 @@ int kiss_rendertext(SDL_Renderer *renderer, char *text, int x, int y,
 	kiss_renderimage(renderer, image, x, y, NULL);
 	SDL_DestroyTexture(image.image);
 	**/
+	char wrapped_text[KISS_MAX_TEXT];
+	int error = wrap_text(text, font, width_pixels, wrapped_text, KISS_MAX_TEXT);
+	if (error != 0)
+	{
+		printf("wrap_text error  for %s", text);
+	}
+	char buf[KISS_MAX_LABEL], * p;
+	//print while moving down the y axis at every line break
+	for (p = wrapped_text; *p; p = strchr(p, '\n') + 1)
+	{
+		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
+		kiss_rendertext(renderer, buf, x, y, font, color);
+		y += font.lineheight;
+	}
 	
-	FC_Draw(fc_font, renderer, x, y, text);
+	return 0;
+}
+
+int wrap_text(const char* text, kiss_font font, int wrap_width, char* result, int result_size)
+{
+	int length = strnlen(text, result_size);
+	int result_index = 0;
+	int line_start_index = 0;
+	int line_end_index = 0;
+	int line_length = 0;
+	int last_space = -1;
+
+	while (line_end_index < length) {
+		// Find the end of the current line
+		while (line_end_index < length && text[line_end_index] != '\n' && line_length + kiss_charwidth(font, text[line_end_index], NULL) <= wrap_width) 
+		{
+			line_length += kiss_charwidth(font, text[line_end_index], NULL);
+			line_end_index++;
+			if (text[line_end_index] == ' ')
+			{
+				last_space = line_end_index;
+			}
+
+		}
+		line_length += kiss_charwidth(font, text[line_end_index], NULL);
+
+		if (line_end_index < length && text[line_end_index] == '\n') {
+			// If we've reached a newline character, move to the next line
+			
+			line_end_index++;
+			strncpy(&result[result_index], &text[line_start_index], line_end_index - line_start_index);
+			result_index += line_end_index - line_start_index;
+			
+		}
+		else {
+			// Otherwise, wrap the text by inserting a newline character
+			if (result_index + line_end_index - line_start_index + 1 >= result_size) {
+				return 1; // Result buffer overflow
+			}
+			if (line_length >= wrap_width && last_space != -1)
+			{
+				line_end_index = last_space;
+				last_space = -1;
+				strncpy(&result[result_index], &text[line_start_index], line_end_index - line_start_index);
+				result[result_index + line_end_index - line_start_index] = '\n';
+				result_index += line_end_index - line_start_index + 1;
+			}
+			else
+			{
+				strncpy(&result[result_index], &text[line_start_index], line_end_index - line_start_index);
+				result[result_index + line_end_index - line_start_index] = '\n';
+				result_index += line_end_index - line_start_index + 1;
+			}
+			
+		}
+
+		// Reset the line length and start index for the next line
+		line_length = 0;
+		line_start_index = line_end_index;
+		
+	}
+	result[result_index] = 0;
 	return 0;
 }
 

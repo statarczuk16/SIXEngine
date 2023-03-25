@@ -50,11 +50,11 @@ namespace SXNGN::ECS
 				int world_map_grid_y = round(location_ptr->m_pos_y_m_ * SXNGN::OVERWORLD_GRIDS_PER_PIXEL);
 
 				std::vector<sole::uuid> party_map_location_uuids;
-				if (worldmap_ptr->world_locations_.size() > world_map_grid_x)
+				if (worldmap_ptr->world_locations_.size() > world_map_grid_y)
 				{
-					if (worldmap_ptr->world_locations_.at(world_map_grid_x).size() > world_map_grid_y)
+					if (worldmap_ptr->world_locations_.at(world_map_grid_y).size() > world_map_grid_x)
 					{
-						party_map_location_uuids = worldmap_ptr->world_locations_[world_map_grid_x][world_map_grid_y];
+						party_map_location_uuids = worldmap_ptr->world_locations_[world_map_grid_y][world_map_grid_x];
 					}
 				}
 				party_ptr->world_location_ids_ = party_map_location_uuids;
@@ -80,10 +80,10 @@ namespace SXNGN::ECS
 
 				if (pace_go.second && pace_penalty_overworld.second)
 				{
-					double pace_m_s = pace_go.first * PARTY_PACE_NOMINAL_M_S + pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
+					double pace_m_s = pace_go.first * PARTY_PACE_NOMINAL_M_S - pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
 					party_status_oss << "Traveling at " << std::fixed << std::setprecision(2) << pace_m_s << " M/S" << std::endl;
-					party_status_oss << "   From terrain: " << std::fixed << std::setprecision(2) << pace_penalty_overworld.first << " M/S" << std::endl;
-					party_status_oss << "   From weight: " << std::fixed << std::setprecision(2) << party_ptr->encumbrance_penalty_m_s_ << " M/S" << std::endl;
+					party_status_oss << "  Terrain: " << std::fixed << std::setprecision(2) << pace_penalty_overworld.first << " M/S" << std::endl;
+					party_status_oss << "  Weight: " << std::fixed << std::setprecision(2) << party_ptr->encumbrance_penalty_m_s_ << " M/S" << std::endl;
 					gCoordinator.setSetting(OVERWORLD_PACE_M_S, pace_m_s);
 					double game_seconds_passed = dt * OVERWORLD_MULTIPLIER;
 					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
@@ -198,7 +198,7 @@ namespace SXNGN::ECS
 
 				auto party_str = party_status_oss.str();
 				auto status_text = ui_single->string_to_ui_map_["OVERWORLD_status_text"];
-				snprintf(status_text->label_->text, 100, "%s", party_str.data());
+				snprintf(status_text->label_->text, KISS_MAX_TEXT, "%s", party_str.data());
 				//Update UI for progress bars
 				auto stamina_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_stamina"];
 				stamina_progress_bar->progressbar_->value = party_ptr->stamina_;

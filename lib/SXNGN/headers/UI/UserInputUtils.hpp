@@ -4,6 +4,7 @@
 #include <vector>
 #include <kiss_sdl.h>
 #include <ECS/Core/Types.hpp>
+#include <ECS/Core/Item.hpp>
 
 
 
@@ -47,6 +48,8 @@ namespace SXNGN::ECS {
 			UILayer layer, char* name, double lower_bound, double upper_bound, text_entry_type entry_type, double default_val = 0, int row = -1, int column = -1);
 
 		static std::shared_ptr<UIContainerComponent> create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks, std::vector<bool> option_enables);
+
+		static std::shared_ptr<UIContainerComponent> create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, std::map<ItemType, double> shop_inv);
 
 
 		

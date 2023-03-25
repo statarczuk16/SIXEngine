@@ -43,6 +43,10 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 	{
 		//set x position to middle of parent window
 		*out_x = parent_rect->x + (parent_rect->w / 2) - (text_width / 2);
+		if (*out_x < parent_rect->x)
+		{
+			*out_x = parent_rect->x + parent_rect->w / 10;
+		}
 		break;
 	}
 	case HA_COLUMN:
@@ -74,6 +78,13 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 		int offset_down = parent_rect->h * 0.5; //set to y to middle of parent window
 		int offset_up_text = text_height * 0.6; //offset up to account for height of font
 		*out_y = parent_rect->y + offset_down - offset_up_text;
+		break;
+	}
+	case VA_TOP:
+	{
+
+		//offset ui rect by the position of parent window
+		*out_y = parent_rect->y + parent_rect->y / 10;
 		break;
 	}
 	default:
@@ -353,112 +364,29 @@ int substring_length(char str[], int start, int end)
 
 int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 {
-	char buf[KISS_MAX_LABEL], *p;
 	int len, y, x;
 	int visible = label->visible;
 	int text_width;
 
 	if (label)
 	{
-		//get the width in units of the label text
-		//if it has line breaks, get the width until the first line break
-		char* first_line_break_pos = strchr(label->text, '\n');
-		if (first_line_break_pos != NULL)
-		{
-			//get index of first line break pos subtracting address of label (eg, FF) from address of line break (eg, FF+7)
-			int first_line_break_index = (int) (first_line_break_pos - label->text);
-			char buffer[KISS_MAX_LABEL];
-			//make a substring of the label up until first line break
-			strncpy(buffer, label->text, first_line_break_index);
-			buffer[first_line_break_index] = '\0';
-			//get width of the text up until the first line break
-			text_width = kiss_textwidth(label->font, buffer, NULL);
-		}
-		else
-		{
-			text_width = kiss_textwidth(label->font, label->text, NULL);
-		}
-		
+		//for use if text is centers, get width of the first line of text (until line break)
+		int width_until_line_break = kiss_textwidth_first_line(label->font, label->text);
 		visible = label->visible && label->wdw->visible;
 		//pass by ref - sets button->r_rect
 		(void)determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
 		//pass by ref - sets textx and texty
-		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, VA_CENTER, &x, &y, text_width, kiss_textheight(label->font, label->text, NULL));
-		if (x > label->r_rect.x)
-		{
-			text_width += (x - label->r_rect.x);
-		}
-		
+		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, label->txt_v_align, &x, &y, width_until_line_break, kiss_textheight(label->font, label->text, NULL));
 	}
 	if (!label || !visible || !renderer)
 	{
 		return 0;
 	}
-	
-	
-	//if the text is too wide to fit in the label, insert line breaks
-	//note text_width variable is only as wide as text until first line break
-	double text_width_temp_px_dbl = text_width * 1.05;
-	int text_width_temp_px = round(text_width_temp_px_dbl);
-	if (text_width_temp_px > label->r_rect.w)
-	{
-		char* test = "o";
-		int char_width_px = kiss_textwidth(label->font, test, NULL);
-		
-		
-		int label_width_chars = label->r_rect.w / char_width_px + 1;
-		int split_location = 0;
-		size_t label_text_width_chars = strnlen(label->text, KISS_MAX_LABEL);
-		
-		if (strchr(label->text, ' ') == NULL)
-		{
-			label->r_rect.w = text_width_temp_px;
-		}
-		while (text_width_temp_px > label->r_rect.w)
-		{
-			split_location += label_width_chars;
-			if (split_location < label_text_width_chars && split_location > 0)
-			{
-				while (label->text[split_location] != ' ')
-				{
-					split_location--;
-				}
-				label->text[split_location] = '\n';
-				char* buffer = label->text + split_location;
-				text_width_temp_px = kiss_textwidth(label->font, buffer, NULL);
-			}
-			else
-			{
 
-				label->r_rect.w = text_width_temp_px;
-			}
-		}
-	}
-	
-	
-	
 
 	kiss_decorate(renderer, &label->r_rect, kiss_sand_dark, kiss_edge);
 
-	len = (int)strlen(label->text);
-	if (len > KISS_MAX_LABEL - 2)
-	{
-		label->text[len - 1] = '\n';
-	}
-	else
-	{
-		strncat(label->text, "\n", KISS_MAX_LENGTH);
-	}
-	
-	for (p = label->text; *p; p = strchr(p, '\n')+1)
-	{
-		kiss_string_copy(buf, strcspn(p, "\n") + 1, p, NULL);
-		kiss_rendertext(renderer, buf, x, y, label->font, label->textcolor);
-		y += label->font.lineheight;
-	}
-	
-	
-	label->text[len] = 0;
+	kiss_rendertext_wrapped(renderer, label->text, x, y, label->r_rect.w, label->font, label->textcolor);
 	return 1;
 }
 

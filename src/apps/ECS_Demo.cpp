@@ -743,6 +743,15 @@ int init_menus()
 	inventory_window_c->child_components_.push_back(inv_label_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, inventory_window_c);
 
+
+	std::map<ItemType, double> shop_inv_dummy;
+	std::function<void(std::map < ItemType, double> trader_inv)> trade_with_inv = [coordinator](std::map < ItemType, double> trader_inv)
+	{
+		auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::TOP, trader_inv);
+		auto ui = UICollectionSingleton::get_instance();
+		ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, trading_window);
+	};
+	auto dummy_trade_func = std::bind(trade_with_inv, shop_inv_dummy);
 	// Settlement
 	auto settlement_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	std::shared_ptr<UIContainerComponent> settlement_label_c = UserInputUtils::create_label(settlement_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Settlement", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
@@ -754,6 +763,7 @@ int init_menus()
 	auto trade_button_c = UserInputUtils::create_button(settlement_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Trade", settlement_row, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	trade_button_c->name_ = "OVERWORLD_trade_button";
 	trade_button_c->button_->enabled = false;
+	trade_button_c->callback_functions_.push_back(dummy_trade_func);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trade_button_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, settlement_window_c);
 	settlement_window_c->window_->visible = false;
@@ -783,8 +793,9 @@ int init_menus()
 	//std::shared_ptr<UIContainerComponent> status_label_c = UserInputUtils::create_label(status_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Status", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 	//status_window_c->child_components_.push_back(status_label_c);
 
-	std::shared_ptr<UIContainerComponent> status_text_c = UserInputUtils::create_label(status_window_c->window_, HA_LEFT, HA_LEFT, VA_NONE, SP_FILL_WITH_BUFFER, UILayer::TOP, "Status", -1, -1, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT);
+	std::shared_ptr<UIContainerComponent> status_text_c = UserInputUtils::create_label(status_window_c->window_, HA_LEFT, HA_LEFT, VA_NONE, SP_FILL, UILayer::TOP, "Status", -1, -1, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT);
 	status_text_c->name_ = "OVERWORLD_status_text";
+	status_text_c->label_->txt_v_align = VA_TOP;
 	status_window_c->child_components_.push_back(status_text_c);
 
 	int status_row = 2;

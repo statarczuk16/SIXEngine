@@ -38,6 +38,46 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, std::map<ItemType, double> shop_inv)
+	{
+		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
+		sole::uuid player_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+		Entity player_entity = gCoordinator.GetEntityFromUUID(player_id);
+		auto party_data = gCoordinator.GetComponentReadOnly(player_entity, ComponentTypeEnum::PARTY);
+		std::map<ItemType, double> player_inv;
+		if (party_data)
+		{
+			const Party* party_ptr = static_cast<const Party*>(party_data);
+			player_inv = party_ptr->inventory_;
+		}
+		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+		int w = 300;
+		int h = 600;
+		int window_layer_int = (int)UILayer::TOP;
+		int window_item_layer_int = window_layer_int;
+		UILayer window_item_layer = (UILayer)window_item_layer_int;
+		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
+		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
+		auto trade_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, layer);
+
+		int player_item_label_x = window_x + 10;
+		int player_item_label_w = 50;
+		int player_item_label_h = 30;
+		
+		int row = 2;
+		int column = 0;
+		for (auto player_item : player_inv)
+		{
+			std::string item_name = item_type_to_string()[player_item.first];
+			std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_THIRD, window_item_layer, item_name.data(), row, column, player_item_label_w, player_item_label_h);
+			trade_window_c->child_components_.push_back(title_label_c);
+			row++;
+		}
+
+		return trade_window_c;
+	}
+		
+
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks, std::vector<bool> option_enables)
 	{
 		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
@@ -121,6 +161,7 @@ namespace SXNGN::ECS {
 		new_kiss_label->h_align = h_align;//label center to parent window window
 		new_kiss_label->v_align = v_align;
 		new_kiss_label->txt_h_align = txt_h_align;//text center to this label
+		new_kiss_label->txt_v_align = v_alignment::VA_CENTER;//text center to this label
 		new_kiss_label->row = row;
 		new_kiss_label->column = column;
 		new_kiss_label->parent_scale = parent_scale;

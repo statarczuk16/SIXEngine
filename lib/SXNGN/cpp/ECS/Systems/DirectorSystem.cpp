@@ -251,6 +251,9 @@ namespace SXNGN::ECS
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ROAD);
 			event_ptr->weight = 0;
 		}
+
+		DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ANY);
+		event_ptr->weight = 100;
 	}
 
 	DropEntry<PartyEventType> Director_System::GenerateEventTable()

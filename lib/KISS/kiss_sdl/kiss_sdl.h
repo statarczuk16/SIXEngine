@@ -56,6 +56,7 @@
 #define KISS_MAX_LENGTH 260
 #define KISS_MIN_LENGTH 10
 #define KISS_MAX_LABEL 500
+#define KISS_MAX_TEXT 10000
 #define KISS_MAGIC 12345
 
 enum {OTHER_TYPE, WINDOW_TYPE, RENDERER_TYPE, TEXTURE_TYPE, SURFACE_TYPE,
@@ -93,6 +94,7 @@ typedef enum h_alignment {
 
 typedef enum v_alignment {
 	VA_NONE,
+	VA_TOP,
 	VA_CENTER,
 	VA_ROW
 } v_alignment;
@@ -402,9 +404,14 @@ int kiss_array_free(kiss_array *a);
 unsigned int kiss_getticks(void);
 int kiss_maxlength(kiss_font font, int width, char *str1, char *str2);
 int kiss_textwidth(kiss_font font, char *str1, char *str2);
+int kiss_charwidth(kiss_font font, char character);
+int kiss_textwidth_first_line(kiss_font font, char* str);
+
 int kiss_renderimage(SDL_Renderer *renderer, kiss_image image,
 	int x, int y, SDL_Rect *clip);
 int kiss_rendertext(SDL_Renderer *renderer, char *text, int x, int y,
+	kiss_font font, SDL_Color color);
+int kiss_rendertext_wrapped(SDL_Renderer* renderer, char* text, int x, int y, int width_pixels,
 	kiss_font font, SDL_Color color);
 int kiss_fillrect(SDL_Renderer *renderer, SDL_Rect *rect, SDL_Color color);
 int kiss_decorate(SDL_Renderer *renderer, SDL_Rect *rect, SDL_Color color,

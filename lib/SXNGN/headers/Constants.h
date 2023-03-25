@@ -61,7 +61,7 @@ namespace SXNGN {
 	const std::string OVERWORLD_PACE_PENALTY_M_S = "OVERWORLD_PACE_PENALTY_M_S";
 
 	
-	const double SECONDS_TO_HOURS = (1 / 60) * (1 / 60);
+	const double SECONDS_TO_HOURS = (1 / 60.0) * (1 / 60.0);
 	const double HANDS_BASE_CALORIES_PER_KM = 100.0;
 	const double LOST_BASE_KM = 1; //
 	const double SICK_BASE_MINUTES_GM = 60.0 * 2; //game time minutes to be sick for when sick event happens
@@ -73,7 +73,7 @@ namespace SXNGN {
 	const double WORLD_ROAD_PENALTY_PACE_M_S = -0.5; //road bonus
 	const double WORLD_DESERT_PENALTY_PACE_M_S = 0.1; //offroading penalty
 	const double WORLD_NONE_PENALTY_PACE_M_S = 0.0; //offroading penalty
-	const double PARTY_PACE_NOMINAL_M_S = 1.5; //no health or weight problems 
+	const double PARTY_PACE_NOMINAL_M_S = 1.0; //no health or weight problems 
 	const double PARTY_PACE_BOOTS_PENALTY_MILD = 0.5;
 
 	const double PARTY_PACE_WEIGHT_PENALTY_MILD = 0.2;
