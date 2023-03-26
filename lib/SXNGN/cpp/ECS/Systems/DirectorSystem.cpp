@@ -65,6 +65,7 @@ namespace SXNGN::ECS
 				bool at_ruins = false;
 				double traversal_cost_penalty_m_s_ = 0.0;
 				auto ui = UICollectionSingleton::get_instance();
+				Entity settlement_entity = -1;
 				if (overworld_player_uuid != SXNGN::BAD_UUID)
 				{
 					auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
@@ -85,6 +86,7 @@ namespace SXNGN::ECS
 							}
 							if (ptr->has_settlement_)
 							{
+								settlement_entity = gCoordinator.GetEntityFromUUID(id);
 								at_settlement = true;
 								auto settlement_name_label = ui->string_to_ui_map_["OVERWORLD_settlement_name"];
 								snprintf(settlement_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
@@ -112,27 +114,31 @@ namespace SXNGN::ECS
 				{
 					auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
 					auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
-					if (party_component)
+					auto party_ptr = static_cast<Party*>(party_component);
+					auto market_component = gCoordinator.CheckOutComponent(settlement_entity, ComponentTypeEnum::MARKET);
+					auto market_ptr = static_cast<Market*>(market_component);
+						
+					TradeHelper* trade_helper = new TradeHelper();
+					trade_helper->left_inv = party_ptr->inventory_;
+					trade_helper->right_inv = market_ptr->inventory_;
+
+					std::function<void(TradeHelper* helper)> trade_with_inv = [](TradeHelper* trade_helper)
 					{
-						auto party_ptr = static_cast<Party*>(party_component);
-						TradeHelper* trade_helper = new TradeHelper();
-						trade_helper->left_inv = party_ptr->inventory_;
+						auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::BOTTOM, trade_helper);
+						auto ui = UICollectionSingleton::get_instance();
+						ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trading_window);
+					};
+					auto trade_here = std::bind(trade_with_inv, trade_helper);
 
-						std::function<void(TradeHelper* helper)> trade_with_inv = [](TradeHelper* trade_helper)
-						{
-							auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::BOTTOM, trade_helper);
-							auto ui = UICollectionSingleton::get_instance();
-							ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trading_window);
-						};
-						auto trade_here = std::bind(trade_with_inv, trade_helper);
+					auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
+					trade_button->button_->enabled = true;
+					trade_button->callback_functions_.clear();
+					trade_button->callback_functions_.push_back(trade_here);
+					gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+					gCoordinator.CheckInComponent(settlement_entity, ComponentTypeEnum::MARKET);
 
-						auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
-						trade_button->button_->enabled = true;
-						trade_button->callback_functions_.clear();
-						trade_button->callback_functions_.push_back(trade_here);
-						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 
-					}
+					
 					
 				}
 				else

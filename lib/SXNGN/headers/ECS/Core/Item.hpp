@@ -17,6 +17,7 @@ namespace SXNGN::ECS {
         AMMO,
         BATTERY,
         GPS,
+		KALNOTE,
 		END
     };
 
@@ -32,6 +33,7 @@ namespace SXNGN::ECS {
 			{ItemType::GUN,"GUN"},
 			{ItemType::AMMO,"AMMO"},
 			{ItemType::BATTERY,"BATTERY"},
+			{ItemType::KALNOTE,"KALNOTE"},
 			{ItemType::GPS,"GPS"}
 		};
 		return item_type_to_string;
@@ -49,6 +51,7 @@ namespace SXNGN::ECS {
 			{"GUN",ItemType::GUN},
 			{"AMMO",ItemType::AMMO},
 			{"BATTERY",ItemType::BATTERY},
+			{"KALNOTE",ItemType::KALNOTE},
 			{"FOOD",ItemType::FOOD}
 		};
 		return string_to_item_type;
@@ -60,6 +63,7 @@ namespace SXNGN::ECS {
 		{
 			{ItemType::UNKNOWN, 0.0},
 			{ItemType::FOOD, 0.01}, //1 unit = 10 calories, so like half a quarter of a granola bar
+			{ItemType::KALNOTE, 0.001}, //1 unit = 10 calories, so like half a quarter of a granola bar
 			{ItemType::FOOTWEAR,2.0},
 			{ItemType::WATER,1}, //0.5 liter = 0.5 kg
 			{ItemType::MEDKIT,10},
@@ -69,6 +73,24 @@ namespace SXNGN::ECS {
 			{ItemType::GPS,1}
 		};
 		return item_type_to_weight_kg;
+	}
+
+	//convert enum to string for json purposes
+	inline std::unordered_map<ItemType, double>& item_type_to_base_value_kl() {
+		static std::unordered_map<ItemType, double> item_type_to_base_value_kl =
+		{
+			{ItemType::UNKNOWN, 0.0},
+			{ItemType::FOOD, 0.015}, //1 unit = 10 calories, 1 kalnote buys 700 calories
+			{ItemType::KALNOTE, 1}, //this is the currency
+			{ItemType::FOOTWEAR, 10.0},
+			{ItemType::WATER,1}, //0.5 liter = 0.5 kg
+			{ItemType::MEDKIT,15.0},
+			{ItemType::GUN,25.0},
+			{ItemType::AMMO,0.05},
+			{ItemType::BATTERY,2},
+			{ItemType::GPS,100}
+		};
+		return item_type_to_base_value_kl;
 	}
     
 	class Item

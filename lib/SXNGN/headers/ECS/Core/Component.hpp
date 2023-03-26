@@ -37,6 +37,7 @@ namespace SXNGN::ECS {
 	EXTERN_ENTITY,
 	EVENT,
 	TASK,
+	MARKET,
 	TASK_WORKER,
 	PARTY,
 	GAME_STATE_START_HERE, //!!!! only game state enums after this point !!!!
@@ -85,6 +86,7 @@ namespace SXNGN::ECS {
 			{ComponentTypeEnum::JSON_ENTITY,"JSON_ENTITY"},
 			{ComponentTypeEnum::EXTERN_ENTITY,"EXTERN_ENTITY"},
 			{ComponentTypeEnum::MAIN_MENU_STATE,"MAIN_MENU_STATE"},
+			{ComponentTypeEnum::MARKET,"MARKET"},
 			{ComponentTypeEnum::CORE_BG_GAME_STATE,"CORE_BG_GAME_STATE"},
 			{ComponentTypeEnum::MAIN_GAME_STATE,"MAIN_GAME_STATE"},
 			{ComponentTypeEnum::MAIN_SETTINGS_STATE,"MAIN_SETTINGS_STATE"},
@@ -126,6 +128,7 @@ namespace SXNGN::ECS {
 			{"UUID",ComponentTypeEnum::UUID},
 			{"SELECTABLE",ComponentTypeEnum::SELECTABLE},
 			{"WORLD_MAP",ComponentTypeEnum::WORLD_MAP},
+			{"MARKET",ComponentTypeEnum::MARKET},
 			{"WORLD_LOCATION",ComponentTypeEnum::WORLD_LOCATION},
 			{"JSON_ENTITY",ComponentTypeEnum::JSON_ENTITY},
 			{"EXTERN_ENTITY",ComponentTypeEnum::EXTERN_ENTITY},

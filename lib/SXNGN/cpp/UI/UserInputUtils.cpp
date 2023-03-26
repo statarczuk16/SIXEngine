@@ -53,8 +53,84 @@ namespace SXNGN::ECS {
 			player_inv = party_ptr->inventory_;
 		}
 		**/
+		
+		
+		std::function<void(std::shared_ptr<UIContainerComponent> edit_component, std::shared_ptr<UIContainerComponent> total_label, ItemType item_type, bool left_1_right_0)> update_total = [trade_helper](std::shared_ptr<UIContainerComponent> edit_component, std::shared_ptr<UIContainerComponent> total_label, ItemType item_type, bool left_1_right_0)
+		{
+			double amount = edit_component->entry_->num_val;
+			std::map<ItemType, double> temp;
+			if (left_1_right_0)
+			{
+				trade_helper->left_inv_temp[item_type] = amount;
+				temp = trade_helper->left_inv_temp;
+
+			}
+			else
+			{
+				trade_helper->right_inv_temp[item_type] = amount;
+				temp = trade_helper->right_inv_temp;
+			}
+			double running_cost_total = 0.0;
+			for (auto item_amount_pair : temp)
+			{
+				running_cost_total += item_type_to_base_value_kl()[item_amount_pair.first] * item_amount_pair.second;
+			}
+			sprintf(total_label->label_->text, "%.3f KNs", running_cost_total);
+		};
+
+		std::function<void(std::shared_ptr<UIContainerComponent> edit_component, float amount)> add_to_edit = [](std::shared_ptr<UIContainerComponent> edit_component, float amount)
+		{
+			//edit_component->entry_->num_val += amount;
+			double cur_val = edit_component->entry_->num_val;
+			double temp = cur_val + amount;
+
+			switch (edit_component->entry_->entry_type)
+			{
+			case TE_NONE:
+			{
+				break;
+			}
+			case TE_FLOAT:
+			{
+				
+				if (temp >= edit_component->entry_->upper_bound)
+				{
+					temp = edit_component->entry_->upper_bound;
+				}
+				else if (temp <= edit_component->entry_->lower_bound)
+				{
+					temp = edit_component->entry_->lower_bound;
+				}
+				edit_component->entry_->num_val = temp;
+				snprintf(edit_component->entry_->text, KISS_MAX_LENGTH, "%g", edit_component->entry_->num_val);
+				break;
+			}
+			case TE_INT:
+			{
+				
+
+				if (temp >= edit_component->entry_->upper_bound)
+				{
+					temp = (int)round(edit_component->entry_->upper_bound);
+				}
+				else if (temp <= edit_component->entry_->lower_bound)
+				{
+					temp = (int)round(edit_component->entry_->lower_bound);
+				}
+				edit_component->entry_->num_val = (int)temp;
+				snprintf(edit_component->entry_->text, KISS_MAX_LENGTH, "%d", (int)edit_component->entry_->num_val);
+				break;
+			}
+			default:
+			{
+				printf("kiss_entry_handle bad entry->entry_type\n");
+				abort();
+			}
+			}
+		};
+
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-		int w = 400;
+		int w = 600;
 		int h = 500;
 		int window_layer_int = (int)layer;
 		int window_item_layer_int = window_layer_int + 1;
@@ -64,34 +140,141 @@ namespace SXNGN::ECS {
 		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
 		auto trade_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, window_layer);
 
-		int player_item_label_w = 75;
-		int amount_edit_w = 50;
-		int player_item_label_h = 30;
+		int item_total_w = 100;
+		int item_label_w = 75;
+		int amount_edit_w = 75;
+		int item_label_h = 30;
+		int item_cost_w = 75;
 		int add_remove_button_width = 15;
 		int player_item_label_x = 10;
-		int dec_button_x = player_item_label_x + player_item_label_w + 5;
-		int amount_edit_x = dec_button_x + add_remove_button_width + 5;
-		int inc_button_x = amount_edit_x + amount_edit_w;
+		int player_dec_button_x = player_item_label_x + item_label_w + 5;
+		int player_amount_edit_x = player_dec_button_x + add_remove_button_width + 5;
+		int player_inc_button_x = player_amount_edit_x + amount_edit_w;
+		int player_cost_label_x = player_inc_button_x + 5 + add_remove_button_width;
+
+
+		int shop_item_label_x = w - 5 - item_label_w;
+		int shop_item_inc_button_x = shop_item_label_x - 5 - add_remove_button_width;
+		int shop_amount_edit_x = shop_item_inc_button_x - 5 - amount_edit_w;
+		int shop_item_dec_button_x = shop_amount_edit_x - 5 - add_remove_button_width;
+		int shop_cost_label_x = shop_item_dec_button_x - 5 - item_cost_w;
+
+		std::shared_ptr<UIContainerComponent> left_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Item", 1, -1, item_label_w, item_label_h);
+		left_title_label_c->label_->rect.x = player_item_label_x;
+
+		std::shared_ptr<UIContainerComponent> left_amount_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "To Sell", 1, -1, item_label_w, item_label_h);
+		left_amount_label_c->label_->rect.x = player_amount_edit_x;
+
+		std::shared_ptr<UIContainerComponent> left_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Sell Price", 1, -1, item_cost_w, item_label_h);
+		left_cost_label_c->label_->rect.x = player_cost_label_x;
+
+		std::shared_ptr<UIContainerComponent> right_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Item", 1, -1, item_label_w, item_label_h);
+		right_title_label_c->label_->rect.x = shop_item_label_x;
+
+		std::shared_ptr<UIContainerComponent> right_amount_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "To Buy", 1, -1, item_label_w, item_label_h);
+		right_amount_label_c->label_->rect.x = shop_amount_edit_x;
+
+		std::shared_ptr<UIContainerComponent> right_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Buy Price", 1, -1, item_cost_w, item_label_h);
+		right_cost_label_c->label_->rect.x = shop_cost_label_x;
+
+		trade_window_c->child_components_.push_back(left_title_label_c);
+		trade_window_c->child_components_.push_back(left_amount_label_c);
+		trade_window_c->child_components_.push_back(left_cost_label_c);
+		trade_window_c->child_components_.push_back(right_title_label_c);
+		trade_window_c->child_components_.push_back(right_amount_label_c);
+		trade_window_c->child_components_.push_back(right_cost_label_c);
+
+
+		std::shared_ptr<UIContainerComponent> left_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 10, -1, item_total_w, item_label_h);
+		left_total_label_c->label_->rect.x = player_cost_label_x;
+
+		std::shared_ptr<UIContainerComponent> right_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 10, -1, item_total_w, item_label_h);
+		right_total_label_c->label_->rect.x = shop_cost_label_x;
+
+		trade_window_c->child_components_.push_back(left_total_label_c);
+		trade_window_c->child_components_.push_back(right_total_label_c);
+
 		
 		int row = 2;
-		
-		for (auto player_item : trade_helper->left_inv)
+		for (auto item : trade_helper->left_inv)
 		{
-			std::string item_name = item_type_to_string()[player_item.first];
-			std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, player_item_label_w, player_item_label_h);
-			title_label_c->label_->rect.x = player_item_label_x;
+			double amt_available = item.second;
+			std::string item_name = item_type_to_string()[item.first];
+			double base_cost = item_type_to_base_value_kl()[item.first];
+			std::shared_ptr<UIContainerComponent> left_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, item_label_w, item_label_h);
+			left_title_label_c->label_->rect.x = player_item_label_x;
 			
-			std::shared_ptr<UIContainerComponent> decrease_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "-", row, -1, add_remove_button_width, player_item_label_h);
-			decrease_button_c->button_->rect.x = dec_button_x;
-			std::shared_ptr<UIContainerComponent> increase_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "+", row, -1, add_remove_button_width, player_item_label_h);
-			increase_button_c->button_->rect.x = inc_button_x;
+			std::shared_ptr<UIContainerComponent> left_decrease_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "-", row, -1, add_remove_button_width, item_label_h);
+			left_decrease_button_c->button_->rect.x = player_dec_button_x;
+			
+			std::shared_ptr<UIContainerComponent> left_increase_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "+", row, -1, add_remove_button_width, item_label_h);
+			left_increase_button_c->button_->rect.x = player_inc_button_x;
 
-			trade_window_c->child_components_.push_back(title_label_c);
-			trade_window_c->child_components_.push_back(decrease_button_c);
-			trade_window_c->child_components_.push_back(increase_button_c);
+			std::shared_ptr<UIContainerComponent> left_amount_entry_c = UserInputUtils::create_num_entry(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "?", 0, amt_available, TE_INT, 0, row, -1);
+			left_amount_entry_c->entry_->rect.x = player_amount_edit_x;
+			left_amount_entry_c->entry_->rect.w = amount_edit_w;
+			left_amount_entry_c->entry_->rect.h = item_label_h;
+			char base_cost_str[10];
+			sprintf(base_cost_str, "%.3f", base_cost);
+			std::shared_ptr<UIContainerComponent> left_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, base_cost_str, row, -1, item_cost_w, item_label_h);
+			left_cost_label_c->label_->rect.x = player_cost_label_x;
+
+			left_decrease_button_c->callback_functions_.push_back(std::bind(add_to_edit, left_amount_entry_c, -1));
+			left_increase_button_c->callback_functions_.push_back(std::bind(add_to_edit, left_amount_entry_c, 1));
+			left_increase_button_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, left_total_label_c, item.first, true));
+			left_decrease_button_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, left_total_label_c, item.first, true));
+			left_amount_entry_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, left_total_label_c, item.first, true));
+
+			trade_window_c->child_components_.push_back(left_title_label_c);
+			trade_window_c->child_components_.push_back(left_decrease_button_c);
+			trade_window_c->child_components_.push_back(left_increase_button_c);
+			trade_window_c->child_components_.push_back(left_cost_label_c);
+			trade_window_c->child_components_.push_back(left_amount_entry_c);
+
+			
 			
 			row++;
 		}
+
+		row = 2;
+		for (auto item : trade_helper->right_inv)
+		{
+			double amt_available = item.second;
+			double base_cost = item_type_to_base_value_kl()[item.first];
+			std::string item_name = item_type_to_string()[item.first];
+			std::shared_ptr<UIContainerComponent> right_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, item_label_w, item_label_h);
+			right_title_label_c->label_->rect.x = shop_item_label_x;
+
+			std::shared_ptr<UIContainerComponent> right_decrease_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "-", row, -1, add_remove_button_width, item_label_h);
+			right_decrease_button_c->button_->rect.x = shop_item_dec_button_x;
+			std::shared_ptr<UIContainerComponent> right_increase_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "+", row, -1, add_remove_button_width, item_label_h);
+			right_increase_button_c->button_->rect.x = shop_item_inc_button_x;
+			std::shared_ptr<UIContainerComponent> right_amount_entry_c = UserInputUtils::create_num_entry(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "?", 0, amt_available, TE_INT, 0, row, -1);
+			right_amount_entry_c->entry_->rect.x = shop_amount_edit_x;
+			right_amount_entry_c->entry_->rect.w = amount_edit_w;
+			right_amount_entry_c->entry_->rect.h = item_label_h;
+			char base_cost_str[10];
+			sprintf(base_cost_str, "%.3f", base_cost);
+			std::shared_ptr<UIContainerComponent> right_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, base_cost_str, row, -1, item_cost_w, item_label_h);
+			right_cost_label_c->label_->rect.x = shop_cost_label_x;
+
+			right_decrease_button_c->callback_functions_.push_back(std::bind(add_to_edit, right_amount_entry_c, -1));
+			right_increase_button_c->callback_functions_.push_back(std::bind(add_to_edit, right_amount_entry_c, 1));
+			right_increase_button_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, right_total_label_c, item.first, false));
+			right_decrease_button_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, right_total_label_c, item.first, false));
+			right_amount_entry_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, right_total_label_c, item.first, false));
+
+			trade_window_c->child_components_.push_back(right_title_label_c);
+			trade_window_c->child_components_.push_back(right_decrease_button_c);
+			trade_window_c->child_components_.push_back(right_increase_button_c);
+			trade_window_c->child_components_.push_back(right_cost_label_c);
+			trade_window_c->child_components_.push_back(right_amount_entry_c);
+			row++;
+		}
+
+		
+
+		
 
 		return trade_window_c;
 	}

@@ -195,6 +195,16 @@ namespace SXNGN::ECS {
 					}
 					else if (world_location->has_settlement_)
 					{
+						Market* market = new Market();
+						market->inventory_[ItemType::AMMO] = 1000.0;
+						market->inventory_[ItemType::BATTERY] = 5;
+						market->inventory_[ItemType::FOOD] = 10000.0;
+						market->inventory_[ItemType::FOOTWEAR] = 500;
+						market->inventory_[ItemType::GPS] = 3;
+						market->inventory_[ItemType::GUN] = 50;
+						market->inventory_[ItemType::KALNOTE] = 10000.0;
+						market->inventory_[ItemType::MEDKIT] = 100.0;
+						gCoordinator->AddComponent(location_entity, market);
 						pre_render->sprite_factory_sprite_type_ = "SHRINE";
 					}
 					else if (world_location->traversal_cost_m_s_ == WORLD_ROAD_PENALTY_PACE_M_S)

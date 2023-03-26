@@ -256,6 +256,7 @@ int init_menus()
 	auto ngl_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "New Game", 0, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	new_game_window_c->child_components_.push_back(ngl_c);
 
+	/**
 	auto lwel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Width (Chunks)", 1, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	new_game_window_c->child_components_.push_back(lwel_c);
 
@@ -283,10 +284,10 @@ int init_menus()
 	{
 		coordinator->get_state_manager()->setLevelHeightTiles(Uint32(uicc->entry_->num_val));
 	};
-
+	
 	std::function<void()> ng_update_height_b = std::bind(ng_update_height, lhe_c);
 	lhe_c->callback_functions_.push_back(ng_update_height_b);
-		
+		**/
 	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	std::function<void()> ng_start = Map_Utils::StartNewGame;
@@ -920,6 +921,8 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::WORLD_LOCATION);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::WORLD_MAP);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::DATABASE_SINGLE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::MARKET);
+
 
 
 

@@ -60,6 +60,7 @@ int determine_text_render_position(SDL_Rect* parent_rect, h_alignment ha, v_alig
 	}
 	case HA_NONE:
 	{
+		*out_x = parent_rect->x + parent_rect->w / 10;
 		break;
 	}
 	default:
