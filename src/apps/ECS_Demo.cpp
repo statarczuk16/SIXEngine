@@ -337,7 +337,7 @@ int init_menus()
 	const int POP_UP_GAME_MENU_Y = 85;
 	const int POP_UP_GAME_MENU_H = resolution.h - POP_UP_GAME_MENU_W;
 	//************************* Pop Up Game Menu
-	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, POP_UP_GAME_MENU_X, POP_UP_GAME_MENU_Y, POP_UP_GAME_MENU_W, POP_UP_GAME_MENU_H, UILayer::MID);
+	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, POP_UP_GAME_MENU_X, POP_UP_GAME_MENU_Y, POP_UP_GAME_MENU_W, POP_UP_GAME_MENU_H, UILayer::TOP_4);
 	ig_ui_window_pop_up_c->window_->visible = false;
 	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
 	//Callback function to toggle menu visiblility 
@@ -744,14 +744,9 @@ int init_menus()
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, inventory_window_c);
 
 
-	std::map<ItemType, double> shop_inv_dummy;
-	std::function<void(std::map < ItemType, double> trader_inv)> trade_with_inv = [coordinator](std::map < ItemType, double> trader_inv)
-	{
-		auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::TOP, trader_inv);
-		auto ui = UICollectionSingleton::get_instance();
-		ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, trading_window);
-	};
-	auto dummy_trade_func = std::bind(trade_with_inv, shop_inv_dummy);
+	
+	
+	
 	// Settlement
 	auto settlement_window_c = UserInputUtils::create_window_raw(nullptr, resolution.w - MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH, resolution.h - 2 * MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	std::shared_ptr<UIContainerComponent> settlement_label_c = UserInputUtils::create_label(settlement_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Settlement", 0, -1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
@@ -763,7 +758,7 @@ int init_menus()
 	auto trade_button_c = UserInputUtils::create_button(settlement_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Trade", settlement_row, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	trade_button_c->name_ = "OVERWORLD_trade_button";
 	trade_button_c->button_->enabled = false;
-	trade_button_c->callback_functions_.push_back(dummy_trade_func);
+
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trade_button_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, settlement_window_c);
 	settlement_window_c->window_->visible = false;

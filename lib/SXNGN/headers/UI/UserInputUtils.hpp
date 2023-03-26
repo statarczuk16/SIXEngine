@@ -49,7 +49,7 @@ namespace SXNGN::ECS {
 
 		static std::shared_ptr<UIContainerComponent> create_message_box(kiss_window* parent_window, std::string title, std::string detail, int w, int h, UILayer layer, std::vector<std::string> option_strings, std::vector<std::function<void()>> option_callbacks, std::vector<bool> option_enables);
 
-		static std::shared_ptr<UIContainerComponent> create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, std::map<ItemType, double> shop_inv);
+		static std::shared_ptr<UIContainerComponent> create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, TradeHelper* trade_helper);
 
 
 		

@@ -38,9 +38,11 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
-	std::shared_ptr<UIContainerComponent> UserInputUtils::create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, std::map<ItemType, double> shop_inv)
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, TradeHelper* trade_helper)
 	{
 		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
+		/**
+		
 		sole::uuid player_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
 		Entity player_entity = gCoordinator.GetEntityFromUUID(player_id);
 		auto party_data = gCoordinator.GetComponentReadOnly(player_entity, ComponentTypeEnum::PARTY);
@@ -50,27 +52,44 @@ namespace SXNGN::ECS {
 			const Party* party_ptr = static_cast<const Party*>(party_data);
 			player_inv = party_ptr->inventory_;
 		}
+		**/
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-		int w = 300;
-		int h = 600;
-		int window_layer_int = (int)UILayer::TOP;
-		int window_item_layer_int = window_layer_int;
+		int w = 400;
+		int h = 500;
+		int window_layer_int = (int)layer;
+		int window_item_layer_int = window_layer_int + 1;
 		UILayer window_item_layer = (UILayer)window_item_layer_int;
+		UILayer window_layer = (UILayer)window_item_layer_int;
 		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
 		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
-		auto trade_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, layer);
+		auto trade_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, window_layer);
 
-		int player_item_label_x = window_x + 10;
-		int player_item_label_w = 50;
+		int player_item_label_w = 75;
+		int amount_edit_w = 50;
 		int player_item_label_h = 30;
+		int add_remove_button_width = 15;
+		int player_item_label_x = 10;
+		int dec_button_x = player_item_label_x + player_item_label_w + 5;
+		int amount_edit_x = dec_button_x + add_remove_button_width + 5;
+		int inc_button_x = amount_edit_x + amount_edit_w;
 		
 		int row = 2;
-		int column = 0;
-		for (auto player_item : player_inv)
+		
+		for (auto player_item : trade_helper->left_inv)
 		{
 			std::string item_name = item_type_to_string()[player_item.first];
-			std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_THIRD, window_item_layer, item_name.data(), row, column, player_item_label_w, player_item_label_h);
+			std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, player_item_label_w, player_item_label_h);
+			title_label_c->label_->rect.x = player_item_label_x;
+			
+			std::shared_ptr<UIContainerComponent> decrease_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "-", row, -1, add_remove_button_width, player_item_label_h);
+			decrease_button_c->button_->rect.x = dec_button_x;
+			std::shared_ptr<UIContainerComponent> increase_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_NONE, VA_ROW, SP_NONE, window_item_layer, "+", row, -1, add_remove_button_width, player_item_label_h);
+			increase_button_c->button_->rect.x = inc_button_x;
+
 			trade_window_c->child_components_.push_back(title_label_c);
+			trade_window_c->child_components_.push_back(decrease_button_c);
+			trade_window_c->child_components_.push_back(increase_button_c);
+			
 			row++;
 		}
 

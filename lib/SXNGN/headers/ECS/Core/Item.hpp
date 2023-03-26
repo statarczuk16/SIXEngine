@@ -99,6 +99,20 @@ namespace SXNGN::ECS {
 		p.type_ = item_type;
 	}
 
+	class TradeHelper
+	{
+		
+
+		public:
+			TradeHelper();
+			std::map<ItemType, double> left_inv;
+			std::map<ItemType, double> right_inv;
+			std::map<ItemType, double> left_inv_temp;
+			std::map<ItemType, double> right_inv_temp;
+			std::map<ItemType, double> item_values;
+
+	};
+
 	
 
 }

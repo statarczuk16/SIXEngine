@@ -9,6 +9,11 @@ namespace SXNGN::ECS {
 		return type_;
 	}
 
+	TradeHelper::TradeHelper()
+	{
+
+	}
+
 	
 
 }

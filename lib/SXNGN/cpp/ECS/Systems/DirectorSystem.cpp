@@ -110,8 +110,30 @@ namespace SXNGN::ECS
 
 				if (at_settlement)
 				{
-					auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
-					trade_button->button_->enabled = true;
+					auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
+					auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+					if (party_component)
+					{
+						auto party_ptr = static_cast<Party*>(party_component);
+						TradeHelper* trade_helper = new TradeHelper();
+						trade_helper->left_inv = party_ptr->inventory_;
+
+						std::function<void(TradeHelper* helper)> trade_with_inv = [](TradeHelper* trade_helper)
+						{
+							auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::BOTTOM, trade_helper);
+							auto ui = UICollectionSingleton::get_instance();
+							ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trading_window);
+						};
+						auto trade_here = std::bind(trade_with_inv, trade_helper);
+
+						auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
+						trade_button->button_->enabled = true;
+						trade_button->callback_functions_.clear();
+						trade_button->callback_functions_.push_back(trade_here);
+						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
+
+					}
+					
 				}
 				else
 				{
