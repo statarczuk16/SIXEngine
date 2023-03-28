@@ -219,7 +219,7 @@ namespace SXNGN::ECS {
 						}
 						pre_render->sprite_factory_sprite_type_ = "NONE";
 						
-						pre_render->sprite_batch_.push_back(sprite_row);
+						pre_render->sprite_batch_.push_back(sprite_row); //FIXME memory leak
 					}
 					else
 					{

@@ -474,7 +474,7 @@ namespace SXNGN::ECS {
 					pre_renderable.render_layer_,
 					pre_renderable.name_
 				);
-				renderable_component->sprite_batch_ = pre_renderable.sprite_batch_;
+				renderable_component->sprite_batch_ = pre_renderable.sprite_batch_; //FIXME memory leak
 				renderable_component->sprite_batch_snips_ = sprite_batch_snips_;
 				renderable_component->scale_x_ = pre_renderable.scale_x_;
 				renderable_component->scale_y_ = pre_renderable.scale_y_;

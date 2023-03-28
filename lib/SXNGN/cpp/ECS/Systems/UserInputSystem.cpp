@@ -111,6 +111,8 @@ namespace SXNGN::ECS {
 		{
 			gCoordinator.DestroyEntity(entity_to_clean);
 		}
+
+		
 		
 	}
 

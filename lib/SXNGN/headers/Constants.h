@@ -5,6 +5,7 @@ namespace SXNGN {
 
 	const std::string BAD_STRING_RETURN = "bad_string_result";
 
+
 	//Tile constants
 	const size_t BASE_TILE_WIDTH = 16;
 	const size_t BASE_TILE_HEIGHT = 16;

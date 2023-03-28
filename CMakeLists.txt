@@ -6,6 +6,9 @@ project(RiskTheSix)
 set( CMAKE_MESSAGE_LOG_LEVEL "STATUS" )
 add_definitions(-DNOMINMAX) #disable stupid windows.h thing intefering with std::min std::max
 
+set(CMAKE_BUILD_TYPE Debug) 
+
+
 set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 #put external libraries on path
 list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/") 
@@ -14,6 +17,15 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 
 #To help find_package find SDL2 when on Windows and libraries are in vclib folder.
 if(MSVC)  
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Zi")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG") 
+	# Enable AddressSanitizer
+	#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
+	#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
+
+	# Set linker flags for AddressSanitizer
+	#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 	message("Setting hints for MSVC")
 	set(SDL_HINT_END "include/")
 	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)   
@@ -21,6 +33,8 @@ if(MSVC)
     #add_link_options(/WX)
 elseif (MINGW)
 	message("Setting hints for MINGW")
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 	#add_compile_options(-Wall -Wextra -pedantic -Werror -Wl,--fatal-warnings)
 	set(SDL_HINT_END "include/SDL2")
 	if (${CMAKE_SIZEOF_VOID_P} MATCHES 8) #64 bit systems have length 8 words
@@ -29,6 +43,8 @@ elseif (MINGW)
 		set(SDL_HINT_START ${VCLIB_PATH}/mingw/*/i686-w64-mingw32/) 
 	endif()
 else()
+	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g")
+	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -g")
 	message("Linux")   
 endif()
 
@@ -120,8 +136,8 @@ include_directories(${CMAKE_SOURCE_DIR}/lib/olc/)
 add_executable(json_tests "src/tests/json_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES} ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
 target_link_libraries(json_tests SDL2::Main SDL2::Image SDL2::TTF)  
 
-add_executable(ECS_Demo "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
-target_link_libraries(ECS_Demo SDL2::Main SDL2::Image SDL2::TTF) 
+add_executable(ApocalypseHighwayTrader "src/apps/ECS_Demo.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
+target_link_libraries(ApocalypseHighwayTrader SDL2::Main SDL2::Image SDL2::TTF) 
 
 add_executable(system_tests "src/tests/system_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
 target_link_libraries(system_tests SDL2::Main SDL2::Image SDL2::TTF)

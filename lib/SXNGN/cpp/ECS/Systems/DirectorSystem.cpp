@@ -118,22 +118,23 @@ namespace SXNGN::ECS
 					auto market_component = gCoordinator.CheckOutComponent(settlement_entity, ComponentTypeEnum::MARKET);
 					auto market_ptr = static_cast<Market*>(market_component);
 						
-					TradeHelper* trade_helper = new TradeHelper();
-					trade_helper->left_inv = party_ptr->inventory_;
-					trade_helper->right_inv = market_ptr->inventory_;
+					
 
-					std::function<void(TradeHelper* helper)> trade_with_inv = [](TradeHelper* trade_helper)
+					std::function<void()> trade_with_inv = [party_ptr, market_ptr]()
 					{
+						TradeHelper* trade_helper = new TradeHelper();
+						trade_helper->left_inv = party_ptr->inventory_;
+						trade_helper->right_inv = market_ptr->inventory_;
 						auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::BOTTOM, trade_helper);
 						auto ui = UICollectionSingleton::get_instance();
 						ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trading_window);
 					};
-					auto trade_here = std::bind(trade_with_inv, trade_helper);
+					//auto trade_here = std::bind(trade_with_inv, trade_helper);
 
 					auto trade_button = ui->string_to_ui_map_["OVERWORLD_trade_button"];
 					trade_button->button_->enabled = true;
 					trade_button->callback_functions_.clear();
-					trade_button->callback_functions_.push_back(trade_here);
+					trade_button->callback_functions_.push_back(trade_with_inv);
 					gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 					gCoordinator.CheckInComponent(settlement_entity, ComponentTypeEnum::MARKET);
 
