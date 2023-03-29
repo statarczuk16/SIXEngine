@@ -13,6 +13,8 @@ namespace SXNGN::ECS {
 	void User_Input_System::Init()
 	{
 		SDL_LogInfo(SDL_LOG_CATEGORY_APPLICATION, "User_Input_System Init");
+		this->cleanup_ui_counter = 1.0;
+		this->tic_counter = 0;
 	}
 
 	/// <summary>
@@ -22,6 +24,15 @@ namespace SXNGN::ECS {
 	void User_Input_System::Update(double dt)
 	{
 		auto gCoordinator = *SXNGN::Database::get_coordinator();
+
+		this->tic_counter += dt;
+		if (this->tic_counter > this->cleanup_ui_counter)
+		{
+			RemoveDeadComponents();
+			this->tic_counter = 0.0;
+		}
+
+
 		std::vector<Entity> entities_to_cleanup;
 
 		//SDL_LogDebug(1, "User_Input_Begin ");
@@ -222,7 +233,7 @@ namespace SXNGN::ECS {
 	{
 		int draw_ui = 1;
 		bool event_handled = false;
-		if (component_in_layer == nullptr)
+		if (component_in_layer == nullptr || component_in_layer->cleanup)
 		{
 			return false;
 		}
@@ -541,5 +552,31 @@ namespace SXNGN::ECS {
 			}
 		}
 
+	}
+
+	void  User_Input_System::RemoveDeadComponents()
+	{
+		
+		std::shared_ptr<UICollectionSingleton> ui = UICollectionSingleton::get_instance();
+		for (auto& stateMap : ui->state_to_ui_map_)
+		{
+			for (auto& layerMap : stateMap.second)
+			{
+				auto& componentVec = layerMap.second;
+				auto componentItr = componentVec.begin();
+				while (componentItr != componentVec.end()) 
+				{
+					if (componentItr->get()->cleanup == 1) {
+						componentItr->get()->ClearUIContainerComponent();
+						componentItr = componentVec.erase(componentItr);
+					}
+					else {
+						++componentItr;
+					}
+				}
+
+			}
+		}
+		
 	}
 }

@@ -2,10 +2,13 @@
 #include <SDL.h>
 #include <unordered_map>
 #include <nlohmann/json.hpp>
+#include <ECS/Core/Types.hpp>
+
 using nlohmann::json;
 
 namespace SXNGN::ECS {
 
+	class UIContainerComponent;
 
     enum ItemType : Uint32 {
         UNKNOWN,
@@ -126,12 +129,21 @@ namespace SXNGN::ECS {
 		
 
 		public:
-			TradeHelper();
+			
+			Entity left_trader = -1;
+			Entity right_trader = -1;
+			double left_running_total = 0;
+			double right_running_total = 0;
+			bool left_is_player = true;
 			std::map<ItemType, double> left_inv;
 			std::map<ItemType, double> right_inv;
 			std::map<ItemType, double> left_inv_temp;
 			std::map<ItemType, double> right_inv_temp;
 			std::map<ItemType, double> item_values;
+			std::shared_ptr<UIContainerComponent> left_side_total_label = nullptr;
+			std::shared_ptr<UIContainerComponent> right_side_total_label = nullptr;
+			std::shared_ptr<UIContainerComponent> confirm_button = nullptr;
+
 
 	};
 

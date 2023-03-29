@@ -40,47 +40,211 @@ namespace SXNGN::ECS {
 
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, TradeHelper* trade_helper)
 	{
+		//First, use the IDs passed in with the TraderHelper to set the inventories available to trade with
 		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
-		/**
-		
-		sole::uuid player_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
-		Entity player_entity = gCoordinator.GetEntityFromUUID(player_id);
-		auto party_data = gCoordinator.GetComponentReadOnly(player_entity, ComponentTypeEnum::PARTY);
-		std::map<ItemType, double> player_inv;
-		if (party_data)
+
+
+		std::function<void(std::shared_ptr<UIContainerComponent> component)> kill_ui = [](std::shared_ptr<UIContainerComponent> uicc)
 		{
+			uicc->cleanup = true;
+		};
+		
+		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+		int w = 750;
+		int h = 550;
+		int window_layer_int = (int)layer;
+		int window_item_layer_int = window_layer_int + 1;
+		UILayer window_item_layer = (UILayer)window_item_layer_int;
+		UILayer window_layer = (UILayer)window_item_layer_int;
+		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
+		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
+		auto trade_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, window_layer);
+		auto kill_trade_window_func = std::bind(kill_ui, trade_window_c); //function to destroy the trade window
+
+		int item_total_w = 100;
+		int item_label_w = 75;
+		int amount_edit_w = 75;
+		int item_label_h = 30;
+		int item_cost_w = 75;
+		int add_remove_button_width = 15;
+		int player_item_label_x = 10;
+		int player_dec_button_x = player_item_label_x + item_label_w + 5;
+		int player_amount_edit_x = player_dec_button_x + add_remove_button_width + 5;
+		int player_inc_button_x = player_amount_edit_x + amount_edit_w;
+		int player_cost_label_x = player_inc_button_x + 5 + add_remove_button_width;
+		int player_available_x = player_cost_label_x + 5 + item_cost_w;
+
+
+		int shop_item_label_x = w - 5 - item_label_w;
+		int shop_item_inc_button_x = shop_item_label_x - 5 - add_remove_button_width;
+		int shop_amount_edit_x = shop_item_inc_button_x - 5 - amount_edit_w;
+		int shop_item_dec_button_x = shop_amount_edit_x - 5 - add_remove_button_width;
+		int shop_cost_label_x = shop_item_dec_button_x - 5 - item_cost_w;
+		int shop_available_x = shop_cost_label_x - 5 - item_cost_w;
+
+		
+		auto confirm_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, window_item_layer, "Confirm", 0, 0, 20, item_label_h);
+		confirm_button_c->callback_functions_.push_back(kill_trade_window_func);
+
+		auto quit_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, window_item_layer, "Exit", 0, 2, 20, item_label_h);
+		quit_button_c->callback_functions_.push_back(kill_trade_window_func);
+		
+		
+
+		trade_window_c->child_components_.push_back(quit_button_c);
+		trade_window_c->child_components_.push_back(confirm_button_c);
+
+		std::shared_ptr<UIContainerComponent> left_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 0, -1, item_total_w, item_label_h);
+		left_total_label_c->label_->rect.x = player_cost_label_x;
+
+		std::shared_ptr<UIContainerComponent> right_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 0, -1, item_total_w, item_label_h);
+		right_total_label_c->label_->rect.x = shop_cost_label_x;
+
+		trade_window_c->child_components_.push_back(left_total_label_c);
+		trade_window_c->child_components_.push_back(right_total_label_c);
+
+		if(trade_helper->left_is_player)
+		{
+			
+			auto party_data = gCoordinator.GetComponentReadOnly(trade_helper->left_trader, ComponentTypeEnum::PARTY);
 			const Party* party_ptr = static_cast<const Party*>(party_data);
-			player_inv = party_ptr->inventory_;
+			trade_helper->left_inv = party_ptr->inventory_;
+
 		}
-		**/
-		
-		
-		std::function<void(std::shared_ptr<UIContainerComponent> edit_component, std::shared_ptr<UIContainerComponent> total_label, ItemType item_type, bool left_1_right_0)> update_total = [trade_helper](std::shared_ptr<UIContainerComponent> edit_component, std::shared_ptr<UIContainerComponent> total_label, ItemType item_type, bool left_1_right_0)
+		else
 		{
+			auto market_data = gCoordinator.GetComponentReadOnly(trade_helper->left_trader, ComponentTypeEnum::MARKET);
+			const Market* market_ptr = static_cast<const Market*>(market_data);
+			trade_helper->left_inv = market_ptr->inventory_;
+		}
+		auto market_data = gCoordinator.GetComponentReadOnly(trade_helper->right_trader, ComponentTypeEnum::MARKET);
+		const Market* market_ptr = static_cast<const Market*>(market_data);
+		trade_helper->right_inv = market_ptr->inventory_;
+
+		trade_helper->right_side_total_label = right_total_label_c;
+		trade_helper->left_side_total_label = left_total_label_c;
+		trade_helper->confirm_button = confirm_button_c;
+		
+		
+		
+		//This function is bound to the buttons that change how much of an item is being traded.
+		//Eg, for +1 GUN button on the player's side (selling 1 gun), this callback adjusts the total value being traded on the left side and then determines if the store side can afford to buy it and grays out the SELL button accordingly.
+		//If on the shop's side, determines whether the player can afford to buy.
+		std::function<void(std::shared_ptr<UIContainerComponent> edit_component, ItemType item_type, bool left_1_right_0)>
+		 update_total = [trade_helper](std::shared_ptr<UIContainerComponent> edit_component, ItemType item_type, bool left_1_right_0)
+		{
+
+			//
+			// First, recalculate the total value of goods being sold/bought for what side was modified
+			//
 			double amount = edit_component->entry_->num_val;
-			std::map<ItemType, double> temp;
+			std::map<ItemType, double> modified_sell_list;
 			if (left_1_right_0)
 			{
 				trade_helper->left_inv_temp[item_type] = amount;
-				temp = trade_helper->left_inv_temp;
-
+				modified_sell_list = trade_helper->left_inv_temp;
 			}
 			else
 			{
 				trade_helper->right_inv_temp[item_type] = amount;
-				temp = trade_helper->right_inv_temp;
+				modified_sell_list = trade_helper->right_inv_temp;
 			}
-			double running_cost_total = 0.0;
-			for (auto item_amount_pair : temp)
+			double modified_running_total = 0.0;
+			for (auto item_amount_pair : modified_sell_list)
 			{
-				running_cost_total += item_type_to_base_value_kl()[item_amount_pair.first] * item_amount_pair.second;
+				modified_running_total += item_type_to_base_value_kl()[item_amount_pair.first] * item_amount_pair.second;
 			}
-			sprintf(total_label->label_->text, "%.3f KNs", running_cost_total);
+			if (left_1_right_0)
+			{
+				trade_helper->left_running_total = modified_running_total;
+				sprintf(trade_helper->left_side_total_label->label_->text, "%.3f KNs", modified_running_total);
+			}
+			else
+			{
+				trade_helper->right_running_total = modified_running_total;
+				sprintf(trade_helper->right_side_total_label->label_->text, "%.3f KNs", modified_running_total);
+			}
+
+			//
+			// Second, evaluate the assets on either side and determine if the trade is possible
+			//
+			double left_assets_total = trade_helper->left_running_total + trade_helper->left_inv[ItemType::KALNOTE] - trade_helper->left_inv_temp[ItemType::KALNOTE];
+			double right_assets_total = trade_helper->right_running_total + trade_helper->right_inv[ItemType::KALNOTE] + trade_helper->right_inv_temp[ItemType::KALNOTE];
+			//If player is offering more than the store, OK
+			if(trade_helper->left_running_total >= trade_helper->right_running_total)
+			{
+				
+				//if amount player is selling is not more than the store's assets, OK
+				if(trade_helper->left_running_total <= right_assets_total) 
+				{
+					trade_helper->confirm_button->button_->enabled = true;
+				}
+				else
+				{
+					//seller would approve of transaction, but doesnt have the cash
+					trade_helper->confirm_button->button_->enabled = false;
+				}
+			}
+			else
+			{
+				//seller won't take the bad deal
+				trade_helper->confirm_button->button_->enabled = false;
+			}
+			
 		};
 
+		/// Takes all the items traded and puts them into their owner's inventories
+		/// Deletes and then remakes the trade window with the updated inventories
+		std::function<void()> confirm_trade = [trade_helper]()
+		{
+
+			auto gCoordinator = *SXNGN::Database::get_coordinator();
+
+			Party* party_ptr;
+			Market* shop_ptr;
+			if (trade_helper->left_is_player)
+			{
+
+				auto party_data = gCoordinator.CheckOutComponent(trade_helper->left_trader, ComponentTypeEnum::PARTY);
+				party_ptr = static_cast<Party*>(party_data);
+			}
+			
+			
+			auto market_data = gCoordinator.CheckOutComponent(trade_helper->right_trader, ComponentTypeEnum::MARKET);
+			shop_ptr = static_cast<Market*>(market_data);
+			
+
+			//all the items the player traded away
+			for (auto item_traded : trade_helper->left_inv_temp)
+			{
+				party_ptr->remove_item(item_traded.first, item_traded.second);
+				shop_ptr->add_item(item_traded.first, item_traded.second);
+			}
+			//all the items the player bought
+			for (auto item_traded : trade_helper->right_inv_temp)
+			{
+				party_ptr->add_item(item_traded.first, item_traded.second);
+				shop_ptr->remove_item(item_traded.first, item_traded.second);
+			}
+			gCoordinator.CheckInComponent(trade_helper->left_trader, ComponentTypeEnum::PARTY);
+			gCoordinator.CheckInComponent(trade_helper->right_trader, ComponentTypeEnum::MARKET);
+			TradeHelper* trade_helper_new = new TradeHelper();
+			trade_helper_new->left_trader = trade_helper->left_trader;
+			trade_helper_new->right_trader = trade_helper->right_trader;
+			trade_helper_new->left_is_player = trade_helper->left_is_player;
+			delete trade_helper;
+			auto trading_window = UserInputUtils::create_trading_menu(nullptr, "Trading", "Buy some stuff!", UILayer::BOTTOM, trade_helper_new);
+			auto ui = UICollectionSingleton::get_instance();
+			ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, trading_window);
+			
+		};
+
+		confirm_button_c->callback_functions_.push_back(confirm_trade);
+
+		//This callback adjusts the text edit areas when you increment an item to be bought/sold.
+		//IE, attach this to the +1 GUN button so the quantity field for GUN updates when you press the button.
 		std::function<void(std::shared_ptr<UIContainerComponent> edit_component, float amount)> add_to_edit = [](std::shared_ptr<UIContainerComponent> edit_component, float amount)
 		{
-			//edit_component->entry_->num_val += amount;
 			double cur_val = edit_component->entry_->num_val;
 			double temp = cur_val + amount;
 
@@ -108,7 +272,6 @@ namespace SXNGN::ECS {
 			case TE_INT:
 			{
 				
-
 				if (temp >= edit_component->entry_->upper_bound)
 				{
 					temp = (int)round(edit_component->entry_->upper_bound);
@@ -129,35 +292,12 @@ namespace SXNGN::ECS {
 			}
 		};
 
-		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-		int w = 600;
-		int h = 500;
-		int window_layer_int = (int)layer;
-		int window_item_layer_int = window_layer_int + 1;
-		UILayer window_item_layer = (UILayer)window_item_layer_int;
-		UILayer window_layer = (UILayer)window_item_layer_int;
-		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
-		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
-		auto trade_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, window_layer);
+	
 
-		int item_total_w = 100;
-		int item_label_w = 75;
-		int amount_edit_w = 75;
-		int item_label_h = 30;
-		int item_cost_w = 75;
-		int add_remove_button_width = 15;
-		int player_item_label_x = 10;
-		int player_dec_button_x = player_item_label_x + item_label_w + 5;
-		int player_amount_edit_x = player_dec_button_x + add_remove_button_width + 5;
-		int player_inc_button_x = player_amount_edit_x + amount_edit_w;
-		int player_cost_label_x = player_inc_button_x + 5 + add_remove_button_width;
+		
 
 
-		int shop_item_label_x = w - 5 - item_label_w;
-		int shop_item_inc_button_x = shop_item_label_x - 5 - add_remove_button_width;
-		int shop_amount_edit_x = shop_item_inc_button_x - 5 - amount_edit_w;
-		int shop_item_dec_button_x = shop_amount_edit_x - 5 - add_remove_button_width;
-		int shop_cost_label_x = shop_item_dec_button_x - 5 - item_cost_w;
+		
 
 		std::shared_ptr<UIContainerComponent> left_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Item", 1, -1, item_label_w, item_label_h);
 		left_title_label_c->label_->rect.x = player_item_label_x;
@@ -168,6 +308,9 @@ namespace SXNGN::ECS {
 		std::shared_ptr<UIContainerComponent> left_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Sell Price", 1, -1, item_cost_w, item_label_h);
 		left_cost_label_c->label_->rect.x = player_cost_label_x;
 
+		std::shared_ptr<UIContainerComponent> player_stock_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Stock", 1, -1, item_label_w, item_label_h);
+		player_stock_label_c->label_->rect.x = player_available_x;
+
 		std::shared_ptr<UIContainerComponent> right_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Item", 1, -1, item_label_w, item_label_h);
 		right_title_label_c->label_->rect.x = shop_item_label_x;
 
@@ -177,28 +320,31 @@ namespace SXNGN::ECS {
 		std::shared_ptr<UIContainerComponent> right_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Buy Price", 1, -1, item_cost_w, item_label_h);
 		right_cost_label_c->label_->rect.x = shop_cost_label_x;
 
+		std::shared_ptr<UIContainerComponent> right_stock_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "Stock", 1, -1, item_label_w, item_label_h);
+		right_stock_label_c->label_->rect.x = shop_available_x;
+
 		trade_window_c->child_components_.push_back(left_title_label_c);
 		trade_window_c->child_components_.push_back(left_amount_label_c);
 		trade_window_c->child_components_.push_back(left_cost_label_c);
+		trade_window_c->child_components_.push_back(player_stock_label_c);
+
 		trade_window_c->child_components_.push_back(right_title_label_c);
 		trade_window_c->child_components_.push_back(right_amount_label_c);
 		trade_window_c->child_components_.push_back(right_cost_label_c);
+		trade_window_c->child_components_.push_back(right_stock_label_c);
 
 
-		std::shared_ptr<UIContainerComponent> left_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 10, -1, item_total_w, item_label_h);
-		left_total_label_c->label_->rect.x = player_cost_label_x;
-
-		std::shared_ptr<UIContainerComponent> right_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 10, -1, item_total_w, item_label_h);
-		right_total_label_c->label_->rect.x = shop_cost_label_x;
-
-		trade_window_c->child_components_.push_back(left_total_label_c);
-		trade_window_c->child_components_.push_back(right_total_label_c);
+		
 
 		
 		int row = 2;
 		for (auto item : trade_helper->left_inv)
 		{
 			double amt_available = item.second;
+			if (amt_available <= 0)
+			{
+				continue;
+			}
 			std::string item_name = item_type_to_string()[item.first];
 			double base_cost = item_type_to_base_value_kl()[item.first];
 			std::shared_ptr<UIContainerComponent> left_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, item_label_w, item_label_h);
@@ -219,27 +365,38 @@ namespace SXNGN::ECS {
 			std::shared_ptr<UIContainerComponent> left_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, base_cost_str, row, -1, item_cost_w, item_label_h);
 			left_cost_label_c->label_->rect.x = player_cost_label_x;
 
+			std::shared_ptr<UIContainerComponent> left_stock_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "", row, -1, item_label_w, item_label_h);
+			left_stock_label_c->label_->rect.x = player_available_x;
+			sprintf(left_stock_label_c->label_->text, "%.2f", amt_available);
+
 			left_decrease_button_c->callback_functions_.push_back(std::bind(add_to_edit, left_amount_entry_c, -1));
 			left_increase_button_c->callback_functions_.push_back(std::bind(add_to_edit, left_amount_entry_c, 1));
-			left_increase_button_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, left_total_label_c, item.first, true));
-			left_decrease_button_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, left_total_label_c, item.first, true));
-			left_amount_entry_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, left_total_label_c, item.first, true));
+			left_increase_button_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c,  item.first, true));
+			left_decrease_button_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c, item.first, true));
+			left_amount_entry_c->callback_functions_.push_back(std::bind(update_total, left_amount_entry_c,  item.first, true));
 
 			trade_window_c->child_components_.push_back(left_title_label_c);
 			trade_window_c->child_components_.push_back(left_decrease_button_c);
 			trade_window_c->child_components_.push_back(left_increase_button_c);
 			trade_window_c->child_components_.push_back(left_cost_label_c);
 			trade_window_c->child_components_.push_back(left_amount_entry_c);
+			trade_window_c->child_components_.push_back(left_stock_label_c);
 
 			
 			
 			row++;
 		}
+		int left_max_row = row;
 
 		row = 2;
 		for (auto item : trade_helper->right_inv)
 		{
+
 			double amt_available = item.second;
+			if (amt_available <= 0)
+			{
+				continue;
+			}
 			double base_cost = item_type_to_base_value_kl()[item.first];
 			std::string item_name = item_type_to_string()[item.first];
 			std::shared_ptr<UIContainerComponent> right_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, item_label_w, item_label_h);
@@ -258,19 +415,35 @@ namespace SXNGN::ECS {
 			std::shared_ptr<UIContainerComponent> right_cost_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, base_cost_str, row, -1, item_cost_w, item_label_h);
 			right_cost_label_c->label_->rect.x = shop_cost_label_x;
 
+			std::shared_ptr<UIContainerComponent> right_stock_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "", row, -1, item_label_w, item_label_h);
+			right_stock_label_c->label_->rect.x = shop_available_x;
+			sprintf(right_stock_label_c->label_->text, "%.2f", amt_available);
+
 			right_decrease_button_c->callback_functions_.push_back(std::bind(add_to_edit, right_amount_entry_c, -1));
 			right_increase_button_c->callback_functions_.push_back(std::bind(add_to_edit, right_amount_entry_c, 1));
-			right_increase_button_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, right_total_label_c, item.first, false));
-			right_decrease_button_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, right_total_label_c, item.first, false));
-			right_amount_entry_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, right_total_label_c, item.first, false));
+			right_increase_button_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c,  item.first, false));
+			right_decrease_button_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c, item.first, false));
+			right_amount_entry_c->callback_functions_.push_back(std::bind(update_total, right_amount_entry_c,  item.first, false));
 
 			trade_window_c->child_components_.push_back(right_title_label_c);
 			trade_window_c->child_components_.push_back(right_decrease_button_c);
 			trade_window_c->child_components_.push_back(right_increase_button_c);
 			trade_window_c->child_components_.push_back(right_cost_label_c);
 			trade_window_c->child_components_.push_back(right_amount_entry_c);
+			trade_window_c->child_components_.push_back(right_stock_label_c);
 			row++;
 		}
+
+		if (left_max_row > row)
+		{
+			row = left_max_row;
+		}
+		confirm_button_c->button_->row = row + 1;
+		left_total_label_c->label_->row = row;
+		quit_button_c->button_->row = row + 1;
+		right_total_label_c->label_->row = row;
+	
+		
 
 		
 

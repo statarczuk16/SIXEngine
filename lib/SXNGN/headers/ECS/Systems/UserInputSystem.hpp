@@ -26,6 +26,8 @@ namespace SXNGN::ECS {
 	public:
 		virtual void Init();
 
+		void RemoveDeadComponents();
+
 		void Handle_GUI_Input(std::vector<SDL_Event>& events);
 
 		void GUI_Handle_Events(std::vector<SDL_Event> &events, std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>> layer_to_ui_elements);
@@ -44,7 +46,8 @@ namespace SXNGN::ECS {
 
 
 	private:
-
+		double tic_counter;
+		double cleanup_ui_counter;
 
 	};
 }

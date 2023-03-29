@@ -37,9 +37,9 @@ namespace SXNGN::ECS {
 
 		std::set<ComponentTypeEnum> active_game_states = gCoordinator.GetActiveGameStates();
 		//For each active game state, draw the corresponding UI elements
-		for (auto state : active_game_states)
+		for (auto& state : active_game_states)
 		{
-			auto game_state_ui = ui->state_to_ui_map_.find(state);
+			auto& game_state_ui = ui->state_to_ui_map_.find(state);
 			if (game_state_ui != ui->state_to_ui_map_.end())
 			{
 				Draw_GUI_Components(game_state_ui->second);
@@ -139,9 +139,10 @@ namespace SXNGN::ECS {
 				std::shared_ptr<UIContainerComponent> component_in_layer = *component_it;
 				if (component_in_layer->cleanup)
 				{
-					component_it = component_vector.erase(component_it);
-					component_in_layer->ClearUIContainerComponent();
+					
 					//fixme remove from lookup map too
+					
+					component_it++;
 				}
 				else
 				{
