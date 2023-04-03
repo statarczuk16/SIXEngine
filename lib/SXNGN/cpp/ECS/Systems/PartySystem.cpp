@@ -80,11 +80,11 @@ namespace SXNGN::ECS
 
 				if (pace_go.second && pace_penalty_overworld.second)
 				{
-					double pace_m_s = pace_go.first * PARTY_PACE_NOMINAL_M_S - pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
+					double pace_m_s = abs(pace_go.first) * PARTY_PACE_NOMINAL_M_S - pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
 					party_status_oss << "Traveling at " << std::fixed << std::setprecision(2) << pace_m_s << " M/S" << std::endl;
 					party_status_oss << "  Terrain: " << std::fixed << std::setprecision(2) << pace_penalty_overworld.first << " M/S" << std::endl;
 					party_status_oss << "  Weight: " << std::fixed << std::setprecision(2) << party_ptr->encumbrance_penalty_m_s_ << " M/S" << std::endl;
-					gCoordinator.setSetting(OVERWORLD_PACE_M_S, pace_m_s);
+					gCoordinator.setSetting(OVERWORLD_PACE_M_S, abs(pace_m_s));
 					double game_seconds_passed = dt * OVERWORLD_MULTIPLIER;
 					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
 
@@ -95,7 +95,7 @@ namespace SXNGN::ECS
 						
 					std::ostringstream oss;
 					
-					bool moving = pace_go.first;
+					bool moving = abs(pace_go.first);
 					bool sick = party_ptr->sick_counter_s_ > 0.0;
 					bool lost = party_ptr->lost_counter_ > 0.0;
 					bool have_food = party_ptr->inventory_[ItemType::FOOD] >= 0.0;

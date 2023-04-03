@@ -557,35 +557,18 @@ int init_menus()
 	pause_button_c->button_->visible = false;
 	unpause_button_c->button_->visible = true;
 
-	auto go_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Go", 0, button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto backward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Backward", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto stop_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Rest", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto forward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Forward", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	
+	
+	button_column++;
 
 	auto settlement_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Settlement", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto ruins_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Ruins", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto inv_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Inventory", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto status_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Status", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
-	stop_button_c->button_->visible = false;
-	/// Pace Selector Pop Up
-	/**
-	auto pace_pop_up_c = UserInputUtils::create_window_raw(bottom_side_state_menu_c->window_, 0, 0 - BUTTON_HEIGHT * 5, BUTTON_WIDTH*1.5, BUTTON_HEIGHT*5, UILayer::MID);
-	pace_pop_up_c->window_->h_align = HA_CENTER;
-	pace_pop_up_c->window_->visible = false;
-	std::function<void()> mg_toggle_pace_visible = std::bind(toggle_menu, pace_pop_up_c);
-	auto pace_label_box = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Select Pace", 0, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto ig_pace_0 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Slow", 1, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto pace_label_0 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Slow", 1, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-
-
-	auto ig_pace_1 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Medium", 2, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto pace_label_1 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Medium", 2, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-
-
-	auto ig_pace_2 = UserInputUtils::create_select_button(pace_pop_up_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::TOP_2, "Fast", 3, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-	auto pace_label_2 = UserInputUtils::create_label(pace_pop_up_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_NONE, UILayer::TOP, "Fast", 3, 1, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
-
-
-	bottom_side_state_menu_c->child_components_.push_back(pace_pop_up_c);
-	**/
+	
 
 	std::function<void()> set_pause_visible = std::bind(set_button_visible, pause_button_c);
 	std::function<void()> set_unpause_visible = std::bind(set_button_visible, unpause_button_c);
@@ -604,7 +587,7 @@ int init_menus()
 
 	Event_Component unpause_game_event;
 	unpause_game_event.e.func_event.callbacks.push_back(unpause_function);
-	unpause_game_event.e.func_event.callbacks.push_back(set_pause_visible);
+	unpause_game_event.e.func_event.callbacks.push_back(set_pause_visible); 
 	unpause_game_event.e.func_event.callbacks.push_back(set_unpause_invisible);
 	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
 
@@ -622,27 +605,25 @@ int init_menus()
 
 
 	
-	std::function<void()> toggle_stop_visible = std::bind(toggle_button_visible, stop_button_c);
-	std::function<void()> toggle_go_visible = std::bind(toggle_button_visible, go_button_c);
 	
 
 	std::function<void()> stop_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 0.0);
-	std::function<void()> go_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 1.0);
+	std::function<void()> forward_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 1.0);
+	std::function<void()> reverse_function = std::bind(set_property, SXNGN::OVERWORLD_GO, -1.0);
 
 	
 	bottom_side_state_menu_c->child_components_.push_back(pause_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(unpause_button_c);
 
 	stop_button_c->callback_functions_.push_back(stop_function);
-	stop_button_c->callback_functions_.push_back(toggle_stop_visible);
-	stop_button_c->callback_functions_.push_back(toggle_go_visible);
 	stop_button_c->callback_functions_.push_back(update_pace);
-	go_button_c->callback_functions_.push_back(go_function);
-	go_button_c->callback_functions_.push_back(toggle_stop_visible);
-	go_button_c->callback_functions_.push_back(toggle_go_visible);
-	go_button_c->callback_functions_.push_back(update_pace);
+	forward_button_c->callback_functions_.push_back(forward_function);
+	backward_button_c->callback_functions_.push_back(reverse_function);
+	forward_button_c->callback_functions_.push_back(update_pace);
+	backward_button_c->callback_functions_.push_back(update_pace);
 	bottom_side_state_menu_c->child_components_.push_back(stop_button_c);
-	bottom_side_state_menu_c->child_components_.push_back(go_button_c);
+	bottom_side_state_menu_c->child_components_.push_back(forward_button_c);
+	bottom_side_state_menu_c->child_components_.push_back(backward_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(settlement_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(ruins_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(inv_button_c);
@@ -655,42 +636,7 @@ int init_menus()
 		
 	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
 	set_pace_medium();
-	/**
-	//set the pace value
-	std::function<void()> set_pace_stop = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 0.0);
-	std::function<void()> set_pace_slow = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.0);
-	
-	std::function<void()> set_pace_fast = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.5);
 
-	pace_pop_up_c->child_components_.push_back(ig_pace_0);
-	pace_pop_up_c->child_components_.push_back(ig_pace_1);
-	pace_pop_up_c->child_components_.push_back(ig_pace_2);
-
-	
-	//unselect all the other toggles
-	std::function<void()> set_pace_0 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 0);
-	std::function<void()> set_pace_1 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 1);
-	std::function<void()> set_pace_2 = std::bind(exclusive_select, pace_pop_up_c->child_components_, 2);
-
-	pace_pop_up_c->child_components_.push_back(pace_label_0);
-	pace_pop_up_c->child_components_.push_back(pace_label_1);
-	pace_pop_up_c->child_components_.push_back(pace_label_2); 
-	pace_pop_up_c->child_components_.push_back(pace_label_box);
-
-	ig_pace_0->callback_functions_.push_back(set_pace_slow);
-	ig_pace_1->callback_functions_.push_back(set_pace_medium);
-	ig_pace_2->callback_functions_.push_back(set_pace_fast);
-
-	ig_pace_0->callback_functions_.push_back(set_pace_0);
-	ig_pace_1->callback_functions_.push_back(set_pace_1);
-	ig_pace_2->callback_functions_.push_back(set_pace_2);
-
-
-	for (auto f : ig_pace_1->callback_functions_)
-	{
-		f();
-	}
-	**/
 
 	//************************* Right Side Status Menus
 

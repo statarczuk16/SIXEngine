@@ -113,10 +113,6 @@ namespace SXNGN::ECS
 				if (at_settlement)
 				{
 					auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
-
-						
-					
-
 					std::function<void()> trade_with_inv = [overworld_player_entity, settlement_entity]()
 					{
 						TradeHelper* trade_helper = new TradeHelper();
@@ -151,7 +147,7 @@ namespace SXNGN::ECS
 
 
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S);
-				bool moving = pace_go.first > 0.0;
+				bool moving = abs(pace_go.first) > 0.0;
 				bool scavenging = false;
 				bool towning = false;
 				if (moving || scavenging || towning)

@@ -165,10 +165,17 @@ namespace SXNGN::ECS {
 		auto gCoordinator = Database::get_coordinator();
 		Entity world_map_entity = gCoordinator->CreateEntity();
 		WorldMap* world_map_component = new WorldMap();
+		int col_idx = 0;
+		int row_idx = 0;
 		
+		int num_rows = new_world_map.size();
 		for (auto row : new_world_map)
 		{
+			bool currently_drawing_road = false;
 			std::vector< std::vector < sole::uuid> > uuids_this_row;
+			int num_cols = row.size();
+			//FIXME algo to determine road end does not work.
+			//Need to check every map location in the column not just the one that happens to ebe a road
 			for (auto column : row)
 			{
 				std::vector<sole::uuid> uuids_this_at_this_location;
@@ -191,7 +198,12 @@ namespace SXNGN::ECS {
 					pre_render->sprite_factory_sprite_type_ = "UNINIT";
 					if (world_location->has_ruins_)
 					{
-						pre_render->sprite_factory_sprite_type_ = "RUIN_CAR";
+						auto sprite_factory_holder = SpriteFactoryHolder::get_instance();
+						pre_render->sprite_factory_sprite_type_ = "RED_BRICK_RUINED";
+						auto sprite_factory = sprite_factory_holder->sprite_factories_["APOCALYPSE_MAP"];
+						auto sprite_height = sprite_factory->tile_name_string_to_rect_map_["RED_BRICK_RUINED"]->h;
+						location->m_pos_y_m_ -= sprite_height;
+
 					}
 					else if (world_location->has_settlement_)
 					{
@@ -205,18 +217,66 @@ namespace SXNGN::ECS {
 						market->inventory_[ItemType::KALNOTE] = 10000.0;
 						market->inventory_[ItemType::MEDKIT] = 100.0;
 						gCoordinator->AddComponent(location_entity, market);
-						pre_render->sprite_factory_sprite_type_ = "SHRINE";
+						pre_render->sprite_factory_sprite_type_ = "RED_BRICK";
+
+						auto sprite_factory_holder = SpriteFactoryHolder::get_instance();
+						auto sprite_factory = sprite_factory_holder->sprite_factories_["APOCALYPSE_MAP"];
+						auto sprite_height = sprite_factory->tile_name_string_to_rect_map_["RED_BRICK"]->h;
+						location->m_pos_y_m_ -= sprite_height;
 					}
 					else if (world_location->traversal_cost_m_s_ == WORLD_ROAD_PENALTY_PACE_M_S)
 					{
 						pre_render->scale_x_ = 1.0;
 						pre_render->scale_y_ = 1.0;
 						std::vector < std::string > sprite_row;
-						for (int i = 0; i < SXNGN::OVERWORLD_PIXELS_PER_GRID; i += (pre_render->scale_x_ * 32))
+						int road_start_idx = 0;
+						bool end_of_road = false;
+						//use the road start piece if this is start of new road
+						if(!currently_drawing_road)
 						{
-							int ran_num = 0 + (rand() % 3);
-							sprite_row.push_back("ROAD_ISO_" + std::to_string(ran_num));
+							sprite_row.push_back("ROAD_START");
+							currently_drawing_road = true;
+							road_start_idx = 32; //already filled in the start space for this grid 
+							//fill in the rest of the grid with road pieces
+							
 						}
+						else
+						{
+							road_start_idx = 0;
+						}
+						//if the next map grid does not have a road
+						if(col_idx + 1 < num_cols && column[col_idx+1]->traversal_cost_m_s_ != WORLD_ROAD_PENALTY_PACE_M_S)
+						{
+							end_of_road = true;
+						}
+						for (int i = road_start_idx; i < SXNGN::OVERWORLD_PIXELS_PER_GRID; i += (pre_render->scale_x_ * 32))
+						{
+							int ran_num = 0 + (rand() % 10);
+							std::string road_type = "";
+							if(ran_num > 8)
+							{
+								road_type = "ROAD_MID_BREAK";
+							}
+							else if(ran_num > 6)
+							{
+								road_type = "ROAD_MID_RUIN_1";
+							}
+							else if(ran_num > 4)
+							{
+								road_type = "ROAD_MID_RUIN_2";
+							}
+							else
+							{
+								road_type = "ROAD_MID";
+							}
+							sprite_row.push_back(road_type);
+						}
+						if(end_of_road)
+						{
+							sprite_row.at(sprite_row.size()) == "ROAD_END";
+						}
+						
+						
 						pre_render->sprite_factory_sprite_type_ = "NONE";
 						
 						pre_render->sprite_batch_.push_back(sprite_row); //FIXME memory leak
@@ -228,10 +288,12 @@ namespace SXNGN::ECS {
 					}
 					gCoordinator->AddComponent(location_entity, pre_render);
 					gCoordinator->AddComponent(location_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
-					
+					col_idx++;
 				}
 				uuids_this_row.push_back(uuids_this_at_this_location);
+				row_idx++;
 			}
+			
 			world_map_component->world_locations_.push_back(uuids_this_row);
 		}
 		gCoordinator->AddComponent(world_map_entity, world_map_component);

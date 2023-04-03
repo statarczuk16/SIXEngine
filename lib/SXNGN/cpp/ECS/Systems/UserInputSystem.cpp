@@ -89,28 +89,6 @@ namespace SXNGN::ECS {
 							}
 						}
 					}
-					/**
-					if (input_tags.input_tags_.count(User_Input_Tags::PROPERTY_CONTROL_MOVEMENT))
-					{
-						auto db_comp = DatabaseComponent::get_instance();
-						if (db_comp->settings_map.count(input_tags.property_tag_) > 0)
-						{
-							auto check_out_move = gCoordinator.CheckOutComponent(entity_interest, ComponentTypeEnum::MOVEABLE);
-							if (check_out_move)
-							{
-								Moveable* moveable_ptr = static_cast<Moveable*>(check_out_move);
-								double speed = db_comp->settings_map.at(input_tags.property_tag_);
-								double stop_or_go = 0.0;
-								if (db_comp->settings_map.count(SXNGN::OVERWORLD_GO) > 0)
-								{
-									stop_or_go = db_comp->settings_map.at(SXNGN::OVERWORLD_GO);
-								}
-								moveable_ptr->m_vel_x_m_s = speed * stop_or_go; //fixme make stop_or_go more flexible
-								gCoordinator.CheckInComponent(ComponentTypeEnum::MOVEABLE, entity_interest);
-							}
-						}
-					}
-					**/
 				}
 				
 				
