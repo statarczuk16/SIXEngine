@@ -167,19 +167,22 @@ namespace SXNGN::ECS {
 		WorldMap* world_map_component = new WorldMap();
 		int col_idx = 0;
 		int row_idx = 0;
-		
+		std::set<int> used_x;
 		int num_rows = new_world_map.size();
-		for (auto row : new_world_map)
+		for (std::vector<std::vector<WorldLocation*>> row : new_world_map)
 		{
 			bool currently_drawing_road = false;
 			std::vector< std::vector < sole::uuid> > uuids_this_row;
 			int num_cols = row.size();
-			//FIXME algo to determine road end does not work.
-			//Need to check every map location in the column not just the one that happens to ebe a road
-			for (auto column : row)
+			
+			for (std::vector<WorldLocation*> column : row)
 			{
+				if(column.empty())
+				{
+					std::cout << "Empty Map Grid" << std::endl;
+				}
 				std::vector<sole::uuid> uuids_this_at_this_location;
-				for (auto world_location : column)
+				for (WorldLocation* world_location : column)
 				{	
 					Entity location_entity = gCoordinator->CreateEntity();
 					sole::uuid uuid_ = gCoordinator->GetUUIDFromEntity(location_entity);
@@ -231,27 +234,32 @@ namespace SXNGN::ECS {
 						std::vector < std::string > sprite_row;
 						int road_start_idx = 0;
 						bool end_of_road = false;
+						bool start_of_road = false;
+						std::cout << "Map grid at " << world_location->map_grid_x_ << " has road " << std::endl;
 						//use the road start piece if this is start of new road
 						if(!currently_drawing_road)
 						{
-							sprite_row.push_back("ROAD_START");
 							currently_drawing_road = true;
-							road_start_idx = 32; //already filled in the start space for this grid 
-							//fill in the rest of the grid with road pieces
-							
-						}
-						else
-						{
-							road_start_idx = 0;
+							start_of_road = true;
 						}
 						//if the next map grid does not have a road
-						if(col_idx + 1 < num_cols && column[col_idx+1]->traversal_cost_m_s_ != WORLD_ROAD_PENALTY_PACE_M_S)
+						if(col_idx + 1 < num_cols)
 						{
-							end_of_road = true;
+							bool road_in_next_column = false;
+							auto next_column = row[col_idx+1];
+							for(auto temp_loc :  next_column)
+							{
+								if(temp_loc->traversal_cost_m_s_ == WORLD_ROAD_PENALTY_PACE_M_S)
+								{
+									road_in_next_column = true;
+									break;
+								}
+							}
+							end_of_road = !road_in_next_column;
 						}
 						for (int i = road_start_idx; i < SXNGN::OVERWORLD_PIXELS_PER_GRID; i += (pre_render->scale_x_ * 32))
 						{
-							int ran_num = 0 + (rand() % 10);
+							int ran_num =  0 + (rand() % 10);
 							std::string road_type = "";
 							if(ran_num > 8)
 							{
@@ -270,11 +278,28 @@ namespace SXNGN::ECS {
 								road_type = "ROAD_MID";
 							}
 							sprite_row.push_back(road_type);
+							if(used_x.count(location->m_pos_x_m_ + i))
+							{
+								std::cout << "Duplicate" << std::endl;
+							}
+							used_x.insert(location->m_pos_x_m_ + i);
+							std::cout << location->m_pos_x_m_ + i << std::endl;
+							//std::cout << "Map grid at " << world_location->map_grid_x_ << " has road type " << road_type << std::endl;
+						}
+						if(start_of_road)
+						{
+							sprite_row[0] = "ROAD_START_1";
+							sprite_row[1] = "ROAD_START_2";
+							std::cout << "Map grid at " << world_location->map_grid_x_ << " is START of road " << std::endl;
 						}
 						if(end_of_road)
 						{
-							sprite_row.at(sprite_row.size()) == "ROAD_END";
+							sprite_row[sprite_row.size()-1] = "ROAD_END_2";
+							sprite_row[sprite_row.size()-2] = "ROAD_END_1";
+							currently_drawing_road = false;
+							std::cout << "Map grid at " << world_location->map_grid_x_ << " is END of road " << std::endl;
 						}
+						
 						
 						
 						pre_render->sprite_factory_sprite_type_ = "NONE";
@@ -288,12 +313,12 @@ namespace SXNGN::ECS {
 					}
 					gCoordinator->AddComponent(location_entity, pre_render);
 					gCoordinator->AddComponent(location_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
-					col_idx++;
+					
 				}
 				uuids_this_row.push_back(uuids_this_at_this_location);
-				row_idx++;
+				col_idx++;
 			}
-			
+			row_idx++;
 			world_map_component->world_locations_.push_back(uuids_this_row);
 		}
 		gCoordinator->AddComponent(world_map_entity, world_map_component);
