@@ -131,6 +131,7 @@ namespace SXNGN {
 						func();
 					}
 				}
+				disable_ui();
 			}
 
 			void ECS_Utils::update_pace()
@@ -153,6 +154,33 @@ namespace SXNGN {
 				if (pause_game_event_pair.second)
 				{
 					for (auto func : pause_game_event_pair.first.e.func_event.callbacks)
+					{
+						func();
+					}
+				}
+				enable_ui();
+			}
+
+			void ECS_Utils::enable_ui()
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				auto event_pair = gCoordinator->getEvent(SXNGN::ENABLE_UI);
+				if (event_pair.second)
+				{
+					for (auto func : event_pair.first.e.func_event.callbacks)
+					{
+						func();
+					}
+				}
+			}
+
+			void ECS_Utils::disable_ui()
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				auto event_pair = gCoordinator->getEvent(SXNGN::DISABLE_UI);
+				if (event_pair.second)
+				{
+					for (auto func : event_pair.first.e.func_event.callbacks)
 					{
 						func();
 					}

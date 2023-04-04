@@ -172,7 +172,7 @@ bool init()
 int init_menus()
 {
 
-	const int BUTTON_WIDTH = 150;
+	const int BUTTON_WIDTH = 125;
 	const int BUTTON_HEIGHT = 50;
 	const int CHECK_BOX_WIDTH = 42;
 	const int STAT_LABEL_HEIGHT = 25;
@@ -305,6 +305,8 @@ int init_menus()
 
 	//************************* In Game UI
 
+	std::vector<std::shared_ptr<UIContainerComponent> > disable_on_pause_buttons;
+
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
 	const int MAIN_GAME_STATE_SIDE_MENU_WIDTH = 140;
@@ -327,10 +329,11 @@ int init_menus()
 	//Open Menu Button
 	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_CENTER, SP_NONE, UILayer::MID, "Menu",0,0, BUTTON_WIDTH, BUTTON_HEIGHT);
 	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
+	disable_on_pause_buttons.push_back(ig_go_to_menu_button);
 
-	auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
+	//auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 
-	ig_ui_window_top_c->child_components_.push_back(ig_debug_toggle_1);
+	//ig_ui_window_top_c->child_components_.push_back(ig_debug_toggle_1);
 
 
 	const int POP_UP_GAME_MENU_W = 240;
@@ -561,9 +564,6 @@ int init_menus()
 	auto stop_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Rest", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto forward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Forward", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	
-	
-	button_column++;
-
 	auto settlement_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Settlement", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto ruins_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Ruins", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto inv_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Inventory", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
@@ -594,14 +594,7 @@ int init_menus()
 	Event_Component update_pace_event;
 	update_pace_event.e.func_event.callbacks.push_back(update_pace);
 
-	gCoordinator.setEvent(SXNGN::UPDATE_PACE, update_pace_event);
-	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
-	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
-
-	pause_button_c->callback_functions_.push_back(ECS_Utils::pause_game);
-
-	unpause_button_c->callback_functions_.push_back(ECS_Utils::unpause_game);
-	ECS_Utils::unpause_game();
+	
 
 
 	
@@ -621,6 +614,7 @@ int init_menus()
 	backward_button_c->callback_functions_.push_back(reverse_function);
 	forward_button_c->callback_functions_.push_back(update_pace);
 	backward_button_c->callback_functions_.push_back(update_pace);
+
 	bottom_side_state_menu_c->child_components_.push_back(stop_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(forward_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(backward_button_c);
@@ -628,6 +622,11 @@ int init_menus()
 	bottom_side_state_menu_c->child_components_.push_back(ruins_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(inv_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(status_button_c);
+
+	disable_on_pause_buttons.push_back(stop_button_c);
+	disable_on_pause_buttons.push_back(forward_button_c);
+	disable_on_pause_buttons.push_back(backward_button_c);
+
 	
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);
 	
@@ -637,7 +636,42 @@ int init_menus()
 	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
 	set_pace_medium();
 
+	std::function<void()> disable_ui = [disable_on_pause_buttons, coordinator]()
+	{
+		for(auto button : disable_on_pause_buttons)
+		{
+			button->button_->enabled = false;
+		}
+	};
 
+	std::function<void()> enable_ui = [disable_on_pause_buttons, coordinator]()
+	{
+		for(auto button : disable_on_pause_buttons)
+		{
+			button->button_->enabled = true;
+		}
+	};
+
+	Event_Component disable_ui_event;
+	disable_ui_event.e.func_event.callbacks.push_back(disable_ui);
+
+	Event_Component enable_ui_event;
+	enable_ui_event.e.func_event.callbacks.push_back(enable_ui);
+
+	gCoordinator.setEvent(SXNGN::ENABLE_UI, enable_ui_event);
+	gCoordinator.setEvent(SXNGN::DISABLE_UI, disable_ui_event);
+
+	gCoordinator.setEvent(SXNGN::UPDATE_PACE, update_pace_event);
+	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
+	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
+
+	pause_button_c->callback_functions_.push_back(ECS_Utils::pause_game);
+	pause_button_c->callback_functions_.push_back(ECS_Utils::disable_ui);
+
+	unpause_button_c->callback_functions_.push_back(ECS_Utils::unpause_game);
+	unpause_button_c->callback_functions_.push_back(ECS_Utils::enable_ui);
+	ECS_Utils::unpause_game();
+	
 	//************************* Right Side Status Menus
 
 
@@ -723,10 +757,37 @@ int init_menus()
 	auto scavenge_button_c = UserInputUtils::create_button(ruins_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Scavenge", ruins_row, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	scavenge_button_c->button_->enabled = false;
 	scavenge_button_c->name_ = "OVERWORLD_scavenge_button";
+	
+
+	auto stop_scavenge_button_c = UserInputUtils::create_button(ruins_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "Stop", ruins_row, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
+	stop_scavenge_button_c->button_->enabled = false;
+	stop_scavenge_button_c->name_ = "OVERWORLD_stop_scavenge_button";
+	ruins_window_c->child_components_.push_back(stop_scavenge_button_c);
+
+	std::function<void()> set_scavenge_visible = std::bind(set_button_visible, scavenge_button_c);
+	std::function<void()> set_stop_scavenge_visible = std::bind(set_button_visible, stop_scavenge_button_c);
+
+	std::function<void()> set_scavenge_invisible = std::bind(set_button_invisible, scavenge_button_c);
+	std::function<void()> set_stop_scavenge_invisible = std::bind(set_button_invisible, stop_scavenge_button_c);
+
+	std::function<void()> enable_scavenge = std::bind(&Coordinator::setSetting, &gCoordinator, SXNGN::SCAVENGE, 1.0);
+	std::function<void()> disable_scavenge = std::bind(&Coordinator::setSetting, &gCoordinator, SXNGN::SCAVENGE, 0.0);
+
+	scavenge_button_c->callback_functions_.push_back(set_scavenge_invisible);
+	scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_visible);
+	scavenge_button_c->callback_functions_.push_back(enable_scavenge);
+
+	stop_scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_invisible);
+	stop_scavenge_button_c->callback_functions_.push_back(set_scavenge_visible);
+	stop_scavenge_button_c->callback_functions_.push_back(disable_scavenge);
+
 	ruins_window_c->window_->visible = false;
 	ruins_window_c->name_ = "OVERWORLD_ruins";
 	ruins_window_c->child_components_.push_back(scavenge_button_c);
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, ruins_window_c);
+
+
+	//scavenge_button_c->callback_functions_.push_back
 
 
 	// Party Status

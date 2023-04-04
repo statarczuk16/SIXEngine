@@ -46,8 +46,8 @@ namespace SXNGN::ECS
 				auto location_data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::LOCATION);
 				const Location* location_ptr = static_cast<const Location*>(location_data);
 
-				int world_map_grid_x = round(location_ptr->m_pos_x_m_ * SXNGN::OVERWORLD_GRIDS_PER_PIXEL);
-				int world_map_grid_y = round(location_ptr->m_pos_y_m_ * SXNGN::OVERWORLD_GRIDS_PER_PIXEL);
+				int world_map_grid_x = int(location_ptr->m_pos_x_m_ * SXNGN::METERS_TO_PIXELS_2 * SXNGN::OVERWORLD_MULTIPLIER * SXNGN::OVERWORLD_GRIDS_PER_METER);
+				int world_map_grid_y = int(location_ptr->m_pos_y_m_ * SXNGN::METERS_TO_PIXELS_2 * SXNGN::OVERWORLD_MULTIPLIER * SXNGN::OVERWORLD_GRIDS_PER_METER);
 
 				std::vector<sole::uuid> party_map_location_uuids;
 				if (worldmap_ptr->world_locations_.size() > world_map_grid_y)
@@ -101,7 +101,14 @@ namespace SXNGN::ECS
 					bool have_food = party_ptr->inventory_[ItemType::FOOD] >= 0.0;
 					bool max_stamina = party_ptr->stamina_ >= party_ptr->stamina_max_;
 					bool sandstorm = party_ptr->weather_counter_s_ > 0.0;
+
+					auto scavenge_pair = gCoordinator.getSetting(SXNGN::SCAVENGE);
+					bool scavenging = scavenge_pair.second && scavenge_pair.first;
 					
+					if(scavenging)
+					{
+						std::cout << "Scavenging" << std::endl;
+					}
 					if (sick)
 					{
 						double sick_time_recovered_s = game_seconds_passed;
@@ -118,26 +125,37 @@ namespace SXNGN::ECS
 						}
 					}
 
-					if (moving && sandstorm)
+					
+					if(sandstorm)
 					{
-						double hp_drain = 0.0;
-						if (party_ptr->weather_level_ == EventSeverity::MILD)
+						party_ptr->weather_counter_s_ -= game_seconds_passed;
+						if (party_ptr->weather_counter_s_ < 0)
 						{
-							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MILD;
+							party_ptr->weather_counter_s_ = 0.0;
+							party_ptr->weather_level_ = EventSeverity::UNKNOWN;
 						}
-						else if (party_ptr->weather_level_ == EventSeverity::MEDIUM)
-						{
-							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MED;
-						}
-						else if (party_ptr->weather_level_ == EventSeverity::EXTREME)
-						{
-							hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_EXT;
-						}
-						party_ptr->health_ -= hp_drain;
-						party_status_oss << "Losing health to sandstorm " << std::endl;
 
-						
+						if (moving && sandstorm)
+						{
+							double hp_drain = 0.0;
+							if (party_ptr->weather_level_ == EventSeverity::MILD)
+							{
+								hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MILD;
+							}
+							else if (party_ptr->weather_level_ == EventSeverity::MEDIUM)
+							{
+								hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_MED;
+							}
+							else if (party_ptr->weather_level_ == EventSeverity::EXTREME)
+							{
+								hp_drain = game_seconds_passed * PARTY_WEATHER_HP_DRAIN_PER_SECOND_EXT;
+							}
+							party_ptr->health_ -= hp_drain;
+							party_status_oss << "Losing health to sandstorm " << std::endl;
+						}
+
 					}
+
 					std::string res = "";
 					if(moving && !party_ptr->have_footwear(res))
 					{

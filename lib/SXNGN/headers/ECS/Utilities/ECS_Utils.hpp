@@ -32,6 +32,10 @@ namespace SXNGN {
 
 				static void unpause_game();
 
+				static void enable_ui();
+
+				static void disable_ui();
+
 				static void update_pace();
 
 				static void send_event(ECS_Component* event_component);
