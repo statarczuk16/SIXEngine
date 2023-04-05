@@ -366,14 +366,15 @@ int substring_length(char str[], int start, int end)
 int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 {
 	int len, y, x;
-	int visible = label->visible;
+	int visible = 0;
+	
 	int text_width;
 
 	if (label)
 	{
+		visible = (label->wdw->visible && label->visible);
 		//for use if text is centers, get width of the first line of text (until line break)
 		int width_until_line_break = kiss_textwidth_first_line(label->font, label->text);
-		visible = label->visible && label->wdw->visible;
 		//pass by ref - sets button->r_rect
 		(void)determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
 		//pass by ref - sets textx and texty
@@ -513,7 +514,6 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 	if (button)
 	{
 		visible = (button->wdw->visible && button->visible);
-		
 		//pass by ref - sets button->r_rect
 		(void) determine_render_position(&button->rect, button->wdw, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
 		//pass by ref - sets textx and texty

@@ -120,10 +120,10 @@ namespace SXNGN {
 
 			}
 
-			void ECS_Utils::pause_game()
+			void ECS_Utils::system_pause()
 			{
 				auto gCoordinator = SXNGN::Database::get_coordinator();
-				auto pause_game_event_pair = gCoordinator->getEvent(SXNGN::PAUSE);
+				auto pause_game_event_pair = gCoordinator->getEvent(SXNGN::DISABLE_UI_SYSTEM_PAUSE);
 				if (pause_game_event_pair.second)
 				{
 					for (auto func : pause_game_event_pair.first.e.func_event.callbacks)
@@ -131,7 +131,21 @@ namespace SXNGN {
 						func();
 					}
 				}
-				disable_ui();
+				
+			}
+
+			void ECS_Utils::system_unpause()
+			{
+				auto gCoordinator = SXNGN::Database::get_coordinator();
+				auto pause_game_event_pair = gCoordinator->getEvent(SXNGN::ENABLE_UI_SYSTEM_UNPAUSE);
+				if (pause_game_event_pair.second)
+				{
+					for (auto func : pause_game_event_pair.first.e.func_event.callbacks)
+					{
+						func();
+					}
+				}
+
 			}
 
 			void ECS_Utils::update_pace()
@@ -147,45 +161,9 @@ namespace SXNGN {
 				}
 			}
 
-			void ECS_Utils::unpause_game()
-			{
-				auto gCoordinator = SXNGN::Database::get_coordinator();
-				auto pause_game_event_pair = gCoordinator->getEvent(SXNGN::UNPAUSE);
-				if (pause_game_event_pair.second)
-				{
-					for (auto func : pause_game_event_pair.first.e.func_event.callbacks)
-					{
-						func();
-					}
-				}
-				enable_ui();
-			}
+			
 
-			void ECS_Utils::enable_ui()
-			{
-				auto gCoordinator = SXNGN::Database::get_coordinator();
-				auto event_pair = gCoordinator->getEvent(SXNGN::ENABLE_UI);
-				if (event_pair.second)
-				{
-					for (auto func : event_pair.first.e.func_event.callbacks)
-					{
-						func();
-					}
-				}
-			}
-
-			void ECS_Utils::disable_ui()
-			{
-				auto gCoordinator = SXNGN::Database::get_coordinator();
-				auto event_pair = gCoordinator->getEvent(SXNGN::DISABLE_UI);
-				if (event_pair.second)
-				{
-					for (auto func : event_pair.first.e.func_event.callbacks)
-					{
-						func();
-					}
-				}
-			}
+			
 
 			void ECS_Utils::send_event(ECS_Component* event_component)
 			{

@@ -28,13 +28,13 @@ namespace SXNGN {
 				// Convert a position on the screen where (0,0) = top left to a world position where top left = camera top left + zoom in /scale shenanigans
 				static SDL_FRect convert_screen_position_to_world_position(std::shared_ptr<ECS_Camera> camera, int entity_x_unscaled, int entity_y_unscaled, ComponentTypeEnum game_state = ComponentTypeEnum::MAIN_GAME_STATE);
 
-				static void pause_game();
+				static void system_pause();
 
-				static void unpause_game();
+				static void system_unpause();
 
-				static void enable_ui();
+				//static void enable_ui();
 
-				static void disable_ui();
+				//static void disable_ui();
 
 				static void update_pace();
 

@@ -84,7 +84,7 @@ namespace SXNGN::ECS {
 				}
 				case EventType::MOUSE_WHEEL:
 				{
-					SDL_LogInfo(1, "Event_System::Update:: Got Mouse Wheel Event");
+					//SDL_LogInfo(1, "Event_System::Update:: Got Mouse Wheel Event");
 					Handle_Mouse_Wheel_Event(event_ptr);
 					break;
 				}
@@ -406,7 +406,7 @@ namespace SXNGN::ECS {
 		auto message_box_c = UserInputUtils::create_message_box(nullptr, ec->e.choice_event.title, ec->e.choice_event.detail, 500, 300, UILayer::BOTTOM, ec->e.choice_event.options_text, ec->e.choice_event.options_callbacks, ec->e.choice_event.option_enables);
 		if (ec->e.choice_event.pause)
 		{
-			ECS_Utils::pause_game();
+			ECS_Utils::system_pause();
 		}
 		ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 	}
@@ -441,7 +441,7 @@ namespace SXNGN::ECS {
 			options_list_events.push_back(set_bad_boots);
 			std::vector<bool> option_enables;
 			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Boots have worn out!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
-			ECS_Utils::pause_game();
+			ECS_Utils::system_pause();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -513,7 +513,7 @@ namespace SXNGN::ECS {
 				}
 			}
 			gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
-			ECS_Utils::pause_game();
+			ECS_Utils::system_pause();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -629,7 +629,7 @@ namespace SXNGN::ECS {
 			gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
 
 
-			ECS_Utils::pause_game();
+			ECS_Utils::system_pause();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -706,7 +706,7 @@ namespace SXNGN::ECS {
 				}
 			}
 			gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
-			ECS_Utils::pause_game();
+			ECS_Utils::system_pause();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
@@ -744,8 +744,12 @@ namespace SXNGN::ECS {
 			options_list_text.push_back("Ok");
 			std::vector<bool> option_enables;
 			auto message_box_c = UserInputUtils::create_message_box(nullptr, "The weather turns foul!", detail, 500, 300, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
-			ECS_Utils::pause_game();
+			ECS_Utils::system_pause();
 			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
+			break;
+		}
+		case PartyEventType::RUINS_GOOD_LOOT:
+		{
 			break;
 		}
 		case PartyEventType::NONE:

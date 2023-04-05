@@ -88,6 +88,7 @@ namespace SXNGN::ECS {
 
 		auto quit_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, window_item_layer, "Exit", 0, 2, 20, item_label_h);
 		quit_button_c->callback_functions_.push_back(kill_trade_window_func);
+		quit_button_c->triggered_events.push_back(gCoordinator.getEvent(SXNGN::ENABLE_UI_SYSTEM_UNPAUSE).first);
 		
 		
 
@@ -506,6 +507,7 @@ namespace SXNGN::ECS {
 			auto kill_button = std::bind(kill_ui, message_window_c);
 			button_c->callback_functions_.push_back(kill_button);
 			button_c->callback_functions_.push_back(option_callbacks[i]);
+			button_c->triggered_events.push_back(gCoordinator.getEvent(SXNGN::ENABLE_UI_SYSTEM_UNPAUSE).first);
 			message_window_c->child_components_.push_back(button_c);
 		
 		}

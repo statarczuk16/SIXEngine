@@ -171,12 +171,85 @@ bool init()
 
 int init_menus()
 {
+	auto coordinator = SXNGN::Database::get_coordinator();
+
+	std::function<void(std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)> exclusive_select = [](std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)
+	{
+		for (auto select : all_buttons)
+		{
+			select->selectbutton_->selected = false;
+		}
+		all_buttons[selected_button]->selectbutton_->selected = true;
+
+	};
+	std::function<void(std::string property, double new_value)> set_property = [](std::string property, double new_value)
+	{
+		gCoordinator.setSetting(property, new_value);
+	};
+
+	std::function<void()> update_pace = []()
+	{
+		auto pair_pace = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
+		auto pair_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
+		auto pair_lost = gCoordinator.getSetting(SXNGN::OVERWORLD_LOST);
+		double pace_value = pair_go.first * pair_pace.first;
+		if (pair_lost.second && pair_lost.first)
+		{
+			pace_value *= 0.0;
+		}
+		gCoordinator.setSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S, pace_value);
+	};
+
+	std::function<void(std::string property, double new_value)> cache_and_replace_property = [](std::string property, double new_value)
+	{
+		std::string property_cache = property + SXNGN::CACHE;
+		auto pair = gCoordinator.getSetting(property);
+		gCoordinator.setSetting(property_cache, pair.first);
+		gCoordinator.setSetting(property, new_value);
+	};
+
+	std::function<void(std::string property)> restore_property_from_cache = [](std::string property)
+	{
+		std::string property_cache = property + SXNGN::CACHE;
+		auto old_pair = gCoordinator.getSetting(property_cache);
+		gCoordinator.setSetting(property, old_pair.first);
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_button_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->button_->visible = !uicc->button_->visible;
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_button_invisible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->button_->visible = 0;
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_button_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->button_->visible = 1;
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc, bool enabled)> set_button_enable = [coordinator](std::shared_ptr<UIContainerComponent> uicc, bool enabled)
+	{
+		uicc->button_->enabled = enabled;
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_window_invisible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->window_->visible = 0;
+	};
+
+	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_window_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
+	{
+		uicc->window_->visible = 1;
+	};
 
 	const int BUTTON_WIDTH = 125;
 	const int BUTTON_HEIGHT = 50;
 	const int CHECK_BOX_WIDTH = 42;
 	const int STAT_LABEL_HEIGHT = 25;
-	auto coordinator = SXNGN::Database::get_coordinator();
+	
 	const int WINDOW_HEIGHT = 620;
 	const int WINDOW_WIDTH = 320;
 	auto ui = UICollectionSingleton::get_instance();
@@ -305,7 +378,10 @@ int init_menus()
 
 	//************************* In Game UI
 
-	std::vector<std::shared_ptr<UIContainerComponent> > disable_on_pause_buttons;
+	std::vector<std::shared_ptr<UIContainerComponent> > disable_on_player_pause_buttons;
+	std::vector<std::shared_ptr<UIContainerComponent> > disable_on_player_pause_windows;
+	std::vector<std::shared_ptr<UIContainerComponent> > disable_on_system_pause_windows;
+	std::vector<std::shared_ptr<UIContainerComponent> > player_move_buttons;
 
 	const int MAIN_GAME_STATE_MENU_HEIGHT = 80;
 	const int MAIN_GAME_STATE_MENU_WIDTH = resolution.w;
@@ -313,8 +389,8 @@ int init_menus()
 	const int MAIN_GAME_STATE_RIGHT_SIDE_MENU_WIDTH = 200;
 	const int OVERWORLD_STATE_HEIGHT = 580;
 	// Window
-	auto ig_ui_window_top_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
-	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_top_c);
+	auto overworld_top_menu_c = UserInputUtils::create_window_raw(nullptr, 0, 0, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::BOTTOM);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, overworld_top_menu_c);
 	//offset the game world display below this menu strip at the top
 	std::shared_ptr<SDL_Rect> overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 	overworld_viewport->y = MAIN_GAME_STATE_MENU_HEIGHT; 
@@ -327,9 +403,31 @@ int init_menus()
 
 
 	//Open Menu Button
-	auto ig_go_to_menu_button = UserInputUtils::create_button(ig_ui_window_top_c->window_, HA_CENTER, VA_CENTER, SP_NONE, UILayer::MID, "Menu",0,0, BUTTON_WIDTH, BUTTON_HEIGHT);
-	ig_ui_window_top_c->child_components_.push_back(ig_go_to_menu_button);
-	disable_on_pause_buttons.push_back(ig_go_to_menu_button);
+	int top_menu_button_column = 3;
+	auto pause_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Pause", 0, top_menu_button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto unpause_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Resume", 0, top_menu_button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	pause_button_c->button_->visible = false;
+	unpause_button_c->button_->visible = true;
+
+	std::function<void()> set_pause_visible = std::bind(set_button_visible, pause_button_c);
+	std::function<void()> set_unpause_visible = std::bind(set_button_visible, unpause_button_c);
+
+	std::function<void()> set_pause_invisible = std::bind(set_button_invisible, pause_button_c);
+	std::function<void()> set_unpause_invisible = std::bind(set_button_invisible, unpause_button_c);
+
+	std::function<void()> pause_game_engine_function = std::bind(set_property, SXNGN::PAUSE, 1.0);
+	std::function<void()> unpause_game_engine_function = std::bind(set_property, SXNGN::PAUSE, 0.0);
+
+	Event_Component update_pace_event;
+	update_pace_event.e.common.type = EventType::FUNCTION;
+	update_pace_event.e.func_event.callbacks.push_back(update_pace);
+
+	overworld_top_menu_c->child_components_.push_back(pause_button_c);
+	overworld_top_menu_c->child_components_.push_back(unpause_button_c);
+
+	auto ig_go_to_menu_button = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Menu",0, top_menu_button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
+	overworld_top_menu_c->child_components_.push_back(ig_go_to_menu_button);
+	disable_on_player_pause_buttons.push_back(ig_go_to_menu_button);
 
 	//auto ig_debug_toggle_1 = UserInputUtils::create_select_button(ig_ui_window_top_c->window_, HA_COLUMN, VA_ROW, SP_NONE, UILayer::MID, "Debug_Spawn_Block", 0, 0, CHECK_BOX_WIDTH, BUTTON_HEIGHT);
 
@@ -484,129 +582,29 @@ int init_menus()
 
 	//************************* Bottom Side State Relevant Menu
 
-	std::function<void(std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)> exclusive_select = [](std::vector<std::shared_ptr<UIContainerComponent>> all_buttons, int selected_button)
-	{
-		for (auto select : all_buttons)
-		{
-			select->selectbutton_->selected = false;
-		}
-		all_buttons[selected_button]->selectbutton_->selected = true;
-
-	};
-	std::function<void(std::string property, double new_value)> set_property = [](std::string property, double new_value)
-	{
-		gCoordinator.setSetting(property, new_value);
-	};
-
-	std::function<void()> update_pace = []()
-	{
-		auto pair_pace = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_M_S);
-		auto pair_go = gCoordinator.getSetting(SXNGN::OVERWORLD_GO);
-		auto pair_lost = gCoordinator.getSetting(SXNGN::OVERWORLD_LOST);
-		double pace_value = pair_go.first * pair_pace.first; 
-		if (pair_lost.second && pair_lost.first)
-		{
-			pace_value *= 0.0;
-		}
-		gCoordinator.setSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S, pace_value);
-	};
-
-	std::function<void(std::string property, double new_value)> cache_and_replace_property = [](std::string property, double new_value)
-	{
-		std::string property_cache = property + SXNGN::CACHE;
-		auto pair = gCoordinator.getSetting(property);
-		gCoordinator.setSetting(property_cache, pair.first);
-		gCoordinator.setSetting(property, new_value);
-	};
-
-	std::function<void(std::string property)> restore_property_from_cache = [](std::string property)
-	{
-		std::string property_cache = property + SXNGN::CACHE;
-		auto old_pair = gCoordinator.getSetting(property_cache);
-		gCoordinator.setSetting(property, old_pair.first);
-	};
-
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_button_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		uicc->button_->visible = !uicc->button_->visible;
-	};
-
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_button_invisible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		uicc->button_->visible = 0;
-	};
-
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_button_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		uicc->button_->visible = 1;
-	};
-
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_window_invisible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		uicc->window_->visible = 0;
-	};
-
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> set_window_visible = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		uicc->window_->visible = 1;
-	};
+	
 
 
 	auto bottom_side_state_menu_c = UserInputUtils::create_window_raw(nullptr, 0, resolution.h - MAIN_GAME_STATE_MENU_HEIGHT, MAIN_GAME_STATE_MENU_WIDTH, MAIN_GAME_STATE_MENU_HEIGHT, UILayer::MID);
 	
 	int button_column = 0;
-	auto pause_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Pause", 0, button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
-	auto unpause_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Resume", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
-	pause_button_c->button_->visible = false;
-	unpause_button_c->button_->visible = true;
+	
 
-	auto backward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Backward", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto backward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "<<< Backward", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto stop_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Rest", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
-	auto forward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Forward", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto forward_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Forward >>>", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	
 	auto settlement_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Settlement", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto ruins_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Ruins", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto inv_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Inventory", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto status_button_c = UserInputUtils::create_button(bottom_side_state_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Status", 0, button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	
-
-	std::function<void()> set_pause_visible = std::bind(set_button_visible, pause_button_c);
-	std::function<void()> set_unpause_visible = std::bind(set_button_visible, unpause_button_c);
-
-	std::function<void()> set_pause_invisible = std::bind(set_button_invisible, pause_button_c);
-	std::function<void()> set_unpause_invisible = std::bind(set_button_invisible, unpause_button_c);
-
-	std::function<void()> pause_function = std::bind(set_property, SXNGN::PAUSE, 1.0);
-	std::function<void()> unpause_function = std::bind(set_property, SXNGN::PAUSE, 0.0);
-
-	Event_Component pause_game_event;
-	pause_game_event.e.func_event.callbacks.push_back(pause_function);
-	pause_game_event.e.func_event.callbacks.push_back(set_pause_invisible);
-	pause_game_event.e.func_event.callbacks.push_back(set_unpause_visible);
-	pause_game_event.e.func_event.callbacks.push_back(update_pace);
-
-	Event_Component unpause_game_event;
-	unpause_game_event.e.func_event.callbacks.push_back(unpause_function);
-	unpause_game_event.e.func_event.callbacks.push_back(set_pause_visible); 
-	unpause_game_event.e.func_event.callbacks.push_back(set_unpause_invisible);
-	unpause_game_event.e.func_event.callbacks.push_back(update_pace);
-
-	Event_Component update_pace_event;
-	update_pace_event.e.func_event.callbacks.push_back(update_pace);
-
-	
-
-
-	
-	
-
 	std::function<void()> stop_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 0.0);
 	std::function<void()> forward_function = std::bind(set_property, SXNGN::OVERWORLD_GO, 1.0);
 	std::function<void()> reverse_function = std::bind(set_property, SXNGN::OVERWORLD_GO, -1.0);
 
 	
-	bottom_side_state_menu_c->child_components_.push_back(pause_button_c);
-	bottom_side_state_menu_c->child_components_.push_back(unpause_button_c);
+	
 
 	stop_button_c->callback_functions_.push_back(stop_function);
 	stop_button_c->callback_functions_.push_back(update_pace);
@@ -623,54 +621,21 @@ int init_menus()
 	bottom_side_state_menu_c->child_components_.push_back(inv_button_c);
 	bottom_side_state_menu_c->child_components_.push_back(status_button_c);
 
-	disable_on_pause_buttons.push_back(stop_button_c);
-	disable_on_pause_buttons.push_back(forward_button_c);
-	disable_on_pause_buttons.push_back(backward_button_c);
+	//disable_on_pause_buttons.push_back(stop_button_c);
+	//disable_on_pause_buttons.push_back(forward_button_c);
+	//disable_on_pause_buttons.push_back(backward_button_c);
+	
+	
+
+
+	player_move_buttons.push_back(stop_button_c);
+	player_move_buttons.push_back(forward_button_c);
+	player_move_buttons.push_back(backward_button_c);
 
 	
 	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, bottom_side_state_menu_c);
 	
-
-
-		
-	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
-	set_pace_medium();
-
-	std::function<void()> disable_ui = [disable_on_pause_buttons, coordinator]()
-	{
-		for(auto button : disable_on_pause_buttons)
-		{
-			button->button_->enabled = false;
-		}
-	};
-
-	std::function<void()> enable_ui = [disable_on_pause_buttons, coordinator]()
-	{
-		for(auto button : disable_on_pause_buttons)
-		{
-			button->button_->enabled = true;
-		}
-	};
-
-	Event_Component disable_ui_event;
-	disable_ui_event.e.func_event.callbacks.push_back(disable_ui);
-
-	Event_Component enable_ui_event;
-	enable_ui_event.e.func_event.callbacks.push_back(enable_ui);
-
-	gCoordinator.setEvent(SXNGN::ENABLE_UI, enable_ui_event);
-	gCoordinator.setEvent(SXNGN::DISABLE_UI, disable_ui_event);
-
-	gCoordinator.setEvent(SXNGN::UPDATE_PACE, update_pace_event);
-	gCoordinator.setEvent(SXNGN::PAUSE, pause_game_event);
-	gCoordinator.setEvent(SXNGN::UNPAUSE, unpause_game_event);
-
-	pause_button_c->callback_functions_.push_back(ECS_Utils::pause_game);
-	pause_button_c->callback_functions_.push_back(ECS_Utils::disable_ui);
-
-	unpause_button_c->callback_functions_.push_back(ECS_Utils::unpause_game);
-	unpause_button_c->callback_functions_.push_back(ECS_Utils::enable_ui);
-	ECS_Utils::unpause_game();
+	
 	
 	//************************* Right Side Status Menus
 
@@ -773,13 +738,11 @@ int init_menus()
 	std::function<void()> enable_scavenge = std::bind(&Coordinator::setSetting, &gCoordinator, SXNGN::SCAVENGE, 1.0);
 	std::function<void()> disable_scavenge = std::bind(&Coordinator::setSetting, &gCoordinator, SXNGN::SCAVENGE, 0.0);
 
-	scavenge_button_c->callback_functions_.push_back(set_scavenge_invisible);
-	scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_visible);
-	scavenge_button_c->callback_functions_.push_back(enable_scavenge);
+	std::function<void()> set_stop_scavenge_enable = std::bind(set_button_enable, stop_scavenge_button_c, true);
+	std::function<void()> set_stop_scavenge_disable = std::bind(set_button_enable, stop_scavenge_button_c, false);
 
-	stop_scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_invisible);
-	stop_scavenge_button_c->callback_functions_.push_back(set_scavenge_visible);
-	stop_scavenge_button_c->callback_functions_.push_back(disable_scavenge);
+	
+	
 
 	ruins_window_c->window_->visible = false;
 	ruins_window_c->name_ = "OVERWORLD_ruins";
@@ -838,7 +801,136 @@ int init_menus()
 
 	
 	
+	disable_on_player_pause_windows.push_back(bottom_side_state_menu_c);
+	disable_on_system_pause_windows.push_back(bottom_side_state_menu_c);
+	disable_on_system_pause_windows.push_back(overworld_top_menu_c);
+	disable_on_system_pause_windows.push_back(settlement_window_c); 
+	disable_on_system_pause_windows.push_back(status_window_c);
+	disable_on_system_pause_windows.push_back(ruins_window_c);
 
+	std::function<void()> set_pace_medium = std::bind(set_property, SXNGN::OVERWORLD_PACE_M_S, 1.25);
+	set_pace_medium();
+
+	std::function<void()> disable_ui_player_pause = [disable_on_player_pause_buttons, disable_on_player_pause_windows, coordinator]()
+	{
+		for (auto button : disable_on_player_pause_buttons)
+		{
+			button->button_->enabled = false;
+		}
+		for (auto window : disable_on_player_pause_windows)
+		{
+			window->window_->visible = false;
+		}
+	};
+
+	std::function<void()> enable_ui_player_pause = [disable_on_player_pause_buttons, disable_on_player_pause_windows, coordinator]()
+	{
+		for (auto button : disable_on_player_pause_buttons)
+		{
+			button->button_->enabled = true;
+		}
+		for (auto window : disable_on_player_pause_windows)
+		{
+			window->window_->visible = true;
+		}
+	};
+
+	std::function<void(bool can_move)> set_player_can_move = [player_move_buttons, coordinator](bool can_move)
+	{
+		for (auto button : player_move_buttons)
+		{
+			button->button_->enabled = can_move;
+		}
+	};
+
+	std::function<void(bool enabled)> set_enable_ui_system_pause = [disable_on_system_pause_windows, coordinator](bool enabled)
+	{
+		for (auto window : disable_on_system_pause_windows)
+		{
+			window->window_->visible = enabled;
+		}
+	};
+
+	//Player presses pause button
+	Event_Component player_pause_game_event;
+	player_pause_game_event.e.common.type = EventType::FUNCTION;
+	player_pause_game_event.e.func_event.callbacks.push_back(pause_game_engine_function);
+	player_pause_game_event.e.func_event.callbacks.push_back(set_pause_invisible);
+	player_pause_game_event.e.func_event.callbacks.push_back(set_unpause_visible);
+
+	Event_Component player_unpause_game_event;
+	player_unpause_game_event.e.common.type = EventType::FUNCTION;
+	player_unpause_game_event.e.func_event.callbacks.push_back(unpause_game_engine_function);
+	player_unpause_game_event.e.func_event.callbacks.push_back(set_pause_visible);
+	player_unpause_game_event.e.func_event.callbacks.push_back(set_unpause_invisible);
+
+	Event_Component player_disable_ui_event;
+	player_disable_ui_event.e.common.type = EventType::FUNCTION;
+	player_disable_ui_event.e.func_event.callbacks.push_back(disable_ui_player_pause);
+
+	Event_Component player_enable_ui_event;
+	player_enable_ui_event.e.common.type = EventType::FUNCTION;
+	player_enable_ui_event.e.func_event.callbacks.push_back(enable_ui_player_pause);
+
+	//Game engine pauses game, does not allow player to resume
+	Event_Component system_pause_game_event;
+	system_pause_game_event.e.common.type = EventType::FUNCTION;
+	system_pause_game_event.e.func_event.callbacks.push_back(pause_game_engine_function);
+	system_pause_game_event.e.func_event.callbacks.push_back(std::bind(set_enable_ui_system_pause, false));
+
+	Event_Component system_unpause_game_event;
+	system_unpause_game_event.e.common.type = EventType::FUNCTION;
+	system_unpause_game_event.e.func_event.callbacks.push_back(unpause_game_engine_function);
+	system_unpause_game_event.e.func_event.callbacks.push_back(std::bind(set_enable_ui_system_pause, true));
+
+	
+	//sets pace to 0
+	Event_Component stop_player_movement;
+	stop_player_movement.e.common.type = EventType::FUNCTION;
+	stop_player_movement.e.func_event.callbacks.push_back(stop_function);
+
+	//disables movement buttons
+	Event_Component disable_player_movement;
+	disable_player_movement.e.common.type = EventType::FUNCTION;
+	disable_player_movement.e.func_event.callbacks.push_back(std::bind(set_player_can_move, false));
+
+	//enables movement buttons
+	Event_Component enable_player_movement;
+	enable_player_movement.e.common.type = EventType::FUNCTION;
+	enable_player_movement.e.func_event.callbacks.push_back(std::bind(set_player_can_move, true));
+
+	gCoordinator.setEvent(SXNGN::ENABLE_UI_PLAYER_PAUSE, player_enable_ui_event);
+	gCoordinator.setEvent(SXNGN::DISABLE_UI_PLAYER_PAUSE, player_disable_ui_event);
+
+	gCoordinator.setEvent(SXNGN::DISABLE_UI_SYSTEM_PAUSE, system_pause_game_event);
+	gCoordinator.setEvent(SXNGN::ENABLE_UI_SYSTEM_UNPAUSE, system_unpause_game_event);
+
+	gCoordinator.setEvent(SXNGN::UPDATE_PACE, update_pace_event);
+	gCoordinator.setEvent(SXNGN::PAUSE, player_pause_game_event);
+	gCoordinator.setEvent(SXNGN::UNPAUSE, player_unpause_game_event);
+
+	gCoordinator.setEvent(SXNGN::DISABLE_PLAYER_MOVE, disable_player_movement);
+	gCoordinator.setEvent(SXNGN::ENABLE_PLAYER_MOVE, enable_player_movement);
+	gCoordinator.setEvent(SXNGN::STOP_PLAYER_MOVE, stop_player_movement);
+
+	pause_button_c->triggered_events.push_back(player_pause_game_event);
+	unpause_button_c->triggered_events.push_back(player_unpause_game_event);
+	
+
+	scavenge_button_c->callback_functions_.push_back(set_scavenge_invisible);
+	scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_visible);
+	scavenge_button_c->callback_functions_.push_back(enable_scavenge);
+	scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_enable);
+	scavenge_button_c->triggered_events.push_back(stop_player_movement);
+	scavenge_button_c->triggered_events.push_back(disable_player_movement);
+
+
+	stop_scavenge_button_c->callback_functions_.push_back(set_stop_scavenge_invisible);
+	stop_scavenge_button_c->callback_functions_.push_back(set_scavenge_visible);
+	stop_scavenge_button_c->callback_functions_.push_back(disable_scavenge);
+	stop_scavenge_button_c->triggered_events.push_back(enable_player_movement);
+
+	//ECS_Utils::unpause_game();
 
 
 

@@ -58,9 +58,14 @@ namespace SXNGN {
 	const std::string PAUSE = "PAUSE";
 	const std::string UNPAUSE = "UNPAUSE";
 	const std::string UPDATE_PACE = "UPDATE_PACE";
-	const std::string ENABLE_UI = "ENABLE_UI";
-	const std::string DISABLE_UI = "DISABLE_UI";
+	const std::string ENABLE_UI_PLAYER_PAUSE = "ENABLE_UI_PLAYER_PAUSE";
+	const std::string DISABLE_UI_PLAYER_PAUSE = "DISABLE_UI_PLAYER_PAUSE";
+	const std::string DISABLE_UI_SYSTEM_PAUSE = "DISABLE_UI_SYSTEM_PAUSE";
+	const std::string ENABLE_UI_SYSTEM_UNPAUSE = "ENABLE_UI_SYSTEM_UNPAUSE";
 	const std::string CACHE = "_CACHE";
+	const std::string DISABLE_PLAYER_MOVE = "DISABLE_PLAYER_MOVE";
+	const std::string ENABLE_PLAYER_MOVE = "ENABLE_PLAYER_MOVE";
+	const std::string STOP_PLAYER_MOVE = "STOP_PLAYER_MOVE";
 
 	const std::string SCAVENGE = "SCAVENGE";
 

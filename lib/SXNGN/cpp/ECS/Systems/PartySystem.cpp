@@ -102,13 +102,8 @@ namespace SXNGN::ECS
 					bool max_stamina = party_ptr->stamina_ >= party_ptr->stamina_max_;
 					bool sandstorm = party_ptr->weather_counter_s_ > 0.0;
 
-					auto scavenge_pair = gCoordinator.getSetting(SXNGN::SCAVENGE);
-					bool scavenging = scavenge_pair.second && scavenge_pair.first;
 					
-					if(scavenging)
-					{
-						std::cout << "Scavenging" << std::endl;
-					}
+					
 					if (sick)
 					{
 						double sick_time_recovered_s = game_seconds_passed;

@@ -63,6 +63,9 @@ namespace SXNGN::ECS
 				auto overworld_player_uuid = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
 				bool at_settlement = false;
 				bool at_ruins = false;
+				auto scavenge_pair = gCoordinator.getSetting(SXNGN::SCAVENGE);
+				bool scavenging = scavenge_pair.second && scavenge_pair.first;
+
 				double traversal_cost_penalty_m_s_ = 0.0;
 				auto ui = UICollectionSingleton::get_instance();
 				Entity settlement_entity = -1;
@@ -99,15 +102,30 @@ namespace SXNGN::ECS
 				}
 				if (at_ruins)
 				{
+					//Enable the button for scavenging
 					auto scavenge_button = ui->string_to_ui_map_["OVERWORLD_scavenge_button"];
 					scavenge_button->button_->enabled = true;
 				}
 				else
 				{
+					//Disable the button for scavenging
 					auto ruins_name_label = ui->string_to_ui_map_["OVERWORLD_ruins_name"];
 					snprintf(ruins_name_label->label_->text, KISS_MAX_LABEL, "None");
 					auto scavenge_button = ui->string_to_ui_map_["OVERWORLD_scavenge_button"];
 					scavenge_button->button_->enabled = false;
+					//If currently scavenging, simulate a press of the stop scavenging button.
+					auto scavenge_pair = gCoordinator.getSetting(SXNGN::SCAVENGE);
+					if (scavenge_pair.second == 1.0 && scavenge_pair.first == true)
+					{
+						auto stop_scavenge_button = ui->string_to_ui_map_["OVERWORLD_stop_scavenge_button"];
+						for (auto func : stop_scavenge_button->callback_functions_)
+						{
+							func();
+						}
+					}
+					scavenging = false;
+					
+
 				}
 
 				if (at_settlement)
@@ -129,11 +147,11 @@ namespace SXNGN::ECS
 					trade_button->button_->enabled = true;
 					trade_button->callback_functions_.clear();
 					trade_button->callback_functions_.push_back(trade_with_inv);
-
-
-
+					trade_button->triggered_events.clear();
+					trade_button->triggered_events.push_back(gCoordinator.getEvent(SXNGN::DISABLE_UI_SYSTEM_PAUSE).first);
 					
-					
+
+	
 				}
 				else
 				{
@@ -148,7 +166,6 @@ namespace SXNGN::ECS
 
 				auto pace_go = gCoordinator.getSetting(SXNGN::OVERWORLD_PACE_TOTAL_M_S);
 				bool moving = abs(pace_go.first) > 0.0;
-				bool scavenging = false;
 				bool towning = false;
 				if (moving || scavenging || towning)
 				{
@@ -166,7 +183,7 @@ namespace SXNGN::ECS
 						auto overworld_player_entity = gCoordinator.GetEntityFromUUID(overworld_player_uuid);
 						auto party_component = gCoordinator.CheckOutComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 						auto party_ptr = static_cast<Party*>(party_component);
-						PruneEvents(director_ptr, party_ptr, at_settlement, at_ruins, moving);
+						PruneEvents(director_ptr, party_ptr, at_settlement, scavenging, moving);
 
 
 						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
@@ -241,6 +258,7 @@ namespace SXNGN::ECS
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ANY_BAD_WEATHER);
 			event_ptr->weight = 0;
 		}
+
 		if (at_settlement)
 		{
 			DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::SETTLEMENT);
@@ -462,6 +480,7 @@ namespace SXNGN::ECS
 					DropEntry<PartyEventType> pe;
 					pe.value = event_type;
 					pe.weight = 0;
+					pe.max_weight = 10;
 					pe.accumulation = 10;
 					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_BAD);
 					et->children.push_back(pe);
@@ -471,6 +490,7 @@ namespace SXNGN::ECS
 					DropEntry<PartyEventType> pe;
 					pe.value = event_type;
 					pe.weight = 0;
+					pe.max_weight = 10;
 					pe.accumulation = 10;
 					DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_GOOD);
 					et->children.push_back(pe);
