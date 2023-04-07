@@ -307,12 +307,6 @@ namespace SXNGN::ECS
 		none_event.accumulation = 50;
 		none_event.value = PartyEventType::NONE;
 
-
-
-		
-
-		
-
 		for (int i = PartyEventType::NONE + 1; i != PartyEventType::ANY_END; i++)
 		{
 			PartyEventType event_type = static_cast<PartyEventType>(i);

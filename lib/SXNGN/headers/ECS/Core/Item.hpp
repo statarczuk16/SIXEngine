@@ -24,6 +24,8 @@ namespace SXNGN::ECS {
 		END
     };
 
+
+
 	//convert enum to string for json purposes
 	inline std::unordered_map<ItemType, std::string>& item_type_to_string() {
 		static std::unordered_map<ItemType, std::string> item_type_to_string =
@@ -78,6 +80,42 @@ namespace SXNGN::ECS {
 		return item_type_to_weight_kg;
 	}
 
+	//base rarity of items
+	inline std::unordered_map<ItemType, int>& item_type_to_table_weight() {
+		static std::unordered_map<ItemType, int> item_type_to_table_weight =
+		{
+			{ItemType::UNKNOWN, 0.0},
+			{ItemType::FOOD, 100}, //1 unit = 10 calories, so like half a quarter of a granola bar
+			{ItemType::KALNOTE, 15}, //1 unit = 10 calories, so like half a quarter of a granola bar
+			{ItemType::FOOTWEAR, 15},
+			{ItemType::WATER, 0}, //0.5 liter = 0.5 kg
+			{ItemType::MEDKIT, 10},
+			{ItemType::GUN, 5},
+			{ItemType::AMMO, 30},
+			{ItemType::BATTERY, 12},
+			{ItemType::GPS, 5}
+		};
+		return item_type_to_table_weight;
+	}
+
+	//base accumulation of items
+	inline std::unordered_map<ItemType, double>& item_type_to_table_acc() {
+		static std::unordered_map<ItemType, double> item_type_to_table_acc =
+		{
+			{ItemType::UNKNOWN, 0.0},
+			{ItemType::FOOD, 100}, //1 unit = 10 calories, so like half a quarter of a granola bar
+			{ItemType::KALNOTE, 15}, //1 unit = 10 calories, so like half a quarter of a granola bar
+			{ItemType::FOOTWEAR, 15},
+			{ItemType::WATER, 0}, //0.5 liter = 0.5 kg
+			{ItemType::MEDKIT, 10},
+			{ItemType::GUN, 5},
+			{ItemType::AMMO, 30},
+			{ItemType::BATTERY, 12},
+			{ItemType::GPS, 5}
+		};
+		return item_type_to_table_acc;
+	}
+
 	//convert enum to string for json purposes
 	inline std::unordered_map<ItemType, double>& item_type_to_base_value_kl() {
 		static std::unordered_map<ItemType, double> item_type_to_base_value_kl =
@@ -95,20 +133,44 @@ namespace SXNGN::ECS {
 		};
 		return item_type_to_base_value_kl;
 	}
-    
+
 	class Item
 	{
-		Item();
 
 	public:
+		Item(ItemType type = ItemType::UNKNOWN,
+			int rarity = 10,
+			int acc = 1,
+			int dec = 5,
+			int max_rarity = 100,
+			int min_rarity = 0,
+			double base_value_kn = 1,
+			double weight_kg = 1) :
+			type_(type),
+			name_(item_type_to_string()[type]),
+			rarity_(rarity),
+			acc_(acc),
+			dec_(dec),
+			max_rarity_(max_rarity),
+			min_rarity_(min_rarity),
+			base_value_kn_(base_value_kn),
+			weight_kg_(weight_kg)
+		{
+
+		}
 
 		ItemType get_type();
 		ItemType type_;
-
-	private:
-
-		double weight_;
-		
+		std::string name_;
+		//loot table stuff
+		int rarity_; //base weight in loot tables (higher is less rare)
+		int acc_; //base accumulation loot tables (weight increases this much if NOT chosen for drop)
+		int dec_; //base penalty in loot tables (weight decreases this much if chosen for drop)
+		int max_rarity_; //max weight for loot drop
+		int min_rarity_; //minimum weight for loot drop
+		//gameplay stuff
+		double base_value_kn_; //base value in kalnotes (kn) 
+		double weight_kg_;
 	};
 
 	inline void to_json(json& j, const Item& p) {
@@ -122,6 +184,24 @@ namespace SXNGN::ECS {
 	inline void from_json(const json& j, Item& p) {
 		auto item_type = string_to_item_type().at(j.at("type_"));
 		p.type_ = item_type;
+	}
+
+	//convert enum to string for json purposes
+	inline std::unordered_map<ItemType, Item>& item_type_to_item() {
+		static std::unordered_map<ItemType, Item> item_type_to_item =
+		{
+			{ItemType::UNKNOWN, Item()},
+			{ItemType::FOOD, Item()},
+			{ItemType::KALNOTE, Item()}, 
+			{ItemType::FOOTWEAR, Item()},
+			{ItemType::WATER, Item()},
+			{ItemType::MEDKIT, Item()},
+			{ItemType::GUN, Item()},
+			{ItemType::AMMO, Item()},
+			{ItemType::BATTERY, Item()},
+			{ItemType::GPS, Item()}
+		};
+		return item_type_to_item;
 	}
 
 	class TradeHelper
