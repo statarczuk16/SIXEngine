@@ -168,6 +168,142 @@ bool init()
 	return success;
 }
 
+int init_loot_tables()
+{
+
+	for (int i = ItemType::UNKNOWN; i < ItemType::END; i++)
+	{
+		
+		switch (static_cast<ItemType>(i))
+		{
+		case ItemType::AMMO:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 0.05;
+			item.dec_ = 0;
+			item.max_find_weight_ = 10;
+			item.min_find_weight_ = 10;
+			item.rarity_ = 10;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "AMMO";
+			item.weight_kg_ = 0.01;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::BATTERY:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 2;
+			item.dec_ = 0;
+			item.max_find_weight_ = 8;
+			item.min_find_weight_ = 8;
+			item.rarity_ = 8;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "BATTERY";
+			item.weight_kg_ = 0.15;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::FOOD:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 0.015;
+			item.dec_ = 0;
+			item.max_find_weight_ = 20;
+			item.min_find_weight_ = 20;
+			item.rarity_ = 20;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "FOOD";
+			item.weight_kg_ = 0.001;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::FOOTWEAR:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 10.0;
+			item.dec_ = 0;
+			item.max_find_weight_ = 10;
+			item.min_find_weight_ = 10;
+			item.rarity_ = 10;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "FOOTWEAR";
+			item.weight_kg_ = 2.0;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::GPS:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 100;
+			item.dec_ = 0;
+			item.max_find_weight_ = 5;
+			item.min_find_weight_ = 5;
+			item.rarity_ = 5;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "GPS";
+			item.weight_kg_ = 1;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::GUN:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 25;
+			item.dec_ = 0;
+			item.max_find_weight_ = 3;
+			item.min_find_weight_ = 3;
+			item.rarity_ = 3;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "GUN";
+			item.weight_kg_ = 1;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::KALNOTE:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 1;
+			item.dec_ = 0;
+			item.max_find_weight_ = 7;
+			item.min_find_weight_ = 7;
+			item.rarity_ = 7;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "KALNOTE";
+			item.weight_kg_ = 0.001;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::MEDKIT:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 15.0;
+			item.dec_ = 0;
+			item.max_find_weight_ = 5;
+			item.min_find_weight_ = 5;
+			item.rarity_ = 5;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "MEDKIT";
+			item.weight_kg_ = 1;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		default:
+		{
+			SDL_Log("init_loot_tables: Bad ItemType");
+		}
+		}
+	}
+	return 0;
+}
 
 int init_menus()
 {
@@ -1196,6 +1332,8 @@ int main(int argc, char* args[])
 	active_game_states.insert(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 	init_menus();
+	init_loot_tables();
+	auto table = item_type_to_item();
 	std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 	auto settings = gCoordinator.get_state_manager()->getGameSettings();
 	// SEE OVERWORLD_STATE_HEIGHT

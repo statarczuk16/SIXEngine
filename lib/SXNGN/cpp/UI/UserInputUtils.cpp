@@ -153,7 +153,7 @@ namespace SXNGN::ECS {
 			double modified_running_total = 0.0;
 			for (auto item_amount_pair : modified_sell_list)
 			{
-				modified_running_total += item_type_to_base_value_kl()[item_amount_pair.first] * item_amount_pair.second;
+				modified_running_total += item_type_to_item()[item_amount_pair.first].dec_ * item_amount_pair.second;
 			}
 			if (left_1_right_0)
 			{
@@ -347,7 +347,7 @@ namespace SXNGN::ECS {
 				continue;
 			}
 			std::string item_name = item_type_to_string()[item.first];
-			double base_cost = item_type_to_base_value_kl()[item.first];
+			double base_cost = item_type_to_item()[item.first].base_value_kn_;
 			std::shared_ptr<UIContainerComponent> left_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, item_label_w, item_label_h);
 			left_title_label_c->label_->rect.x = player_item_label_x;
 			
@@ -398,7 +398,7 @@ namespace SXNGN::ECS {
 			{
 				continue;
 			}
-			double base_cost = item_type_to_base_value_kl()[item.first];
+			double base_cost = item_type_to_item()[item.first].base_value_kn_;
 			std::string item_name = item_type_to_string()[item.first];
 			std::shared_ptr<UIContainerComponent> right_title_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, item_name.data(), row, -1, item_label_w, item_label_h);
 			right_title_label_c->label_->rect.x = shop_item_label_x;

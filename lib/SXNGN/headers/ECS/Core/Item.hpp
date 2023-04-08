@@ -62,77 +62,8 @@ namespace SXNGN::ECS {
 		return string_to_item_type;
 	}
 
-	//convert enum to string for json purposes
-	inline std::unordered_map<ItemType, double>& item_type_to_weight_kg() {
-		static std::unordered_map<ItemType, double> item_type_to_weight_kg =
-		{
-			{ItemType::UNKNOWN, 0.0},
-			{ItemType::FOOD, 0.01}, //1 unit = 10 calories, so like half a quarter of a granola bar
-			{ItemType::KALNOTE, 0.001}, //1 unit = 10 calories, so like half a quarter of a granola bar
-			{ItemType::FOOTWEAR,2.0},
-			{ItemType::WATER,1}, //0.5 liter = 0.5 kg
-			{ItemType::MEDKIT,10},
-			{ItemType::GUN,1},
-			{ItemType::AMMO,0.01},
-			{ItemType::BATTERY,0.15},
-			{ItemType::GPS,1}
-		};
-		return item_type_to_weight_kg;
-	}
-
-	//base rarity of items
-	inline std::unordered_map<ItemType, int>& item_type_to_table_weight() {
-		static std::unordered_map<ItemType, int> item_type_to_table_weight =
-		{
-			{ItemType::UNKNOWN, 0.0},
-			{ItemType::FOOD, 100}, //1 unit = 10 calories, so like half a quarter of a granola bar
-			{ItemType::KALNOTE, 15}, //1 unit = 10 calories, so like half a quarter of a granola bar
-			{ItemType::FOOTWEAR, 15},
-			{ItemType::WATER, 0}, //0.5 liter = 0.5 kg
-			{ItemType::MEDKIT, 10},
-			{ItemType::GUN, 5},
-			{ItemType::AMMO, 30},
-			{ItemType::BATTERY, 12},
-			{ItemType::GPS, 5}
-		};
-		return item_type_to_table_weight;
-	}
-
-	//base accumulation of items
-	inline std::unordered_map<ItemType, double>& item_type_to_table_acc() {
-		static std::unordered_map<ItemType, double> item_type_to_table_acc =
-		{
-			{ItemType::UNKNOWN, 0.0},
-			{ItemType::FOOD, 100}, //1 unit = 10 calories, so like half a quarter of a granola bar
-			{ItemType::KALNOTE, 15}, //1 unit = 10 calories, so like half a quarter of a granola bar
-			{ItemType::FOOTWEAR, 15},
-			{ItemType::WATER, 0}, //0.5 liter = 0.5 kg
-			{ItemType::MEDKIT, 10},
-			{ItemType::GUN, 5},
-			{ItemType::AMMO, 30},
-			{ItemType::BATTERY, 12},
-			{ItemType::GPS, 5}
-		};
-		return item_type_to_table_acc;
-	}
-
-	//convert enum to string for json purposes
-	inline std::unordered_map<ItemType, double>& item_type_to_base_value_kl() {
-		static std::unordered_map<ItemType, double> item_type_to_base_value_kl =
-		{
-			{ItemType::UNKNOWN, 0.0},
-			{ItemType::FOOD, 0.015}, //1 unit = 10 calories, 1 kalnote buys 700 calories
-			{ItemType::KALNOTE, 1}, //this is the currency
-			{ItemType::FOOTWEAR, 10.0},
-			{ItemType::WATER,1}, //0.5 liter = 0.5 kg
-			{ItemType::MEDKIT,15.0},
-			{ItemType::GUN,25.0},
-			{ItemType::AMMO,0.05},
-			{ItemType::BATTERY,2},
-			{ItemType::GPS,100}
-		};
-		return item_type_to_base_value_kl;
-	}
+	
+	
 
 	class Item
 	{
@@ -151,8 +82,8 @@ namespace SXNGN::ECS {
 			rarity_(rarity),
 			acc_(acc),
 			dec_(dec),
-			max_rarity_(max_rarity),
-			min_rarity_(min_rarity),
+			max_find_weight_(max_rarity),
+			min_find_weight_(min_rarity),
 			base_value_kn_(base_value_kn),
 			weight_kg_(weight_kg)
 		{
@@ -166,8 +97,8 @@ namespace SXNGN::ECS {
 		int rarity_; //base weight in loot tables (higher is less rare)
 		int acc_; //base accumulation loot tables (weight increases this much if NOT chosen for drop)
 		int dec_; //base penalty in loot tables (weight decreases this much if chosen for drop)
-		int max_rarity_; //max weight for loot drop
-		int min_rarity_; //minimum weight for loot drop
+		int max_find_weight_; //max weight for loot drop
+		int min_find_weight_; //minimum weight for loot drop
 		//gameplay stuff
 		double base_value_kn_; //base value in kalnotes (kn) 
 		double weight_kg_;
@@ -188,19 +119,7 @@ namespace SXNGN::ECS {
 
 	//convert enum to string for json purposes
 	inline std::unordered_map<ItemType, Item>& item_type_to_item() {
-		static std::unordered_map<ItemType, Item> item_type_to_item =
-		{
-			{ItemType::UNKNOWN, Item()},
-			{ItemType::FOOD, Item()},
-			{ItemType::KALNOTE, Item()}, 
-			{ItemType::FOOTWEAR, Item()},
-			{ItemType::WATER, Item()},
-			{ItemType::MEDKIT, Item()},
-			{ItemType::GUN, Item()},
-			{ItemType::AMMO, Item()},
-			{ItemType::BATTERY, Item()},
-			{ItemType::GPS, Item()}
-		};
+		static std::unordered_map<ItemType, Item> item_type_to_item;
 		return item_type_to_item;
 	}
 

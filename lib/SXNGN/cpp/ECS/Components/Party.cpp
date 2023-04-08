@@ -45,7 +45,7 @@ namespace SXNGN::ECS {
 		weight_capacity_kg_ = hands_ * PARTY_WEIGHT_CAPACITY_PER_HAND_KG;
 		for (auto item_i : inventory_)
 		{
-			double item_weight = item_type_to_weight_kg()[item_i.first];
+			double item_weight = item_type_to_item()[item_i.first].weight_kg_;
 			encumbrance_kg_ += item_i.second * item_weight;
 		}
 		update_encumbrance_threshs();
@@ -112,7 +112,7 @@ namespace SXNGN::ECS {
 		{
 			inventory_[item] = amount;
 		}
-		encumbrance_kg_ += amount * item_type_to_weight_kg()[item];
+		encumbrance_kg_ += amount * item_type_to_item()[item].weight_kg_;
 		update_encumbrance_threshs();
 	}
 
@@ -125,7 +125,7 @@ namespace SXNGN::ECS {
 			{
 				inventory_.erase(item);
 			}
-			encumbrance_kg_ -= amount * item_type_to_weight_kg()[item];
+			encumbrance_kg_ -= amount * item_type_to_item()[item].weight_kg_;
 			update_encumbrance_threshs();
 		}
 
