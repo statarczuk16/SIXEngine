@@ -23,6 +23,8 @@ namespace SXNGN::ECS {
 
 		DropEntry<PartyEventType> GenerateEventTable();
 
+		DropEntry<ItemType> GenerateLootTable();
+
 
 	private:
 		

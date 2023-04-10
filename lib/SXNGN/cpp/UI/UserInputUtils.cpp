@@ -6,6 +6,32 @@
 namespace SXNGN::ECS {
 
 
+	std::string  UserInputUtils::inventory_to_text(std::unordered_map<ItemType, double> items)
+	{
+		std::ostringstream oss;
+		int maxAmountWidth = 0;
+		for (auto item_pair : items) {
+			std::string amountStr = std::to_string(item_pair.second);
+			int amountWidth = amountStr.length();
+			if (amountWidth > maxAmountWidth) {
+				maxAmountWidth = amountWidth;
+			}
+		}
+
+		for (auto item_pair : items) {
+			std::string item_name = item_type_to_string()[item_pair.first];
+			oss << item_name;
+			std::string dots(item_name.length(), '.');
+			oss << dots;
+			std::string amountStr = std::to_string(item_pair.second);
+			int numSpaces = maxAmountWidth - amountStr.length();
+			oss << std::string(numSpaces, ' ');
+			oss << item_pair.second << "\n";
+		}
+
+		return oss.str();
+	}
+
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_button(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_button* new_kiss_button = new kiss_button();
@@ -37,6 +63,7 @@ namespace SXNGN::ECS {
 		//Event_Component back_state_event_ng;
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
+
 
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, TradeHelper* trade_helper)
 	{
@@ -444,12 +471,6 @@ namespace SXNGN::ECS {
 		quit_button_c->button_->row = row + 1;
 		right_total_label_c->label_->row = row;
 	
-		
-
-		
-
-		
-
 		return trade_window_c;
 	}
 		
@@ -469,7 +490,7 @@ namespace SXNGN::ECS {
 		char* title_str = title.data();
 		std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, title_str, row++, -1, 50, 50);
 		char* detail_str = detail.data();
-		std::shared_ptr<UIContainerComponent> detail_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, detail_str, row++, -1, 50, 50);
+		std::shared_ptr<UIContainerComponent> detail_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, detail_str, row++, -1, 50, 100);
 		message_window_c->child_components_.push_back(title_label_c);
 		message_window_c->child_components_.push_back(detail_label_c);
 

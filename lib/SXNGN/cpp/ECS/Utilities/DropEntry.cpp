@@ -1,4 +1,6 @@
 #include <ECS/Utilities/DropEntry.hpp>
+#include <ECS/Core/Item.hpp>
+#include <ECS/Components/EventComponent.hpp>
 #include <iostream>
 
 
@@ -92,7 +94,7 @@
 			return generate_event(&(node->children[chosen_event]));
 		}
 	}
-
+	
 	template<typename T>
 	void SXNGN::ECS::DropEntry<T>::print_event_table(const std::string& prefix, SXNGN::ECS::DropEntry<T> node, bool last_child)
 	{
@@ -100,7 +102,7 @@
 		{
 			std::cout << prefix;
 			std::cout << (last_child ? "L--" : "|--");
-			std::cout << "[" << party_event_type_enum_to_string()[node.value] << "]{" << node.weight  << "/" << node.max_weight << "+" << node.accumulation << "}" << std::endl;
+			std::cout << "[" << node.to_std_string() << "]{" << node.weight  << "/" << node.max_weight << "+" << node.accumulation << "}" << std::endl;
 
 			for (int i = 0; i < node.children.size(); i++)
 			{
@@ -125,10 +127,43 @@
 		std::cout << "Event Table End " << std::endl;
 	}
 
+	/**
 	template<typename T>
 	std::string SXNGN::ECS::DropEntry<T>::to_std_string()
+	{
+		if (std::is_same(T, PartyEventType)::value)
+		{
+			return party_event_type_enum_to_string()[value];
+		}
+		else if
+		{
+			return item_type_to_string()[value];
+		}
+		else
+		{
+			return "NO STR";
+		}
+		
+	}
+	**/
+	template<typename T>
+	std::string SXNGN::ECS::DropEntry<T>::to_std_string()
+	{
+		return "NO_STR";
+	}
+
+	template<>
+	std::string SXNGN::ECS::DropEntry<SXNGN::ECS::ItemType>::to_std_string()
+	{
+		return item_type_to_string()[value];
+	}
+
+	template<>
+	std::string SXNGN::ECS::DropEntry<SXNGN::ECS::PartyEventType>::to_std_string()
 	{
 		return party_event_type_enum_to_string()[value];
 	}
 
+
 	template class SXNGN::ECS::DropEntry<SXNGN::ECS::PartyEventType>;
+	template class SXNGN::ECS::DropEntry<SXNGN::ECS::ItemType>;

@@ -187,6 +187,8 @@ namespace SXNGN::ECS {
 		std::string event_name;
 		PartyEventType party_event_type;
 		EventSeverity severity;
+		std::unordered_map<ItemType, double> items_gained;
+		std::unordered_map<ItemType, double> items_lost;
 	};
 
 	struct SXNGN_SaveEvent

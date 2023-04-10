@@ -168,7 +168,7 @@ bool init()
 	return success;
 }
 
-int init_loot_tables()
+int init_items()
 {
 
 	for (int i = ItemType::UNKNOWN; i < ItemType::END; i++)
@@ -298,7 +298,7 @@ int init_loot_tables()
 		}
 		default:
 		{
-			SDL_Log("init_loot_tables: Bad ItemType");
+			SDL_Log("init_items: Bad ItemType");
 		}
 		}
 	}
@@ -1332,8 +1332,7 @@ int main(int argc, char* args[])
 	active_game_states.insert(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.GameStateChanged(active_game_states);
 	init_menus();
-	init_loot_tables();
-	auto table = item_type_to_item();
+	init_items();
 	std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
 	auto settings = gCoordinator.get_state_manager()->getGameSettings();
 	// SEE OVERWORLD_STATE_HEIGHT

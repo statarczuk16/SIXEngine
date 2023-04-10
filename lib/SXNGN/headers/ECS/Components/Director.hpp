@@ -21,8 +21,8 @@ namespace SXNGN::ECS {
 		std::time_t game_clock_;
 		double event_gauge_s_; //event generated when event_tick reaches this value
 		double event_tick_s_;
-		DropEntry<PartyEventType> event_table_;
-		bool has_event_table_;
+		DropEntry<PartyEventType> event_table_; 
+		
 		std::unordered_map<PartyEventType, DropEntry<PartyEventType>* > event_table_cache_;
 
 	};
@@ -33,8 +33,8 @@ namespace SXNGN::ECS {
 			{"event_gauge_s_", p.event_gauge_s_},
 			{"event_table_", p.event_table_},
 			{"event_tick_s_", p.event_tick_s_},
-			{"game_clock_", p.game_clock_},
-			{"has_event_table_", p.has_event_table_}
+			{"game_clock_", p.game_clock_}
+			
 		};
 	}
 
@@ -45,7 +45,7 @@ namespace SXNGN::ECS {
 		j.at("event_table_").get_to(p.event_table_);
 		j.at("event_tick_s_").get_to(p.event_tick_s_);
 		j.at("game_clock_").get_to(p.game_clock_);
-		j.at("has_event_table_").get_to(p.has_event_table_);
+		
 
 	}
 }

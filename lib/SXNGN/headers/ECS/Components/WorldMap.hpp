@@ -3,6 +3,8 @@
 #include <SDL.h>
 #include <ECS/Core/Component.hpp>
 #include <nlohmann/json.hpp>
+#include <ECS/Core/Item.hpp>
+#include <ECS/Utilities/DropEntry.hpp>
 using nlohmann::json;
 
 
@@ -30,6 +32,7 @@ namespace SXNGN::ECS {
 		RenderLayer map_layer_;
 		uint16_t map_grid_x_;
 		uint16_t map_grid_y_;
+		DropEntry<ItemType> loot_table_;
 		
 
 

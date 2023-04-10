@@ -15,6 +15,7 @@ namespace SXNGN::ECS {
 		int accumulation;//add to weight at event tick
 		std::vector<DropEntry> children;
 		T value;
+		bool init = false;
 		DropEntry();
 
 		DropEntry<T>* find_event_by_type(T search_value);
@@ -31,9 +32,7 @@ namespace SXNGN::ECS {
 		/// <returns></returns>
 		static DropEntry* generate_event(DropEntry* node);
 
-
 		static void print_event_table(const std::string& prefix, DropEntry node, bool last_child);
-
 
 		void print_event_table(DropEntry node);
 
@@ -49,9 +48,9 @@ namespace SXNGN::ECS {
 			{"reoccurance_penalty", p.reoccurance_penalty},
 			{"value", party_event_type_enum_to_string()[p.value]},
 			{"weight", p.weight},
-			{"children", p.children}
+			{"children", p.children},
+			{"init",p.init}
 		};
-
 	}
 
 	inline void from_json(const json& j, DropEntry<PartyEventType>& p) {
@@ -63,5 +62,6 @@ namespace SXNGN::ECS {
 		j.at("min_weight").get_to(p.min_weight);
 		j.at("reoccurance_penalty").get_to(p.reoccurance_penalty);
 		j.at("weight").get_to(p.weight);
+		j.at("init").get_to(p.init);
 	}
 }

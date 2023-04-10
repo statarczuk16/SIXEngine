@@ -21,7 +21,7 @@ namespace SXNGN::ECS {
 		game_clock_ = mktime(&t2);
 		event_gauge_s_ = 10.0;
 		event_tick_s_ = 0.0;
-		has_event_table_ = false;
+		
 	}
 
 

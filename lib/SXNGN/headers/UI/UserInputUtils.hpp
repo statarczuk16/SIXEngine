@@ -25,6 +25,8 @@ namespace SXNGN::ECS {
 
 	public:
 
+		static std::string inventory_to_text(std::unordered_map<ItemType, double> items);
+
 		static std::vector<std::vector<SDL_Event>> filter_sdl_events(std::vector<SDL_Event> events);
 
 		static std::pair<Sint32, Sint32> wasd_to_x_y(std::vector<SDL_Event> events);

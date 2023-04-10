@@ -38,11 +38,11 @@ namespace SXNGN::ECS
 			{
 				Director* director_ptr = static_cast<Director*>(director_data);
 
-				if (!director_ptr->has_event_table_)
+				if (!director_ptr->event_table_.init)
 				{
 					auto new_event_table = GenerateEventTable();
 					director_ptr->event_table_ = new_event_table;
-					director_ptr->has_event_table_ = true;
+					
 				}
 
 				//Update the date and time
@@ -68,6 +68,7 @@ namespace SXNGN::ECS
 
 				double traversal_cost_penalty_m_s_ = 0.0;
 				auto ui = UICollectionSingleton::get_instance();
+				sole::uuid ruins_id = SXNGN::BAD_UUID;
 				Entity settlement_entity = -1;
 				if (overworld_player_uuid != SXNGN::BAD_UUID)
 				{
@@ -78,13 +79,19 @@ namespace SXNGN::ECS
 						auto party_ptr = static_cast<Party*>(party_component);
 						for (auto id : party_ptr->world_location_ids_)
 						{
-							auto world_location_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(id), ComponentTypeEnum::WORLD_LOCATION);
-							const WorldLocation* ptr = static_cast<const WorldLocation*>(world_location_data);
+							auto world_location_data = gCoordinator.CheckOutComponent(gCoordinator.GetEntityFromUUID(id), ComponentTypeEnum::WORLD_LOCATION);
+							WorldLocation* ptr = static_cast< WorldLocation*>(world_location_data);
 							if (ptr->has_ruins_)
 							{
+								ruins_id = id;
 								at_ruins = true;
 								auto ruins_name_label = ui->string_to_ui_map_["OVERWORLD_ruins_name"];
 								snprintf(ruins_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
+								if (!ptr->loot_table_.init)
+								{
+									ptr->loot_table_ = GenerateLootTable();
+									
+								}
 
 							}
 							if (ptr->has_settlement_)
@@ -93,8 +100,10 @@ namespace SXNGN::ECS
 								at_settlement = true;
 								auto settlement_name_label = ui->string_to_ui_map_["OVERWORLD_settlement_name"];
 								snprintf(settlement_name_label->label_->text, KISS_MAX_LABEL, ptr->location_name_.data());
+
 							}
 							traversal_cost_penalty_m_s_ += ptr->traversal_cost_m_s_;
+							gCoordinator.CheckInComponent(gCoordinator.GetEntityFromUUID(id), ComponentTypeEnum::WORLD_LOCATION);
 						}
 
 						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
@@ -189,11 +198,50 @@ namespace SXNGN::ECS
 						gCoordinator.CheckInComponent(overworld_player_entity, ComponentTypeEnum::PARTY);
 					}
 					
-					auto generated_event = director_ptr->event_table_.generate_event(&director_ptr->event_table_);
-					std::cout << "Generated event " << generated_event->to_std_string() << std::endl;
 					director_ptr->event_table_.print_event_table(director_ptr->event_table_);
+					auto generated_event = director_ptr->event_table_.generate_event(&director_ptr->event_table_);
+					
+					std::unordered_map<ItemType, double> loot;
+					std::cout << "Generated event " << generated_event->to_std_string() << std::endl;
+					if (generated_event->value == PartyEventType::RUINS_GOOD_LOOT)
+					{
+						
+						if (ruins_id != SXNGN::BAD_UUID)
+						{
+							auto world_location_data = gCoordinator.CheckOutComponent(gCoordinator.GetEntityFromUUID(ruins_id), ComponentTypeEnum::WORLD_LOCATION);
+							auto world_ptr = static_cast<WorldLocation*>(world_location_data);
+
+							int random_number = (std::rand() % 20 + std::rand() % 20) / 2;
+							int discovery_weight = 0;
+							while (random_number > discovery_weight)
+							{
+								ItemType loot_item = world_ptr->loot_table_.generate_event(&world_ptr->loot_table_)->value;
+								if (loot.count(loot_item) == 0)
+								{
+									loot[loot_item] = 1;
+								}
+								else
+								{
+									loot[loot_item]++;
+								}
+								discovery_weight += 2;
+								random_number = (std::rand() % 20 + std::rand() % 20) / 2;
+							}
+							
+
+							
+							
+							gCoordinator.CheckInComponent(gCoordinator.GetEntityFromUUID(ruins_id), ComponentTypeEnum::WORLD_LOCATION);
+
+						}
+					}
+					
 					Event_Component* event_component = new Event_Component();
 					SXNGN_Party party_event;
+					if (generated_event->value == PartyEventType::RUINS_GOOD_LOOT)
+					{
+						party_event.items_gained = loot;
+					}
 					party_event.party_event_type = generated_event->value;
 					party_event.party_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
 					party_event.severity = EventSeverity::MILD;
@@ -293,13 +341,39 @@ namespace SXNGN::ECS
 		}
 
 		DropEntry<PartyEventType>* event_ptr = FindEventByType(director_ptr, PartyEventType::ANY);
-		event_ptr->weight = 100;
+		event_ptr->weight = 30;
+	}
+
+	DropEntry<ItemType> Director_System::GenerateLootTable()
+	{
+		DropEntry<ItemType> event_table;
+		event_table.min_weight = 100;
+		event_table.max_weight = 100;
+		event_table.weight = 100;
+		event_table.value = ItemType::UNKNOWN;
+		event_table.init = true;
+		for (int i = ItemType::UNKNOWN; i < ItemType::END; i++)
+		{
+			ItemType item_type = static_cast<ItemType>(i);
+			DropEntry<ItemType> entry;
+			auto item = item_type_to_item()[item_type];
+			entry.accumulation = item.acc_;
+			entry.max_weight = item.max_find_weight_;
+			entry.min_weight = item.min_find_weight_;
+			entry.weight = item.rarity_;
+			entry.reoccurance_penalty = item.dec_;
+			entry.value = item_type;
+			event_table.children.push_back(entry);
+		}
+		event_table.print_event_table(event_table);
+		return event_table;
 	}
 
 	DropEntry<PartyEventType> Director_System::GenerateEventTable()
 	{
 		
 		DropEntry<PartyEventType> event_table;
+		
 
 		DropEntry<PartyEventType> none_event;
 		none_event.weight = 51;
@@ -522,6 +596,7 @@ namespace SXNGN::ECS
 
 	
 		event_table.print_event_table(event_table);
+		event_table.init = true;
 
 		return event_table;
 	}

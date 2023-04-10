@@ -750,6 +750,28 @@ namespace SXNGN::ECS {
 		}
 		case PartyEventType::RUINS_GOOD_LOOT:
 		{
+			auto ui = UICollectionSingleton::get_instance();
+			std::vector<std::string> options_list_text;
+			
+			auto items = ec->e.party_event.items_gained;
+			std::string detail = UserInputUtils::inventory_to_text(items);
+			std::function<void()> get_loot_func = [gCoordinator, party_entity, items]()
+			{
+				auto party_component = gCoordinator->CheckOutComponent(party_entity, ComponentTypeEnum::PARTY);
+				auto party_ptr = static_cast<Party*>(party_component);
+				for (auto item_pair : items)
+				{
+					party_ptr->add_item(item_pair.first, item_pair.second);
+				}
+				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+			};
+			std::vector<std::function<void()>> options_list_events;
+			options_list_events.push_back(get_loot_func);
+			options_list_text.push_back("Ok");
+			std::vector<bool> option_enables;
+			auto message_box_c = UserInputUtils::create_message_box(nullptr, "Found items!", detail, 500, 500, UILayer::BOTTOM, options_list_text, options_list_events, option_enables);
+			ECS_Utils::system_pause();
+			ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, message_box_c);
 			break;
 		}
 		case PartyEventType::NONE:
