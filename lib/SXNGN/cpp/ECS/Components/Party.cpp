@@ -10,7 +10,6 @@ namespace SXNGN::ECS {
 		health_max_ = 100.0;
 		stamina_ = 1000.0;
 		stamina_max_ = stamina_;
-		food_max_ = 1000.0;
 		pace_abs_ = 0.0;
 
 		hands_ = 1.0;
@@ -28,14 +27,14 @@ namespace SXNGN::ECS {
 
 		bool at_ruins_ = false;
 		bool at_settlement_ = false;
-		inventory_[ItemType::AMMO] = 6;
-		inventory_[ItemType::BATTERY] = 1;
-		inventory_[ItemType::FOOD] = 750.0;
+		inventory_[ItemType::AMMO] = 0;
+		inventory_[ItemType::BATTERY] = 0;
+		inventory_[ItemType::FOOD] = 1;
 		inventory_[ItemType::FOOTWEAR] = 1;
 		inventory_[ItemType::GPS] = 0;
-		inventory_[ItemType::GUN] = 1;
-		inventory_[ItemType::MEDKIT] = 1;
-		inventory_[ItemType::WATER] = 10;
+		inventory_[ItemType::GUN] = 0;
+		inventory_[ItemType::MEDKIT] = 0;
+		inventory_[ItemType::WATER] = 0;
 		update_encumbrance();
 	}
 

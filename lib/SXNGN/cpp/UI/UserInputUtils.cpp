@@ -48,6 +48,21 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_v_scrollbar(kiss_window* parent_window, UILayer layer, int height)
+	{
+		kiss_vscrollbar* scroll = new kiss_vscrollbar;
+
+		kiss_vscrollbar_new(scroll, parent_window, 0, 0, height);
+		scroll->uprect.x = scroll->wdw->rect.w;// -scroll->uprect.w - 10;
+		scroll->downrect.x = scroll->wdw->rect.w;// -scroll->downrect.w - 10;
+		scroll->sliderrect.x = scroll->wdw->rect.w;// -scroll->sliderrect.w - 10;
+
+		
+		UIContainerComponent new_ui_container(parent_window, layer, UIType::VSCROLLBAR);
+		new_ui_container.vscrollbar_ = scroll;
+		return std::make_shared<UIContainerComponent>(new_ui_container);
+	}
+
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_select_button(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height)
 	{
 		kiss_selectbutton* new_kiss_toggle = new kiss_selectbutton();
@@ -77,7 +92,7 @@ namespace SXNGN::ECS {
 		};
 		
 		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
-		int w = 750;
+		int w = 800;
 		int h = 550;
 		int window_layer_int = (int)layer;
 		int window_item_layer_int = window_layer_int + 1;
@@ -93,6 +108,7 @@ namespace SXNGN::ECS {
 		int amount_edit_w = 75;
 		int item_label_h = 30;
 		int item_cost_w = 75;
+		int v_scroll_w = 30;
 		int add_remove_button_width = 15;
 		int player_item_label_x = 10;
 		int player_dec_button_x = player_item_label_x + item_label_w + 5;
@@ -101,19 +117,20 @@ namespace SXNGN::ECS {
 		int player_cost_label_x = player_inc_button_x + 5 + add_remove_button_width;
 		int player_available_x = player_cost_label_x + 5 + item_cost_w;
 
-
-		int shop_item_label_x = w - 5 - item_label_w;
+		int v_scoll_x = w - v_scroll_w - 5;
+		int shop_item_label_x = v_scoll_x - 5 - item_label_w;
 		int shop_item_inc_button_x = shop_item_label_x - 5 - add_remove_button_width;
 		int shop_amount_edit_x = shop_item_inc_button_x - 5 - amount_edit_w;
 		int shop_item_dec_button_x = shop_amount_edit_x - 5 - add_remove_button_width;
 		int shop_cost_label_x = shop_item_dec_button_x - 5 - item_cost_w;
 		int shop_available_x = shop_cost_label_x - 5 - item_cost_w;
 
+		auto v_scroll = UserInputUtils::create_v_scrollbar(trade_window_c->window_, window_item_layer, h);
 		
-		auto confirm_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, window_item_layer, "Confirm", 0, 0, 20, item_label_h);
+		auto confirm_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_FOURTH, window_item_layer, "Confirm", 0, 1, 20, item_label_h);
 		confirm_button_c->callback_functions_.push_back(kill_trade_window_func);
 
-		auto quit_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, window_item_layer, "Exit", 0, 2, 20, item_label_h);
+		auto quit_button_c = UserInputUtils::create_button(trade_window_c->window_, HA_COLUMN, VA_ROW, SP_FOURTH, window_item_layer, "Exit", 0, 2, 20, item_label_h);
 		quit_button_c->callback_functions_.push_back(kill_trade_window_func);
 		quit_button_c->triggered_events.push_back(gCoordinator.getEvent(SXNGN::ENABLE_UI_SYSTEM_UNPAUSE).first);
 		
@@ -121,6 +138,7 @@ namespace SXNGN::ECS {
 
 		trade_window_c->child_components_.push_back(quit_button_c);
 		trade_window_c->child_components_.push_back(confirm_button_c);
+		trade_window_c->child_components_.push_back(v_scroll);
 
 		std::shared_ptr<UIContainerComponent> left_total_label_c = UserInputUtils::create_label(trade_window_c->window_, HA_NONE, HA_CENTER, VA_ROW, SP_NONE, window_item_layer, "0", 0, -1, item_total_w, item_label_h);
 		left_total_label_c->label_->rect.x = player_cost_label_x;
@@ -180,7 +198,7 @@ namespace SXNGN::ECS {
 			double modified_running_total = 0.0;
 			for (auto item_amount_pair : modified_sell_list)
 			{
-				modified_running_total += item_type_to_item()[item_amount_pair.first].dec_ * item_amount_pair.second;
+				modified_running_total += item_type_to_item()[item_amount_pair.first].base_value_kn_ * item_amount_pair.second;
 			}
 			if (left_1_right_0)
 			{
@@ -486,16 +504,30 @@ namespace SXNGN::ECS {
 		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
 		auto message_window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, layer);
 		int column = 0;
-		int row = 0;
 		char* title_str = title.data();
-		std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, title_str, row++, -1, 50, 50);
+
+		int TITLE_HEIGHT = 50;
+		int TITLE_WIDTH = w - 10 - 10;
+		int BUTTON_HEIGHT = 50;
+		int DETAIL_HEIGHT = h - TITLE_HEIGHT - BUTTON_HEIGHT - 10 - 10;
+
+		int TITLE_Y = 10;
+		int DETAIL_Y = TITLE_Y + TITLE_HEIGHT;
+		int BUTTONS_Y = DETAIL_Y + DETAIL_HEIGHT;
+		std::shared_ptr<UIContainerComponent> title_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_NONE, SP_FILL_WITH_BUFFER, window_item_layer, title_str, -1, -1, TITLE_WIDTH, TITLE_HEIGHT);
+		title_label_c->label_->rect.w = TITLE_WIDTH;
+		title_label_c->label_->rect.h = TITLE_HEIGHT;
+		title_label_c->label_->rect.y = TITLE_Y;
+
 		char* detail_str = detail.data();
-		std::shared_ptr<UIContainerComponent> detail_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, detail_str, row++, -1, 50, 100);
+		std::shared_ptr<UIContainerComponent> detail_label_c = UserInputUtils::create_label(message_window_c->window_, HA_CENTER, HA_CENTER, VA_NONE, SP_FILL_WITH_BUFFER, window_item_layer, detail_str, -1, -1, TITLE_WIDTH, DETAIL_HEIGHT);
+		detail_label_c->label_->rect.w = TITLE_WIDTH;
+		detail_label_c->label_->rect.h = DETAIL_HEIGHT;
+		detail_label_c->label_->rect.y = DETAIL_Y;
 		message_window_c->child_components_.push_back(title_label_c);
 		message_window_c->child_components_.push_back(detail_label_c);
 
 
-		row = 3;
 		column = 0;
 		scale_to_parent_width button_width = SP_HALF;
 		h_alignment h_align = HA_COLUMN;
@@ -511,8 +543,10 @@ namespace SXNGN::ECS {
 		{
 			column = i % 4;
 			char* button_str = option_strings[i].data();
-			std::shared_ptr<UIContainerComponent> button_c = UserInputUtils::create_button(message_window_c->window_, h_align, VA_ROW, button_width, window_item_layer, button_str, row, column, 50, 50);
-
+			std::shared_ptr<UIContainerComponent> button_c = UserInputUtils::create_button(message_window_c->window_, h_align, VA_NONE, button_width, window_item_layer, button_str, -1, column, 50, BUTTON_HEIGHT);
+			button_c->button_->rect.w = -1;
+			button_c->button_->rect.h = BUTTON_HEIGHT;
+			button_c->button_->rect.y = BUTTONS_Y;
 			//set button to disabled if does not pass the test passed in
 			if (option_enables.size() > i)
 			{

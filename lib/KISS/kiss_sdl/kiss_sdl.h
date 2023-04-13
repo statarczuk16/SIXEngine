@@ -155,6 +155,8 @@ typedef struct kiss_window {
 	int decorate;
 	SDL_Color bg;
 	struct kiss_window *wdw;
+	double v_scroll_fraction; //if this window has a v scrollbar, this is the fraction (top to bottom) it is at
+	double h_scroll_fraction;//if this window has a h scrollbar, this is the fraction (top to bottom) it is at
 } kiss_window;
 
 typedef struct kiss_label {
@@ -232,6 +234,9 @@ typedef struct kiss_vscrollbar {
 	SDL_Rect uprect;
 	SDL_Rect downrect;
 	SDL_Rect sliderrect;
+	SDL_Rect r_uprect;
+	SDL_Rect r_downrect;
+	SDL_Rect r_sliderrect;
 	int maxpos;
 	double fraction;
 	double step;

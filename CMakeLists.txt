@@ -144,6 +144,9 @@ target_link_libraries(system_tests SDL2::Main SDL2::Image SDL2::TTF)
 
 add_executable(unit_tests "src/tests/unit_tests.cpp" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
 target_link_libraries(unit_tests SDL2::Main SDL2::Image SDL2::TTF) 
+
+add_executable(kiss_example_1 "lib/KISS/kiss_example1.c" ${SXNGN_SOURCES} ${OLC_SOURCES} ${KISS_SOURCES}  ${JSON_SOURCES}  ${UUID_SOURCES} ${SDL_FONTCACHE_SOURCES})
+target_link_libraries(kiss_example_1 SDL2::Main SDL2::Image SDL2::TTF) 
  
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR})

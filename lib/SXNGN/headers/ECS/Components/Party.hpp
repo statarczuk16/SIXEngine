@@ -27,7 +27,6 @@ namespace SXNGN::ECS {
 		double encumbrance_kg_;
 		double health_max_;
 		double stamina_max_;
-		double food_max_;
 
 		std::map<ItemType, double> inventory_;
 		
@@ -84,7 +83,6 @@ namespace SXNGN::ECS {
 			{"encumbrance_kg_",p.encumbrance_kg_},
 			{"health_max_",p.health_max_},
 			{"stamina_max_",p.stamina_max_},
-			{"food_max_",p.food_max_},
 			{"inventory_",p.inventory_},
 			{"lost_counter_",p.lost_counter_},
 			{"sick_counter_s_",p.sick_counter_s_},
@@ -116,7 +114,6 @@ namespace SXNGN::ECS {
 		j.at("encumbrance_kg_").get_to(p.encumbrance_kg_);
 		j.at("health_max_").get_to(p.health_max_);
 		j.at("stamina_max_").get_to(p.stamina_max_);
-		j.at("food_max_").get_to(p.food_max_);
 		j.at("inventory_").get_to(p.inventory_);
 		j.at("lost_counter_").get_to(p.lost_counter_);
 		j.at("sick_counter_s_").get_to(p.sick_counter_s_);

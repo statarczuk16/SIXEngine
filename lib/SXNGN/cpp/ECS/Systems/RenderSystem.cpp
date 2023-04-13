@@ -115,6 +115,7 @@ namespace SXNGN::ECS {
 			}
 			case UIType::VSCROLLBAR:
 			{
+				kiss_vscrollbar_draw(component_in_layer->vscrollbar_, gRenderer);
 				break;
 			}
 			default:

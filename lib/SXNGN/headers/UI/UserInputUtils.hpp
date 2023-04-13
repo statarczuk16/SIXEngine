@@ -33,6 +33,8 @@ namespace SXNGN::ECS {
 
 		static std::shared_ptr<UIContainerComponent> create_button(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row = -1, int column = -1, int width = -1, int height = -1);
 
+		static std::shared_ptr<UIContainerComponent> create_v_scrollbar(kiss_window* parent_window, UILayer layer, int height);
+
 		static std::shared_ptr<UIContainerComponent> create_select_button(kiss_window* parent_window, h_alignment h_align, v_alignment v_align, scale_to_parent_width parent_scale, UILayer layer, char* name, int row, int column, int width, int height);
 
 		static std::shared_ptr<UIContainerComponent> create_window_raw(kiss_window* parent_window, int x, int y, int w, int h, UILayer layer);

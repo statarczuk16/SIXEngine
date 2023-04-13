@@ -78,9 +78,9 @@ namespace SXNGN {
 	const double LOST_BASE_KM = 1; //
 	const double SICK_BASE_MINUTES_GM = 60.0 * 2; //game time minutes to be sick for when sick event happens
 	const double WEATHER_BASE_MINUTES_GM = 60.0; //game time minutes for sandstorm/weather to last
-	const double PARTY_RECHARGE_CALORIES_PER_MINUTE = 15.0;
-	const double FOOD_UNITS_PER_CALORIES = 0.1;
-	const double FOOD_CALORIES_PER_UNIT = 1 / FOOD_UNITS_PER_CALORIES;
+	const double PARTY_RECHARGE_CALORIES_PER_MINUTE = 30.0;
+	const double CALORIES_PER_FOOD_UNIT = 700;
+	const double FOOD_UNITS_PER_CALORIES = 1.0 / CALORIES_PER_FOOD_UNIT;
 
 	const double WORLD_ROAD_PENALTY_PACE_M_S = -0.5; //road bonus
 	const double WORLD_DESERT_PENALTY_PACE_M_S = 0.1; //offroading penalty

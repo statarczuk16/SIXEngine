@@ -112,7 +112,7 @@ int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect 
 	temp_parent.y = 0;
 	temp_parent.h = 0;
 	temp_parent.w = 0;
-
+	double subtract_y = 0.0;//if v scroll, subtract this much from y coordinate to determine if item is on or off screen
 	//if this component has a parent window
 	if (parent_ != NULL)
 	{
@@ -131,6 +131,10 @@ int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect 
 			parent = parent->wdw;
 		}
 		**/
+		if (parent->v_scroll_fraction != -1.0)
+		{
+			subtract_y = parent->v_scroll_fraction * parent->rect.h;
+		}
 
 	}
 	else
@@ -249,6 +253,11 @@ int determine_render_position(SDL_Rect *ui_rect, kiss_window* parent_, SDL_Rect 
 			break;
 		}
 	}
+	return_rect->y -= subtract_y;
+	if (return_rect->y < temp_parent.y || return_rect->y > temp_parent.y + temp_parent.h)
+	{
+		return 1;
+	}
 	return 0;
 	
 }
@@ -263,6 +272,8 @@ int kiss_window_new(kiss_window *window, kiss_window *wdw, int decorate,
 	window->visible = 0;
 	window->focus = 1;
 	window->wdw = wdw;
+	window->v_scroll_fraction = -1.0;
+	window->h_scroll_fraction = -1.0;
 	return 0;
 }
 
@@ -337,7 +348,7 @@ int kiss_window_draw(kiss_window* window, SDL_Renderer* renderer)
 	}
 
 	
-	(void)determine_render_position(&window->rect, window->wdw, &window->r_rect, window->h_align, window->v_align, window->parent_scale, window->column, window->row);
+	int draw = determine_render_position(&window->rect, window->wdw, &window->r_rect, window->h_align, window->v_align, window->parent_scale, window->column, window->row);
 
 		
 	
@@ -376,7 +387,11 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 		//for use if text is centers, get width of the first line of text (until line break)
 		int width_until_line_break = kiss_textwidth_first_line(label->font, label->text);
 		//pass by ref - sets button->r_rect
-		(void)determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
+		int draw = determine_render_position(&label->rect, label->wdw, &label->r_rect, label->h_align, label->v_align, label->parent_scale, label->column, label->row);
+		if (draw)
+		{
+			return 0;
+		}
 		//pass by ref - sets textx and texty
 		(void)determine_text_render_position(&label->r_rect, label->txt_h_align, label->txt_v_align, &x, &y, width_until_line_break, kiss_textheight(label->font, label->text, NULL));
 	}
@@ -513,9 +528,14 @@ int kiss_button_draw(kiss_button *button, SDL_Renderer *renderer)
 	int visible = 0;
 	if (button)
 	{
+		
 		visible = (button->wdw->visible && button->visible);
 		//pass by ref - sets button->r_rect
-		(void) determine_render_position(&button->rect, button->wdw, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
+		int draw = determine_render_position(&button->rect, button->wdw, &button->r_rect, button->h_align, button->v_align, button->parent_scale, button->column, button->row);
+		if (draw == 1)
+		{
+			return 0;
+		}
 		//pass by ref - sets textx and texty
 		(void) determine_text_render_position(&button->r_rect, button->txt_h_align, button->txt_v_align, &x, &y, kiss_textwidth(button->font, button->text, NULL), kiss_textheight(button->font, button->text, NULL));
 	}
@@ -639,7 +659,12 @@ int kiss_selectbutton_draw(kiss_selectbutton *selectbutton,	SDL_Renderer *render
 	{
 		visible = (selectbutton->wdw->visible && selectbutton->visible);
 		//pass by ref - sets button->r_rect
-		(void)determine_render_position(&selectbutton->rect, selectbutton->wdw, &selectbutton->r_rect, selectbutton->h_align, selectbutton->v_align, selectbutton->parent_scale, selectbutton->column, selectbutton->row);
+
+		int draw = determine_render_position(&selectbutton->rect, selectbutton->wdw, &selectbutton->r_rect, selectbutton->h_align, selectbutton->v_align, selectbutton->parent_scale, selectbutton->column, selectbutton->row);
+		if (draw == 1)
+		{
+			return 0;
+		}
 		//pass by ref - sets textx and texty
 		//(void)determine_text_render_position(&selectbutton->r_rect, selectbutton->txt_h_align, selectbutton->txt_v_align, &selectbutton->textx, &selectbutton->texty, selectbutton->text_width, selectbutton->font.fontheight);
 	}
@@ -661,26 +686,31 @@ int kiss_selectbutton_draw(kiss_selectbutton *selectbutton,	SDL_Renderer *render
 int kiss_vscrollbar_new(kiss_vscrollbar *vscrollbar, kiss_window *wdw,
 	int x, int y, int h)
 {
-	if (!vscrollbar) return -1;
-	if (vscrollbar->up.magic != KISS_MAGIC)
-		vscrollbar->up = kiss_up;
-	if (vscrollbar->down.magic != KISS_MAGIC)
-		vscrollbar->down = kiss_down;
-	if (vscrollbar->vslider.magic != KISS_MAGIC)
-		vscrollbar->vslider = kiss_vslider;
-	if (vscrollbar->up.h + vscrollbar->down.h + 2 * kiss_edge +
-		2 * kiss_slider_padding + vscrollbar->vslider.h > h)
+	if (!vscrollbar)
+	{
 		return -1;
-	kiss_makerect(&vscrollbar->uprect, x, y + kiss_edge,
-		vscrollbar->up.w, vscrollbar->up.h + kiss_slider_padding);
-	kiss_makerect(&vscrollbar->downrect, x, y + h - vscrollbar->down.h -
-		kiss_slider_padding - kiss_edge, vscrollbar->down.w,
-		vscrollbar->down.h + kiss_slider_padding);
-	kiss_makerect(&vscrollbar->sliderrect, x, y + vscrollbar->uprect.h +
-		kiss_edge, vscrollbar->vslider.w, vscrollbar->vslider.h);
-	vscrollbar->maxpos = h - 2 * kiss_slider_padding - 2 * kiss_edge -
-		vscrollbar->up.h - vscrollbar->down.h -
-		vscrollbar->vslider.h;
+	}
+	if (vscrollbar->up.magic != KISS_MAGIC)
+	{
+		vscrollbar->up = kiss_up;
+	}
+	if (vscrollbar->down.magic != KISS_MAGIC)
+	{
+		vscrollbar->down = kiss_down;
+	}
+	if (vscrollbar->vslider.magic != KISS_MAGIC)
+	{
+		vscrollbar->vslider = kiss_vslider;
+	}
+	if (vscrollbar->up.h + vscrollbar->down.h + 2 * kiss_edge + 2 * kiss_slider_padding + vscrollbar->vslider.h > h)
+	{
+		return -1;
+	}
+		
+	kiss_makerect(&vscrollbar->uprect, x, y + kiss_edge, vscrollbar->up.w, vscrollbar->up.h + kiss_slider_padding);
+	kiss_makerect(&vscrollbar->downrect, x, y + h - vscrollbar->down.h - kiss_slider_padding - kiss_edge, vscrollbar->down.w, vscrollbar->down.h + kiss_slider_padding);
+	kiss_makerect(&vscrollbar->sliderrect, x, y + vscrollbar->uprect.h + kiss_edge, vscrollbar->vslider.w, vscrollbar->vslider.h);
+	vscrollbar->maxpos = h - 2 * kiss_slider_padding - 2 * kiss_edge - vscrollbar->up.h - vscrollbar->down.h - vscrollbar->vslider.h;
 	vscrollbar->fraction = 0.;
 	vscrollbar->step = 0.1;
 	vscrollbar->upclicked = 0;
@@ -698,16 +728,24 @@ static void vnewpos(kiss_vscrollbar *vscrollbar, double step, int *draw)
 	*draw = 1;
 	vscrollbar->fraction += step;
 	vscrollbar->lasttick = kiss_getticks();
-	if (vscrollbar->fraction < -0.000001) vscrollbar->fraction = 0.;
-	if (vscrollbar->fraction > 0.999999) vscrollbar->fraction = 1.;
-	vscrollbar->sliderrect.y = vscrollbar->uprect.y +
-		vscrollbar->uprect.h + (int) (vscrollbar->fraction *
-		vscrollbar->maxpos + 0.5);
-	if (vscrollbar->fraction > 0.000001 &&
-		vscrollbar->fraction < 0.999999)
+	if (vscrollbar->fraction < -0.000001)
+	{
+		vscrollbar->fraction = 0.;
+	}
+	if (vscrollbar->fraction > 0.999999) 
+	{
+		vscrollbar->fraction = 1.;
+	}
+	vscrollbar->sliderrect.y = vscrollbar->uprect.y + vscrollbar->uprect.h + (int) (vscrollbar->fraction * vscrollbar->maxpos + 0.5);
+	printf("Fraction: %f\n", vscrollbar->fraction);
+	vscrollbar->wdw->v_scroll_fraction = vscrollbar->fraction;
+	if (vscrollbar->fraction > 0.000001 && vscrollbar->fraction < 0.999999)
+	{
 		return;
+	}
 	vscrollbar->upclicked = 0;
 	vscrollbar->downclicked = 0;
+	
 }
 
 int kiss_vscrollbar_event(kiss_vscrollbar *vscrollbar, SDL_Event *event,
@@ -715,63 +753,77 @@ int kiss_vscrollbar_event(kiss_vscrollbar *vscrollbar, SDL_Event *event,
 {
 	int visible = 0;
 	visible = (vscrollbar->wdw->visible && vscrollbar->visible);
-	if (!vscrollbar || !visible) return 0;
-	if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT))) {
-		vscrollbar->upclicked = 0;
-		vscrollbar->downclicked = 0;
-		vscrollbar->lasttick = 0;
-	} else if (vscrollbar->upclicked && kiss_getticks() >
-		vscrollbar->lasttick + kiss_click_interval) {
-		vnewpos(vscrollbar, -vscrollbar->step, draw);
-		return 1;
-	} else if (vscrollbar->downclicked && kiss_getticks() >
-		vscrollbar->lasttick + kiss_click_interval) {
-		vnewpos(vscrollbar, vscrollbar->step, draw);
-		return 1;
+	if (event->type == SDL_MOUSEBUTTONDOWN)
+	{
+		//printf("click");
 	}
-	if (!event) return 0;
-	if (event->type == SDL_WINDOWEVENT &&
-		event->window.event == SDL_WINDOWEVENT_EXPOSED)
-		*draw = 1;
-	if (!vscrollbar->focus && (!vscrollbar->wdw ||
-		(vscrollbar->wdw && !vscrollbar->wdw->focus)))
+	if (!vscrollbar || !visible)
+	{
 		return 0;
-	if (event->type == SDL_MOUSEBUTTONDOWN &&
-		kiss_pointinrect(event->button.x, event->button.y,
-		&vscrollbar->uprect) && vscrollbar->step > 0.000001) {
+	}
+	
+	
+
+	if (!event)
+	{
+		return 0;
+	}
+	if (event->type == SDL_WINDOWEVENT && event->window.event == SDL_WINDOWEVENT_EXPOSED)
+	{
+		*draw = 1;
+	}
+		
+	if (!vscrollbar->focus && (!vscrollbar->wdw || (vscrollbar->wdw && !vscrollbar->wdw->focus)))
+	{
+		return 0;
+	}
+		
+	if (event->type == SDL_MOUSEBUTTONDOWN && kiss_pointinrect(event->button.x, event->button.y, &vscrollbar->r_uprect) && vscrollbar->step > 0.000001) 
+	{
+		//scroll UP button clicked
 		if (vscrollbar->fraction > 0.000001) {
 			vscrollbar->upclicked = 1;
-			if (vscrollbar->wdw) vscrollbar->wdw->focus = 0;
+			//focus is not on window, is on scroll bar
+			if (vscrollbar->wdw)
+			{
+				vscrollbar->wdw->focus = 0;
+			}
 			vscrollbar->focus = 1;
 		}
-		vscrollbar->lasttick = kiss_getticks() -
-			kiss_click_interval - 1;
-	} else if (event->type == SDL_MOUSEBUTTONDOWN &&
-		kiss_pointinrect(event->button.x, event->button.y,
-		&vscrollbar->downrect) && vscrollbar->step > 0.000001) {
+		vscrollbar->lasttick = kiss_getticks() - kiss_click_interval - 1;
+	} 
+	else if (event->type == SDL_MOUSEBUTTONDOWN && kiss_pointinrect(event->button.x, event->button.y, &vscrollbar->r_downrect) && vscrollbar->step > 0.000001) 
+	{
+		//scroll DOWN clicked
 		if (vscrollbar->fraction < 0.999999) {
 			vscrollbar->downclicked = 1;
-			if (vscrollbar->wdw) vscrollbar->wdw->focus = 0;
+			if (vscrollbar->wdw) 
+			{
+				vscrollbar->wdw->focus = 0;
+			}
 			vscrollbar->focus = 1;
 		}
-		vscrollbar->lasttick = kiss_getticks() -
-			kiss_click_interval - 1;
-	} else if (event->type == SDL_MOUSEBUTTONDOWN &&
-		kiss_pointinrect(event->button.x, event->button.y,
-		&vscrollbar->sliderrect) && vscrollbar->step > 0.000001) {
+		vscrollbar->lasttick = kiss_getticks() - kiss_click_interval - 1;
+	} 
+	else if (event->type == SDL_MOUSEBUTTONDOWN && kiss_pointinrect(event->button.x, event->button.y, &vscrollbar->r_sliderrect) && vscrollbar->step > 0.000001) 
+	{
 		if (vscrollbar->wdw) vscrollbar->wdw->focus = 0;
 		vscrollbar->focus = 1;
 		vscrollbar->sliderclicked = 1;
-	} else if (event->type == SDL_MOUSEBUTTONUP) {
+	}
+	else if (event->type == SDL_MOUSEBUTTONUP) 
+	{
+		//mouse unclick without anythign clicked
 		vscrollbar->upclicked = 0;
 		vscrollbar->downclicked = 0;
 		vscrollbar->lasttick = 0;
 		if (vscrollbar->wdw) vscrollbar->wdw->focus = 1;
 		vscrollbar->focus = 0;
 		vscrollbar->sliderclicked = 0;
-	} else if (event->type == SDL_MOUSEMOTION &&
-		(event->motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) &&
-		vscrollbar->sliderclicked) {
+	} 
+	else if (event->type == SDL_MOUSEMOTION && (event->motion.state & SDL_BUTTON(SDL_BUTTON_LEFT)) && vscrollbar->sliderclicked) 
+	{
+		//dragging the bar around
 		vnewpos(vscrollbar, 1. * event->motion.yrel /
 			vscrollbar->maxpos, draw);
 		return 1;
@@ -781,18 +833,70 @@ int kiss_vscrollbar_event(kiss_vscrollbar *vscrollbar, SDL_Event *event,
 
 int kiss_vscrollbar_draw(kiss_vscrollbar *vscrollbar, SDL_Renderer *renderer)
 {
-	if (vscrollbar && vscrollbar->wdw)
-		vscrollbar->visible = vscrollbar->wdw->visible;
-	if (!vscrollbar || !vscrollbar->visible || !renderer) return 0;
-	vscrollbar->sliderrect.y = vscrollbar->uprect.y +
-		vscrollbar->uprect.h + (int) (vscrollbar->fraction *
-		vscrollbar->maxpos);
-	kiss_renderimage(renderer, vscrollbar->up, vscrollbar->uprect.x,
-		vscrollbar->uprect.y, NULL);
-	kiss_renderimage(renderer, vscrollbar->down, vscrollbar->downrect.x,
-		vscrollbar->downrect.y + kiss_slider_padding, NULL);
-	kiss_renderimage(renderer, vscrollbar->vslider,
-		vscrollbar->sliderrect.x, vscrollbar->sliderrect.y, NULL);
+	int visible = 0;
+	
+	visible = (vscrollbar->wdw->visible && vscrollbar->visible);
+	if (!vscrollbar || !visible || !renderer)
+	{
+		return 0;
+	}
+	int draw = 1;
+	if (vscrollbar->upclicked)
+	{
+		unsigned int invterval = kiss_getticks();
+
+		if (invterval > vscrollbar->lasttick + kiss_click_interval)
+		{
+			//scroll UP button clicked and stayed clicked longer than interval
+			vnewpos(vscrollbar, -vscrollbar->step, &draw);
+			
+		}
+
+	}
+	else if (vscrollbar->downclicked)
+	{
+		unsigned int invterval = kiss_getticks();
+		if (invterval > vscrollbar->lasttick + kiss_click_interval)
+		{
+			//scroll DOWN button clicked and stayed clicked longer than interval
+			vnewpos(vscrollbar, vscrollbar->step, &draw);
+			
+		}
+
+	}
+	else if (!(SDL_GetMouseState(NULL, NULL) & SDL_BUTTON(SDL_BUTTON_LEFT)))
+	{
+		vscrollbar->upclicked = 0;
+		vscrollbar->downclicked = 0;
+		vscrollbar->lasttick = 0;
+	}
+	
+	
+	SDL_Rect temp_parent;
+	temp_parent.w = vscrollbar->wdw->rect.w;
+	temp_parent.h = vscrollbar->wdw->rect.h;
+	temp_parent.x = vscrollbar->wdw->r_rect.x;
+	temp_parent.y = vscrollbar->wdw->r_rect.y;
+	vscrollbar->r_uprect.x = temp_parent.x + vscrollbar->uprect.x;
+	vscrollbar->r_uprect.y = temp_parent.y + vscrollbar->uprect.y;
+	vscrollbar->r_uprect.w = vscrollbar->uprect.w;
+	vscrollbar->r_uprect.h = vscrollbar->uprect.h;
+
+	vscrollbar->r_downrect.x = temp_parent.x + vscrollbar->downrect.x;
+	vscrollbar->r_downrect.y = temp_parent.y + vscrollbar->downrect.y + kiss_slider_padding;
+	vscrollbar->r_downrect.w = vscrollbar->downrect.w;
+	vscrollbar->r_downrect.h = vscrollbar->downrect.h;
+
+
+	vscrollbar->r_sliderrect.x = temp_parent.x + vscrollbar->sliderrect.x;
+	vscrollbar->r_sliderrect.y = temp_parent.y + vscrollbar->sliderrect.y;
+	vscrollbar->r_sliderrect.h = vscrollbar->sliderrect.h;
+	vscrollbar->r_sliderrect.w = vscrollbar->sliderrect.w;
+
+	vscrollbar->sliderrect.y = vscrollbar->uprect.y + vscrollbar->uprect.h + (int) (vscrollbar->fraction *vscrollbar->maxpos);
+	kiss_renderimage(renderer, vscrollbar->up, vscrollbar->r_uprect.x, vscrollbar->r_uprect.y, NULL);
+	kiss_renderimage(renderer, vscrollbar->down, vscrollbar->r_downrect.x, vscrollbar->r_downrect.y, NULL);
+	kiss_renderimage(renderer, vscrollbar->vslider, vscrollbar->r_sliderrect.x, vscrollbar->r_sliderrect.y, NULL);
 	return 1;
 }
 
@@ -948,6 +1052,10 @@ int kiss_progressbar_new(kiss_progressbar *progressbar, kiss_window *wdw,
 	{
 		progressbar->bar = kiss_bar;
 	}
+	if (progressbar->font.magic != KISS_MAGIC)
+	{
+		progressbar->font = kiss_textfont;
+	}
 		
 	progressbar->bg = kiss_blue;
 	kiss_makerect(&progressbar->rect, x, y, w, progressbar->bar.h + 2 * kiss_border);
@@ -1022,7 +1130,11 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	{
 		visible = progressbar->visible && progressbar->wdw->visible;
 		//pass by ref - sets button->r_rect
-		(void)determine_render_position(&progressbar->rect, progressbar->wdw, &progressbar->r_rect, progressbar->h_align, progressbar->v_align, progressbar->parent_scale, progressbar->column, progressbar->row);
+		int draw = determine_render_position(&progressbar->rect, progressbar->wdw, &progressbar->r_rect, progressbar->h_align, progressbar->v_align, progressbar->parent_scale, progressbar->column, progressbar->row);
+		if (draw)
+		{
+			return 0;
+		}
 		//pass by ref - sets textx and texty
 		(void)determine_text_render_position(&progressbar->r_rect, progressbar->txt_h_align, VA_CENTER, &x, &y, kiss_textwidth(progressbar->font, progressbar->text, NULL), kiss_textheight(progressbar->font, progressbar->text, NULL));
 	}
@@ -1220,7 +1332,11 @@ int kiss_entry_draw(kiss_entry *entry, SDL_Renderer *renderer)
 	if (entry && entry->wdw)
 	{
 		visible = entry->visible && entry->wdw->visible;
-		(void)determine_render_position(&entry->rect, entry->wdw, &entry->r_rect, entry->h_align, entry->v_align, entry->parent_scale, entry->column, entry->row);
+		int draw = determine_render_position(&entry->rect, entry->wdw, &entry->r_rect, entry->h_align, entry->v_align, entry->parent_scale, entry->column, entry->row);
+		if (draw)
+		{
+			return 0;
+		}
 		//pass by ref - sets textx and texty
 		(void)determine_text_render_position(&entry->r_rect, entry->txt_h_align, entry->txt_v_align, &entry->textx, &entry->texty, entry->textwidth, entry->font.fontheight);
 	}

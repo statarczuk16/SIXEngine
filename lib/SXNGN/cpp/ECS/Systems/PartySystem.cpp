@@ -186,7 +186,7 @@ namespace SXNGN::ECS
 					//else recharge using food
 					else
 					{
-						if (!max_stamina)
+						if (!max_stamina && have_food)
 						{
 							double recharge_calories_per_minute = SXNGN::PARTY_RECHARGE_CALORIES_PER_MINUTE;
 							double recharge_calories_per_second = recharge_calories_per_minute / OVERWORLD_MULTIPLIER;
@@ -218,7 +218,7 @@ namespace SXNGN::ECS
 				stamina_progress_bar->progressbar_->max_value = party_ptr->stamina_max_;
 				auto health_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_health"];
 				health_progress_bar->progressbar_->value = party_ptr->health_;
-				health_progress_bar->progressbar_->max_value = party_ptr->health_;
+				health_progress_bar->progressbar_->max_value = party_ptr->health_max_;
 				//auto food_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_food"];
 				//food_progress_bar->progressbar_->value = party_ptr->inventory_[ItemType::FOOD];
 				//food_progress_bar->progressbar_->max_value = party_ptr->food_max_;

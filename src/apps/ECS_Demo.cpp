@@ -182,9 +182,9 @@ int init_items()
 			item.acc_ = 100;
 			item.base_value_kn_ = 0.05;
 			item.dec_ = 0;
-			item.max_find_weight_ = 10;
-			item.min_find_weight_ = 10;
-			item.rarity_ = 10;
+			item.max_find_weight_ = 30;
+			item.min_find_weight_ = 30;
+			item.rarity_ = 30;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "AMMO";
 			item.weight_kg_ = 0.01;
@@ -197,9 +197,9 @@ int init_items()
 			item.acc_ = 100;
 			item.base_value_kn_ = 2;
 			item.dec_ = 0;
-			item.max_find_weight_ = 8;
-			item.min_find_weight_ = 8;
-			item.rarity_ = 8;
+			item.max_find_weight_ = 20;
+			item.min_find_weight_ = 20;
+			item.rarity_ = 20;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "BATTERY";
 			item.weight_kg_ = 0.15;
@@ -210,11 +210,11 @@ int init_items()
 		{
 			Item item = Item();
 			item.acc_ = 100;
-			item.base_value_kn_ = 0.015;
+			item.base_value_kn_ = 1.0;
 			item.dec_ = 0;
-			item.max_find_weight_ = 20;
-			item.min_find_weight_ = 20;
-			item.rarity_ = 20;
+			item.max_find_weight_ = 50;
+			item.min_find_weight_ = 50;
+			item.rarity_ = 50;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "FOOD";
 			item.weight_kg_ = 0.001;
@@ -257,9 +257,9 @@ int init_items()
 			item.acc_ = 100;
 			item.base_value_kn_ = 25;
 			item.dec_ = 0;
-			item.max_find_weight_ = 3;
-			item.min_find_weight_ = 3;
-			item.rarity_ = 3;
+			item.max_find_weight_ = 10;
+			item.min_find_weight_ = 10;
+			item.rarity_ = 10;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "GUN";
 			item.weight_kg_ = 1;
@@ -272,9 +272,9 @@ int init_items()
 			item.acc_ = 100;
 			item.base_value_kn_ = 1;
 			item.dec_ = 0;
-			item.max_find_weight_ = 7;
-			item.min_find_weight_ = 7;
-			item.rarity_ = 7;
+			item.max_find_weight_ = 10;
+			item.min_find_weight_ = 10;
+			item.rarity_ = 10;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "KALNOTE";
 			item.weight_kg_ = 0.001;
@@ -292,6 +292,36 @@ int init_items()
 			item.rarity_ = 5;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "MEDKIT";
+			item.weight_kg_ = 1;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::SCRAP:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 1.0;
+			item.dec_ = 0;
+			item.max_find_weight_ = 950;
+			item.min_find_weight_ = 950;
+			item.rarity_ = 950;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "SCRAP";
+			item.weight_kg_ = 10;
+			item_type_to_item()[item.type_] = item;
+			break;
+		}
+		case ItemType::UNKNOWN:
+		{
+			Item item = Item();
+			item.acc_ = 100;
+			item.base_value_kn_ = 15.0;
+			item.dec_ = 0;
+			item.max_find_weight_ = 0;
+			item.min_find_weight_ = 0;
+			item.rarity_ = 0;
+			item.type_ = static_cast<ItemType>(i);
+			item.name_ = "UNKNOWN";
 			item.weight_kg_ = 1;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -1393,12 +1423,6 @@ int main(int argc, char* args[])
 		{
 			events_this_frame.push_back(e);
 			//queue up and add to event component type
-		}
-		system_timer.start();
-		//If any input occured, create an entity to carry them to the input_system
-		if (!events_this_frame.empty())
-		{
-
 			auto input_event = gCoordinator.CreateEntity();
 			SXNGN::ECS::User_Input_Cache* input_cache = new User_Input_Cache();
 			input_cache->events_ = events_this_frame;
@@ -1407,6 +1431,13 @@ int main(int argc, char* args[])
 			//update event handling system
 			input_system->Update(accumulated_ms);
 		}
+		system_timer.start();
+		//If any input occured, create an entity to carry them to the input_system
+		
+
+		
+		
+		
 		strncpy(input_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
 		while (accumulated_ms > SXNGN::Database::get_screen_ms_per_frame())

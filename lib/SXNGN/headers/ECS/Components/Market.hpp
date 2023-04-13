@@ -22,6 +22,8 @@ namespace SXNGN::ECS {
 			component_type = ComponentTypeEnum::MARKET;
 		}
 		std::map<ItemType, double> inventory_;
+
+
 		void add_item(ItemType item, double amount)
 		{
 			if (inventory_.count(item) > 0)

@@ -46,11 +46,10 @@ namespace SXNGN::ECS {
 			auto user_input_ptr = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::INPUT_CACHE);
 			User_Input_Cache input_cache = *static_cast<const User_Input_Cache*>(user_input_ptr);
 
-			if (input_cache.events_.empty() == false)
-			{
-				//pass by ref
-				Handle_GUI_Input(input_cache.events_);
-			}
+			
+			//pass by ref
+			Handle_GUI_Input(input_cache.events_);
+			
 
 			std::vector<std::vector<SDL_Event>> sorted_events = UserInputUtils::filter_sdl_events(input_cache.events_);
 			std::vector<SDL_Event> mouse_events = sorted_events.at(0);
@@ -279,6 +278,19 @@ namespace SXNGN::ECS {
 			}
 			case UIType::HSCROLLBAR:
 			{
+				if (component_in_layer->hscrollbar_ != NULL && kiss_hscrollbar_event(component_in_layer->hscrollbar_, e, &draw_ui))
+				{
+					event_handled = true;
+				}
+				break;
+			}
+			case UIType::VSCROLLBAR:
+			{
+				if (component_in_layer->vscrollbar_ != NULL && kiss_vscrollbar_event(component_in_layer->vscrollbar_, e, &draw_ui))
+				{
+					component_in_layer->vscrollbar_->wdw->v_scroll_fraction = component_in_layer->vscrollbar_->fraction;
+					event_handled = true;
+				}
 				break;
 			}
 			case UIType::PROGRESSBAR:
@@ -306,10 +318,6 @@ namespace SXNGN::ECS {
 				break;
 			}
 			case UIType::TEXTBOX:
-			{
-				break;
-			}
-			case UIType::VSCROLLBAR:
 			{
 				break;
 			}

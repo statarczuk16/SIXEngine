@@ -21,6 +21,7 @@ namespace SXNGN::ECS {
         BATTERY,
         GPS,
 		KALNOTE,
+		SCRAP,
 		END
     };
 
@@ -39,7 +40,8 @@ namespace SXNGN::ECS {
 			{ItemType::AMMO,"AMMO"},
 			{ItemType::BATTERY,"BATTERY"},
 			{ItemType::KALNOTE,"KALNOTE"},
-			{ItemType::GPS,"GPS"}
+			{ItemType::GPS,"GPS"},
+			{ItemType::SCRAP,"SCRAP"}
 		};
 		return item_type_to_string;
 	}
@@ -57,7 +59,8 @@ namespace SXNGN::ECS {
 			{"AMMO",ItemType::AMMO},
 			{"BATTERY",ItemType::BATTERY},
 			{"KALNOTE",ItemType::KALNOTE},
-			{"FOOD",ItemType::FOOD}
+			{"FOOD",ItemType::FOOD},
+			{"SCRAP",ItemType::SCRAP}
 		};
 		return string_to_item_type;
 	}

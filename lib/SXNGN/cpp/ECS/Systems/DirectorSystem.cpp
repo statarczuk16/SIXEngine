@@ -215,6 +215,7 @@ namespace SXNGN::ECS
 							int discovery_weight = 0;
 							while (random_number > discovery_weight)
 							{
+								world_ptr->loot_table_.print_event_table(world_ptr->loot_table_);
 								ItemType loot_item = world_ptr->loot_table_.generate_event(&world_ptr->loot_table_)->value;
 								if (loot.count(loot_item) == 0)
 								{

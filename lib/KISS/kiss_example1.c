@@ -210,7 +210,7 @@ int main(int argc, char **argv)
 	textbox_height = 250;
 	window2_width = 400;
 	window2_height = 168;
-	renderer = kiss_init("kiss_sdl example 1", &objects, 640, 480);
+	renderer = kiss_init("kiss_sdl example 1", &objects, 640, 480, "N:/Code/C++/SDL_Tutorial/Media/kiss_resources" , "sand");
 	if (!renderer) return 1;
 	kiss_array_new(&a1);
 	kiss_array_append(&objects, ARRAY_TYPE, &a1);

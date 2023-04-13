@@ -213,12 +213,13 @@ namespace SXNGN::ECS {
 						Market* market = new Market();
 						market->inventory_[ItemType::AMMO] = 1000.0;
 						market->inventory_[ItemType::BATTERY] = 5;
-						market->inventory_[ItemType::FOOD] = 10000.0;
-						market->inventory_[ItemType::FOOTWEAR] = 500;
+						market->inventory_[ItemType::FOOD] = 100.0;
+						market->inventory_[ItemType::FOOTWEAR] = 8;
 						market->inventory_[ItemType::GPS] = 3;
-						market->inventory_[ItemType::GUN] = 50;
-						market->inventory_[ItemType::KALNOTE] = 10000.0;
-						market->inventory_[ItemType::MEDKIT] = 100.0;
+						market->inventory_[ItemType::GUN] = 7;
+						market->inventory_[ItemType::KALNOTE] = 100.0;
+						market->inventory_[ItemType::MEDKIT] = 12.0;
+						market->inventory_[ItemType::SCRAP] = 15.0;
 						gCoordinator->AddComponent(location_entity, market);
 						pre_render->sprite_factory_sprite_type_ = "RED_BRICK";
 
