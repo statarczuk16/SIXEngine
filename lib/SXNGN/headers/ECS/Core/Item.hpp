@@ -79,7 +79,8 @@ namespace SXNGN::ECS {
 			int max_rarity = 100,
 			int min_rarity = 0,
 			double base_value_kn = 1,
-			double weight_kg = 1) :
+			double weight_kg = 1,
+			std::string desc = "This is an item") :
 			type_(type),
 			name_(item_type_to_string()[type]),
 			rarity_(rarity),
@@ -88,7 +89,8 @@ namespace SXNGN::ECS {
 			max_find_weight_(max_rarity),
 			min_find_weight_(min_rarity),
 			base_value_kn_(base_value_kn),
-			weight_kg_(weight_kg)
+			weight_kg_(weight_kg),
+			description_(desc)
 		{
 
 		}
@@ -105,6 +107,7 @@ namespace SXNGN::ECS {
 		//gameplay stuff
 		double base_value_kn_; //base value in kalnotes (kn) 
 		double weight_kg_;
+		std::string description_;
 	};
 
 	inline void to_json(json& j, const Item& p) {

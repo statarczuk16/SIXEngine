@@ -495,38 +495,6 @@ int init_menus()
 	auto ngl_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "New Game", 0, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 	new_game_window_c->child_components_.push_back(ngl_c);
 
-	/**
-	auto lwel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Width (Chunks)", 1, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
-	new_game_window_c->child_components_.push_back(lwel_c);
-
-	auto lwe_c = UserInputUtils::create_num_entry(new_game_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, UILayer::MID, "level_width_entry", 2, 24, TE_INT, 4, 2, 1);
-	new_game_window_c->child_components_.push_back(lwe_c);
-
-	auto lhel_c = UserInputUtils::create_label(new_game_window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_THIRD, UILayer::MID, "Level Height (Chunks)", 3, 1, BUTTON_WIDTH, BUTTON_HEIGHT);
-	new_game_window_c->child_components_.push_back(lhel_c);
-
-	auto lhe_c = UserInputUtils::create_num_entry(new_game_window_c->window_, HA_COLUMN, VA_ROW, SP_THIRD, UILayer::MID, "level_height_entry", 2, 24, TE_INT, 4, 4, 1);
-	new_game_window_c->child_components_.push_back(lhe_c);
-
-	
-	//Callback functions for level width/height 
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_width = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		coordinator->get_state_manager()->setLevelWidthTiles(Uint32(uicc->entry_->num_val));
-	};
-
-	std::function<void()> ng_update_width_b = std::bind(ng_update_width, lwe_c);
-	lwe_c->callback_functions_.push_back(ng_update_width_b);
-
-	//Callback functions for level width/height 
-	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> ng_update_height = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
-	{
-		coordinator->get_state_manager()->setLevelHeightTiles(Uint32(uicc->entry_->num_val));
-	};
-	
-	std::function<void()> ng_update_height_b = std::bind(ng_update_height, lhe_c);
-	lhe_c->callback_functions_.push_back(ng_update_height_b);
-		**/
 	auto new_game_start_b = UserInputUtils::create_button(new_game_window_c->window_, HA_CENTER, VA_ROW, SP_HALF, UILayer::MID, "Start", NUM_SETTINGS_NG-1, -1, BUTTON_WIDTH, BUTTON_HEIGHT);
 
 	std::function<void()> ng_start = Map_Utils::StartNewGame;
@@ -860,11 +828,11 @@ int init_menus()
 	{
 		ItemType item_type = static_cast<ItemType>(i);
 		std::string item_name_str = item_type_to_string()[item_type];
-		std::shared_ptr<UIContainerComponent> label_inv_item = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, item_name_str.data(), inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+		std::shared_ptr<UIContainerComponent> button_inv_item = UserInputUtils::create_button(inventory_window_c->window_, HA_COLUMN, VA_ROW, SP_HALF, UILayer::TOP, item_name_str.data(), inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 		std::shared_ptr<UIContainerComponent> label_inv_amount = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 		label_inv_amount->name_ = "OVERWORLD_amount_" + item_name_str;
 		inv_row++;
-		inventory_window_c->child_components_.push_back(label_inv_item);
+		inventory_window_c->child_components_.push_back(button_inv_item);
 		inventory_window_c->child_components_.push_back(label_inv_amount);
 	}
 	inventory_window_c->child_components_.push_back(inv_label_c);
