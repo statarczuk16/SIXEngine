@@ -569,11 +569,23 @@ int init_menus()
 
 
 	//Open Menu Button
-	int top_menu_button_column = 3;
+	int top_menu_button_column = 0;
 	auto pause_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Pause", 0, top_menu_button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
 	auto unpause_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Resume", 0, top_menu_button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
 	pause_button_c->button_->visible = false;
 	unpause_button_c->button_->visible = true;
+
+	auto x_1_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "x1", 0, top_menu_button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto x_2_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "x2", 0, top_menu_button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto x_4_button_c = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "x4", 0, top_menu_button_column++, BUTTON_WIDTH, BUTTON_HEIGHT);
+
+	std::function<void()> set_fast_forward_1 = std::bind(set_property, SXNGN::FAST_FORWARD, 1.0);
+	std::function<void()> set_fast_forward_2 = std::bind(set_property, SXNGN::FAST_FORWARD, 2.0);
+	std::function<void()> set_fast_forward_4 = std::bind(set_property, SXNGN::FAST_FORWARD, 4.0);
+
+	x_1_button_c->callback_functions_.push_back(set_fast_forward_1);
+	x_2_button_c->callback_functions_.push_back(set_fast_forward_2);
+	x_4_button_c->callback_functions_.push_back(set_fast_forward_4);
 
 	std::function<void()> set_pause_visible = std::bind(set_button_visible, pause_button_c);
 	std::function<void()> set_unpause_visible = std::bind(set_button_visible, unpause_button_c);
@@ -590,8 +602,11 @@ int init_menus()
 
 	overworld_top_menu_c->child_components_.push_back(pause_button_c);
 	overworld_top_menu_c->child_components_.push_back(unpause_button_c);
+	overworld_top_menu_c->child_components_.push_back(x_1_button_c);
+	overworld_top_menu_c->child_components_.push_back(x_2_button_c);
+	overworld_top_menu_c->child_components_.push_back(x_4_button_c);
 
-	auto ig_go_to_menu_button = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Menu",0, top_menu_button_column, BUTTON_WIDTH, BUTTON_HEIGHT);
+	auto ig_go_to_menu_button = UserInputUtils::create_button(overworld_top_menu_c->window_, HA_COLUMN, VA_CENTER, SP_NONE, UILayer::MID, "Menu",0, 5, BUTTON_WIDTH, BUTTON_HEIGHT);
 	overworld_top_menu_c->child_components_.push_back(ig_go_to_menu_button);
 	disable_on_player_pause_buttons.push_back(ig_go_to_menu_button);
 
@@ -1413,6 +1428,12 @@ int main(int argc, char* args[])
 		{
 			accumulated_ms = 0;
 		}
+		auto ff = gCoordinator.getSetting(SXNGN::FAST_FORWARD);
+		if (ff.second == 1.0)
+		{
+			accumulated_ms *= ff.first;
+		}
+		
 		//std::cout << "Acc: " << accumulated_ms << std::endl;
 		
 		//std::cout << dt_seconds << " " << accumulated_ms << std::endl;

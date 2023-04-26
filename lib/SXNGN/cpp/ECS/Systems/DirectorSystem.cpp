@@ -450,6 +450,14 @@ namespace SXNGN::ECS
 				{
 					DropEntry<PartyEventType> event_tree;
 					event_tree.value = event_type;
+					if (i == RUINS_BAD || i == RUINS_NEUTRAL)
+					{
+						event_tree.max_weight = 20;
+					}
+					else if (i == RUINS_GOOD)
+					{
+						event_tree.max_weight = 80;
+					}
 					ruins_event_tree->children.push_back(event_tree);
 				}
 				else if (i > RUINS_BAD && i < RUINS_GOOD)
@@ -533,6 +541,7 @@ namespace SXNGN::ECS
 			event_tree.value = PartyEventType::ANY;
 			event_tree.weight = 0;
 			event_tree.accumulation = 0;
+			event_tree.max_weight = 25;
 			event_table.children.push_back(event_tree);
 			}
 			else if (i > ANY_START && i < ANY_END)

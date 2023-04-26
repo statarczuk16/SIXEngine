@@ -55,6 +55,9 @@ namespace SXNGN {
 	const std::string PARTY_HEALTH = "PARTY_HEALTH";
 	const std::string PARTY_FOOD = "PARTY_FOOD";
 
+
+	const std::string FAST_FORWARD = "FAST_FORWARD";
+
 	const std::string PAUSE = "PAUSE";
 	const std::string UNPAUSE = "UNPAUSE";
 	const std::string UPDATE_PACE = "UPDATE_PACE";
