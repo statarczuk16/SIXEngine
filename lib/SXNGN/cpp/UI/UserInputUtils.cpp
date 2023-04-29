@@ -80,6 +80,70 @@ namespace SXNGN::ECS {
 	}
 
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_item_brief_window(kiss_window* parent_window, ItemType item_type, UILayer layer)
+	{
+		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
+
+		std::function<void(std::shared_ptr<UIContainerComponent> component)> kill_ui = [](std::shared_ptr<UIContainerComponent> uicc)
+		{
+			uicc->cleanup = true;
+		};
+
+		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator.get_state_manager()->getStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE);
+		int w = 400;
+		int h = 500;
+		int window_layer_int = (int)layer;
+		int window_item_layer_int = window_layer_int + 1;
+		UILayer window_item_layer = (UILayer)window_item_layer_int;
+		UILayer window_layer = (UILayer)window_item_layer_int;
+		int window_x = overworld_viewport->x + (overworld_viewport->w / 2) - (w / 2);
+		int window_y = overworld_viewport->y + (overworld_viewport->h / 2) - (h / 2);
+		auto window_c = UserInputUtils::create_window_raw(parent_window, window_x, window_y, w, h, window_layer);
+		auto kill_window_func = std::bind(kill_ui, window_c); //function to destroy the trade window
+		auto item = item_type_to_item()[item_type];
+		char buffer[10];
+		int row = 0;
+		int col = 0;
+		std::shared_ptr<UIContainerComponent> item_name_c = UserInputUtils::create_label(window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, item.name_.data(), row, col, 0, 50);
+
+		row = 0;
+		col = 3;
+		std::shared_ptr<UIContainerComponent> exit_button_c = UserInputUtils::create_button(window_c->window_, HA_COLUMN, VA_ROW, SP_FOURTH, window_item_layer, "X", row, col, 0, 35);
+		exit_button_c->callback_functions_.push_back(kill_window_func);
+
+
+		row = 1;
+		col = 0;
+		std::shared_ptr<UIContainerComponent> item_weight_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, window_item_layer, "Weight (KG)", row, col, 0, 50);
+
+		row = 1;
+		col = 1;
+		std::shared_ptr<UIContainerComponent> item_value_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, window_item_layer, "Value (KN)", row, col, 0, 50);
+
+		row = 2;
+		col = 0;
+		std::snprintf(buffer, sizeof(buffer), "%.2f", item.weight_kg_);
+		std::shared_ptr<UIContainerComponent> item_weight_value_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, window_item_layer, buffer, row, col, 0, 50);
+		row = 2;
+		col = 1;
+		std::snprintf(buffer, sizeof(buffer), "%.2f", item.base_value_kn_);
+		std::shared_ptr<UIContainerComponent> item_value_value_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, window_item_layer, buffer, row, col, 0, 50);
+
+		row = 3;
+		col = 0;
+		std::shared_ptr<UIContainerComponent> desc_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, item.description_.data(), row, col, 0, 50);
+
+		window_c->child_components_.push_back(item_name_c);
+		window_c->child_components_.push_back(exit_button_c);
+		window_c->child_components_.push_back(item_weight_c);
+		window_c->child_components_.push_back(item_value_c);
+		window_c->child_components_.push_back(item_weight_value_c);
+		window_c->child_components_.push_back(item_value_value_c);
+		window_c->child_components_.push_back(desc_c);
+
+		return window_c;
+	}
+
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, TradeHelper* trade_helper)
 	{
 		//First, use the IDs passed in with the TraderHelper to set the inventories available to trade with

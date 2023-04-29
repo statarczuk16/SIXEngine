@@ -187,6 +187,7 @@ int init_items()
 			item.rarity_ = 30;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "AMMO";
+			item.description_ = "Endangered food source of the Pike's apex predator.";
 			item.weight_kg_ = 0.01;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -202,6 +203,7 @@ int init_items()
 			item.rarity_ = 20;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "BATTERY";
+			item.description_ = "Can be used to power gadgets. At one time subject of a moral panic over Pike kids engaged in 'numb tonguing'";
 			item.weight_kg_ = 0.15;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -216,7 +218,8 @@ int init_items()
 			item.min_find_weight_ = 50;
 			item.rarity_ = 50;
 			item.type_ = static_cast<ItemType>(i);
-			item.name_ = "FOOD";
+			item.name_ = "KALBAR";
+			item.description_ = "750 calories of ... something. Packaged in attractive, matte-blue HOPLON cardboard. Never goes bad. Never doesn't taste like a hot engine block's breath after an algae smoothie. ";
 			item.weight_kg_ = 0.001;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -231,7 +234,8 @@ int init_items()
 			item.min_find_weight_ = 10;
 			item.rarity_ = 10;
 			item.type_ = static_cast<ItemType>(i);
-			item.name_ = "FOOTWEAR";
+			item.name_ = "BOOTS";
+			item.description_ = "Wear on feet to avoid feet turning to hamburger. Place against lips for a chance at a HOPLON market license.";
 			item.weight_kg_ = 2.0;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -247,6 +251,7 @@ int init_items()
 			item.rarity_ = 5;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "GPS";
+			item.description_ = "Word is that HOPLON's rangers use these to treck out past the Pike without getting lost. Further word is that they talk to ancient robots in the sky. Use a battery to un-lost yourself.";
 			item.weight_kg_ = 1;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -262,6 +267,7 @@ int init_items()
 			item.rarity_ = 10;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "GUN";
+			item.description_ = "For safety reasons, always treat as loaded - wouldn't want the bad guys to know you traded your bullets for food already.";
 			item.weight_kg_ = 1;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -277,6 +283,7 @@ int init_items()
 			item.rarity_ = 10;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "KALNOTE";
+			item.description_ = "A portrait of a self-serious woman in impractical clothes stares past you. Text above her head guarantees that HOPLON will trade this note for an entire Kalbar. Seems like a poor trade, but that's their problem.";
 			item.weight_kg_ = 0.001;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -292,6 +299,7 @@ int init_items()
 			item.rarity_ = 5;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "MEDKIT";
+			item.description_ = "A tidy kit of bandages, creams, and pills pre-packaged and sold by HOPLON. Some read the instructions, others slather all of the above on whatever ails. Either approach seems to work on wounds and sickness. Usually.";
 			item.weight_kg_ = 1;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -307,6 +315,7 @@ int init_items()
 			item.rarity_ = 950;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "SCRAP";
+			item.description_ = "Unrefined hunks of unrefined scrap metal. Cumbersome and not particularly valuable, but abundant. Pikemen subsist on digging up the old world and selling it to the new.";
 			item.weight_kg_ = 10;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -322,6 +331,7 @@ int init_items()
 			item.rarity_ = 0;
 			item.type_ = static_cast<ItemType>(i);
 			item.name_ = "UNKNOWN";
+			item.description_ = "Unknown";
 			item.weight_kg_ = 1;
 			item_type_to_item()[item.type_] = item;
 			break;
@@ -824,11 +834,20 @@ int init_menus()
 	inventory_window_c->child_components_.push_back(label_inv_amount);
 	
 	
+	
 	for (int i = ItemType::UNKNOWN + 1; i != ItemType::END; i++)
 	{
 		ItemType item_type = static_cast<ItemType>(i);
 		std::string item_name_str = item_type_to_string()[item_type];
 		std::shared_ptr<UIContainerComponent> button_inv_item = UserInputUtils::create_button(inventory_window_c->window_, HA_COLUMN, VA_ROW, SP_HALF, UILayer::TOP, item_name_str.data(), inv_row, 0, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
+
+		std::function<void()> open_item_brief = [item_type, ui, inventory_window_c]()
+		{
+			auto brief_window_c = UserInputUtils::create_item_brief_window(nullptr, item_type, UILayer::MID);
+			ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, brief_window_c);
+		};
+		button_inv_item->callback_functions_.push_back(open_item_brief);
+
 		std::shared_ptr<UIContainerComponent> label_inv_amount = UserInputUtils::create_label(inventory_window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, UILayer::TOP, "0", inv_row, 1, BUTTON_WIDTH, STAT_LABEL_HEIGHT);
 		label_inv_amount->name_ = "OVERWORLD_amount_" + item_name_str;
 		inv_row++;
