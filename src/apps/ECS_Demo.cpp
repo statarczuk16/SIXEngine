@@ -600,7 +600,7 @@ int init_menus()
 	//************************* Pop Up Game Menu
 	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, POP_UP_GAME_MENU_X, POP_UP_GAME_MENU_Y, POP_UP_GAME_MENU_W, POP_UP_GAME_MENU_H, UILayer::TOP_4);
 	ig_ui_window_pop_up_c->window_->visible = false;
-	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
+	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, ig_ui_window_pop_up_c);
 	//Callback function to toggle menu visiblility 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_menu = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{

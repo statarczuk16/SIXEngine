@@ -174,6 +174,7 @@ typedef struct kiss_label {
 	scale_to_parent_width parent_scale;
 	int row;
 	int column;
+	int decorate;
 } kiss_label;
 
 typedef struct kiss_button {

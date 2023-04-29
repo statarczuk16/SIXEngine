@@ -318,6 +318,7 @@ int kiss_label_new_uc(kiss_label* label, kiss_window* wdw, char* text,
 	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
 	label->visible = 1;
 	label->wdw = wdw;
+	label->decorate = 1;
 	return 0;
 }
 
@@ -331,6 +332,7 @@ int kiss_label_new(kiss_label *label, kiss_window *wdw, char *text,
 	kiss_string_copy(label->text, KISS_MAX_LABEL, text, NULL);
 	label->visible = 1;
 	label->wdw = wdw;
+	label->decorate = 1;
 	return 0;
 }
 
@@ -400,8 +402,11 @@ int kiss_label_draw(kiss_label *label, SDL_Renderer *renderer)
 		return 0;
 	}
 
+	if (label->decorate)
+	{
+		kiss_decorate(renderer, &label->r_rect, kiss_sand_dark, kiss_edge);
 
-	kiss_decorate(renderer, &label->r_rect, kiss_sand_dark, kiss_edge);
+	}
 
 	kiss_rendertext_wrapped(renderer, label->text, x, y, label->r_rect.w, label->font, label->textcolor);
 	return 1;
@@ -1155,6 +1160,10 @@ int kiss_progressbar_draw(kiss_progressbar *progressbar,
 	if (progressbar->fraction < 0.0)
 	{
 		progressbar->fraction = 0.0;
+	}
+	if (progressbar->fraction > 100.0)
+	{
+		progressbar->fraction = 100.0;
 	}
 	progressbar->barrect.w = (int)(progressbar->barrect.w * progressbar->fraction);
 	if (progressbar->barrect.w < 0)

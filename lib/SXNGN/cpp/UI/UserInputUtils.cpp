@@ -105,10 +105,12 @@ namespace SXNGN::ECS {
 		int row = 0;
 		int col = 0;
 		std::shared_ptr<UIContainerComponent> item_name_c = UserInputUtils::create_label(window_c->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, item.name_.data(), row, col, 0, 50);
-
+		item_name_c->label_->decorate = 0;
 		row = 0;
 		col = 3;
-		std::shared_ptr<UIContainerComponent> exit_button_c = UserInputUtils::create_button(window_c->window_, HA_COLUMN, VA_ROW, SP_FOURTH, window_item_layer, "X", row, col, 0, 35);
+		std::shared_ptr<UIContainerComponent> exit_button_c = UserInputUtils::create_button(window_c->window_, HA_NONE, VA_NONE, SP_NONE, window_item_layer, "x", -1, -1, 35, 35);
+		exit_button_c->button_->rect.x = w - 35 - 3;
+		exit_button_c->button_->rect.y = 3;
 		exit_button_c->callback_functions_.push_back(kill_window_func);
 
 
@@ -131,7 +133,8 @@ namespace SXNGN::ECS {
 
 		row = 3;
 		col = 0;
-		std::shared_ptr<UIContainerComponent> desc_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, item.description_.data(), row, col, 0, 50);
+		std::shared_ptr<UIContainerComponent> desc_c = UserInputUtils::create_label(window_c->window_, HA_NONE, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, window_item_layer, item.description_.data(), row, col, 0, 50);
+		desc_c->label_->decorate = 0;
 
 		window_c->child_components_.push_back(item_name_c);
 		window_c->child_components_.push_back(exit_button_c);
