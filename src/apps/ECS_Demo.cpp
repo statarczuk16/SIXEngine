@@ -30,6 +30,7 @@
 #include <ECS/Systems/ParallaxSystem.hpp>
 #include <ECS/Systems/PartySystem.hpp>
 #include <ECS/Utilities/ECS_Utils.hpp>
+#include <ECS/Systems/BattleSystem.hpp>
 
 
 
@@ -74,15 +75,6 @@ std::shared_ptr<UIContainerComponent> collision_system_label;
 std::shared_ptr<UIContainerComponent> event_system_label;
 std::shared_ptr<UIContainerComponent> render_system_label;
 std::shared_ptr<UIContainerComponent> ecs_stats_label;
-
-
-
-
-void QuitHandler(Event& event)
-{
-	quit = true;
-}
-
 
 
 bool init()
@@ -600,7 +592,7 @@ int init_menus()
 	//************************* Pop Up Game Menu
 	auto ig_ui_window_pop_up_c = UserInputUtils::create_window_raw(nullptr, POP_UP_GAME_MENU_X, POP_UP_GAME_MENU_Y, POP_UP_GAME_MENU_W, POP_UP_GAME_MENU_H, UILayer::TOP_4);
 	ig_ui_window_pop_up_c->window_->visible = false;
-	ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, ig_ui_window_pop_up_c);
+	ui->add_ui_element(ComponentTypeEnum::MAIN_GAME_STATE, ig_ui_window_pop_up_c);
 	//Callback function to toggle menu visiblility 
 	std::function<void(std::shared_ptr<UIContainerComponent> uicc)> toggle_menu = [coordinator](std::shared_ptr<UIContainerComponent> uicc)
 	{
@@ -843,7 +835,7 @@ int init_menus()
 
 		std::function<void()> open_item_brief = [item_type, ui, inventory_window_c]()
 		{
-			auto brief_window_c = UserInputUtils::create_item_brief_window(nullptr, item_type, UILayer::MID);
+			auto brief_window_c = UserInputUtils::create_item_brief_window_interactable(nullptr, item_type, UILayer::MID);
 			ui->add_ui_element(ComponentTypeEnum::OVERWORLD_STATE, brief_window_c);
 		};
 		button_inv_item->callback_functions_.push_back(open_item_brief);
@@ -1178,6 +1170,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::CORE_BG_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TACTICAL_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::BATTLE_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::OVERWORLD_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
@@ -1323,6 +1316,15 @@ int main(int argc, char* args[])
 		gCoordinator.SetSystemSignatureActable<Director_System>(signature);
 	}
 	director_system->Init();
+
+	auto battle_system = gCoordinator.RegisterSystem<Battle_System>();
+	{
+		Signature signature;
+		//ACTS on Parties
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::DIRECTOR));
+		gCoordinator.SetSystemSignatureActable<Director_System>(signature);
+	}
+	battle_system->Init();
 
 
 

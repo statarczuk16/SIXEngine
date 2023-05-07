@@ -54,6 +54,14 @@ namespace SXNGN::ECS {
 		}
 	};
 
+	struct BattleGameStateComponent : ECS_Component
+	{
+		BattleGameStateComponent()
+		{
+			component_type = ComponentTypeEnum::BATTLE_STATE;
+		}
+	};
+
 	static ECS_Component* Create_Gamestate_Component_from_Enum(ComponentTypeEnum game_state)
 	{
 		switch (game_state)
@@ -62,6 +70,7 @@ namespace SXNGN::ECS {
 		case ComponentTypeEnum::MAIN_MENU_STATE: return new MainMenuStateComponent();
 		case ComponentTypeEnum::CORE_BG_GAME_STATE: return new CoreBackGroundGameStateComponent();
 		case ComponentTypeEnum::TACTICAL_STATE: return new TacticalGameStateComponent();
+		case ComponentTypeEnum::BATTLE_STATE: return new BattleGameStateComponent();
 		case ComponentTypeEnum::OVERWORLD_STATE: return new OverworldGameStateComponent();
 		default: 
 		{

@@ -596,8 +596,27 @@ namespace SXNGN::ECS {
 				auto party_ptr = static_cast<Party*>(party_component);
 
 				gCoordinator->CheckInComponent(party_entity, ComponentTypeEnum::PARTY);
+				Event_Component new_game_event;
+				new_game_event.e.common.type = EventType::STATE_CHANGE;
+				new_game_event.e.state_change.new_states.push_front(ComponentTypeEnum::BATTLE_STATE);
+				new_game_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::OVERWORLD_STATE);
+				Entity event_entity = Entity_Builder_Utils::Create_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, new_game_event, "Start Battle Event");
+
+				Entity bandit_entity = gCoordinator->CreateEntity();
+				Party* bandit_party = new Party();
+				bandit_party->hands_ = 1;
+				bandit_party->add_item(ItemType::FOOD, 1);
+				gCoordinator->AddComponent(bandit_entity, bandit_party);
+
+				Entity battle_entity = gCoordinator->CreateEntity();
+				Battle* battle = new Battle();
+				battle->battle_state_ = BattleState::WAIT_TO_START;
+				battle->party_right_ = gCoordinator->GetUUIDFromEntity(bandit_entity);
+				battle->party_left_ = gCoordinator->getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+
+				gCoordinator->AddComponent(battle_entity, battle);
+
 				
-				yield_func();
 				
 			};
 			std::vector<std::function<void()>> options_list_events;

@@ -26,6 +26,7 @@ namespace SXNGN::ECS {
 	INPUT_CACHE,
 	INPUT_TAGS,
 	SELECTABLE,
+	BATTLE,
 	WORLD_MAP,
 	WORLD_LOCATION,
 	UI_SINGLE,
@@ -47,6 +48,7 @@ namespace SXNGN::ECS {
 	MAIN_SETTINGS_STATE,
 	TACTICAL_STATE,
 	OVERWORLD_STATE,
+	BATTLE_STATE,
 	CORE_BG_GAME_STATE,//don't forget to add to component_type_enum_to_string and reverse when adding a new enum
 	NUM_COMPONENT_TYPES
 };
@@ -75,6 +77,7 @@ namespace SXNGN::ECS {
 			{ComponentTypeEnum::INPUT_TAGS,"INPUT_TAGS"},
 			{ComponentTypeEnum::COLLISION,"COLLISION"},
 			{ComponentTypeEnum::TASK,"TASK"},
+			{ComponentTypeEnum::BATTLE,"BATTLE"},
 			{ComponentTypeEnum::TASK_WORKER,"TASK_WORKER"},
 			{ComponentTypeEnum::TILE,"TILE"},
 			{ComponentTypeEnum::WORLD_MAP,"WORLD_MAP"},
@@ -91,6 +94,7 @@ namespace SXNGN::ECS {
 			{ComponentTypeEnum::MAIN_GAME_STATE,"MAIN_GAME_STATE"},
 			{ComponentTypeEnum::MAIN_SETTINGS_STATE,"MAIN_SETTINGS_STATE"},
 			{ComponentTypeEnum::TACTICAL_STATE,"TACTICAL_STATE"},
+			{ComponentTypeEnum::BATTLE_STATE,"BATTLE_STATE"},
 			{ComponentTypeEnum::OVERWORLD_STATE,"OVERWORLD_STATE"},
 			{ComponentTypeEnum::NEW_GAME_STATE,"NEW_GAME_STATE"},
 			{ComponentTypeEnum::GAME_STATE_START_HERE,"GAME_STATE_START_HERE"}
@@ -117,6 +121,7 @@ namespace SXNGN::ECS {
 			{"CAMERA_SINGLE",ComponentTypeEnum::CAMERA_SINGLE},
 			{"DATABASE_SINGLE",ComponentTypeEnum::DATABASE_SINGLE},
 			{"MOVEABLE",ComponentTypeEnum::MOVEABLE},
+			{"BATTLE",ComponentTypeEnum::BATTLE},
 			{"INPUT_CACHE",ComponentTypeEnum::INPUT_CACHE},
 			{"INPUT_TAGS",ComponentTypeEnum::INPUT_TAGS},
 			{"COLLISION",ComponentTypeEnum::COLLISION},
@@ -137,6 +142,7 @@ namespace SXNGN::ECS {
 			{"MAIN_GAME_STATE",ComponentTypeEnum::MAIN_GAME_STATE},
 			{"MAIN_SETTINGS_STATE",ComponentTypeEnum::MAIN_SETTINGS_STATE},
 			{"TACTICAL_STATE",ComponentTypeEnum::TACTICAL_STATE},
+			{"BATTLE_STATE",ComponentTypeEnum::BATTLE_STATE},
 			{"OVERWORLD_STATE",ComponentTypeEnum::OVERWORLD_STATE},
 			{"NEW_GAME_STATE",ComponentTypeEnum::NEW_GAME_STATE},
 			{"GAME_STATE_START_HERE",ComponentTypeEnum::GAME_STATE_START_HERE},

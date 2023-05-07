@@ -23,3 +23,4 @@
 #include <ECS/Components/Party.hpp>
 #include <ECS/Components/Market.hpp>
 #include <ECS/Components/Director.hpp>
+#include <ECS/Components/Battle.hpp>

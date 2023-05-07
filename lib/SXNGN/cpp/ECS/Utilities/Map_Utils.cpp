@@ -580,7 +580,7 @@ namespace SXNGN::ECS {
 		auto director = gCoordinator->CreateEntity();
 		auto director_comp = new Director();
 
-		gCoordinator->AddComponent(director, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
+		gCoordinator->AddComponent(director, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
 		//movement_character->m_speed_m_s = 10.0;
 		gCoordinator->AddComponent(director, director_comp);
 

@@ -589,8 +589,8 @@ namespace SXNGN::ECS
 
 		//disable robber for until combat implemented
 		DropEntry<PartyEventType>* event_ptr = event_table.find_event_by_type(PartyEventType::ROAD_BAD_ROBBER);
-		event_ptr->max_weight = 0.0;
-		event_ptr->weight = 0.0;
+		event_ptr->max_weight = 1000.0;
+		event_ptr->weight = 1000.0;
 	
 		DropEntry<PartyEventType>* et = event_table.find_event_by_type(PartyEventType::ANY_NEUTRAL);
 		et->children.push_back(none_event);

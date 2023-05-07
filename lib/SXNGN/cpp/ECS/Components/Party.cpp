@@ -235,7 +235,143 @@ namespace SXNGN::ECS {
 		}
 	}
 
-	int Party::get_fighting_strength(std::string& result)
+	int Party::use_item(ItemType item, std::string& result)
+	{
+		switch (item)
+		{
+		case ItemType::AMMO:
+		{
+			result = "Unuseable Item";
+			return 1;
+			break;
+		}
+		case ItemType::BATTERY:
+		{
+			result = "Unuseable Item";
+			return 1;
+			break;
+		}
+		case ItemType::FOOD:
+		{
+			result = "Unuseable Item";
+			return 1;
+			break;
+		}
+		case ItemType::FOOTWEAR:
+		{
+			result = "Footwear worn automatically.";
+			return 1;
+			break;
+		}
+		case ItemType::GPS:
+		{
+			if (can_use_gps(result))
+			{
+				return use_gps(result);
+			}
+			break;
+		}
+		case ItemType::GUN:
+		{
+			result = "Can't use outside combat.";
+			return 1;
+			break;
+		}
+		case ItemType::KALNOTE:
+		{
+			result = "Can't use outside trading.";
+			return 1;
+			break;
+		}
+		case ItemType::MEDKIT:
+		{
+			if (can_use_medit(result))
+			{
+				return can_use_medit(result);
+			}
+			break;
+		}
+		case ItemType::SCRAP:
+		{
+			result = "Can't use outside trading.";
+			return 1;
+			break;
+		}
+		default:
+		{
+			result = "Unuseable Item";
+			return 1;
+			break;
+		}
+		}
+	}
+
+	bool Party::can_use_item(ItemType item, std::string& result)
+	{
+		switch (item)
+		{
+			case ItemType::AMMO:
+			{
+				result = "Unable Item";
+				return false;
+				break;
+			}
+			case ItemType::BATTERY:
+			{
+				result = "Unable Item";
+				return false;
+				break;
+			}
+			case ItemType::FOOD:
+			{
+				result = "Rest to eat.";
+				return false;
+				break;
+			}
+			case ItemType::FOOTWEAR:
+			{
+				result = "Footwear worn automatically.";
+				return false;
+				break;
+			}
+			case ItemType::GPS:
+			{
+				return can_use_gps(result);
+				break;
+			}
+			case ItemType::GUN:
+			{
+				result = "Can't use outside combat.";
+				return false;
+				break;
+			}
+			case ItemType::KALNOTE:
+			{
+				result = "Can't use outside trading.";
+				return false;
+				break;
+			}
+			case ItemType::MEDKIT:
+			{
+				return can_use_medit(result);
+				break;
+			}
+			case ItemType::SCRAP:
+			{
+				result = "Can't use outside trading.";
+				return false;
+				break;
+			}
+			default:
+			{
+				result = "Unable Item";
+				return false;
+				break;
+			}
+		}
+	}
+
+	int Party::get_fighting_strength(std::string& result) const
 	{
 		//hand with a gun = 10 strength
 		//hand with no gun = 2 strength
@@ -244,17 +380,17 @@ namespace SXNGN::ECS {
 		int strength = 0;
 		int guns_temp = 0;
 		result = "Fighting Strength\n";
-		if (inventory_[ItemType::AMMO] > inventory_[ItemType::GUN])
+		if (inventory_.at(ItemType::AMMO) > inventory_.at(ItemType::GUN))
 		{
 			result += "Ammo for all guns.\n";
 			//if more ammo than guns, all guns operational
-			guns_temp = inventory_[ItemType::GUN];
+			guns_temp = inventory_.at(ItemType::GUN);
 		}
 		else
 		{
 			//else if we have say 5 bullets and 10 guns, there are really only 5 guns available
-			result += "Ammo for " + std::to_string(inventory_[ItemType::AMMO]) + " guns.\n";
-			guns_temp = inventory_[ItemType::AMMO];
+			result += "Ammo for " + std::to_string(inventory_.at(ItemType::AMMO)) + " guns.\n";
+			guns_temp = inventory_.at(ItemType::AMMO);
 		}
 		if (guns_temp >= hands_)
 		{

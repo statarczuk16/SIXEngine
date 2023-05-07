@@ -11,7 +11,7 @@ set(CMAKE_BUILD_TYPE Debug)
 
 set(VCLIB_PATH "${CMAKE_SOURCE_DIR}/vclib")
 #put external libraries on path
-list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/") 
+list(APPEND CMAKE_PREFIX_PATH  "${CMAKE_SOURCE_DIR}/vclib/")  
 #put the cmake sdl tools on the path
 list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)  
 
@@ -19,16 +19,16 @@ list(APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake/sdl2)
 if(MSVC)  
 	set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} /Zi")
 	set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} /Zi")
-	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG") 
+	set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} /DEBUG")  
 	# Enable AddressSanitizer
 	#set(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -fsanitize=address")
 	#set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -fsanitize=address")
 
-	# Set linker flags for AddressSanitizer
+	# Set linker flags for AddressSanitizer 
 	#set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -fsanitize=address")
 	message("Setting hints for MSVC")
 	set(SDL_HINT_END "include/")
-	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)   
+	set(SDL_HINT_START ${VCLIB_PATH}/visual/*/)    
 	#add_compile_options(/WX)
     #add_link_options(/WX)
 elseif (MINGW)

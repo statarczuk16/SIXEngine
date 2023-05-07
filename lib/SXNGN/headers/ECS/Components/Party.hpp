@@ -67,7 +67,11 @@ namespace SXNGN::ECS {
 
 		int hands_without_footwear(std::string& result);
 
-		int get_fighting_strength(std::string& result);
+		int get_fighting_strength(std::string& result) const;
+
+		bool can_use_item(ItemType item, std::string& result);
+
+		int use_item(ItemType item, std::string& result);
 
 	};
 

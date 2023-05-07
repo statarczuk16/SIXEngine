@@ -79,6 +79,27 @@ namespace SXNGN::ECS {
 		return std::make_shared<UIContainerComponent>(new_ui_container);
 	}
 
+	std::shared_ptr<UIContainerComponent> UserInputUtils::create_item_brief_window_interactable(kiss_window* parent_window, ItemType item_type, UILayer layer)
+	{
+		Coordinator gCoordinator = *SXNGN::Database::get_coordinator();
+		std::shared_ptr<UIContainerComponent> item_brief_window_c = create_item_brief_window(parent_window, item_type, layer);
+		sole::uuid player_id = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+		if (player_id == SXNGN::BAD_UUID)
+		{
+			return nullptr;
+		}
+		Entity player_entity = gCoordinator.GetEntityFromUUID(player_id);
+		auto party_data = gCoordinator.CheckOutComponent(player_entity, ComponentTypeEnum::PARTY);
+		auto party_ptr = static_cast<Party*>(party_data);
+		int interactable_w = 200;
+		int interactable_h = 200;
+		auto window_c = UserInputUtils::create_window_raw(item_brief_window_c->window_, 0 - interactable_w, 0, interactable_w, interactable_h, layer);
+		item_brief_window_c->child_components_.push_back(window_c);
+
+		gCoordinator.CheckInComponent(player_entity, ComponentTypeEnum::PARTY);
+		return item_brief_window_c;
+	}
+
 
 	std::shared_ptr<UIContainerComponent> UserInputUtils::create_item_brief_window(kiss_window* parent_window, ItemType item_type, UILayer layer)
 	{
@@ -124,11 +145,11 @@ namespace SXNGN::ECS {
 
 		row = 2;
 		col = 0;
-		std::snprintf(buffer, sizeof(buffer), "%.2f", item.weight_kg_);
+		std::snprintf(buffer, sizeof(buffer), "%.3f", item.weight_kg_);
 		std::shared_ptr<UIContainerComponent> item_weight_value_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, window_item_layer, buffer, row, col, 0, 50);
 		row = 2;
 		col = 1;
-		std::snprintf(buffer, sizeof(buffer), "%.2f", item.base_value_kn_);
+		std::snprintf(buffer, sizeof(buffer), "%.3f", item.base_value_kn_);
 		std::shared_ptr<UIContainerComponent> item_value_value_c = UserInputUtils::create_label(window_c->window_, HA_COLUMN, HA_CENTER, VA_ROW, SP_HALF, window_item_layer, buffer, row, col, 0, 50);
 
 		row = 3;

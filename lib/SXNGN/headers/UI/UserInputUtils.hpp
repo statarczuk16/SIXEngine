@@ -55,6 +55,8 @@ namespace SXNGN::ECS {
 
 		static std::shared_ptr<UIContainerComponent> create_item_brief_window(kiss_window* parent_window, ItemType item_type, UILayer layer);
 
+		static std::shared_ptr<UIContainerComponent> create_item_brief_window_interactable(kiss_window* parent_window, ItemType item_type, UILayer layer);
+
 		static std::shared_ptr<UIContainerComponent> create_trading_menu(kiss_window* parent_window, std::string title, std::string detail, UILayer layer, TradeHelper* trade_helper);
 
 
