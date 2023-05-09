@@ -536,6 +536,13 @@ int init_menus()
 	overworld_viewport->w -= 2* MAIN_GAME_STATE_SIDE_MENU_WIDTH;
 	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::MAIN_GAME_STATE, overworld_viewport);
 
+	overworld_viewport = coordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::BATTLE_STATE);
+	overworld_viewport->y = MAIN_GAME_STATE_MENU_HEIGHT;
+	overworld_viewport->x = MAIN_GAME_STATE_SIDE_MENU_WIDTH;
+	//offset for a strip of menu at the bottom
+	overworld_viewport->h = OVERWORLD_STATE_HEIGHT;
+	coordinator->get_state_manager()->setStateViewPort(ComponentTypeEnum::BATTLE_STATE, overworld_viewport);
+
 
 
 	//Open Menu Button
@@ -1171,6 +1178,7 @@ int main(int argc, char* args[])
 	gCoordinator.RegisterComponent(ComponentTypeEnum::MAIN_SETTINGS_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TACTICAL_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::BATTLE_STATE);
+	gCoordinator.RegisterComponent(ComponentTypeEnum::BATTLE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::OVERWORLD_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::NEW_GAME_STATE);
 	gCoordinator.RegisterComponent(ComponentTypeEnum::TASK);
@@ -1321,7 +1329,7 @@ int main(int argc, char* args[])
 	{
 		Signature signature;
 		//ACTS on Parties
-		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::DIRECTOR));
+		signature.set(gCoordinator.GetComponentType(ComponentTypeEnum::BATTLE));
 		gCoordinator.SetSystemSignatureActable<Director_System>(signature);
 	}
 	battle_system->Init();
@@ -1478,7 +1486,7 @@ int main(int argc, char* args[])
 			collision_system->Update(dt_seconds);
 			strncpy(collision_system_ms->label_->text, std::to_string(system_timer.getMSSinceTimerStart() / 1000.f).c_str(), KISS_MAX_LENGTH);
 
-			//Phys End
+			battle_system->Update(dt_seconds);
 			
 
 			system_timer.start();

@@ -65,17 +65,18 @@ namespace SXNGN::ECS {
 	void Battle_System::Init_Menus(Battle* battle)
 	{
 		auto gCoordinator = Database::get_coordinator();
-		auto settings = gCoordinator->get_state_manager()->getGameSettings();
-		auto resolution = settings->resolution;
+		std::shared_ptr<SDL_Rect> overworld_viewport = gCoordinator->get_state_manager()->getStateViewPort(ComponentTypeEnum::BATTLE_STATE);
+		
 		auto ui = UICollectionSingleton::get_instance();
 		Entity left_entity = gCoordinator->GetEntityFromUUID(battle->party_left_);
 		Entity right_entity = gCoordinator->GetEntityFromUUID(battle->party_right_);
 
 		const Party* left_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(left_entity, ComponentTypeEnum::PARTY));
 		const Party* right_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(right_entity, ComponentTypeEnum::PARTY));
-		std::string reason;
-		auto left_combat_strength = left_party->get_fighting_strength(reason);
-		auto right_combat_strength = right_party->get_fighting_strength(reason);
+		std::string left_reason;
+		std::string right_reason;
+		auto left_combat_strength = left_party->get_fighting_strength(left_reason);
+		auto right_combat_strength = right_party->get_fighting_strength(right_reason);
 
 		const int WINDOW_HEIGHT = 600;
 		const int WINDOW_WIDTH = 400;
@@ -99,25 +100,71 @@ namespace SXNGN::ECS {
 
 		
 
-		auto left_win = UserInputUtils::create_window_raw(nullptr, 0, TOP_BUFFER, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
-		auto right_win = UserInputUtils::create_window_raw(nullptr, resolution.w - WINDOW_WIDTH, TOP_BUFFER, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
+		auto left_win = UserInputUtils::create_window_raw(nullptr, 0, overworld_viewport->y + TOP_BUFFER, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
+		auto right_win = UserInputUtils::create_window_raw(nullptr, overworld_viewport->w - WINDOW_WIDTH, overworld_viewport->y + TOP_BUFFER, WINDOW_WIDTH, WINDOW_HEIGHT, UILayer::BOTTOM);
 		
 		std::vector<std::shared_ptr<UIContainerComponent>> left_labels;
 		std::vector<std::shared_ptr<UIContainerComponent>>  right_labels;
 
 		int row = 0;
 
-		auto left_def_name_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_CENTER, SP_FILL_WITH_BUFFER, UILayer::MID, "Defensive Strength", row++, -1, -1, LABEL_HEIGHT);		
-		auto left_def_val_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_CENTER, SP_FILL, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
-		sprintf(left_def_val_c->label_->text, "%.1f", left_combat_strength);
+		auto left_def_name_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Defensive Strength", row++, -1, -1, LABEL_HEIGHT);		
+		left_win->child_components_.push_back(left_def_name_c);
 
-		auto left_atk_name_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_CENTER, SP_FILL_WITH_BUFFER, UILayer::MID, "Offensive Strength", row++, -1, -1, LABEL_HEIGHT);
-		auto left_atk_val_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_CENTER, SP_FILL, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
-		sprintf(left_atk_val_c->label_->text, "%.1f", left_combat_strength);
+		auto left_def_val_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
+		sprintf(left_def_val_c->label_->text, "%d", left_combat_strength);
+		left_win->child_components_.push_back(left_def_val_c);
 
-		auto left_party_nums_name_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_CENTER, SP_FILL_WITH_BUFFER, UILayer::MID, "Party", row++, -1, -1, LABEL_HEIGHT);
-		auto left_party_nums_val_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_CENTER, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
-		sprintf(left_atk_val_c->label_->text, "%.1f", left_party->hands_);
+
+		auto left_atk_name_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Offensive Strength", row++, -1, -1, LABEL_HEIGHT);
+		left_win->child_components_.push_back(left_atk_name_c);
+
+		auto left_atk_val_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
+		sprintf(left_atk_val_c->label_->text, "%d", left_combat_strength);
+		left_win->child_components_.push_back(left_atk_val_c);
+
+
+		auto left_party_nums_name_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Party", row++, -1, -1, LABEL_HEIGHT);
+		left_win->child_components_.push_back(left_party_nums_name_c);
+
+
+		auto left_party_nums_val_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
+		sprintf(left_party_nums_val_c->label_->text, "%.1f", left_party->hands_);
+		left_win->child_components_.push_back(left_party_nums_val_c);
+
+		auto left_party_reason_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, left_reason.data(), row++, -1, -1, LABEL_HEIGHT);
+		left_win->child_components_.push_back(left_party_reason_c);
+		left_party_reason_c->label_->decorate = 0;
+
+		row = 0;
+
+		auto right_def_name_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Defensive Strength", row++, -1, -1, LABEL_HEIGHT);
+		right_win->child_components_.push_back(right_def_name_c);
+
+		auto right_def_val_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
+		sprintf(right_def_val_c->label_->text, "%d", right_combat_strength);
+		right_win->child_components_.push_back(right_def_val_c);
+
+		
+		auto right_atk_name_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Offensive Strength", row++, -1, -1, LABEL_HEIGHT);
+		right_win->child_components_.push_back(right_atk_name_c);
+
+		auto right_atk_val_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
+		sprintf(right_atk_val_c->label_->text, "%d", right_combat_strength);
+		right_win->child_components_.push_back(right_atk_val_c);
+
+
+		auto right_party_nums_name_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Party", row++, -1, -1, LABEL_HEIGHT);
+		right_win->child_components_.push_back(right_party_nums_name_c);
+
+
+		auto right_party_nums_val_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, " -- Uninit --", row++, -1, -1, LABEL_HEIGHT);
+		sprintf(right_party_nums_val_c->label_->text, "%.1f", right_party->hands_);
+		right_win->child_components_.push_back(right_party_nums_val_c);
+
+		auto right_party_reason_c = UserInputUtils::create_label(right_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, right_reason.data(), row++, -1, -1, LABEL_HEIGHT);
+		right_win->child_components_.push_back(right_party_reason_c);
+		right_party_reason_c->label_->decorate = 0;
 
 		ui->add_ui_element(ComponentTypeEnum::BATTLE_STATE, left_win);
 		ui->add_ui_element(ComponentTypeEnum::BATTLE_STATE, right_win);

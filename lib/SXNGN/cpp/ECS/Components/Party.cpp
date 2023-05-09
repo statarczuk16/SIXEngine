@@ -388,19 +388,21 @@ namespace SXNGN::ECS {
 		}
 		else
 		{
+			char ammo_for[50];
 			//else if we have say 5 bullets and 10 guns, there are really only 5 guns available
-			result += "Ammo for " + std::to_string(inventory_.at(ItemType::AMMO)) + " guns.\n";
+			sprintf(ammo_for, "Ammo for %d guns\n", inventory_.at(ItemType::AMMO));
+			result += ammo_for;
 			guns_temp = inventory_.at(ItemType::AMMO);
 		}
 		if (guns_temp >= hands_)
 		{
 			//all hands have guns, 
-			result += "Guns for all hands.\n";
+			result += "Guns for all hands + (" + std::to_string(hands_ * 10) + ")\n";
 			strength += hands_ * 10;
 		}
 		else if (hands_ > guns_temp)
 		{
-			result += "Guns for " + std::to_string(guns_temp) + " hands\n";
+			result += "Guns for " + std::to_string(guns_temp) + " hands + (" + std::to_string(guns_temp * 10) + ")\n";
 			//if not enough guns to go around
 			//add 10 for every person with a gun
 			int temp = hands_;
@@ -408,6 +410,7 @@ namespace SXNGN::ECS {
 			temp -= guns_temp;
 			//add 2 for the rest without guns
 			strength += temp * 2;
+			result += std::to_string(temp) + " unarmed hands + (" + std::to_string(temp * 2) + ")\n";
 		}
 		return strength;
 	}

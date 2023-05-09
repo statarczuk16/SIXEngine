@@ -615,6 +615,7 @@ namespace SXNGN::ECS {
 				battle->party_left_ = gCoordinator->getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
 
 				gCoordinator->AddComponent(battle_entity, battle);
+				gCoordinator->AddComponent(battle_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::CORE_BG_GAME_STATE));
 
 				
 				
