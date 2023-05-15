@@ -15,6 +15,9 @@ namespace SXNGN::ECS {
 
 		void Update(double dt);
 		void Init_Menus(Battle* battle);
+		void Enemy_Attack(Battle* battle);
+		void ShowVictoryScreen(Battle* battle);
+		void UpdateUI(Battle* battle);
 
 	private:
 

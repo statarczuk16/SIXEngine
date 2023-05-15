@@ -13,7 +13,9 @@ namespace SXNGN::ECS {
 		LEFT_TURN,
 		RIGHT_TURN,
 		AFTER_ACTION,
-		COMPLETE
+		VICTORY,
+		WAIT_FOR_GUI,
+		DEFEAT
 	};
 	/// <summary>
 	/// Contains data displayed when selected
