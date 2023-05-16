@@ -350,7 +350,7 @@ namespace SXNGN::ECS {
 		gCoordinator->AddComponent(character, char_render);
 		gCoordinator->AddComponent(character, char_loc);
 		gCoordinator->AddComponent(character, party);
-		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(state));
+		gCoordinator->AddComponent(character, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::OVERWORLD_STATE));
 		User_Input_Tags_Collection* input_tags_comp = new User_Input_Tags_Collection();
 		input_tags_comp->input_tags_.insert(User_Input_Tags::WASD_CONTROL);
 		input_tags_comp->input_tags_.insert(User_Input_Tags::PLAYER_CONTROL_MOVEMENT);

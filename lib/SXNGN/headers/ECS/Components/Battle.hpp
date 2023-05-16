@@ -15,6 +15,7 @@ namespace SXNGN::ECS {
 		AFTER_ACTION,
 		VICTORY,
 		WAIT_FOR_GUI,
+		ESCAPED,
 		DEFEAT
 	};
 	/// <summary>

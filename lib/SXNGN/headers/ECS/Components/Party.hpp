@@ -20,32 +20,37 @@ namespace SXNGN::ECS {
 		
 		std::vector<sole::uuid> character_ids_; //uuuid of unique characters who have their own entities
 		std::vector<sole::uuid> world_location_ids_; //uuids of world locations character can access
-		double health_;
-		double stamina_;
-		double hands_;
-		double pace_abs_;
-		double encumbrance_kg_;
-		double health_max_;
-		double stamina_max_;
+		double health_ = 0.0;
+		double stamina_ = 0.0;
+		double hands_ = 0.0;
+		double pace_abs_ = 0.0;
+		double encumbrance_kg_ = 0.0;
+		double encumbrance_real_kg_ = 0.0; //after accounting for sickness etc
+		double health_max_ = 0.0;
+		double stamina_max_ = 0.0;
+		double pace_m_s_ = 0.0; //accounts for encumbrance and sickness
+		double pace_real_m_s_ = 0.0; //accounts for encumbrance and sickness and road condition
 
 		std::map<ItemType, double> inventory_;
 		
-		double lost_counter_; //party will make no progress until counter hits 0
-		double sick_counter_s_; //encumbrance multiplied until counter hits 0
-		double weather_counter_s_; //take damage until hits 0
-		double lost_counter_max_; //party will make no progress until counter hits 0
-		double sick_counter_max_; //stamina regeneration halved until counter hits 0
-		double weather_counter_max_; //stamina regeneration halved until counter hits 0
+		double lost_counter_ = 0.0; //party will make no progress until counter hits 0
+		double sick_counter_s_ = 0.0; //encumbrance multiplied until counter hits 0
+		double weather_counter_s_ = 0.0; //take damage until hits 0
+		double lost_counter_max_ = 0.0; //party will make no progress until counter hits 0
+		double sick_counter_max_ = 0.0; //stamina regeneration halved until counter hits 0
+		double weather_counter_max_ = 0.0; //stamina regeneration halved until counter hits 0
 
-		EventSeverity sick_level_;
-		EventSeverity weather_level_;
+		EventSeverity sick_level_ = EventSeverity::UNKNOWN;
+		EventSeverity weather_level_ = EventSeverity::UNKNOWN;
 
 		
-		double weight_capacity_kg_;
-		double overencumbered_mild_thresh_kg_; //if encumbrance is greater than this val, pace slows 
-		double overencumbered_medium_thresh_kg_;
-		double overencumbered_extreme_thresh_kg_;
+		double weight_capacity_kg_ = 0.0;
+		double overencumbered_mild_thresh_kg_ = 0.0; //if encumbrance is greater than this val, pace slows 
+		double overencumbered_medium_thresh_kg_ = 0.0;
+		double overencumbered_extreme_thresh_kg_ = 0.0;
 		double encumbrance_penalty_m_s_ = 0.0;
+
+		void update_player_ui();
 
 		void update_encumbrance();
 
@@ -85,6 +90,7 @@ namespace SXNGN::ECS {
 			{"stamina_",p.stamina_},
 			{"hands_",p.hands_},
 			{"encumbrance_kg_",p.encumbrance_kg_},
+			{"encumbrance_real_kg_",p.encumbrance_real_kg_},
 			{"health_max_",p.health_max_},
 			{"stamina_max_",p.stamina_max_},
 			{"inventory_",p.inventory_},
@@ -101,7 +107,8 @@ namespace SXNGN::ECS {
 			{"overencumbered_medium_thresh_kg_",p.overencumbered_medium_thresh_kg_},
 			{"overencumbered_extreme_thresh_kg_",p.overencumbered_extreme_thresh_kg_},
 			{"encumbrance_penalty_m_s_",p.encumbrance_penalty_m_s_},
-
+			{"pace_m_s_",p.pace_m_s_},
+			{"pace_real_m_s_",p.pace_real_m_s_}
 		};
 
 	}
@@ -116,6 +123,7 @@ namespace SXNGN::ECS {
 		j.at("stamina_").get_to(p.stamina_);
 		j.at("hands_").get_to(p.hands_);
 		j.at("encumbrance_kg_").get_to(p.encumbrance_kg_);
+		j.at("encumbrance_real_kg_").get_to(p.encumbrance_real_kg_);
 		j.at("health_max_").get_to(p.health_max_);
 		j.at("stamina_max_").get_to(p.stamina_max_);
 		j.at("inventory_").get_to(p.inventory_);
@@ -132,6 +140,8 @@ namespace SXNGN::ECS {
 		j.at("overencumbered_medium_thresh_kg_").get_to(p.overencumbered_medium_thresh_kg_);
 		j.at("overencumbered_extreme_thresh_kg_").get_to(p.overencumbered_extreme_thresh_kg_);
 		j.at("encumbrance_penalty_m_s_").get_to(p.encumbrance_penalty_m_s_);
+		j.at("pace_m_s_").get_to(p.pace_m_s_);
+		j.at("pace_real_m_s_").get_to(p.pace_real_m_s_);
 		
 
 	}

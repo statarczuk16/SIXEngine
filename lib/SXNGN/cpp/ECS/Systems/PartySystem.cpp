@@ -29,36 +29,51 @@ namespace SXNGN::ECS
 		while (it_act != m_actable_entities.end())
 		{
 			auto const& entity_actable = *it_act;
+
+			
+
 			it_act++;
+
+			// Only player character affected by this system
+			sole::uuid player_uuid = gCoordinator.getUUID(SXNGN::OVERWORLD_PLAYER_UUID);
+			Entity player_id = gCoordinator.GetEntityFromUUID(player_uuid);
+			if (entity_actable != player_id)
+			{
+				continue;
+			}
+
 			auto party_data = gCoordinator.CheckOutComponent(entity_actable, ComponentTypeEnum::PARTY);
 			if (party_data)
 			{
 				ECS_Utils::update_pace();
 				Party* party_ptr = static_cast<Party*>(party_data);
 				std::ostringstream party_status_oss;
-
-				//Handle Location in World
-
-				auto world_map_uuid = gCoordinator.getUUID(SXNGN::WORLD_MAP);
-				auto world_map_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(world_map_uuid), ComponentTypeEnum::WORLD_MAP);
-				const WorldMap* worldmap_ptr = static_cast<const WorldMap*>(world_map_data);
+				party_ptr->update_player_ui();
+				
 				
 				auto location_data = gCoordinator.GetComponentReadOnly(entity_actable, ComponentTypeEnum::LOCATION);
 				const Location* location_ptr = static_cast<const Location*>(location_data);
-
-				int world_map_grid_x = int(location_ptr->m_pos_x_m_ * SXNGN::METERS_TO_PIXELS_2 * SXNGN::OVERWORLD_MULTIPLIER * SXNGN::OVERWORLD_GRIDS_PER_METER);
-				int world_map_grid_y = int(location_ptr->m_pos_y_m_ * SXNGN::METERS_TO_PIXELS_2 * SXNGN::OVERWORLD_MULTIPLIER * SXNGN::OVERWORLD_GRIDS_PER_METER);
-
-				std::vector<sole::uuid> party_map_location_uuids;
-				if (worldmap_ptr->world_locations_.size() > world_map_grid_y)
+				if (location_ptr)
 				{
-					if (worldmap_ptr->world_locations_.at(world_map_grid_y).size() > world_map_grid_x)
+					//Handle Location in World
+					auto world_map_uuid = gCoordinator.getUUID(SXNGN::WORLD_MAP);
+					auto world_map_data = gCoordinator.GetComponentReadOnly(gCoordinator.GetEntityFromUUID(world_map_uuid), ComponentTypeEnum::WORLD_MAP);
+					const WorldMap* worldmap_ptr = static_cast<const WorldMap*>(world_map_data);
+
+					int world_map_grid_x = int(location_ptr->m_pos_x_m_ * SXNGN::METERS_TO_PIXELS_2 * SXNGN::OVERWORLD_MULTIPLIER * SXNGN::OVERWORLD_GRIDS_PER_METER);
+					int world_map_grid_y = int(location_ptr->m_pos_y_m_ * SXNGN::METERS_TO_PIXELS_2 * SXNGN::OVERWORLD_MULTIPLIER * SXNGN::OVERWORLD_GRIDS_PER_METER);
+
+					std::vector<sole::uuid> party_map_location_uuids;
+					if (worldmap_ptr->world_locations_.size() > world_map_grid_y)
 					{
-						party_map_location_uuids = worldmap_ptr->world_locations_[world_map_grid_y][world_map_grid_x];
+						if (worldmap_ptr->world_locations_.at(world_map_grid_y).size() > world_map_grid_x)
+						{
+							party_map_location_uuids = worldmap_ptr->world_locations_[world_map_grid_y][world_map_grid_x];
+						}
 					}
+					party_ptr->world_location_ids_ = party_map_location_uuids;
 				}
-				party_ptr->world_location_ids_ = party_map_location_uuids;
-				
+
 
 				// Handle Pace
 			
@@ -80,11 +95,16 @@ namespace SXNGN::ECS
 
 				if (pace_go.second && pace_penalty_overworld.second)
 				{
-					double pace_m_s = abs(pace_go.first) * PARTY_PACE_NOMINAL_M_S - pace_penalty_overworld.first - party_ptr->encumbrance_penalty_m_s_;
-					party_status_oss << "Traveling at " << std::fixed << std::setprecision(2) << pace_m_s << " M/S" << std::endl;
+					double pace_m_s_real = party_ptr->pace_m_s_ - pace_penalty_overworld.first;
+					if (pace_m_s_real <= 0) //dont walk backwards if overencumbered just stop
+					{
+						pace_m_s_real = 0.0;
+					}
+					pace_m_s_real = abs(pace_go.first) * pace_m_s_real;
+					party_status_oss << "Traveling at " << std::fixed << std::setprecision(2) << pace_m_s_real << " M/S" << std::endl;
 					party_status_oss << "  Terrain: " << std::fixed << std::setprecision(2) << pace_penalty_overworld.first << " M/S" << std::endl;
 					party_status_oss << "  Weight: " << std::fixed << std::setprecision(2) << party_ptr->encumbrance_penalty_m_s_ << " M/S" << std::endl;
-					gCoordinator.setSetting(OVERWORLD_PACE_M_S, abs(pace_m_s));
+					gCoordinator.setSetting(OVERWORLD_PACE_M_S, abs(pace_m_s_real));
 					double game_seconds_passed = dt * OVERWORLD_MULTIPLIER;
 					auto pace_value_label = ui_single->string_to_ui_map_["OVERWORLD_label_pace"];
 
@@ -164,8 +184,8 @@ namespace SXNGN::ECS
 					{
 						auto calories_per_km = HANDS_BASE_CALORIES_PER_KM * party_ptr->hands_;
 						
-						oss << std::fixed << std::setprecision(2) << pace_m_s;
-						auto dist_traveled_km = pace_m_s * game_seconds_passed * 0.001;
+						oss << std::fixed << std::setprecision(2) << pace_m_s_real;
+						auto dist_traveled_km = pace_m_s_real * game_seconds_passed * 0.001;
 						if (lost)
 						{
 							party_ptr->lost_counter_ -= dist_traveled_km;

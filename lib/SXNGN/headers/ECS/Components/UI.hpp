@@ -14,11 +14,38 @@
 
 namespace SXNGN::ECS {
 
+    
+
     struct UIContainerComponent 
     {
         UIContainerComponent()
         {
 
+        }
+
+        // Override less-than operator
+        /**
+        bool operator<(const UIContainerComponent& other) const {
+            return layer_ < other.layer_;
+        }
+
+        
+        bool operator>(const UIContainerComponent& other) const {
+            return layer_ > other.layer_;
+        }
+
+        bool operator<(const std::shared_ptr<UIContainerComponent>& other) const {
+            return layer_ < other->layer_;
+        }
+
+        bool operator>(const std::shared_ptr<UIContainerComponent>& other) const {
+            return layer_ > other->layer_;
+        }
+        **/
+
+        static bool sortAscending(const std::shared_ptr<UIContainerComponent>& first, const std::shared_ptr<UIContainerComponent>& second)
+        {
+            return first->layer_ < second->layer_;
         }
 
         UIContainerComponent(kiss_window* parent_window, UILayer layer, UIType type, std::string name = "uninit_ui_element")
@@ -48,6 +75,7 @@ namespace SXNGN::ECS {
         
         void ClearUIContainerComponent()
         {
+            
             cleanup = true;
 
             if (window_ != nullptr)
@@ -101,6 +129,7 @@ namespace SXNGN::ECS {
                 delete label_;
                 label_ = nullptr;
             }
+
             for (auto component : child_components_)
             {
                 component->ClearUIContainerComponent();
@@ -128,6 +157,8 @@ namespace SXNGN::ECS {
         bool cleanup = false; //when true, RenderSystem will delete this component
 
     };
+
+    
 
     struct UICollectionSingleton : ECS_Component
     {
@@ -189,8 +220,8 @@ namespace SXNGN::ECS {
             }
             else
             {
-                printf("UI:Add_Component:: Fatal: Repeat UI Component Name %s", component_ptr->name_.c_str());
-                abort();
+                printf("UI:Add_Component:: Warning: Repeat UI Component Name %s", component_ptr->name_.c_str());
+                string_to_ui_map_[component_ptr->name_] = component_ptr;
             }
             if (component_ptr->type_ == UIType::WINDOW)
             {
@@ -206,8 +237,9 @@ namespace SXNGN::ECS {
                     }
                     else
                     {
-                        printf("UI:Add_Component:: Fatal: Repeat UI Component Name %s", comp->name_.c_str());
-                        abort();
+                        printf("UI:Add_Component:: Warning: Repeat UI Component Name %s", comp->name_.c_str());
+                        string_to_ui_map_[comp->name_] = comp;
+                        
                     }
                 }
             }

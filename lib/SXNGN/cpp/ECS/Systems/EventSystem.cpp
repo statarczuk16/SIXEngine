@@ -607,6 +607,7 @@ namespace SXNGN::ECS {
 				bandit_party->hands_ = 1;
 				bandit_party->add_item(ItemType::FOOD, 1);
 				gCoordinator->AddComponent(bandit_entity, bandit_party);
+				//gCoordinator->AddComponent(bandit_entity, Create_Gamestate_Component_from_Enum(ComponentTypeEnum::MAIN_GAME_STATE));
 
 				Entity battle_entity = gCoordinator->CreateEntity();
 				Battle* battle = new Battle();

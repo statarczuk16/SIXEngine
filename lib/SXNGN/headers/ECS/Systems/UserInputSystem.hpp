@@ -28,6 +28,8 @@ namespace SXNGN::ECS {
 
 		void RemoveDeadComponents();
 
+		void RemoveDeadComponents(std::vector<std::shared_ptr<UIContainerComponent>>& component_vector);
+
 		void Handle_GUI_Input(std::vector<SDL_Event>& events);
 
 		void GUI_Handle_Events(std::vector<SDL_Event> &events, std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>> layer_to_ui_elements);

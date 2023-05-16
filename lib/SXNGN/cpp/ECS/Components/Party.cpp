@@ -38,6 +38,18 @@ namespace SXNGN::ECS {
 		update_encumbrance();
 	}
 
+	void Party::update_player_ui()
+	{
+		auto ui = UICollectionSingleton::get_instance();
+		auto weight_val_real = ui->string_to_ui_map_["OVERWORLD_inventoryweight_value_real"];
+		auto weight_val = ui->string_to_ui_map_["OVERWORLD_inventoryweight_value"];
+		auto weight_progress_bar = ui->string_to_ui_map_["OVERWORLD_progress_encumber"];
+		weight_progress_bar->progressbar_->value = encumbrance_real_kg_;
+		weight_progress_bar->progressbar_->max_value = weight_capacity_kg_;
+		snprintf(weight_val_real->label_->text, 100, "%.2f", encumbrance_real_kg_);
+		snprintf(weight_val->label_->text, 100, "%.2f", encumbrance_kg_);
+	}
+
 	void Party::update_encumbrance()
 	{
 		encumbrance_kg_ = 0.0;
@@ -52,7 +64,7 @@ namespace SXNGN::ECS {
 
 	void Party::update_encumbrance_threshs()
 	{
-		auto ui = UICollectionSingleton::get_instance();
+		
 		overencumbered_mild_thresh_kg_ = weight_capacity_kg_ * 0.70;
 		overencumbered_medium_thresh_kg_ = weight_capacity_kg_ * 0.85;
 		overencumbered_extreme_thresh_kg_ = weight_capacity_kg_;
@@ -91,14 +103,10 @@ namespace SXNGN::ECS {
 		{
 			encumbrance_penalty_m_s_ = SXNGN::PARTY_PACE_WEIGHT_PENALTY_EXTREME;
 		}
-		auto ui_single = UICollectionSingleton::get_instance();
-		auto weight_val_real = ui->string_to_ui_map_["OVERWORLD_inventoryweight_value_real"];
-		auto weight_val = ui->string_to_ui_map_["OVERWORLD_inventoryweight_value"];
-		auto weight_progress_bar = ui_single->string_to_ui_map_["OVERWORLD_progress_encumber"];
-		weight_progress_bar->progressbar_->value = encumb_temp;
-		weight_progress_bar->progressbar_->max_value = weight_capacity_kg_;
-		snprintf(weight_val_real->label_->text, 100, "%.2f", encumb_temp);
-		snprintf(weight_val->label_->text, 100, "%.2f", encumbrance_kg_);
+
+		encumbrance_real_kg_ = encumb_temp;
+		pace_m_s_ = SXNGN::PARTY_PACE_NOMINAL_M_S - encumbrance_penalty_m_s_;
+		
 	}
 
 	void Party::add_item(ItemType item, double amount)

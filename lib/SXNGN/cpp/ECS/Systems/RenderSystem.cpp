@@ -51,11 +51,17 @@ namespace SXNGN::ECS {
 
 	void Renderer_System::Draw_GUI_Component(SDL_Renderer* gRenderer, std::shared_ptr<UIContainerComponent> component_in_layer)
 	{
+		if (component_in_layer->cleanup)
+		{
+			return;
+		}
 		switch (component_in_layer->type_)
 		{
 			case UIType::WINDOW:
 			{
 				kiss_window_draw(component_in_layer->window_, gRenderer);
+				//draw child components by layer. Sort by layer using overriden comparison operators in UIContainerComponent
+				std::sort(component_in_layer->child_components_.begin(), component_in_layer->child_components_.end(), UIContainerComponent::sortAscending);
 				for (auto component_in_window : component_in_layer->child_components_)
 				{
 					Draw_GUI_Component(gRenderer, component_in_window);
@@ -131,6 +137,7 @@ namespace SXNGN::ECS {
 		auto coordinator = Database::get_coordinator();
 		SDL_Renderer* gRenderer = coordinator->Get_Renderer();
 		std::map<UILayer, std::vector<std::shared_ptr<UIContainerComponent>>>::iterator layer_it = layer_to_components.begin();
+		
 		while(layer_it != layer_to_components.end())
 		{
 			auto component_vector = layer_it->second;
@@ -138,19 +145,8 @@ namespace SXNGN::ECS {
 			while (component_it != component_vector.end())
 			{
 				std::shared_ptr<UIContainerComponent> component_in_layer = *component_it;
-				if (component_in_layer->cleanup)
-				{
-					
-					//fixme remove from lookup map too
-					
-					component_it++;
-				}
-				else
-				{
-					Draw_GUI_Component(gRenderer, component_in_layer);
-					component_it++;
-				}
-				
+				Draw_GUI_Component(gRenderer, component_in_layer);
+				component_it++;
 			}
 			layer_it++;
 		}

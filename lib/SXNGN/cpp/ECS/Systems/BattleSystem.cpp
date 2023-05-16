@@ -80,6 +80,19 @@ namespace SXNGN::ECS {
 					
 					break;
 				}
+				case BattleState::ESCAPED:
+				{
+					auto ui = UICollectionSingleton::get_instance();
+					ui->string_to_ui_map_["BATTLE_battle_left"]->cleanup = true;
+					ui->string_to_ui_map_["BATTLE_battle_right"]->cleanup = true;
+					Event_Component new_game_event;
+					new_game_event.e.common.type = EventType::STATE_CHANGE;
+					new_game_event.e.state_change.new_states.push_front(ComponentTypeEnum::OVERWORLD_STATE);
+					new_game_event.e.state_change.states_to_remove.push_front(ComponentTypeEnum::BATTLE_STATE);
+					Entity event_entity = Entity_Builder_Utils::Create_Event(*gCoordinator, ComponentTypeEnum::CORE_BG_GAME_STATE, new_game_event, "Escaped Battle Event");
+					battle->battle_state_ = BattleState::AFTER_ACTION;
+					break;
+				}
 				case BattleState::VICTORY:
 				{
 					UpdateUI(battle);
@@ -120,6 +133,8 @@ namespace SXNGN::ECS {
 		//get rid of battle screen
 		ui->string_to_ui_map_["BATTLE_battle_left"]->cleanup = true;
 		ui->string_to_ui_map_["BATTLE_battle_right"]->cleanup = true;
+
+		
 
 		Entity left_entity = gCoordinator->GetEntityFromUUID(battle->party_left_);
 		Party* left_party = static_cast<Party*>(gCoordinator->CheckOutComponent(left_entity, ComponentTypeEnum::PARTY));
@@ -269,8 +284,12 @@ namespace SXNGN::ECS {
 		Entity left_entity = gCoordinator->GetEntityFromUUID(battle->party_left_);
 		Entity right_entity = gCoordinator->GetEntityFromUUID(battle->party_right_);
 
-		const Party* left_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(left_entity, ComponentTypeEnum::PARTY));
-		const Party* right_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(right_entity, ComponentTypeEnum::PARTY));
+		Party* left_party = static_cast< Party*>(gCoordinator->CheckOutComponent(left_entity, ComponentTypeEnum::PARTY));
+		Party* right_party = static_cast< Party*>(gCoordinator->CheckOutComponent(right_entity, ComponentTypeEnum::PARTY));
+
+		left_party->update_encumbrance();
+		right_party->update_encumbrance();
+
 		std::string left_reason;
 		std::string right_reason;
 		auto left_combat_strength = left_party->get_fighting_strength(left_reason);
@@ -383,12 +402,90 @@ namespace SXNGN::ECS {
 		};
 		attack_c->callback_functions_.push_back(attack_func);
 
+		auto run_c = UserInputUtils::create_button(left_win->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Run", row++, -1, -1, LABEL_HEIGHT);
+		run_c->name_ = "BATTLE_run";
+
+		//Handles running attempts. Success if faster than opponent. Exponential decrease in success for difference between your and enemy speed if you are slower.
+		std::function<void()> run_func_2 = [gCoordinator, battle]()
+		{
+			Entity left_entity = gCoordinator->GetEntityFromUUID(battle->party_left_);
+			const Party* left_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(left_entity, ComponentTypeEnum::PARTY));
+			Entity right_entity = gCoordinator->GetEntityFromUUID(battle->party_right_);
+			const Party* right_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(right_entity, ComponentTypeEnum::PARTY));
+
+			if (left_party->pace_m_s_ > right_party->pace_m_s_)
+			{
+				SDL_LogInfo(1, "Escaped! You are faster than enemy.");
+				battle->battle_state_ = BattleState::ESCAPED;
+				return;
+			}
+			double speed_disadvantage = right_party->pace_m_s_ / left_party->pace_m_s_;
+			double escape_chance = 1 - (1 / (speed_disadvantage * speed_disadvantage));
+			std::random_device rd;
+			std::mt19937 gen(rd());
+			std::uniform_int_distribution<> dis(1, 10);
+			int roll1 = dis(gen);
+			int roll2 = dis(gen);
+			float percent = (roll1 + roll2) / 2.0 / 100.0; //transform 6/10 to 0.06
+			SDL_LogInfo(1, "Chance to escape: %.2f percent", escape_chance * 100.0);
+			if (percent > escape_chance)
+			{
+				SDL_LogInfo(1, "Escaped!");
+				battle->battle_state_ = BattleState::ESCAPED;
+				return;
+			}
+			else
+			{
+				SDL_LogInfo(1, "Failed to escape!");
+				battle->battle_state_ = BattleState::RIGHT_TURN;
+			}
+		};
+
+		//Open window showing option to run or go back. Show your and enemy speed.
+		std::function<void()> run_func_1 = [gCoordinator, battle, left_win, run_func_2, LABEL_HEIGHT]()
+		{
+			Entity left_entity = gCoordinator->GetEntityFromUUID(battle->party_left_);
+			const Party* left_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(left_entity, ComponentTypeEnum::PARTY));
+			Entity right_entity = gCoordinator->GetEntityFromUUID(battle->party_right_);
+			const Party* right_party = static_cast<const Party*>(gCoordinator->GetComponentReadOnly(right_entity, ComponentTypeEnum::PARTY));
+			auto run_win_c = UserInputUtils::create_window_raw(left_win->window_, 10, 10, left_win->window_->rect.w, left_win->window_->rect.h, UILayer::TOP);
+
+			std::function<void()> kill_func = [run_win_c]()
+			{
+				run_win_c->cleanup = true;
+			};
+
+			auto confirm_button_c = UserInputUtils::create_button(run_win_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Attempt", 0, -1, -1, LABEL_HEIGHT);
+			confirm_button_c->callback_functions_.push_back(kill_func);
+			confirm_button_c->callback_functions_.push_back(run_func_2);
+			run_win_c->child_components_.push_back(confirm_button_c);
+			auto reject_button_c = UserInputUtils::create_button(run_win_c->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, "Back", 1, -1, -1, LABEL_HEIGHT);
+			reject_button_c->callback_functions_.push_back(kill_func);
+			run_win_c->child_components_.push_back(reject_button_c);
+
+			char flee_text[100];
+			sprintf(flee_text, "Try to run?\nYour speed: %.2f\nEnemy speed: %.2f.\n,Abandon equipment to move faster.",left_party->pace_m_s_,right_party->pace_m_s_);
+
+			auto left_party_flee_label = UserInputUtils::create_label(run_win_c->window_, HA_LEFT, HA_LEFT, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::TOP, flee_text, 2, -1, -1, LABEL_HEIGHT);
+			left_party_flee_label->label_->decorate = 0;
+			run_win_c->child_components_.push_back(left_party_flee_label);
+
+
+			left_win->child_components_.push_back(run_win_c);
+		};
+		run_c->callback_functions_.push_back(run_func_1);
+		
+		left_win->child_components_.push_back(run_c);
+
+		auto talk_c = UserInputUtils::create_button(left_win->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Talk", row++, -1, -1, LABEL_HEIGHT);
+		talk_c->name_ = "BATTLE_talk";
+		left_win->child_components_.push_back(talk_c);
+
 		auto left_party_reason_c = UserInputUtils::create_label(left_win->window_, HA_CENTER, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, left_reason.data(), row++, -1, -1, LABEL_HEIGHT);
 		left_win->child_components_.push_back(left_party_reason_c);
 		left_party_reason_c->label_->decorate = 0;
 
-		auto run_c = UserInputUtils::create_button(left_win->window_, HA_CENTER, VA_ROW, SP_FILL_WITH_BUFFER, UILayer::MID, "Run", row++, -1, -1, LABEL_HEIGHT);
-		run_c->child_components_.push_back(attack_c);
+		
 
 		row = 0;
 
@@ -426,6 +523,9 @@ namespace SXNGN::ECS {
 
 		ui->add_ui_element(ComponentTypeEnum::BATTLE_STATE, left_win);
 		ui->add_ui_element(ComponentTypeEnum::BATTLE_STATE, right_win);
+
+		gCoordinator->CheckInComponent(right_entity, ComponentTypeEnum::PARTY);
+		gCoordinator->CheckInComponent(left_entity, ComponentTypeEnum::PARTY);
 
 		return;
 

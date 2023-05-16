@@ -548,21 +548,27 @@ namespace SXNGN::ECS {
 		{
 			for (auto& layerMap : stateMap.second)
 			{
-				auto& componentVec = layerMap.second;
-				auto componentItr = componentVec.begin();
-				while (componentItr != componentVec.end()) 
-				{
-					if (componentItr->get()->cleanup == 1) {
-						componentItr->get()->ClearUIContainerComponent();
-						componentItr = componentVec.erase(componentItr);
-					}
-					else {
-						++componentItr;
-					}
-				}
-
+				std::vector<std::shared_ptr<UIContainerComponent>>& componentVec = layerMap.second;
+				RemoveDeadComponents(componentVec);
 			}
 		}
 		
 	}
+
+	void  User_Input_System::RemoveDeadComponents(std::vector<std::shared_ptr<UIContainerComponent>>& component_vector)
+	{
+		std::vector<std::shared_ptr<UIContainerComponent>>::iterator componentItr = component_vector.begin();
+		while (componentItr != component_vector.end())
+		{
+			if (componentItr->get()->cleanup == 1) {
+				componentItr->get()->ClearUIContainerComponent();
+				componentItr = component_vector.erase(componentItr);
+			}
+			else {
+				RemoveDeadComponents(componentItr->get()->child_components_);
+				++componentItr;
+			}
+		}
+	}
+
 }
