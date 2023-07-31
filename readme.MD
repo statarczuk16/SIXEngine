@@ -1,7 +1,7 @@
 Copyright Notice:
 -----------------
-© 2021 Stephen Tatarczuk
-The files within this repository are copyrighted by Stephen Tatarczuk unless otherwise noted
+© 2021 statarczuk16
+The files within this repository are copyrighted by statarczuk16 unless otherwise noted
 and may not be redistributed without written permission.
 
 # About
