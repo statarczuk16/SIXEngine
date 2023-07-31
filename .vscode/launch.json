@@ -1,0 +1,17 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+      {
+        "name": "Run Game",
+        "type": "cppdbg",
+        "request": "launch",
+        "program": "${workspaceFolder}/build/Debug/ApocalypseHighwayTrader",
+        "args": [],
+        "stopAtEntry": false,
+        "cwd": "${workspaceFolder}/build",
+        "environment": [],
+        "externalConsole": true
+      }
+    ]
+  }
+  
